@@ -5,7 +5,8 @@ const mongoose = require("mongoose");
 const touristRoutes = require('./routes/touristRoutes'); // Ensure correct relative path
 const touristController= require('./controllers/touristController');
 
-let isTourist = 1;
+let isTourist = 1; //yb2a set lama el shakhs ykhtar men el form eno tourist fa  hankhdo men el frontend 
+let userType = "tourist";
 
 // For handling the __dirname issue with ES modules
 const { fileURLToPath } = require('url');
@@ -45,6 +46,11 @@ app.post("/register", (req, res) => {
     touristController.tourist_register(req, res);
   }
   else {
+    //get username,passw,email from req + field role
+    //and put in pendingUsers collection 
+    // if(userType== "tourGuide"){}
+       //let userType= role field
+      //  pendingcontroll.pendinguser_register(req, res);
     //not tourist
   }
 });
