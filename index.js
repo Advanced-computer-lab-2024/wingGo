@@ -71,6 +71,8 @@ app.use('/tourguide', tourGuideRoutes);
 
 app.use('/tags', tagRoutes);
 
+app.use('/products', productRoutes);
+
 //Must be at the bottom so that it doesnt match right away
 app.use((req, res)=> {
   //we could add status code bec it returns a req obj
