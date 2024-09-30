@@ -2,18 +2,13 @@ const bcrypt = require('bcrypt');
 const TourGuide = require('../models/TourGuide');
 const LoginCredentials = require('../models/LoginCredentials'); 
 
-// Get a tour guide by email or username
+// Get a tour guide by id
 const getTourGuide = async (req, res) => {
     try {
-        const value = req.params.value;
+        const id = req.params.id; // Use id as the unique identifier
 
-        // Find the tour guide by email OR username
-        const tourGuide = await TourGuide.findOne({ 
-            $or: [
-                { email: value }, 
-                { username: value }
-            ]
-        });
+        // Find the tour guide by id
+        const tourGuide = await TourGuide.findById(id);
         
         if (!tourGuide) {
             return res.status(404).json({ message: 'Tour guide not found' });
@@ -28,15 +23,10 @@ const getTourGuide = async (req, res) => {
 // Update the tour guide profile (with password hashing if updated)
 const updateTourGuideProfile = async (req, res) => {
     try {
-        const value = req.params.value;
+        const id = req.params.id; // Use id as the unique identifier
 
-        // Find the tour guide by email OR username
-        const tourGuide = await TourGuide.findOne({
-            $or: [
-                { email: value },
-                { username: value }
-            ]
-        });
+        // Find the tour guide by id
+        const tourGuide = await TourGuide.findById(id);
 
         if (!tourGuide) {
             return res.status(404).json({ message: 'Tour guide not found' });
@@ -52,9 +42,6 @@ const updateTourGuideProfile = async (req, res) => {
             req.body.password = await bcrypt.hash(req.body.password, 10);
         }
 
-        // Update the tour guide profile with the new data
-      
-
         // Now update the login credentials as well
         const loginUpdateFields = {};
         if (req.body.username) {
@@ -65,9 +52,9 @@ const updateTourGuideProfile = async (req, res) => {
         }
 
         if (Object.keys(loginUpdateFields).length > 0) {
-            // Find login credentials based on the original email/username
-            const updatedLoginCredentials = await LoginCredentials.findOneAndUpdate(
-                { $or: [{ email: originalEmail }, { username: originalUsername }] }, // Match original email or username
+            // Find login credentials by tour guide id (assuming id is stored in both TourGuide and LoginCredentials models)
+            const updatedLoginCredentials = await LoginCredentials.findByIdAndUpdate(
+                id, // Match by id
                 { $set: loginUpdateFields },
                 { new: true }  // Return the updated document
             );
@@ -76,6 +63,8 @@ const updateTourGuideProfile = async (req, res) => {
                 return res.status(404).json({ message: 'Login credentials not found' });
             }
         }
+
+        // Update the tour guide profile with the new data
         Object.assign(tourGuide, req.body);
         await tourGuide.save();
 

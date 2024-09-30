@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/AdminController');
 
-// Admin route to approve a pending user by username or email
-router.put('/approve', adminController.approvePendingUserByField);
+// Route to approve a pending user by id
+router.put('/approve/:id', adminController.approvePendingUserById);
 
-// Admin route to delete an account by username
-router.delete('/delete-account/:username', adminController.deleteAccount);
+// Route to delete an account by id
+router.delete('/delete-account/:id', adminController.deleteAccount);
 
 module.exports = router;

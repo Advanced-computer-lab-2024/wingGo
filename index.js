@@ -9,9 +9,6 @@ const adminRoutes = require('./routes/AdminRoutes');
 const tourGuideRoutes = require('./routes/TourGuideRoutes'); // Ensure correct path
 
 
-
-
-
 let isTourist = 2; //yb2a set lama el shakhs ykhtar men el form eno tourist fa  hankhdo men el frontend 
 let userType = "tourist";
 
