@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const Tourist = require('../models/tourist');
+const Attraction = require('../models/attraction');
 
 const tourist_hello = (req, res) => {
     res.send('<h1>yayy</h1>');
@@ -33,7 +34,27 @@ const tourist_register = async (req, res) => {
     }
 };
 
+const searchTouristAttractions = async (req, res) => { // to be tested later after crud -Omar Nasr
+    const { query } = req.query; 
+
+    try {
+        const results = await Attraction.find({
+            $or: [
+                { name: { $regex: query, $options: 'i' } },
+                { category: { $regex: query, $options: 'i' } },
+                { tags: { $regex: query, $options: 'i' } }
+            ]
+        });
+
+        res.status(200).json(results);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+        console.log('Error during search:', error.message);
+    }
+};
+
 module.exports = {
     tourist_hello,
-    tourist_register
+    tourist_register,
+    searchTouristAttractions
 };
