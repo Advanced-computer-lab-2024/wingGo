@@ -4,8 +4,15 @@ const path = require("path");
 const mongoose = require("mongoose");
 const touristRoutes = require('./routes/touristRoutes'); // Ensure correct relative path
 const touristController= require('./controllers/touristController');
+const PendingUsersController= require('./controllers/PendingUserController');
+const adminRoutes = require('./routes/AdminRoutes');
+const tourGuideRoutes = require('./routes/TourGuideRoutes'); // Ensure correct path
 
-let isTourist = 1; //yb2a set lama el shakhs ykhtar men el form eno tourist fa  hankhdo men el frontend 
+
+
+
+
+let isTourist = 2; //yb2a set lama el shakhs ykhtar men el form eno tourist fa  hankhdo men el frontend 
 let userType = "tourist";
 
 // For handling the __dirname issue with ES modules
@@ -46,6 +53,7 @@ app.post("/register", (req, res) => {
     touristController.tourist_register(req, res);
   }
   else {
+    PendingUsersController.pendinguser_register(req,res);
     //get username,passw,email from req + field role
     //and put in pendingUsers collection 
     // if(userType== "tourGuide"){}
@@ -59,7 +67,10 @@ app.post("/register", (req, res) => {
 // Tourist routes
 // app.use('/tourist',touristRoutes);
 
+// Use the admin routes
+app.use('/admin', adminRoutes);
 
+app.use('/tourguide', tourGuideRoutes);
 
 
 //Must be at the bottom so that it doesnt match right away
