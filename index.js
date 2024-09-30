@@ -69,6 +69,7 @@ app.use('/admin', adminRoutes);
 
 app.use('/tourguide', tourGuideRoutes);
 
+app.use('/tags', tagRoutes);
 
 //Must be at the bottom so that it doesnt match right away
 app.use((req, res)=> {
