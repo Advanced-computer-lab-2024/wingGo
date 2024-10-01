@@ -4,11 +4,13 @@ const Schema = mongoose.Schema;
 const touristSchema = new Schema({
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true 
     },
     username: {
         type: String,
-        required: true
+        required: true,
+        unique: true 
     },
     password: {
         type: String,
@@ -16,20 +18,28 @@ const touristSchema = new Schema({
     },
     mobileNumber: {
         type: String,
-        required: true
+        required: true,
+        unique: true 
     },
     nationality: {
         type: String,
         required: true
     },
     DOB: {
-        type: String, //Make as a date
+        type: Date, //Make as a date
         required: true
     },
-    type: {
+    jobOrStudent: {
         type: String,
-        required: true
+        required: true,
+        enum: ['job', 'student'] // Ensures the field is either job or student
+    },
+    wallet: {
+        type: Number,
+        default: 0    // Initialize to zero
+          
     }
+
 }, {timestamps: true});
 
 

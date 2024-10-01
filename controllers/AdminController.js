@@ -3,6 +3,8 @@ const PendingUser = require('../models/PendingUsers');
 const TourGuide = require('../models/TourGuide');
 const LoginCredentials = require('../models/LoginCredentials');
 const Tourist = require('../models/tourist');
+const Seller = require('../models/Seller');
+
 
 // Controller function to delete an account using id
 const deleteAccount = async (req, res) => {
@@ -51,7 +53,6 @@ const deleteAccount = async (req, res) => {
 // Controller function to approve a pending user by id
 const approvePendingUserById = async (req, res) => {
     const { id } = req.params;
-    console.log('Malak');
 
     try {
         // Find the pending user by id
@@ -100,8 +101,75 @@ const approvePendingUserById = async (req, res) => {
             await PendingUser.findByIdAndDelete(id);
 
             res.status(200).json({ message: 'User approved, added to tour guide collection, and login credentials saved', tourGuide });
-        } else {
-            res.status(400).json({ message: 'User role is not tour guide. Cannot approve for this role.' });
+        } 
+        else if(pendingUser.role === 'seller'){
+             // Hash the password using bcrypt
+             const hashedPassword = await bcrypt.hash(pendingUser.password, 10);  // 10 is the salt rounds
+
+             // Create a new seller profile after admin approval
+             const seller = new Seller({
+                 _id: pendingUser._id,
+                 email: pendingUser.email,
+                 username: pendingUser.username,
+                 password: hashedPassword, // Save the hashed password
+                
+             });
+ 
+             // Save the tour guide profile
+             await seller.save();
+ 
+             // Add login credentials to the loginCredentials collection
+             const loginCredentials = new LoginCredentials({
+                 _id: pendingUser._id,
+                 username: pendingUser.username,
+                 password: hashedPassword, // Save the hashed password
+                 role: pendingUser.role
+             });
+ 
+             // Save the login credentials
+             await loginCredentials.save();
+ 
+             // Remove the pending user from the PendingUser collection
+             await PendingUser.findByIdAndDelete(id);
+ 
+             res.status(200).json({ message: 'User approved, added to seller collection, and login credentials saved', seller });
+            
+
+        }
+        else if (pendingUser.role === 'advertiser') {
+            // Hash the password using bcrypt
+            const hashedPassword = await bcrypt.hash(pendingUser.password, 10);  // 10 is the salt rounds
+
+            // Create a new advertiser profile after admin approval
+            const advertiser = new Advertiser({
+                _id: pendingUser._id,
+                email: pendingUser.email,
+                username: pendingUser.username,
+                password: hashedPassword, // Save the hashed password
+            });
+
+            // Save the advertiser profile
+            await advertiser.save();
+
+            // Add login credentials to the loginCredentials collection
+            const loginCredentials = new LoginCredentials({
+                _id: pendingUser._id,
+                username: pendingUser.username,
+                password: hashedPassword, // Save the hashed password
+                role: pendingUser.role
+            });
+
+            // Save the login credentials
+            await loginCredentials.save();
+
+            // Remove the pending user from the PendingUser collection
+            await PendingUser.findByIdAndDelete(id);
+
+            res.status(200).json({ message: 'User approved, added to advertiser collection, and login credentials saved', advertiser });
+        } 
+        
+        else {
+            res.status(400).json({ message: 'User role is not seller. Cannot approve for this role.' });
         }
     } catch (err) {
         res.status(500).json({ error: err.message });
