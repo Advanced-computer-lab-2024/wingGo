@@ -51,6 +51,7 @@ const deleteAccount = async (req, res) => {
 // Controller function to approve a pending user by id
 const approvePendingUserById = async (req, res) => {
     const { id } = req.params;
+    console.log('Malak');
 
     try {
         // Find the pending user by id
