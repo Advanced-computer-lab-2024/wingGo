@@ -6,6 +6,6 @@ const adminController = require('../controllers/AdminController');
 router.put('/approve/:id', adminController.approvePendingUserById);
 
 // Route to delete an account by id
-router.delete('/delete-account/:id', adminController.deleteAccount);
+router.delete('/deleteAccount/:id', adminController.deleteAccount);
 
 module.exports = router;
