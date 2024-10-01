@@ -7,7 +7,7 @@ const touristController= require('./controllers/touristController');
 const PendingUsersController= require('./controllers/PendingUserController');
 const adminRoutes = require('./routes/AdminRoutes');
 const tourGuideRoutes = require('./routes/TourGuideRoutes'); // Ensure correct path
-
+const govornorRoutes = require('./routes/GovornorRoutes');
 
 let isTourist = 2; //yb2a set lama el shakhs ykhtar men el form eno tourist fa  hankhdo men el frontend 
 let userType = "tourist";
@@ -69,12 +69,19 @@ app.use('/admin', adminRoutes);
 
 app.use('/tourguide', tourGuideRoutes);
 
-app.use('/tags', tagRoutes);
+//app.use('/tags', tagRoutes);
 
-app.use('/products', productRoutes);
+//app.use('/products', productRoutes);
+
+app.use('/places', govornorRoutes);
+
+
+
 
 //Must be at the bottom so that it doesnt match right away
 app.use((req, res)=> {
   //we could add status code bec it returns a req obj
   res.status(404).sendFile('./views/404.html', {root: __dirname});
 });
+
+
