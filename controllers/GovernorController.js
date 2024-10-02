@@ -1,4 +1,4 @@
-const Place = require('../models/TourismGovernor');
+const Place = require('../models/Places');
 
 //create
 const createPlace = async (req, res) => {
