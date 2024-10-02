@@ -4,7 +4,24 @@ const TourGuide = require('../models/TourGuide');
 const LoginCredentials = require('../models/LoginCredentials');
 const Tourist = require('../models/tourist');
 const Seller = require('../models/Seller');
+const TourismGovernor= require('../models/TourismGovernor');
 
+//add TourismGovernor to DB by username and password
+const addTourismGovernor= async(req,res)=> {
+    const{username,password,email}=req.body;
+    try{
+        //create gov.
+        const newTG = new TourismGovernor({
+            username,
+            password,
+            email
+        });
+        await newTG.save();
+        res.status(200).json({message:'Tourism Governor added successfully',newTG});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
 
 // Controller function to delete an account using id
 const deleteAccount = async (req, res) => {
@@ -178,5 +195,6 @@ const approvePendingUserById = async (req, res) => {
 
 module.exports = {
     approvePendingUserById,
-    deleteAccount
+    deleteAccount,
+    addTourismGovernor
 };

@@ -8,4 +8,5 @@ router.put('/approve/:id', adminController.approvePendingUserById);
 // Route to delete an account by id
 router.delete('/deleteAccount/:id', adminController.deleteAccount);
 
+router.post('/addGovernor', adminController.addTourismGovernor);
 module.exports = router;
