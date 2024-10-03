@@ -43,6 +43,11 @@ const activitySchema = new mongoose.Schema({
   bookingOpen: {
     type: Boolean,
     default: true
+  },
+  advertiser: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'advertiser',
+    required: true
   }
 });
 

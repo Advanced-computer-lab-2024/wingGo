@@ -81,7 +81,7 @@ app.use('/product', productRoutes);
 
 app.use('/govonor', govornorRoutes);
 app.use('/advertiser', advertiserRoutes);
-app.use('/seller', sellerRoutes);
+
 app.use('/tourist', touristRoutes);
 app.use('/guest', guestRoutes);
 
