@@ -18,31 +18,72 @@ const createCategory= async(req,res)=>{
         }
         const newCategory= new ActivityCategory({name});
         await newCategory.save();
-        res.statua(200).json({message:'Category added successfully',newCategory});
+        res.status(200).json({message:'Category added successfully',newCategory});
     } catch(error){
         res.status(500).json({error:error.message});
     }
 }
 
-//Read all categories
+//get all categories
 const getCategories=async(req,res)=>{
     try{
         const categories=await ActivityCategory.find();
-        res.status(200).jaon(categories);
+        res.status(200).json(categories);
     } catch(error){
         res.status(500).json({error:error.message});
     }
 }; 
 
 
+//update category
+const updateCategory= async(req,res)=>{
+    const {id} = req.params;
+    const {name}=req.body;
+    try{
+        const UpdatedCategory = await ActivityCategory.findByIdAndUpdate(id, {name},{new:true});
+        if(!UpdatedCategory){
+            return res.status(400).json({message:'Category not found'});
+        }
+        res.status(200).json(UpdatedCategory);
+    }catch(error){
+        res.status(400).json({error:error.message});
+    }
+}
+//delete a category
+const deleteCategory= async(req,res)=>{
+    const {id}=req.params;
+    try{
+        const deletedCategory= await ActivityCategory.findByIdAndDelete(id);
+        if(!deletedCategory){
+            return res.status(400).json({message:'Category not found'});
+        }
+        res.status(200).json(deletedCategory);
+    } catch(error){
+        res.status(400).json({error:error.message});
+    }
+}
+//view one category 
+const getCategory=async(req,res)=>{
+    const {id}=req.params;
+    try{
+        const category= await ActivityCategory.findById(id);
+        if(!category){
+            return res.status(400).json({message:'Category not found'});
+        }
+        res.status(200).json(category);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
 //add TourismGovernor to DB by username and password
 const addTourismGovernor= async(req,res)=> {
     const{username,password}=req.body;
     try{
+        const hashedPassword = await bcrypt.hash(password, 10);
         //create gov.
         const newTG = new TourismGovernor({
             username,
-            password,
+            password:hashedPassword,
         });
         await newTG.save();
         res.status(200).json({message:'Tourism Governor added successfully',newTG});
@@ -308,5 +349,8 @@ module.exports = {
     updateTag,
     deleteTag,
     addProductAsAdmin,
-    editProduct
+    editProduct,
+    updateCategory,
+    deleteCategory,
+    getCategory
 };

@@ -9,4 +9,18 @@ router.put('/approve/:id', adminController.approvePendingUserById);
 router.delete('/deleteAccount/:id', adminController.deleteAccount);
 router.put('/product/:productId', adminController.editProduct);
 router.post('/addGovernor', adminController.addTourismGovernor);
+//create an activity category
+router.post('/categories', adminController.createCategory);
+
+// Get all activity categories
+router.get('/getcategories', adminController.getCategories);
+
+// Get one activity category by ID
+router.get('/getcategory/:id', adminController.getCategory);
+
+// Update an activity category by ID
+router.put('/updatecategory/:id', adminController.updateCategory);
+
+// Delete an activity category by ID
+router.delete('/deletecategory/:id', adminController.deleteCategory);
 module.exports = router;
