@@ -10,6 +10,7 @@ const tourGuideRoutes = require('./routes/TourGuideRoutes'); // Ensure correct p
 const govornorRoutes = require('./routes/GovornorRoutes');
 const advertiserRoutes = require('./routes/advertiserRoutes');
 const itineraryRoutes = require('./routes/ItineraryRoutes');
+const sellerRoutes = require('./routes/sellerRoutes');
 
 let isTourist = 2; //yb2a set lama el shakhs ykhtar men el form eno tourist fa  hankhdo men el frontend 
 let userType = "tourist";
@@ -77,6 +78,7 @@ app.use('/tourguide', tourGuideRoutes);
 
 app.use('/govonor', govornorRoutes);
 app.use('/advertiser', advertiserRoutes);
+app.use('/seller', sellerRoutes);
 
 // Use the itinerary routes
 app.use('/itinerary', itineraryRoutes);

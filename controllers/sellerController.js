@@ -53,8 +53,8 @@ const updateSellerProfile = async (req, res) => {
 };
 // Function to add a product
 const addProduct = async (req, res) => {
-    const { name, price, quantity, description} = req.body;
-    const sellerId = req.sellerId;  // Assuming sellerId comes from authentication middleware
+    const { name, price, quantity, description,sellerId} = req.body;
+    // const sellerId = req.sellerId;  // Assuming sellerId comes from authentication middleware
 
     try {
         // Check if the seller exists
@@ -80,6 +80,33 @@ const addProduct = async (req, res) => {
     }
 };
 
+// Function to edit a product
+const editProduct = async (req, res) => {
+    const { productId } = req.params;
+    const { name, price, quantity, description } = req.body;
+    const sellerId = req.sellerId;  // Assuming sellerId comes from authentication middleware
+
+    try {
+        // Check if the product exists and belongs to the seller
+        const product = await Product.findOne({ _id: productId, seller: sellerId });
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found or you do not have permission to edit this product' });
+        }
+
+        // Update product details
+        if (name) product.name = name;
+        if (price) product.price = price;
+        if (quantity) product.quantity = quantity;
+        if (description) product.description = description;
+
+        // Save the updated product to the database
+        await product.save();
+        res.status(200).json({ message: 'Product updated successfully', product });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 const getSeller = async(req,res) => {
     try{
         const id = req.params.id; // Use id as the unique identifier
@@ -95,5 +122,6 @@ const getSeller = async(req,res) => {
  module.exports = {
     updateSellerProfile,
     getSeller,
-    addProduct
+    addProduct,
+    editProduct
 };
