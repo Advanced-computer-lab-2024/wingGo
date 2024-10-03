@@ -218,6 +218,25 @@ const filterProduct = async (req, res) => {
     }
 };
 
+const searchProductsByName = async (req, res) => {
+    try {
+        const query = req.query.name;  
+        if (!query) {
+            return res.status(400).json({ message: "Please provide a product name to search." });
+        }
+
+        // Perform a case-insensitive search for products with names that match the search query
+        const products = await Product.find({ name: { $regex: query, $options: 'i' } });
+
+        if (products.length === 0) {
+            return res.status(404).json({ message: "No products found matching your search." });
+        }
+
+        res.status(200).json(products);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
 module.exports = {
     tourist_hello,
@@ -227,6 +246,7 @@ module.exports = {
     updateTouristProfile,
     sortProductsByRatings,
     getAllProducts,
-    filterProduct
+    filterProduct,
+    searchProductsByName
 
 };
