@@ -117,7 +117,8 @@ const getAllProducts = async (req, res) => {
         // If you need to send a public path for pictures stored locally
         const productData = products.map(product => ({
             name: product.name,
-            picture:`${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
+            picture: `../images/${product.picture}`,  // Build image URL dynamically
+            // picture: `${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
             price: product.price,
             description: product.description,
             quantity: product.quantity,
