@@ -18,7 +18,7 @@ const createCategory= async(req,res)=>{
         }
         const newCategory= new ActivityCategory({name});
         await newCategory.save();
-        res.statua(200).json({message:'Category added successfully',newCategory});
+        res.status(200).json({message:'Category added successfully',newCategory});
     } catch(error){
         res.status(500).json({error:error.message});
     }
@@ -28,7 +28,7 @@ const createCategory= async(req,res)=>{
 const getCategories=async(req,res)=>{
     try{
         const categories=await ActivityCategory.find();
-        res.status(200).jaon(categories);
+        res.status(200).json(categories);
     } catch(error){
         res.status(500).json({error:error.message});
     }

@@ -13,14 +13,14 @@ router.post('/addGovernor', adminController.addTourismGovernor);
 router.post('/categories', adminController.createCategory);
 
 // Get all activity categories
-router.get('/categories', adminController.getCategories);
+router.get('/getcategories', adminController.getCategories);
 
 // Get one activity category by ID
-router.get('/categories/:id', adminController.getCategory);
+router.get('/getcategory/:id', adminController.getCategory);
 
 // Update an activity category by ID
-router.put('/categories/:id', adminController.updateCategory);
+router.put('/updatecategory/:id', adminController.updateCategory);
 
 // Delete an activity category by ID
-router.delete('/categories/:id', adminController.deleteCategory);
+router.delete('/deletecategory/:id', adminController.deleteCategory);
 module.exports = router;
