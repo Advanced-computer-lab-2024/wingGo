@@ -1,6 +1,8 @@
 const mongoose= require("mongoose");
 const Schema = mongoose.Schema;
 
+const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces', 'Castles'];
+
 const placeSchema = new Schema({
     name: {
         type: String,
@@ -35,9 +37,19 @@ const placeSchema = new Schema({
             type: Number,
             required: true
         }
-    },tags: {
-        type: [String],  // Array to store tags
-        default: []
+    },
+
+
+    tags: {
+        types: [{
+            type: String,
+            enum: allowedTypes,  // Restrict to allowed values
+            required: true
+        }],
+        historicalPeriods: {
+            type: [String],  // Flexible array for historical periods
+            default: []
+        }
     }
 }, { timestamps: true });
 
