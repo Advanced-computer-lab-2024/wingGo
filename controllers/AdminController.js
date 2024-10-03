@@ -5,6 +5,8 @@ const LoginCredentials = require('../models/LoginCredentials');
 const Tourist = require('../models/tourist');
 const Seller = require('../models/Seller');
 const TourismGovernor = require('../models/TourismGovernor');
+const Product = require('../models/product'); 
+
 
 //add TourismGovernor to DB by username and password
 const addTourismGovernor= async(req,res)=> {
@@ -21,6 +23,39 @@ const addTourismGovernor= async(req,res)=> {
         res.status(500).json({ error: err.message });
     }
 }
+// Admin function to add a product
+const addProductAsAdmin = async (req, res) => {
+    const { name, price, quantity, description} = req.body;
+    let { sellerId } = req.body;  // Optional seller ID provided by the admin
+
+    try {
+        // If sellerId is provided, check if the seller exists
+        if (sellerId) {
+            const sellerExist = await Seller.findById(sellerId);
+            if (!sellerExist) {
+                return res.status(404).json({ message: 'Seller not found. Cannot associate this product with a seller.' });
+            }
+        } else {
+            sellerId = null;  // If no seller is provided, set it to null
+        }
+
+        // Create the product
+        const newProduct = new Product({
+            name,
+            price,
+            quantity,
+            description,
+            seller: sellerId  // Could be null if no seller
+        });
+
+        // Save the product to the database
+        await newProduct.save();
+        res.status(201).json({ message: 'Product added successfully by Admin', newProduct });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 
 // Controller function to delete an account using id
 const deleteAccount = async (req, res) => {
@@ -195,5 +230,6 @@ const approvePendingUserById = async (req, res) => {
 module.exports = {
     approvePendingUserById,
     deleteAccount,
-    addTourismGovernor
+    addTourismGovernor,
+    addProductAsAdmin
 };
