@@ -100,7 +100,7 @@ const getAdvertiserProfile = async (req, res) => {
 
 const createActivity = async (req, res) => {
 
-    const {date, time, location, price, category, tags, specialDiscounts, isBookingOpen} = req.body
+    const {date, time, location, price, category, tags, specialDiscounts, isBookingOpen, advertiser} = req.body
 
     const {lat, lng} = await getCoordinates(location.address);
 
@@ -116,7 +116,8 @@ const createActivity = async (req, res) => {
             category,
             tags,
             specialDiscounts,
-            isBookingOpen
+            isBookingOpen,
+            advertiser
         });
 
         await newActivity.save();
@@ -131,13 +132,18 @@ const createActivity = async (req, res) => {
 
 const updateActivity = async (req, res) => {
     try {
-        const id = req.params.id; // Use id as the unique identifier
-
+        const {activityID} = req.params.id; // Use id as the unique identifier
+        const {advertiserID }= req.query;
+         
         // Find the activity by id
-        const activity = await Activity.findById(id);
+        const activity = await Activity.findOne({ _id: activityID, advertiser: advertiserID });
 
         if (!activity) {
             return res.status(404).json({ message: 'Activity not found' });
+        }
+
+        if (req.body.advertiser) {
+            delete req.body.advertiser;
         }
 
         if (req.body.location && req.body.location.address) {
@@ -165,9 +171,11 @@ const updateActivity = async (req, res) => {
 
 const getActivity = async (req, res) => {
     const { id } = req.params;
-
+    const {advertiserId} = req.query;
+    
+    
     try {
-        const activity = await Activity.findById(id);
+        const activity = await Activity.findOne({ _id: id, advertiser: advertiserId });
         if (!activity) {
             return res.status(404).json({ message: 'Activity not found' });
         }
@@ -180,16 +188,20 @@ const getActivity = async (req, res) => {
 
 const getAllActivities = async(req,res) => {
 
-    const activities = await Activity.find({}).sort({date: -1});
+    const { advertiserId } = req.query;
+    
+
+    const activities = await Activity.find({advertiser: advertiserId}).sort({date: 'desc'});
     res.status(200).json({activities});
 
 };
 
 const deleteActivity = async (req, res) => {
     const { id } = req.params;
+    const {advertiserId} = req.query;
 
     try {
-        const activity = await Activity.findByIdAndDelete(id);
+        const activity = await Activity.findOneAndDelete({ _id: id, advertiser: advertiserId });
         if (!activity) {
             return res.status(404).json({ message: 'Activity not found' });
         }

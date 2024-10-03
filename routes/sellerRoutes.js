@@ -11,4 +11,5 @@ router.put('/product/:productId', sellerController.editProduct);
 router.get('/sortProducts', sellerController.sortProductsByRatings);
 router.get('/filterProducts', sellerController.filterProduct);
 router.post('/createProfile/:id', sellerController.createSellerProfile);
+router.get('/searchProductName', sellerController.searchProductsByName);
 module.exports = router;

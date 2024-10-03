@@ -31,5 +31,7 @@ router.delete('/deletecategory/:id', adminController.deleteCategory);
 router.post('/add-admin', adminController.addAdmin);
 router.get('/filterProducts', adminController.filterProduct);
 
+//Search by product name
+router.get('/searchProductName', adminController.searchProductsByName);
 
 module.exports = router;
