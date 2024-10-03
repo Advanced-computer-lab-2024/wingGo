@@ -11,7 +11,7 @@ const advertiser_hello = (req, res) => {
 };
 
 const createAdvertiserProfile = async (req, res) => {
-    return updateAdvertiserProfile(req,res);
+     return updateAdvertiserProfile(req, res);
 };
 
 // Update advertiser profile
@@ -67,6 +67,9 @@ const updateAdvertiserProfile = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+
+
 
 // Read advertiser profile without sensitive data
 const getAdvertiserProfile = async (req, res) => {
