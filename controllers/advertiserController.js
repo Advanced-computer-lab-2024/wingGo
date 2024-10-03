@@ -9,34 +9,7 @@ const advertiser_hello = (req, res) => {
 };
 
 const createAdvertiserProfile = async (req, res) => {
-    const { id } = req.params; // ID of the advertiser after approval
-    const { companyName, website, hotline, companyProfile, contactEmail, contactPerson, logoUrl, socialMediaLinks } = req.body;
-
-    try {
-        // Check if the profile already exists
-        const existingProfile = await Advertiser.findOne({ _id: id });
-        if (existingProfile) {
-            return res.status(400).json({ message: 'Profile already exists. Please update instead.' });
-        }
-
-        // Create a new advertiser profile
-        const newProfile = new Advertiser({
-            _id: id, // Use the same ID as the advertiser
-            companyName,
-            website,
-            hotline,
-            companyProfile,
-            contactEmail,
-            contactPerson,
-            logoUrl,
-            socialMediaLinks
-        });
-
-        await newProfile.save();
-        res.status(201).json({ message: 'Advertiser profile created successfully!', profile: newProfile });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+    return updateAdvertiserProfile(req,res);
 };
 
 // Update advertiser profile

@@ -14,9 +14,14 @@ const sellerSchema = new Schema({
         type: String,
         required: true
     },
+    name: {
+        type: String
+
+    },
     description:{
         type: String
     }
+
 }, { timestamps: true });
 const Seller = mongoose.model('Seller', sellerSchema);
 

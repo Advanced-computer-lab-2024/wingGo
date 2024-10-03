@@ -51,8 +51,17 @@ const updateSellerProfile = async (req, res) => {
     }
 };
 
+const hello = async(req,res) => {
+
+        console.log('in seller helloo');
+       
+    res.send('<h1>yayy seller</h1>');
+    
+ }
+
 const getSeller = async(req,res) => {
     try{
+        console.log('in seller');
         const id = req.params.id; // Use id as the unique identifier
         const sellerExist = await Seller.findById(id);
         if (!sellerExist) {
@@ -63,7 +72,12 @@ const getSeller = async(req,res) => {
        res.status(400).json({error:error.message})
     }
  }
+ const createSellerProfile = async (req, res) => {
+    return updateSellerProfile(req, res);
+};
  module.exports = {
-    // updateSellerProfile,
+    createSellerProfile,
+    updateSellerProfile,
     getSeller,
+    hello
 };

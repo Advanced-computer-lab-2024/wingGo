@@ -7,5 +7,7 @@ const sellerController = require('../controllers/sellerController');
 
 // Route to update a tour guide by id
 router.put('/update/:id', sellerController.updateSellerProfile);
-router.get('/:id', sellerController.getSeller);
+router.get('/get/:id', sellerController.getSeller);
+router.get('/hello', sellerController.hello);
+router.post('/create/:id', sellerController.createSellerProfile);
 module.exports = router;
