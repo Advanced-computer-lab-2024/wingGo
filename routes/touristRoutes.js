@@ -8,7 +8,9 @@ const router = express.Router();
 // router.get('/register', touristController.tourist_hello);
 router.get('/getallproducts', touristController.getAllProducts);
 router.get('/search', touristController.searchTouristAttractions);
-router.get('/:id', touristController.getTourist);
+router.get('/viewProfile/:id', touristController.getTourist);
 router.put('/update/:id',touristController.updateTouristProfile);
 router.get('/sortProducts', touristController.sortProductsByRatings);
+router.get('/filterProducts', touristController.filterProduct);
+
 module.exports = router;

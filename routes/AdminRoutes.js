@@ -29,5 +29,7 @@ router.delete('/deletecategory/:id', adminController.deleteCategory);
 
 // Route to add a new admin
 router.post('/add-admin', adminController.addAdmin);
+router.get('/filterProducts', adminController.filterProduct);
+
 
 module.exports = router;
