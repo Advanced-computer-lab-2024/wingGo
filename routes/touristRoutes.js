@@ -12,5 +12,6 @@ router.get('/viewProfile/:id', touristController.getTourist);
 router.put('/update/:id',touristController.updateTouristProfile);
 router.get('/sortProducts', touristController.sortProductsByRatings);
 router.get('/filterProducts', touristController.filterProduct);
+router.get('/filterPlacesByTag', touristController.filterPlacesByTag);
 
 module.exports = router;
