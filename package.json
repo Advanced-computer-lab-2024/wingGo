@@ -10,6 +10,7 @@
   "author": "Malak Hesham",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "express": "^4.21.0",
     "mongoose": "^8.7.0",

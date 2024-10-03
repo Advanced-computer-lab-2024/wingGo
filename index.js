@@ -17,7 +17,7 @@ let userType = "tourist";
 const { fileURLToPath } = require('url');
 
 const app = express();
-const port = 8000;
+const port = 8001;
 
 //Connect to mongoDB (will be used later on to connect with our DB)
 //put in env the port an dthe url

@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const Seller = require('../models/Seller');
 const LoginCredentials = require('../models/LoginCredentials'); 
+const Product = require('../models/product');
 
 const updateSellerProfile = async (req, res) => {
     try {
@@ -50,6 +51,34 @@ const updateSellerProfile = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+// Function to add a product
+const addProduct = async (req, res) => {
+    const { name, price, quantity, description} = req.body;
+    const sellerId = req.sellerId;  // Assuming sellerId comes from authentication middleware
+
+    try {
+        // Check if the seller exists
+        const sellerExist = await Seller.findById(sellerId);
+        if (!sellerExist) {
+            return res.status(404).json({ message: 'Seller not found' });
+        }
+
+        // Create a new product
+        const newProduct = new Product({
+            name,
+            price,
+            quantity,
+            description,
+            seller: sellerId  // Link the product to the seller
+        });
+
+        // Save product to the database
+        await newProduct.save();
+        res.status(201).json({ message: 'Product added successfully', newProduct });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
 const getSeller = async(req,res) => {
     try{
@@ -66,4 +95,5 @@ const getSeller = async(req,res) => {
  module.exports = {
     updateSellerProfile,
     getSeller,
+    addProduct
 };

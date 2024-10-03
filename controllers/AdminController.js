@@ -6,6 +6,7 @@ const Tourist = require('../models/tourist');
 const Seller = require('../models/Seller');
 const TourismGovernor = require('../models/TourismGovernor');
 const ActivityCategory = require('../models/ActivityCategory');
+const Product = require('../models/product');
 
 //Create activity category
 const createCategory= async(req,res)=>{
@@ -31,7 +32,9 @@ const getCategories=async(req,res)=>{
     } catch(error){
         res.status(500).json({error:error.message});
     }
-}
+}; 
+
+
 //update category
 const updateCategory= async(req,res)=>{
     const {id} = req.params;
@@ -88,6 +91,39 @@ const addTourismGovernor= async(req,res)=> {
     }
 }
 const Attraction = require('../models/attraction');
+// Admin function to add a product
+const addProductAsAdmin = async (req, res) => {
+    const { name, price, quantity, description} = req.body;
+    let { sellerId } = req.body;  // Optional seller ID provided by the admin
+
+    try {
+        // If sellerId is provided, check if the seller exists
+        if (sellerId) {
+            const sellerExist = await Seller.findById(sellerId);
+            if (!sellerExist) {
+                return res.status(404).json({ message: 'Seller not found. Cannot associate this product with a seller.' });
+            }
+        } else {
+            sellerId = null;  // If no seller is provided, set it to null
+        }
+
+        // Create the product
+        const newProduct = new Product({
+            name,
+            price,
+            quantity,
+            description,
+            seller: sellerId  // Could be null if no seller
+        });
+
+        // Save the product to the database
+        await newProduct.save();
+        res.status(201).json({ message: 'Product added successfully by Admin', newProduct });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 
 // Controller function to delete an account using id
 const deleteAccount = async (req, res) => {
@@ -192,9 +228,15 @@ const approvePendingUserById = async (req, res) => {
     }
 };
 
+const allowedTags = ['historic areas', 'beaches', 'family-friendly', 'shopping', 'budget-friendly'];
+
 const addTag = async (req, res) => {
     const { id } = req.params;
     const { tag } = req.body;
+
+    if (!allowedTags.includes(tag)) {
+        return res.status(400).json({ error: 'Invalid tag' });
+    }
 
     try {
         const attraction = await Attraction.findById(id);
@@ -228,6 +270,10 @@ const getTags = async (req, res) => {
 const updateTag = async (req, res) => {
     const { id, tagId } = req.params;
     const { newTag } = req.body;
+
+    if (!allowedTags.includes(newTag)) {
+        return res.status(400).json({ error: 'Invalid tag' });
+    }
 
     try {
         const attraction = await Attraction.findById(id);
@@ -275,6 +321,7 @@ module.exports = {
     getTags,
     updateTag,
     deleteTag,
+    addProductAsAdmin,
     updateCategory,
     deleteCategory,
     getCategory
