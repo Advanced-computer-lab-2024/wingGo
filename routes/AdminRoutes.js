@@ -26,4 +26,8 @@ router.put('/updatecategory/:id', adminController.updateCategory);
 
 // Delete an activity category by ID
 router.delete('/deletecategory/:id', adminController.deleteCategory);
+
+// Route to add a new admin
+router.post('/add-admin', adminController.addAdmin);
+
 module.exports = router;

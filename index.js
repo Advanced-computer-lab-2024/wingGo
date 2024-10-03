@@ -9,6 +9,7 @@ const adminRoutes = require('./routes/AdminRoutes');
 const tourGuideRoutes = require('./routes/TourGuideRoutes'); // Ensure correct path
 const govornorRoutes = require('./routes/GovornorRoutes');
 const advertiserRoutes = require('./routes/advertiserRoutes');
+const itineraryRoutes = require('./routes/ItineraryRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
 const productRoutes = require('./routes/productRoutes');
 
@@ -82,6 +83,8 @@ app.use('/seller', sellerRoutes);
 app.use('/tourist', touristRoutes);
 
 
+// Use the itinerary routes
+app.use('/itinerary', itineraryRoutes);
 
 
 //Must be at the bottom so that it doesnt match right away

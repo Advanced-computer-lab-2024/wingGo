@@ -338,6 +338,37 @@ const deleteTag = async (req, res) => {
     }
 };
 
+// Controller function to add a new admin
+const addAdmin = async (req, res) => {
+    const { username, password } = req.body;  // Get username and password from request body
+
+    try {
+        // Check if the username already exists
+        const existingUser = await LoginCredentials.findOne({ username });
+
+        if (existingUser) {
+            return res.status(400).json({ message: 'Username already exists' });
+        }
+
+        // Hash the password using bcrypt
+        const hashedPassword = await bcrypt.hash(password, 10);  // 10 is the salt rounds
+
+        // Create a new admin
+        const newAdmin = new LoginCredentials({
+            username,
+            password: hashedPassword,  // Save the hashed password
+            role: 'admin'  // Set role as 'admin'
+        });
+
+        // Save the new admin in the database
+        await newAdmin.save();
+
+        res.status(201).json({ message: 'Admin added successfully', admin: newAdmin });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     approvePendingUserById,
     deleteAccount,
@@ -352,5 +383,6 @@ module.exports = {
     editProduct,
     updateCategory,
     deleteCategory,
-    getCategory
+    getCategory,
+    addAdmin,
 };
