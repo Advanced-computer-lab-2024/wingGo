@@ -1,12 +1,15 @@
 const bcrypt = require('bcrypt');
 const Tourist = require('../models/tourist');
 const Attraction = require('../models/attraction');
-
+const Activity= require('../models/Activity');
+const Itinerary = require ('../models/Itinerary');
 
 const tourist_hello = (req, res) => {
     res.send('<h1>yayy</h1>');
     console.log('yay');
 };
+
+//sort all upcoming activities/itineraries by price/ratings
 
 const tourist_register = async (req, res) => {
     // Destructure fields from the request body
@@ -157,8 +160,36 @@ const getTourist = async(req,res) => {
         res.status(500).json({ error: err.message });
     }
 };
+const sortProductsByRatings = async (req, res) => {
+    try {
+        const products = await Product.find().sort({ ratings: -1 });
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
+const getAllProducts = async (req, res) => {
+    try {
+        const products = await Product.find().populate('seller', 'username');  // Populate seller username if available
 
+        // If you need to send a public path for pictures stored locally
+        const productData = products.map(product => ({
+            name: product.name,
+            picture: `${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
+            price: product.price,
+            description: product.description,
+            quantity: product.quantity,
+            seller: product.seller ? product.seller.username : 'Admin',  // Handle null seller field
+            ratings: product.ratings,
+            reviews: product.reviews
+        }));
+
+        res.status(200).json(productData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
 
 module.exports = {
@@ -166,6 +197,8 @@ module.exports = {
     tourist_register,
     searchTouristAttractions,
     getTourist,
-    updateTouristProfile
+    updateTouristProfile,
+    sortProductsByRatings,
+    getAllProducts
 
 };

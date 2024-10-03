@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const path = require('path');
 
 const sortProductsByRatings = async (req, res) => {
     try {
@@ -8,6 +9,7 @@ const sortProductsByRatings = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
 
 module.exports = {
     sortProductsByRatings,

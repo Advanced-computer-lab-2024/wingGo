@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Define the schema for an activity
+
 const activitySchema = new mongoose.Schema({
   date: {
     type: Date,
@@ -16,9 +16,15 @@ const activitySchema = new mongoose.Schema({
       enum: ['Point'],
       required: true
     },
-    coordinates: {
-      type: [Number],
+    address: {
+      type: String,
       required: true
+    },
+    lat: {
+      type: Number
+    },
+    lng: {
+      type: Number
     }
   },
   price: {
@@ -40,6 +46,6 @@ const activitySchema = new mongoose.Schema({
   }
 });
 
-Activity = mongoose.model('Activity', activitySchema);
+const Activity = mongoose.model('Activity', activitySchema);
 
 module.exports = Activity;

@@ -10,6 +10,7 @@ const tourGuideRoutes = require('./routes/TourGuideRoutes'); // Ensure correct p
 const govornorRoutes = require('./routes/GovornorRoutes');
 const advertiserRoutes = require('./routes/advertiserRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 let isTourist = 2; //yb2a set lama el shakhs ykhtar men el form eno tourist fa  hankhdo men el frontend 
 let userType = "tourist";
@@ -72,12 +73,15 @@ app.use('/seller', sellerRoutes);
 
 app.use('/tourguide', tourGuideRoutes);
 
-//app.use('/tags', tagRoutes);
+// app.use('/tags', tagRoutes);
 
-//app.use('/products', productRoutes);
+app.use('/product', productRoutes);
 
-app.use('/places', govornorRoutes);
+app.use('/govonor', govornorRoutes);
 app.use('/advertiser', advertiserRoutes);
+app.use('/seller', sellerRoutes);
+app.use('/tourist', touristRoutes);
+
 
 
 
@@ -86,5 +90,3 @@ app.use((req, res)=> {
   //we could add status code bec it returns a req obj
   res.status(404).sendFile('./views/404.html', {root: __dirname});
 });
-
-

@@ -1,16 +1,34 @@
 const Place = require('../models/Places');
 
-//create
+// Create a new place
 const createPlace = async (req, res) => {
     try {
-        const place = new Place(req.body);
+        const { types, historicalPeriods, ...placeData } = req.body.tags || {}; // Extract tags separately
+
+        // Validate types
+        const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces/Castles'];
+        if (types && types.some(type => !allowedTypes.includes(type))) {
+            return res.status(400).json({ message: 'Invalid type in types array. Allowed values are Monuments, Museums, Religious Sites, Palaces/Castles.' });
+        }
+
+        // Create a new place with validated tags
+        const place = new Place({
+            ...req.body,  // Spread the rest of the place data (e.g., name, description, location)
+            tags: {
+                types: types || [],  // Use an empty array if types are missing
+                historicalPeriods: historicalPeriods || []  // Use an empty array if historicalPeriods are missing
+            }
+        });
+
         await place.save();
         res.status(201).json(place);
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
 };
-//read all
+
+
+// Get all places
 const getAllPlaces = async (req, res) => {
     try {
         const places = await Place.find();
@@ -19,9 +37,11 @@ const getAllPlaces = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-//read by ID
+
+// Get place by ID
 const getPlaceById = async (req, res) => {
     try {
+        console.log('in get place');
         const place = await Place.findById(req.params.id);
         if (!place) {
             return res.status(404).json({ message: 'Place not found' });
@@ -32,32 +52,63 @@ const getPlaceById = async (req, res) => {
     }
 };
 
-//update
+const hello = async (req, res) => {
+  
+        console.log('in hello ');
+        res.send('<h1>yayy govornor</h1>');
+      
+};
+
+// Update an existing place
 const updatePlace = async (req, res) => {
     try {
-        const place = await Place.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const { types, historicalPeriods, ...placeData } = req.body;
+
+        // Validate types if provided
+        const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces/Castles'];
+        if (types && types.some(type => !allowedTypes.includes(type))) {
+            return res.status(400).json({ message: 'Invalid type in types array. Allowed values are Monuments, Museums, Religious Sites, Palaces/Castles.' });
+        }
+
+        // Find the place by ID and update with the new data
+        const place = await Place.findById(req.params.id);
         if (!place) {
             return res.status(404).json({ message: 'Place not found' });
         }
+
+        // Update place data
+        Object.assign(place, placeData);
+
+        // Explicitly update tags (types and historicalPeriods)
+        if (types) {
+            place.tags.types = types;
+        }
+        if (historicalPeriods) {
+            place.tags.historicalPeriods = historicalPeriods;
+        }
+
+        await place.save();
         res.json(place);
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
 };
 
-//delete
+
+// Delete a place
 const deletePlace = async (req, res) => {
     try {
         const place = await Place.findByIdAndDelete(req.params.id);
         if (!place) {
             return res.status(404).json({ message: 'Place not found' });
         }
-        res.status(204).send(); // No content response
+        res.status(204).send();  // No content response
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
+// Add a tag to a place (already provided in previous response)
 const addTagToPlace = async (req, res) => {
     try {
         const place = await Place.findById(req.params.id);
@@ -65,10 +116,34 @@ const addTagToPlace = async (req, res) => {
             return res.status(404).json({ message: 'Place not found' });
         }
 
-        const { tag } = req.body;  // Get the tag from the request body
-        place.tags.push(tag);  // Add the new tag to the tags array
-        await place.save();
+        const { tag, category } = req.body;  // Get the tag and its category (type or historical period) from the request body
 
+        // Check if it's a type or a historical period
+        if (category === 'type') {
+            // Ensure the tag is one of the allowed types
+            const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces/Castles'];
+            if (!allowedTypes.includes(tag)) {
+                return res.status(400).json({ message: 'Invalid type. Allowed values are Monuments, Museums, Religious Sites, Palaces/Castles.' });
+            }
+
+            // Add the tag to the types array
+            if (!place.tags.types.includes(tag)) {
+                place.tags.types.push(tag);
+            } else {
+                return res.status(400).json({ message: 'Type already exists for this place.' });
+            }
+        } else if (category === 'historicalPeriod') {
+            // Add the tag to the historicalPeriods array (no validation needed here)
+            if (!place.tags.historicalPeriods.includes(tag)) {
+                place.tags.historicalPeriods.push(tag);
+            } else {
+                return res.status(400).json({ message: 'Historical period already exists for this place.' });
+            }
+        } else {
+            return res.status(400).json({ message: 'Invalid category. Must be either "type" or "historicalPeriod".' });
+        }
+
+        await place.save();  // Save the updated place with the new tag
         res.status(200).json(place);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -81,5 +156,6 @@ module.exports = {
     getPlaceById,
     updatePlace,
     deletePlace,
-    addTagToPlace
+    addTagToPlace,
+    hello
 };

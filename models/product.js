@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const { Schema } = mongoose;  // This imports Schema from mongoose
 
 const productSchema = new Schema({
     name: {
@@ -8,7 +8,7 @@ const productSchema = new Schema({
     },
     picture: {
         type: String,
-        required: true
+        required: false
     },
     price: {
         type: Number,
@@ -18,18 +18,24 @@ const productSchema = new Schema({
         type: String,
         required: true
     },
-    seller: {
-        type: String,
+    quantity: {
+        type: Number, // This should be quantity instead of price
         required: true
+    },
+    seller: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Seller',
+        required: false,
+        default: null 
     },
     ratings: {
         type: Number,
-        required: true,
+        required: false,
         default: 0
     },
     reviews: {
-        type: [String],
-        required: true
+        type: [String], // Array of strings for reviews
+        required: false
     }
 }, { timestamps: true });
 
