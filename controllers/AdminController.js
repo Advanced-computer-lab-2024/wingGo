@@ -150,6 +150,29 @@ const editProduct = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+const filterProduct = async (req, res) => {
+    try {
+        const price = req.query.price;  // Assuming 'price' is the query parameter for price
+
+        // Ensure the price is provided
+        if (price) {
+            // Find products with the exact price
+            const result = await Product.find({ price: price });
+
+            // If no products are found, return a 404 response
+            if (result.length === 0) {
+                return res.status(404).json({ message: 'No products found with the specified price' });
+            }
+
+            res.status(200).json(result);
+        } else {
+            res.status(400).json({ message: 'Price query parameter is required' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 
 // Controller function to delete an account using id
@@ -483,5 +506,6 @@ module.exports = {
     getCategory,
     addAdmin,
     sortProductsByRatings,
-    getAllProducts
+    getAllProducts,
+    filterProduct
 };

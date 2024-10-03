@@ -3,6 +3,8 @@ const Tourist = require('../models/tourist');
 const Attraction = require('../models/attraction');
 const Activity= require('../models/Activity');
 const Itinerary = require ('../models/Itinerary');
+const Product = require('../models/product');
+
 
 const tourist_hello = (req, res) => {
     res.send('<h1>yayy</h1>');
@@ -190,6 +192,30 @@ const getAllProducts = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+const filterProduct = async (req, res) => {
+   
+    try {
+       
+        const price = req.query.price;  // Assuming 'price' is the query parameter for price
+
+        // Ensure the price is provided
+        if (price) {
+            // Find products with the exact price
+            const result = await Product.find({ price: price });
+
+            // If no products are found, return a 404 response
+            if (result.length === 0) {
+                return res.status(404).json({ message: 'No products found with the specified price' });
+            }
+
+            res.status(200).json(result);
+        } else {
+            res.status(400).json({ message: 'Price query parameter is required' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 
 module.exports = {
@@ -199,6 +225,7 @@ module.exports = {
     getTourist,
     updateTouristProfile,
     sortProductsByRatings,
-    getAllProducts
+    getAllProducts,
+    filterProduct
 
 };

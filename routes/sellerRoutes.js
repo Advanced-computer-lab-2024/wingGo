@@ -9,5 +9,6 @@ router.get('/viewProfile/get/:id', sellerController.getSeller);
 router.post('/addProduct', sellerController.addProduct);
 router.put('/product/:productId', sellerController.editProduct);
 router.get('/sortProducts', sellerController.sortProductsByRatings);
-router.post('/create/:id', sellerController.createSellerProfile);
+router.get('/filterProducts', sellerController.filterProduct);
+router.post('/createProfile/:id', sellerController.createSellerProfile);
 module.exports = router;
