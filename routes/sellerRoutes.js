@@ -1,10 +1,9 @@
 const express = require ('express');
 const router = express.Router();
 const sellerController = require('../controllers/sellerController');
+const productController = require('../controllers/productController');
 
-// Route to get a tour guide by id
-// router.get('/:id', tourGuideController.getTourGuide);
-// Route to update a tour guide by id
+router.get('/getallproducts', productController.getAllProducts);
 
 router.put('/update/:id', sellerController.updateSellerProfile);
 router.get('/viewProfile/:id', sellerController.getSeller);
