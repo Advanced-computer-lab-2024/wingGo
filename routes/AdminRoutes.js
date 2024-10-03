@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/AdminController');
+const productController = require('../controllers/productController');
+
+router.get('/getallproducts', productController.getAllProducts);
 
 // Route to approve a pending user by id
 router.put('/approve/:id', adminController.approvePendingUserById);
@@ -24,5 +27,8 @@ router.put('/updatecategory/:id', adminController.updateCategory);
 
 // Delete an activity category by ID
 router.delete('/deletecategory/:id', adminController.deleteCategory);
+
+// Route to add a new admin
+router.post('/add-admin', adminController.addAdmin);
 
 module.exports = router;

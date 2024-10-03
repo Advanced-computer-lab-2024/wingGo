@@ -1,12 +1,15 @@
 const bcrypt = require('bcrypt');
 const Tourist = require('../models/tourist');
 const Attraction = require('../models/attraction');
-
+const Activity= require('../models/Activity');
+const Itinerary = require ('../models/Itinerary');
 
 const tourist_hello = (req, res) => {
     res.send('<h1>yayy</h1>');
     console.log('yay');
 };
+
+//sort all upcoming activities/itineraries by price/ratings
 
 const tourist_register = async (req, res) => {
     // Destructure fields from the request body
