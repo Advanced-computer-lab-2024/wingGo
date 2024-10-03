@@ -64,6 +64,6 @@ const getSeller = async(req,res) => {
     }
  }
  module.exports = {
-    // updateSellerProfile,
+    updateSellerProfile,
     getSeller,
 };
