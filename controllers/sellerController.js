@@ -2,11 +2,14 @@ const bcrypt = require('bcrypt');
 const Seller = require('../models/Seller');
 const LoginCredentials = require('../models/LoginCredentials'); 
 const Product = require('../models/product');
+const { default: mongoose } = require('mongoose');
 
 const updateSellerProfile = async (req, res) => {
+    console.log(req.body);
     try {
         const id = req.params.id; // Use id as the unique identifier
         const sellerExist = await Seller.findById(id);
+        
 
         if (!sellerExist) {
             return res.status(404).json({ message: 'Seller not found' });
@@ -83,8 +86,8 @@ const addProduct = async (req, res) => {
 // Function to edit a product
 const editProduct = async (req, res) => {
     const { productId } = req.params;
-    const { name, price, quantity, description } = req.body;
-    const sellerId = req.sellerId;  // Assuming sellerId comes from authentication middleware
+    const { name, price, quantity, description, sellerId } = req.body;
+  // Assuming sellerId comes from authentication middleware
 
     try {
         // Check if the product exists and belongs to the seller
@@ -119,9 +122,20 @@ const getSeller = async(req,res) => {
        res.status(400).json({error:error.message})
     }
  }
+
+ const sortProductsByRatings = async (req, res) => {
+    try {
+        const products = await Product.find().sort({ ratings: -1 });
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
  module.exports = {
     updateSellerProfile,
     getSeller,
     addProduct,
-    editProduct
+    editProduct,
+    sortProductsByRatings
 };

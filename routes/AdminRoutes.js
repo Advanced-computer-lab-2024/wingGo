@@ -14,6 +14,7 @@ router.post('/categories', adminController.createCategory);
 
 // Get all activity categories
 router.get('/getcategories', adminController.getCategories);
+router.get('/sortProducts', adminController.sortProductsByRatings);
 
 // Get one activity category by ID
 router.get('/getcategory/:id', adminController.getCategory);
@@ -23,4 +24,5 @@ router.put('/updatecategory/:id', adminController.updateCategory);
 
 // Delete an activity category by ID
 router.delete('/deletecategory/:id', adminController.deleteCategory);
+
 module.exports = router;

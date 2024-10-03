@@ -8,4 +8,5 @@ const router = express.Router();
 router.get('/search', touristController.searchTouristAttractions);
 router.get('/:id', touristController.getTourist);
 router.put('/update/:id',touristController.updateTouristProfile);
+router.get('/sortProducts', touristController.sortProductsByRatings);
 module.exports = router;
