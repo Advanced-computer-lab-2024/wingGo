@@ -79,10 +79,11 @@ const getCategory=async(req,res)=>{
 const addTourismGovernor= async(req,res)=> {
     const{username,password}=req.body;
     try{
+        const hashedPassword = await bcrypt.hash(password, 10);
         //create gov.
         const newTG = new TourismGovernor({
             username,
-            password,
+            password:hashedPassword,
         });
         await newTG.save();
         res.status(200).json({message:'Tourism Governor added successfully',newTG});
