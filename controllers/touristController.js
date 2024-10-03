@@ -64,8 +64,67 @@ const getTouristAttractions = async (req, res) => {
     }
 };
 
+const viewTouristActivities = async (req, res) => {  // yet to be tested
+
+        try {
+            
+            const activities = await ActivityModel.find();
+    
+            
+            const itineraries = await ItineraryModel.find();
+    
+            
+            const historicalPlaces = await PlaceModel.find();
+    
+            
+            const result = {
+                activities,
+                itineraries,
+                historicalPlaces
+            };
+    
+            res.status(200).json(result); 
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        } 
+
+};
+    const filterTouristActivities = async (req, res) => {  // yet to be tested
+
+        const { budget, date, category, ratings } = req.query; 
+        let filter = { date: { $gte: new Date() } };
+    
+        
+        if (budget) {
+            filter.budget = { $lte: budget }; 
+        }
+    
+        if (date) {
+            filter.date = { $gte: new Date(date) }; 
+        }
+    
+        if (category) {
+            filter.category = category; 
+        }
+    
+        if (ratings) {
+            filter.ratings = { $gte: ratings }; 
+        }
+    
+        try {
+            const activities = await ActivityModel.find(filter); 
+            res.status(200).json(activities); 
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    };
+    
+
+
 module.exports = {
     tourist_hello,
     tourist_register,
-    searchTouristAttractions
+    searchTouristAttractions,
+    viewTouristActivities,
+    filterTouristActivities
 };
