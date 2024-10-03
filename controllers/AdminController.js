@@ -84,6 +84,32 @@ const addProductAsAdmin = async (req, res) => {
     }
 };
 
+// Function to edit a product
+const editProduct = async (req, res) => {
+    const { productId } = req.params;
+    const { name, price, quantity, description } = req.body;
+
+    try {
+        // Check if the product exists
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        // Update product details
+        if (name) product.name = name;
+        if (price) product.price = price;
+        if (quantity) product.quantity = quantity;
+        if (description) product.description = description;
+
+        // Save the updated product to the database
+        await product.save();
+        res.status(200).json({ message: 'Product updated successfully', product });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 
 // Controller function to delete an account using id
 const deleteAccount = async (req, res) => {
@@ -281,5 +307,6 @@ module.exports = {
     getTags,
     updateTag,
     deleteTag,
-    addProductAsAdmin
+    addProductAsAdmin,
+    editProduct
 };
