@@ -1,12 +1,15 @@
 const bcrypt = require('bcrypt');
 const Tourist = require('../models/tourist');
 const Attraction = require('../models/attraction');
-
+const Activity= require('../models/Activity');
+const Itinerary = require ('../models/Itinerary');
 
 const tourist_hello = (req, res) => {
     res.send('<h1>yayy</h1>');
     console.log('yay');
 };
+
+//sort all upcoming activities/itineraries by price/ratings
 
 const tourist_register = async (req, res) => {
     // Destructure fields from the request body
@@ -157,6 +160,14 @@ const getTourist = async(req,res) => {
         res.status(500).json({ error: err.message });
     }
 };
+const sortProductsByRatings = async (req, res) => {
+    try {
+        const products = await Product.find().sort({ ratings: -1 });
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
 const getAllProducts = async (req, res) => {
     try {
@@ -181,13 +192,13 @@ const getAllProducts = async (req, res) => {
 };
 
 
-
 module.exports = {
     tourist_hello,
     tourist_register,
     searchTouristAttractions,
     getTourist,
     updateTouristProfile,
+    sortProductsByRatings,
     getAllProducts
 
 };

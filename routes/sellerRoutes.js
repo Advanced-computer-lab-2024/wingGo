@@ -8,4 +8,5 @@ router.put('/update/:id', sellerController.updateSellerProfile);
 router.get('/viewProfile/:id', sellerController.getSeller);
 router.post('/addProduct', sellerController.addProduct);
 router.put('/product/:productId', sellerController.editProduct);
+router.get('/sortProducts', sellerController.sortProductsByRatings);
 module.exports = router;

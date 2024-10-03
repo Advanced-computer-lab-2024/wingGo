@@ -338,6 +338,14 @@ const deleteTag = async (req, res) => {
     }
 };
 
+const sortProductsByRatings = async (req, res) => {
+    try {
+        const products = await Product.find().sort({ ratings: -1 });
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+};
 // Controller function to add a new admin
 const addAdmin = async (req, res) => {
     const { username, password } = req.body;  // Get username and password from request body
@@ -407,5 +415,6 @@ module.exports = {
     deleteCategory,
     getCategory,
     addAdmin,
+    sortProductsByRatings,
     getAllProducts
 };
