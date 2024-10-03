@@ -5,7 +5,33 @@ const LoginCredentials = require('../models/LoginCredentials');
 const Tourist = require('../models/tourist');
 const Seller = require('../models/Seller');
 const TourismGovernor = require('../models/TourismGovernor');
+const ActivityCategory = require('../models/ActivityCategory');
 
+//Create activity category
+const createCategory= async(req,res)=>{
+    const {name}=req.body;
+    try{
+        const notnew= await ActivityCategory.findOne({name});
+        if(notnew){
+            return res.status(400).json({message:'Category already exists'});
+        }
+        const newCategory= new ActivityCategory({name});
+        await newCategory.save();
+        res.statua(200).json({message:'Category added successfully',newCategory});
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+}
+
+//Read all categories
+const getCategories=async(req,res)=>{
+    try{
+        const categories=await ActivityCategory.find();
+        res.status(200).jaon(categories);
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+}
 //add TourismGovernor to DB by username and password
 const addTourismGovernor= async(req,res)=> {
     const{username,password}=req.body;
@@ -195,5 +221,7 @@ const approvePendingUserById = async (req, res) => {
 module.exports = {
     approvePendingUserById,
     deleteAccount,
-    addTourismGovernor
+    addTourismGovernor,
+    createCategory,
+    getCategories
 };
