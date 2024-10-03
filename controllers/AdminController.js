@@ -230,8 +230,8 @@ module.exports = {
     deleteAccount,
     addTourismGovernor,
     createCategory,
-    getCategories
-        addTag,
+    getCategories,
+    addTag,
     getTags,
     updateTag,
     deleteTag
