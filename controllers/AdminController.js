@@ -5,7 +5,34 @@ const LoginCredentials = require('../models/LoginCredentials');
 const Tourist = require('../models/tourist');
 const Seller = require('../models/Seller');
 const TourismGovernor = require('../models/TourismGovernor');
-const Product = require('../models/product'); 
+const ActivityCategory = require('../models/ActivityCategory');
+const Product = require('../models/product');
+
+//Create activity category
+const createCategory= async(req,res)=>{
+    const {name}=req.body;
+    try{
+        const notnew= await ActivityCategory.findOne({name});
+        if(notnew){
+            return res.status(400).json({message:'Category already exists'});
+        }
+        const newCategory= new ActivityCategory({name});
+        await newCategory.save();
+        res.statua(200).json({message:'Category added successfully',newCategory});
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+}
+
+//Read all categories
+const getCategories=async(req,res)=>{
+    try{
+        const categories=await ActivityCategory.find();
+        res.status(200).jaon(categories);
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+}; 
 
 
 //add TourismGovernor to DB by username and password
@@ -23,6 +50,7 @@ const addTourismGovernor= async(req,res)=> {
         res.status(500).json({ error: err.message });
     }
 }
+const Attraction = require('../models/attraction');
 // Admin function to add a product
 const addProductAsAdmin = async (req, res) => {
     const { name, price, quantity, description} = req.body;
@@ -104,7 +132,7 @@ const deleteAccount = async (req, res) => {
 // Controller function to approve a pending user by id
 const approvePendingUserById = async (req, res) => {
     const { id } = req.params;
-    
+
     try {
         // Find the pending user by id
         const pendingUser = await PendingUser.findById(id);
@@ -152,78 +180,84 @@ const approvePendingUserById = async (req, res) => {
             await PendingUser.findByIdAndDelete(id);
 
             res.status(200).json({ message: 'User approved, added to tour guide collection, and login credentials saved', tourGuide });
-        } 
-        else if(pendingUser.role === 'seller'){
-             // Hash the password using bcrypt
-             const hashedPassword = await bcrypt.hash(pendingUser.password, 10);  // 10 is the salt rounds
-
-             // Create a new seller profile after admin approval
-             const seller = new Seller({
-                 _id: pendingUser._id,
-                 email: pendingUser.email,
-                 username: pendingUser.username,
-                 password: hashedPassword, // Save the hashed password
-                
-             });
- 
-             // Save the tour guide profile
-             await seller.save();
- 
-             // Add login credentials to the loginCredentials collection
-             const loginCredentials = new LoginCredentials({
-                 _id: pendingUser._id,
-                 username: pendingUser.username,
-                 password: hashedPassword, // Save the hashed password
-                 role: pendingUser.role
-             });
- 
-             // Save the login credentials
-             await loginCredentials.save();
- 
-             // Remove the pending user from the PendingUser collection
-             await PendingUser.findByIdAndDelete(id);
- 
-             res.status(200).json({ message: 'User approved, added to seller collection, and login credentials saved', seller });
-            
-
-        }
-        else if (pendingUser.role === 'advertiser') {
-            // Hash the password using bcrypt
-            const hashedPassword = await bcrypt.hash(pendingUser.password, 10);  // 10 is the salt rounds
-
-            // Create a new advertiser profile after admin approval
-            const advertiser = new Advertiser({
-                _id: pendingUser._id,
-                email: pendingUser.email,
-                username: pendingUser.username,
-                password: hashedPassword, // Save the hashed password
-            });
-
-            // Save the advertiser profile
-            await advertiser.save();
-
-            // Add login credentials to the loginCredentials collection
-            const loginCredentials = new LoginCredentials({
-                _id: pendingUser._id,
-                username: pendingUser.username,
-                password: hashedPassword, // Save the hashed password
-                role: pendingUser.role
-            });
-
-            // Save the login credentials
-            await loginCredentials.save();
-
-            // Remove the pending user from the PendingUser collection
-            await PendingUser.findByIdAndDelete(id);
-
-            res.status(200).json({ message: 'User approved, added to advertiser collection, and login credentials saved', advertiser });
-        } 
-        
-        else {
-            res.status(400).json({ message: 'User role is not seller. Cannot approve for this role.' });
+        } else {
+            res.status(400).json({ message: 'User role is not tour guide. Cannot approve for this role.' });
         }
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+};
+
+const addTag = async (req, res) => {
+    const { id } = req.params;
+    const { tag } = req.body;
+
+    try {
+        const attraction = await Attraction.findById(id);
+        if (!attraction) {
+            return res.status(404).json({ error: 'Attraction not found' });
+        }
+
+        attraction.tags.push(tag);
+        await attraction.save();
+        res.status(200).json(attraction);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+const getTags = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const attraction = await Attraction.findById(id);
+        if (!attraction) {
+            return res.status(404).json({ error: 'Attraction not found' });
+        }
+
+        res.status(200).json(attraction.tags);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+const updateTag = async (req, res) => {
+    const { id, tagId } = req.params;
+    const { newTag } = req.body;
+
+    try {
+        const attraction = await Attraction.findById(id);
+        if (!attraction) {
+            return res.status(404).json({ error: 'Attraction not found' });
+        }
+
+        const tagIndex = attraction.tags.indexOf(tagId);
+        if (tagIndex === -1) {
+            return res.status(404).json({ error: 'Tag not found' });
+        }
+
+        attraction.tags[tagIndex] = newTag;
+        await attraction.save();
+        res.status(200).json(attraction);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+const deleteTag = async (req, res) => {
+    const { id, tagId } = req.params;
+
+    try {
+        const attraction = await Attraction.findById(id);
+        if (!attraction) {
+            return res.status(404).json({ error: 'Attraction not found' });
+        }
+
+        attraction.tags = attraction.tags.filter(tag => tag !== tagId);
+        await attraction.save();
+        res.status(200).json(attraction);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 };
 
@@ -231,5 +265,11 @@ module.exports = {
     approvePendingUserById,
     deleteAccount,
     addTourismGovernor,
+    createCategory,
+    getCategories,
+    addTag,
+    getTags,
+    updateTag,
+    deleteTag,
     addProductAsAdmin
 };

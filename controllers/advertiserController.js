@@ -120,6 +120,11 @@ const getAdvertiserProfile = async (req, res) => {
     }
 };
 
+const createActivity = async (req, res) => {
+
+    const {date, time, Location, price, category, tags, specialDiscounts, isBookingOpen} = req.body
+
+}
 
 module.exports = {
     advertiser_hello,
