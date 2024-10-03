@@ -152,9 +152,15 @@ const approvePendingUserById = async (req, res) => {
     }
 };
 
+const allowedTags = ['historic areas', 'beaches', 'family-friendly', 'shopping', 'budget-friendly'];
+
 const addTag = async (req, res) => {
     const { id } = req.params;
     const { tag } = req.body;
+
+    if (!allowedTags.includes(tag)) {
+        return res.status(400).json({ error: 'Invalid tag' });
+    }
 
     try {
         const attraction = await Attraction.findById(id);
@@ -188,6 +194,10 @@ const getTags = async (req, res) => {
 const updateTag = async (req, res) => {
     const { id, tagId } = req.params;
     const { newTag } = req.body;
+
+    if (!allowedTags.includes(newTag)) {
+        return res.status(400).json({ error: 'Invalid tag' });
+    }
 
     try {
         const attraction = await Attraction.findById(id);
