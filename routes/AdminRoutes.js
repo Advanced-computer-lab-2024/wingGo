@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/AdminController');
-const productController = require('../controllers/productController');
 
-router.get('/getallproducts', productController.getAllProducts);
+router.get('/getallproducts', adminController.getAllProducts);
 
 // Route to approve a pending user by id
 router.put('/approve/:id', adminController.approvePendingUserById);

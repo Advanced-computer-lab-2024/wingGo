@@ -1,10 +1,9 @@
 const express = require ('express');
 const router = express.Router();
 const sellerController = require('../controllers/sellerController');
-const productController = require('../controllers/productController');
 
-router.get('/getallproducts', productController.getAllProducts);
 
+router.get('/getallproducts', sellerController.getAllProducts);
 router.put('/update/:id', sellerController.updateSellerProfile);
 router.get('/viewProfile/:id', sellerController.getSeller);
 router.post('/addProduct', sellerController.addProduct);
