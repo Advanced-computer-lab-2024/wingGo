@@ -74,7 +74,7 @@ app.use('/tourguide', tourGuideRoutes);
 
 //app.use('/products', productRoutes);
 
-app.use('/places', govornorRoutes);
+app.use('/govonor', govornorRoutes);
 app.use('/advertiser', advertiserRoutes);
 
 

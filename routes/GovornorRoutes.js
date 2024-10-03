@@ -3,17 +3,17 @@ const router = express.Router();
 const PlaceController = require('../controllers/GovernorController');
 
 
-router.post('/', PlaceController.createPlace);
+router.post('/createPlace', PlaceController.createPlace);
 
-router.get('/', PlaceController.getAllPlaces);
+router.get('/getAllPlaces', PlaceController.getAllPlaces);
 
-router.get('/:id', PlaceController.getPlaceById);
+router.get('getPlace/:id', PlaceController.getPlaceById);
 
-router.put('/:id', PlaceController.updatePlace);
+router.put('updatePlace/:id', PlaceController.updatePlace);
 
-router.delete('/:id', PlaceController.deletePlace);
+router.delete('/deletePlace/:id', PlaceController.deletePlace);
 
-router.put('/:id/tag', PlaceController.addTagToPlace);
+router.put('/addTag/:id', PlaceController.addTagToPlace);
 
 
 module.exports = router;
