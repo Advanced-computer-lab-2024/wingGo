@@ -4,8 +4,8 @@ const router = express.Router();
 
 
 router.get('/hello', advertiserController.advertiser_hello);
-router.post('/:id/create', advertiserController.createAdvertiserProfile);
-router.put('/:id/update', advertiserController.updateAdvertiserProfile);
-router.get('/:id/read', advertiserController.getAdvertiserProfile);
+router.post('createProfile/:id', advertiserController.createAdvertiserProfile);
+router.put('/updateProfile/:id', advertiserController.updateAdvertiserProfile);
+router.get('/viewProfile/:id', advertiserController.getAdvertiserProfile);
 
 module.exports = router;
