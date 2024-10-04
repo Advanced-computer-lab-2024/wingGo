@@ -131,25 +131,24 @@ const editProduct = async (req, res) => {
     const { name, price, quantity, description } = req.body;
 
     try {
-        // Check if the product exists
         const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        // Update product details
-        if (name) product.name = name;
-        if (price) product.price = price;
-        if (quantity) product.quantity = quantity;
-        if (description) product.description = description;
+        product.name = name || product.name;
+        product.price = price || product.price;
+        product.quantity = quantity || product.quantity;
+        product.description = description || product.description;
 
-        // Save the updated product to the database
         await product.save();
         res.status(200).json({ message: 'Product updated successfully', product });
     } catch (err) {
+        console.error('Error updating product:', err.message);
         res.status(500).json({ error: err.message });
     }
 };
+
 const filterProduct = async (req, res) => {
     try {
         const price = req.query.price;  // Assuming 'price' is the query parameter for price

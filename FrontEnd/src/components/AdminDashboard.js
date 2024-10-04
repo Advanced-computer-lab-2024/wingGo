@@ -16,10 +16,16 @@ const AdminDashboard = () => {
     }, []);
 
     const handleEditProduct = async (productId, productData) => {
-        await editProduct(productId, productData);
-        setSelectedProduct(null);
-        const updatedProducts = await getProducts();
-        setProducts(updatedProducts);
+        try {
+            console.log('Sending data to backend:', productData);
+            await editProduct(productId, productData);
+            setSelectedProduct(null);
+            const updatedProducts = await getProducts();
+            setProducts(updatedProducts);
+        } catch (error) {
+            console.error('Failed to edit product:', error.response ? error.response.data : error.message);
+            alert('Failed to edit product. Please try again.');
+        }
     };
 
     return (
@@ -53,6 +59,7 @@ const EditProduct = ({ product, onClose, onSave }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const updatedProduct = { name, price, quantity, description };
+        console.log('Updated product data:', updatedProduct);
         onSave(product._id, updatedProduct);
     };
 
@@ -66,11 +73,11 @@ const EditProduct = ({ product, onClose, onSave }) => {
                 </label>
                 <label>
                     Price:
-                    <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
+                    <input type="number" value={price} onChange={(e) => setPrice(parseFloat(e.target.value))} />
                 </label>
                 <label>
                     Quantity:
-                    <input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+                    <input type="number" value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value, 10))} />
                 </label>
                 <label>
                     Description:
@@ -82,5 +89,6 @@ const EditProduct = ({ product, onClose, onSave }) => {
         </div>
     );
 };
+
 
 export default AdminDashboard;
