@@ -6,6 +6,7 @@ const Tourist = require('../models/tourist');
 const Seller = require('../models/Seller');
 const TourismGovernor = require('../models/TourismGovernor');
 const ActivityCategory = require('../models/ActivityCategory');
+const Advertiser = require('../models/advertiser');
 const Product = require('../models/product');
 const Advertiser = require('../models/advertiser');
 
@@ -132,6 +133,7 @@ const editProduct = async (req, res) => {
     const { name, price, quantity, description } = req.body;
 
     try {
+        console.log('Product ID:', productId); // Add this line to log the product ID
         const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
@@ -218,6 +220,26 @@ const deleteAccount = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+const getPendingUsers = async (req, res) => {
+    try {
+        const pendingUsers = await PendingUser.find();
+        res.status(200).json(pendingUsers);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const deletePendingUserById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await PendingUser.findByIdAndDelete(id);
+        res.status(200).json({ message: 'User was declined successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 
 // Controller function to approve a pending user by id
 const approvePendingUserById = async (req, res) => {
@@ -475,6 +497,7 @@ const getAllProducts = async (req, res) => {
 
         // If you need to send a public path for pictures stored locally
         const productData = products.map(product => ({
+            id: product._id,
             name: product.name,
             picture: `../images/${product.picture}`,  // Build image URL dynamically
             // picture: `${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
@@ -531,5 +554,7 @@ module.exports = {
     sortProductsByRatings,
     getAllProducts,
     filterProduct,
-    searchProductsByName
+    searchProductsByName,
+    getPendingUsers,
+    deletePendingUserById,
 };
