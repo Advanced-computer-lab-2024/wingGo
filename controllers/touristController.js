@@ -72,27 +72,6 @@ const tourist_register = async (req, res) => {
     }
 };
 
-
-
-const searchTouristAttractions = async (req, res) => { // to be tested later after crud -Omar Nasr
-    const { query } = req.query; 
-
-    try {
-        const results = await Attraction.find({
-            $or: [
-                { name: { $regex: query, $options: 'i' } },
-                { category: { $regex: query, $options: 'i' } },
-                { tags: { $regex: query, $options: 'i' } }
-            ]
-        });
-
-        res.status(200).json(results);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-        console.log('Error during search:', error.message);
-    }
-};
-
 const getTourist = async(req,res) => {
     try{
         const id = req.params.id; // Use id as the unique identifier
