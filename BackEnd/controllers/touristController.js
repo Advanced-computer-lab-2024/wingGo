@@ -4,6 +4,8 @@ const Attraction = require('../models/attraction');
 const Activity= require('../models/Activity');
 const Itinerary = require ('../models/Itinerary');
 const Product = require('../models/product');
+const LoginCredentials = require('../models/LoginCredentials');
+
 
 
 const tourist_hello = (req, res) => {
@@ -12,17 +14,17 @@ const tourist_hello = (req, res) => {
 };
 
 //sort all upcoming activities/itineraries by price/ratings
-
 const tourist_register = async (req, res) => {
     // Destructure fields from the request body
-    const { username, email, password, mobileNumber, nationality, DOB, jobOrStudent  } = req.body;
+    const { username, email, password, mobileNumber, nationality, DOB, jobOrStudent } = req.body;
     
+    // Check for existing user
     const existingEmail = await Tourist.findOne({ email });
     const existingUsername = await Tourist.findOne({ username });
     const existingMobile = await Tourist.findOne({ mobileNumber });
+
     if (existingEmail) {
         return res.status(400).json({ message: 'Email is already registered.' });
-   
     }
     if (existingUsername) {
         return res.status(400).json({ message: 'Username is already registered.' });
@@ -48,7 +50,7 @@ const tourist_register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10); // 10 salt rounds
 
         // Create the new tourist with the hashed password
-        const user = await Tourist.create({
+        const user = new Tourist({
             username,
             email,
             password: hashedPassword, // Save the hashed password
@@ -58,19 +60,28 @@ const tourist_register = async (req, res) => {
             jobOrStudent 
         });
 
-        const user2 = await LoginCredentials.create({
+        // Save the tourist to the database
+        await user.save();
+
+        // Create login credentials and save it to LoginCredentials
+        const loginCredentials = new LoginCredentials({
             username,
             password: hashedPassword,
-            role: 'tourist'
+            role: 'tourist',
+            userId: user._id,  // Reference to the created tourist
+            roleModel: 'Tourist'  // Set the role model as 'Tourist'
         });
 
-        console.log('Success! Tourist registered.');
+        await loginCredentials.save();
+
+        console.log('Success! Tourist registered and login credentials created.');
         res.status(200).json(user);
     } catch (error) {
         res.status(400).json({ error: error.message });
         console.log('Error during registration:', error.message);
     }
 };
+
 
 const getTourist = async(req,res) => {
     try{
