@@ -15,8 +15,11 @@ const AdminDashboard = () => {
         fetchProducts();
     }, []);
 
-    const handleEditProduct = async (productId, productData) => {
+    const handleEditProduct = async (updatedProduct) => {
+        const { productId, ...productData } = updatedProduct;
         try {
+            console.log('updated product id:', updatedProduct);
+            console.log('Product ID:', productId); // Log the product ID
             console.log('Sending data to backend:', productData);
             await editProduct(productId, productData);
             setSelectedProduct(null);
@@ -33,7 +36,7 @@ const AdminDashboard = () => {
             <h1>Admin Dashboard</h1>
             <ul>
                 {products.map(product => (
-                    <li key={product._id}>
+                    <li key={product.id}>
                         <span>{product.name}</span>
                         <button onClick={() => setSelectedProduct(product)}>Edit</button>
                     </li>
@@ -51,6 +54,7 @@ const AdminDashboard = () => {
 };
 
 const EditProduct = ({ product, onClose, onSave }) => {
+    const [id, setId] = useState(product.id);
     const [name, setName] = useState(product.name);
     const [price, setPrice] = useState(product.price);
     const [quantity, setQuantity] = useState(product.quantity);
@@ -58,9 +62,15 @@ const EditProduct = ({ product, onClose, onSave }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const updatedProduct = { name, price, quantity, description };
+        const updatedProduct = { 
+            productId: product.id, 
+            name, 
+            price, 
+            quantity, 
+            description 
+        };
         console.log('Updated product data:', updatedProduct);
-        onSave(product._id, updatedProduct);
+        onSave(updatedProduct);
     };
 
     return (

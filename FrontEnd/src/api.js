@@ -14,10 +14,19 @@ export const getProducts = async () => {
 
 export const editProduct = async (productId, productData) => {
     try {
-        const response = await axios.put(`${API_URL}/admin/product/${productId}`, productData);
-        return response.data;
+        const response = await fetch(`${API_URL}/admin/product/${productId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(productData),
+        });
+        if (!response.ok) {
+            throw new Error('Failed to edit product');
+        }
+        return await response.json();
     } catch (error) {
-        console.error('Error editing product:', error);
+        console.error('Error updating product:', error);
         throw error;
     }
 };
