@@ -136,7 +136,7 @@ const AdminDashboard = () => {
                 </label>
                 <label>
                     Description:
-                    <textarea name="description" value={newProduct.description} onChange={handleInputChange} required />
+                    <input type="text" name="description" value={newProduct.description} onChange={handleInputChange} required />
                 </label>
                 <label>
                     Seller ID (optional):
@@ -195,7 +195,7 @@ const EditProduct = ({ product, onClose, onSave }) => {
                 </label>
                 <label>
                     Description:
-                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+                    <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} />
                 </label>
                 <button type="submit">Save</button>
                 <button type="button" onClick={onClose}>Cancel</button>
