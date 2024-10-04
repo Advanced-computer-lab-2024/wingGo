@@ -1,6 +1,6 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin } from '../api';
+import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin, filterProductByPrice } from '../api';
 import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -14,6 +14,8 @@ const AdminDashboard = () => {
         description: '',
         sellerId: ''
     });
+    const [filterPrice, setFilterPrice] = useState('');
+    const [filteredProducts, setFilteredProducts] = useState([]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -37,9 +39,6 @@ const AdminDashboard = () => {
     const handleEditProduct = async (updatedProduct) => {
         const { productId, ...productData } = updatedProduct;
         try {
-            console.log('updated product id:', updatedProduct);
-            console.log('Product ID:', productId); // Log the product ID
-            console.log('Sending data to backend:', productData);
             await editProduct(productId, productData);
             setSelectedProduct(null);
             const updatedProducts = await getProducts();
@@ -65,7 +64,6 @@ const AdminDashboard = () => {
         try {
             await deletePendingUser(userId);
             alert('User was declined successfully');
-            // Refresh the list of pending users
             const users = await getPendingUsers();
             setPendingUsers(users);
         } catch (error) {
@@ -85,7 +83,6 @@ const AdminDashboard = () => {
                 description: '',
                 sellerId: ''
             });
-            // Refresh the list of products
             const products = await getProducts();
             setProducts(products);
         } catch (error) {
@@ -99,6 +96,20 @@ const AdminDashboard = () => {
             ...prevState,
             [name]: value
         }));
+    };
+
+    const handleFilterPriceChange = (e) => {
+        setFilterPrice(e.target.value);
+    };
+
+    const handleFilterProducts = async (e) => {
+        e.preventDefault();
+        try {
+            const products = await filterProductByPrice(filterPrice);
+            setFilteredProducts(products);
+        } catch (error) {
+            alert(`Failed to filter products: ${error.message}`);
+        }
     };
 
     return (
@@ -144,6 +155,26 @@ const AdminDashboard = () => {
                 </label>
                 <button type="submit">Add Product</button>
             </form>
+            <h2>Filter Products by Price</h2>
+            <form onSubmit={handleFilterProducts}>
+                <label>
+                    Price:
+                    <input type="number" value={filterPrice} onChange={handleFilterPriceChange} required />
+                </label>
+                <button type="submit">Filter</button>
+            </form>
+            {filteredProducts.length > 0 && (
+                <div>
+                    <h2>Filtered Products</h2>
+                    <ul>
+                        {filteredProducts.map(product => (
+                            <li key={product.id}>
+                                <span>{product.name} - ${product.price}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
             <h2>Pending Users</h2>
             <ul>
                 {pendingUsers.map(user => (
@@ -173,7 +204,6 @@ const EditProduct = ({ product, onClose, onSave }) => {
             quantity, 
             description 
         };
-        console.log('Updated product data:', updatedProduct);
         onSave(updatedProduct);
     };
 
@@ -203,6 +233,5 @@ const EditProduct = ({ product, onClose, onSave }) => {
         </div>
     );
 };
-
 
 export default AdminDashboard;

@@ -79,6 +79,20 @@ export const getProducts = async () => {
     }
 };
 
+export const filterProductByPrice = async (price) => {
+    try {
+        const response = await fetch(`${API_URL}/admin/filterProducts?price=${price}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to filter products');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error filtering products:', error);
+        throw error;
+    }
+};
+
 export const editProduct = async (productId, productData) => {
     try {
         const response = await fetch(`${API_URL}/admin/product/${productId}`, {
