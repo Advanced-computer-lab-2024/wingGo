@@ -9,6 +9,7 @@ const ActivityCategory = require('../models/ActivityCategory');
 const Advertiser = require('../models/advertiser');
 const Product = require('../models/product');
 
+
 //Create activity category
 const createCategory= async(req,res)=>{
     const {name}=req.body;
@@ -327,6 +328,7 @@ const approvePendingUserById = async (req, res) => {
 
         }
         else if (pendingUser.role === 'advertiser') {
+            
             // Hash the password using bcrypt
             const hashedPassword = await bcrypt.hash(pendingUser.password, 10);  // 10 is the salt rounds
 

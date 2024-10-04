@@ -57,7 +57,7 @@ const updateSellerProfile = async (req, res) => {
 
 const getSeller = async(req,res) => {
     try{
-        console.log('in seller');
+       
         const id = req.params.id; // Use id as the unique identifier
         const sellerExist = await Seller.findById(id);
         if (!sellerExist) {
