@@ -3,7 +3,7 @@ const Place = require('../models/Places');
 // Create a new place
 const createPlace = async (req, res) => {
     try {
-        const { types, historicalPeriods, ...placeData } = req.body.tags || {}; // Extract tags separately
+        const { governerId, types, historicalPeriods, ...placeData } = req.body.tags || {}; // Extract tags separately
 
         // Validate types
         const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces/Castles'];
@@ -30,8 +30,10 @@ const createPlace = async (req, res) => {
 
 // Get all places
 const getAllPlaces = async (req, res) => {
+
+    const {governerId} = req.query;
     try {
-        const places = await Place.find();
+        const places = await Place.find({governerId});
         res.json(places);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -40,9 +42,12 @@ const getAllPlaces = async (req, res) => {
 
 // Get place by ID
 const getPlaceById = async (req, res) => {
+
+    const {governerId} = req.query;
+    const {id} = req.params;
     try {
-        console.log('in get place');
-        const place = await Place.findById(req.params.id);
+        
+        const place = await Place.findOne({governerId, _id: id});
         if (!place) {
             return res.status(404).json({ message: 'Place not found' });
         }
@@ -61,6 +66,8 @@ const hello = async (req, res) => {
 
 // Update an existing place
 const updatePlace = async (req, res) => {
+
+    const {governerId} = req.query;
     try {
         const { types, historicalPeriods, ...placeData } = req.body;
 
@@ -71,9 +78,13 @@ const updatePlace = async (req, res) => {
         }
 
         // Find the place by ID and update with the new data
-        const place = await Place.findById(req.params.id);
+        const place = await Place.findOne({governerId, _id: req.params.id});
         if (!place) {
             return res.status(404).json({ message: 'Place not found' });
+        }
+
+        if(req.body.governerId){
+            req.body.governerId.delete;
         }
 
         // Update place data
@@ -97,8 +108,10 @@ const updatePlace = async (req, res) => {
 
 // Delete a place
 const deletePlace = async (req, res) => {
+
+    const {governerId} = req.query;
     try {
-        const place = await Place.findByIdAndDelete(req.params.id);
+        const place = await Place.findOneAndDelete({governerId, _id: req.params.id});
         if (!place) {
             return res.status(404).json({ message: 'Place not found' });
         }
