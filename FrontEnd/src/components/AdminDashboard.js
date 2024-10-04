@@ -1,11 +1,12 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { getProducts, editProduct } from '../api';
+import { getProducts, editProduct, getPendingUsers, approvePendingUser } from '../api';
 import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {
     const [products, setProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [pendingUsers, setPendingUsers] = useState([]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -13,6 +14,17 @@ const AdminDashboard = () => {
             setProducts(products);
         };
         fetchProducts();
+
+        const fetchPendingUsers = async () => {
+            try {
+                const users = await getPendingUsers();
+                setPendingUsers(users);
+            } catch (error) {
+                console.error('Failed to fetch pending users:', error);
+                alert('Failed to fetch pending users. Please try again.');
+            }
+        };
+        fetchPendingUsers();
     }, []);
 
     const handleEditProduct = async (updatedProduct) => {
@@ -31,9 +43,22 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleApproveUser = async (userId) => {
+        try {
+            const response = await approvePendingUser(userId);
+            alert(response.message);
+            // Refresh the list of pending users
+            const users = await getPendingUsers();
+            setPendingUsers(users);
+        } catch (error) {
+            alert(`Failed to approve user: ${error.message}`);
+        }
+    };
+
     return (
         <div className="admin-dashboard">
             <h1>Admin Dashboard</h1>
+            <h2>Products</h2>
             <ul>
                 {products.map(product => (
                     <li key={product.id}>
@@ -49,6 +74,15 @@ const AdminDashboard = () => {
                     onSave={handleEditProduct}
                 />
             )}
+            <h2>Pending Users</h2>
+            <ul>
+                {pendingUsers.map(user => (
+                    <li key={user._id}>
+                        <span>{user.username} ({user.email}) - Role: {user.role}</span>
+                        <button onClick={() => handleApproveUser(user._id)}>Approve</button>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 };

@@ -8,8 +8,6 @@ const router = express.Router();
 
 
 // Route to sort products by ratings
-router.get('/hello', guestController.guest_hello);
-
 router.get('/filterPlacesByTag', guestController.filterPlacesByTag);
 
 

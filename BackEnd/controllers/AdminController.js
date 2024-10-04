@@ -219,6 +219,15 @@ const deleteAccount = async (req, res) => {
     }
 };
 
+const getPendingUsers = async (req, res) => {
+    try {
+        const pendingUsers = await PendingUser.find();
+        res.status(200).json(pendingUsers);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 // Controller function to approve a pending user by id
 const approvePendingUserById = async (req, res) => {
     const { id } = req.params;
@@ -531,5 +540,6 @@ module.exports = {
     sortProductsByRatings,
     getAllProducts,
     filterProduct,
-    searchProductsByName
+    searchProductsByName,
+    getPendingUsers
 };
