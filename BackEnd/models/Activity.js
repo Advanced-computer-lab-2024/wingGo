@@ -48,7 +48,13 @@ const activitySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'advertiser',
     required: true
-  }
+  },
+  ratings: {
+    type: Number, // Assuming ratings are numeric
+    default: 0,   // Default rating of 0 if none is provided
+    min: 0,
+    max: 5       // Assuming a 5-star rating system
+}
 });
 
 const Activity = mongoose.model('Activity', activitySchema);
