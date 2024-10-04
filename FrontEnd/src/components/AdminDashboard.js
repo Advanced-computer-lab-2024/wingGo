@@ -1,6 +1,6 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin, filterProductByPrice, searchProductsByName } from '../api';
+import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin, filterProductByPrice, searchProductsByName, deleteAccountById } from '../api';
 import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -18,6 +18,7 @@ const AdminDashboard = () => {
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [accountId, setAccountId] = useState('');
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -37,6 +38,16 @@ const AdminDashboard = () => {
         };
         fetchPendingUsers();
     }, []);
+
+    const handleDeleteAccount = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await deleteAccountById(accountId);
+            alert(response.message);
+        } catch (error) {
+            alert('ID is non-existent');
+        }
+    };
 
     const handleEditProduct = async (updatedProduct) => {
         const { productId, ...productData } = updatedProduct;
@@ -221,6 +232,18 @@ const AdminDashboard = () => {
                     </li>
                 ))}
             </ul>
+            <h2>Delete Account by ID</h2>
+            <form onSubmit={handleDeleteAccount}>
+                <label htmlFor="accountId">Account ID:</label>
+                <input
+                    type="text"
+                    id="accountId"
+                    value={accountId}
+                    onChange={(e) => setAccountId(e.target.value)}
+                    required
+                />
+                <button type="submit">Delete Account</button>
+            </form>
         </div>
     );
 };
