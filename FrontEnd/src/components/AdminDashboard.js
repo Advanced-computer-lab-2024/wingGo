@@ -100,7 +100,6 @@ const AdminDashboard = () => {
 };
 
 const EditProduct = ({ product, onClose, onSave }) => {
-    const [id, setId] = useState(product.id);
     const [name, setName] = useState(product.name);
     const [price, setPrice] = useState(product.price);
     const [quantity, setQuantity] = useState(product.quantity);
