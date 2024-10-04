@@ -536,7 +536,7 @@ const searchProductsByName = async (req, res) => {
 };
 
 module.exports = {
-    approvePendingUserById,
+    approvePendingUserById, // done in frontEnd
     deleteAccount,
     addTourismGovernor,
     createCategory,
@@ -545,16 +545,16 @@ module.exports = {
     getTags,
     updateTag,
     deleteTag,
-    addProductAsAdmin,
-    editProduct,
+    addProductAsAdmin, // done in frontEnd
+    editProduct, // done in frontEnd
     updateCategory,
     deleteCategory,
     getCategory,
     addAdmin,
     sortProductsByRatings,
     getAllProducts,
-    filterProduct,
-    searchProductsByName,
-    getPendingUsers,
-    deletePendingUserById,
+    filterProduct, // done in frontEnd
+    searchProductsByName, 
+    getPendingUsers, // done in frontEnd
+    deletePendingUserById, // done in frontEnd
 };

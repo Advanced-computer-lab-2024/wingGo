@@ -1,6 +1,6 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin, filterProductByPrice } from '../api';
+import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin, filterProductByPrice, searchProductsByName } from '../api';
 import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -16,6 +16,8 @@ const AdminDashboard = () => {
     });
     const [filterPrice, setFilterPrice] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -112,6 +114,20 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleSearchQueryChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
+    const handleSearchProducts = async (e) => {
+        e.preventDefault();
+        try {
+            const products = await searchProductsByName(searchQuery);
+            setSearchResults(products);
+        } catch (error) {
+            alert(`Failed to search products: ${error.message}`);
+        }
+    };
+
     return (
         <div className="admin-dashboard">
             <h1>Admin Dashboard</h1>
@@ -155,6 +171,26 @@ const AdminDashboard = () => {
                 </label>
                 <button type="submit">Add Product</button>
             </form>
+            <h2>Search Products by Name</h2>
+            <form onSubmit={handleSearchProducts}>
+                <label>
+                    Name:
+                    <input type="text" value={searchQuery} onChange={handleSearchQueryChange} required />
+                </label>
+                <button type="submit">Search</button>
+            </form>
+            {searchResults.length > 0 && (
+                <div>
+                    <h2>Search Results</h2>
+                    <ul>
+                        {searchResults.map(product => (
+                            <li key={product.id}>
+                                <span>{product.name} - ${product.price}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
             <h2>Filter Products by Price</h2>
             <form onSubmit={handleFilterProducts}>
                 <label>
