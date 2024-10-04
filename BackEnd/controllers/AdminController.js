@@ -8,7 +8,7 @@ const TourismGovernor = require('../models/TourismGovernor');
 const ActivityCategory = require('../models/ActivityCategory');
 const Advertiser = require('../models/advertiser');
 const Product = require('../models/product');
-const Advertiser = require('../models/advertiser');
+
 
 //Create activity category
 const createCategory= async(req,res)=>{

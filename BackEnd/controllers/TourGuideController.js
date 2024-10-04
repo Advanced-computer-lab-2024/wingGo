@@ -82,9 +82,15 @@ const updateTourGuideProfile = async (req, res) => {
 
 // Create an itinerary
 const createItinerary = async (req, res) => {
-    const { tourGuideId, title, activities, locations, timeline, duration, language, price, availableDates, accessibility, pickupLocation, dropoffLocation,bookings  } = req.body;
+    const { tourGuideId, title, activities, locations, timeline, duration, language, price, availableDates, accessibility, pickupLocation, dropoffLocation, bookings } = req.body;
 
     try {
+        // Validate if tourGuideId exists in the TourGuide collection
+        const tourGuideExists = await TourGuide.findById(tourGuideId);
+        if (!tourGuideExists) {
+            return res.status(400).json({ error: 'Invalid tourGuideId. Tour guide not found.' });
+        }
+
         // Fetch coordinates for each location
         const locationDetails = await Promise.all(
             locations.map(async (location) => {
@@ -97,7 +103,7 @@ const createItinerary = async (req, res) => {
             tourGuideId,
             title,
             activities,
-            locations: locationDetails,  // Save locations with lat/lng
+            locations: locationDetails,
             timeline,
             duration,
             language,
@@ -106,7 +112,7 @@ const createItinerary = async (req, res) => {
             accessibility,
             pickupLocation,
             dropoffLocation,
-            bookings  
+            bookings
         });
 
         await newItinerary.save();
@@ -115,7 +121,6 @@ const createItinerary = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
-
 // Read itineraries for a specific tour guide
 const getItineraries = async (req, res) => {
     const { id } = req.params;
@@ -130,7 +135,7 @@ const getItineraries = async (req, res) => {
     }
 };
 
-//get all 
+//get all without tour guide
 const getAllItineraries = async (req, res) => {
     try {
         const itineraries = await Itinerary.find();  // Fetch all itineraries
@@ -141,79 +146,88 @@ const getAllItineraries = async (req, res) => {
 };
 
 const getItinerariesByTourGuide = async (req, res) => {
-    const { tourGuideId } = req.params;
+    const { id } = req.params;  // Itinerary ID from URL
+    const { tourGuideId } = req.query;  // Tour Guide ID from query
 
     try {
-        // Find all itineraries that belong to the given tour guide
-        const itineraries = await Itinerary.find({ tourGuideId });
-        
-        // If no itineraries are found, return an empty array
-        if (!itineraries || itineraries.length === 0) {
-            return res.status(200).json({ message: 'No itineraries found for this tour guide.' });
+        // Find the itinerary and make sure it belongs to the tour guide
+        const itinerary = await Itinerary.findOne({ _id: id, tourGuideId });
+
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found or you do not have permission to view this itinerary.' });
         }
 
-        res.status(200).json(itineraries);
+        res.status(200).json({ itinerary });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 };
 
 // Update itinerary
 // Update itinerary
 const updateItinerary = async (req, res) => {
-    const { id } = req.params;
-    const updates = req.body;
+    const { id } = req.params;  // Itinerary ID from URL
+    const { tourGuideId } = req.query;  // Tour Guide ID from query
 
     try {
-        // Geocode the locations if they are provided in the update request
-        if (updates.locations && Array.isArray(updates.locations)) {
+        // Find the itinerary by its ID and check if it belongs to the tour guide
+        const itinerary = await Itinerary.findOne({ _id: id, tourGuideId });
+
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found or you do not have permission to update this itinerary.' });
+        }
+
+        // Optional: Prevent updating the tour guide ID
+        if (req.body.tourGuideId) {
+            delete req.body.tourGuideId;
+        }
+
+        // Optional: Geocode the locations if provided in the update request
+        if (req.body.locations) {
             const locationDetails = await Promise.all(
-                updates.locations.map(async (location) => {
-                    const { lat, lng } = await getCoordinates(location); // Geocode address to lat/lng
-                    return { address: location, lat, lng };
+                req.body.locations.map(async (location) => {
+                    const { lat, lng } = await getCoordinates(location.address);
+                    return { address: location.address, lat, lng };
                 })
             );
-            updates.locations = locationDetails; // Replace locations with lat/lng
+            req.body.locations = locationDetails;
         }
 
         // Update the itinerary
-        const updatedItinerary = await Itinerary.findByIdAndUpdate(id, updates, { new: true });
-        
-        if (!updatedItinerary) {
-            return res.status(404).json({ message: 'Itinerary not found' });
-        }
+        Object.assign(itinerary, req.body);
+        await itinerary.save();
 
-        res.status(200).json(updatedItinerary);
+        res.status(200).json({ message: 'Itinerary updated successfully', itinerary });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 };
 // Delete itinerary if no bookings exist
 const deleteItinerary = async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.params;  // Itinerary ID from URL
+    const { tourGuideId } = req.query;  // Tour Guide ID from query
 
     try {
-        // Find the itinerary by ID
-        const itinerary = await Itinerary.findById(id);
+        // Find the itinerary by ID and tourGuideId to ensure the guide is the owner
+        const itinerary = await Itinerary.findOne({ _id: id, tourGuideId });
 
-        // If the itinerary is not found, return 404
+        // If the itinerary is not found or doesn't belong to the tour guide, return 404
         if (!itinerary) {
-            return res.status(404).json({ message: 'Itinerary not found' });
+            return res.status(404).json({ message: 'Itinerary not found or you do not have permission to delete this itinerary.' });
         }
 
         // Check if the itinerary has bookings (assuming bookings is a number)
         if (itinerary.bookings && itinerary.bookings > 0) {
-            return res.status(400).json({ message: 'Cannot delete an itinerary with bookings' });
+            return res.status(400).json({ message: 'Cannot delete an itinerary with bookings.' });
         }
 
-        // Delete the itinerary
+        // Delete the itinerary if it has no bookings
         await Itinerary.findByIdAndDelete(id);
         res.status(200).json({ message: 'Itinerary deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
-
 module.exports = {
     getTourGuide,
     updateTourGuideProfile,
