@@ -19,7 +19,13 @@ const itinerarySchema = new Schema({
     accessibility: { type: Boolean, default: false },
     pickupLocation: { type: String, required: true },
     dropoffLocation: { type: String, required: true },
-    bookings: { type: Number, default: 0 }
+    bookings: { type: Number, default: 0 },
+    ratings: {
+        type: Number, // Assuming ratings are numeric
+        default: 0,   // Default rating of 0 if none is provided
+        min: 0,
+        max: 5       // Assuming a 5-star rating system
+    }
 }, { timestamps: true });
 
 const Itinerary = mongoose.model('Itinerary', itinerarySchema);
