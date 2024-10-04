@@ -252,7 +252,6 @@ const searchProductsByName = async (req, res) => {
 module.exports = {
     tourist_hello,
     tourist_register,
-    searchTouristAttractions,
     getTourist,
     updateTouristProfile,
     sortProductsByRatings,
