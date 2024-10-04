@@ -554,7 +554,7 @@ module.exports = {
     sortProductsByRatings,
     getAllProducts,
     filterProduct, // done in frontEnd
-    searchProductsByName, 
+    searchProductsByName, // done in frontEnd
     getPendingUsers, // done in frontEnd
     deletePendingUserById, // done in frontEnd
 };
