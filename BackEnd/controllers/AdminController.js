@@ -537,7 +537,7 @@ const searchProductsByName = async (req, res) => {
 
 module.exports = {
     approvePendingUserById, // done in frontEnd
-    deleteAccount,
+    deleteAccount, // done in frontEnd, still not tested
     addTourismGovernor,
     createCategory,
     getCategories,
