@@ -1,7 +1,7 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { getProducts, editProduct } from '../api'; // The problem of why the react page gives an error is here.
-import '../styling/AdminDashboard.css'; 
+import { getProducts, editProduct } from '../api';
+import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {
     const [products, setProducts] = useState([]);
