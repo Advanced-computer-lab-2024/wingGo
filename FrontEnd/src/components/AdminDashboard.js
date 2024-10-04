@@ -1,6 +1,6 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { getProducts, editProduct, getPendingUsers, approvePendingUser } from '../api';
+import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser } from '../api';
 import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -47,11 +47,22 @@ const AdminDashboard = () => {
         try {
             const response = await approvePendingUser(userId);
             alert(response.message);
-            // Refresh the list of pending users
             const users = await getPendingUsers();
             setPendingUsers(users);
         } catch (error) {
             alert(`Failed to approve user: ${error.message}`);
+        }
+    };
+
+    const handleDeclineUser = async (userId) => {
+        try {
+            await deletePendingUser(userId);
+            alert('User was declined successfully');
+            // Refresh the list of pending users
+            const users = await getPendingUsers();
+            setPendingUsers(users);
+        } catch (error) {
+            alert(`Failed to decline user: ${error.message}`);
         }
     };
 
@@ -80,6 +91,7 @@ const AdminDashboard = () => {
                     <li key={user._id}>
                         <span>{user.username} ({user.email}) - Role: {user.role}</span>
                         <button onClick={() => handleApproveUser(user._id)}>Approve</button>
+                        <button onClick={() => handleDeclineUser(user._id)}>Decline</button>
                     </li>
                 ))}
             </ul>

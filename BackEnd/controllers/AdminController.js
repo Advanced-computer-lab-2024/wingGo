@@ -228,6 +228,17 @@ const getPendingUsers = async (req, res) => {
     }
 };
 
+const deletePendingUserById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await PendingUser.findByIdAndDelete(id);
+        res.status(200).json({ message: 'User was declined successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+
 // Controller function to approve a pending user by id
 const approvePendingUserById = async (req, res) => {
     const { id } = req.params;
@@ -541,5 +552,6 @@ module.exports = {
     getAllProducts,
     filterProduct,
     searchProductsByName,
-    getPendingUsers
+    getPendingUsers,
+    deletePendingUserById,
 };

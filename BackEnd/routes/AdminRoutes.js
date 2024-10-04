@@ -7,6 +7,7 @@ router.get('/getallproducts', adminController.getAllProducts);
 // Route to approve a pending user by id
 router.put('/approve/:id', adminController.approvePendingUserById);
 router.get('/pending-users', adminController.getPendingUsers);
+router.delete('/pending-users/:id', adminController.deletePendingUserById);
 
 // Route to delete an account by id
 router.delete('/deleteAccount/:id', adminController.deleteAccount);
