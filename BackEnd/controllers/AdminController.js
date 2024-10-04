@@ -6,6 +6,7 @@ const Tourist = require('../models/tourist');
 const Seller = require('../models/Seller');
 const TourismGovernor = require('../models/TourismGovernor');
 const ActivityCategory = require('../models/ActivityCategory');
+const Advertiser = require('../models/advertiser');
 const Product = require('../models/product');
 
 //Create activity category
