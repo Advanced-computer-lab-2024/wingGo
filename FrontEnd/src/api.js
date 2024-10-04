@@ -125,3 +125,22 @@ export const editProduct = async (productId, productData) => {
         throw error;
     }
 };
+
+export const deleteAccountById = async (accountId) => {
+    try {
+        const response = await fetch(`${API_URL}/admin/deleteAccount/${accountId}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('ID is non-existent');
+            } else {
+                throw new Error('An error occurred while deleting the account');
+            }
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        throw error;
+    }
+};
