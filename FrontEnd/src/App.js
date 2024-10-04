@@ -1,10 +1,9 @@
-// src/App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './components/Home';
 import About from './components/About';
 import AdminDashboard from './components/AdminDashboard';
-import PlaneAnimation from './components/Preloader';
+import Preloader from './components/Preloader';
 import './App.css';
 
 const App = () => {
@@ -13,7 +12,7 @@ const App = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false);
-        }, 3000); // Duration of the plane animation
+        }, 3000);
 
         return () => clearTimeout(timer);
     }, []);
@@ -22,7 +21,7 @@ const App = () => {
         <Router>
             <div className="App">
                 {loading ? (
-                    <PlaneAnimation />
+                    <Preloader />
                 ) : (
                     <>
                         <nav>
