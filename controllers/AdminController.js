@@ -385,8 +385,8 @@ const getTags = async (req, res) => {
 };
 
 const updateTag = async (req, res) => {
-    const { id, tagId } = req.params;
-    const { newTag } = req.body;
+    const { id } = req.params;
+    const { oldTag, newTag } = req.body;
 
     if (!allowedTags.includes(newTag)) {
         return res.status(400).json({ error: 'Invalid tag' });
@@ -398,7 +398,7 @@ const updateTag = async (req, res) => {
             return res.status(404).json({ error: 'Attraction not found' });
         }
 
-        const tagIndex = attraction.tags.indexOf(tagId);
+        const tagIndex = attraction.tags.indexOf(oldTag);
         if (tagIndex === -1) {
             return res.status(404).json({ error: 'Tag not found' });
         }
@@ -412,7 +412,8 @@ const updateTag = async (req, res) => {
 };
 
 const deleteTag = async (req, res) => {
-    const { id, tagId } = req.params;
+    const { id } = req.params;
+    const { tag } = req.body;
 
     try {
         const attraction = await Attraction.findById(id);
@@ -420,7 +421,7 @@ const deleteTag = async (req, res) => {
             return res.status(404).json({ error: 'Attraction not found' });
         }
 
-        attraction.tags = attraction.tags.filter(tag => tag !== tagId);
+        attraction.tags = attraction.tags.filter(existingTag => existingTag !== tag);
         await attraction.save();
         res.status(200).json(attraction);
     } catch (error) {
