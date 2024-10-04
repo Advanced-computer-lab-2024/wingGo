@@ -48,6 +48,26 @@ export const approvePendingUser = async (userId) => {
     }
 };
 
+export const addProductAsAdmin = async (productData) => {
+    try {
+        const response = await fetch(`${API_URL}/admin/add-product`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(productData),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'SellerID is invalid');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error adding product:', error);
+        throw error;
+    }
+};
+
 
 export const getProducts = async () => {
     try {

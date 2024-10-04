@@ -18,6 +18,8 @@ router.post('/addGovernor', adminController.addTourismGovernor);
 //create an activity category
 router.post('/categories', adminController.createCategory);
 
+router.post('/add-product', adminController.addProductAsAdmin);
+
 // Add a new tag
 router.put('/attractions/:id/addTags', adminController.addTag);
 

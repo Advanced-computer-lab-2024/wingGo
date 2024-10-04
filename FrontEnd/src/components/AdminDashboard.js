@@ -1,12 +1,19 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser } from '../api';
+import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin } from '../api';
 import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {
     const [products, setProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [pendingUsers, setPendingUsers] = useState([]);
+    const [newProduct, setNewProduct] = useState({
+        name: '',
+        price: '',
+        quantity: '',
+        description: '',
+        sellerId: ''
+    });
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -66,6 +73,34 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleAddProduct = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await addProductAsAdmin(newProduct);
+            alert(response.message);
+            setNewProduct({
+                name: '',
+                price: '',
+                quantity: '',
+                description: '',
+                sellerId: ''
+            });
+            // Refresh the list of products
+            const products = await getProducts();
+            setProducts(products);
+        } catch (error) {
+            alert(`Failed to add product: ${error.message}`);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewProduct(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
     return (
         <div className="admin-dashboard">
             <h1>Admin Dashboard</h1>
@@ -85,6 +120,30 @@ const AdminDashboard = () => {
                     onSave={handleEditProduct}
                 />
             )}
+            <h2>Add New Product</h2>
+            <form onSubmit={handleAddProduct}>
+                <label>
+                    Name:
+                    <input type="text" name="name" value={newProduct.name} onChange={handleInputChange} required />
+                </label>
+                <label>
+                    Price:
+                    <input type="number" name="price" value={newProduct.price} onChange={handleInputChange} required />
+                </label>
+                <label>
+                    Quantity:
+                    <input type="number" name="quantity" value={newProduct.quantity} onChange={handleInputChange} required />
+                </label>
+                <label>
+                    Description:
+                    <textarea name="description" value={newProduct.description} onChange={handleInputChange} required />
+                </label>
+                <label>
+                    Seller ID (optional):
+                    <input type="text" name="sellerId" value={newProduct.sellerId} onChange={handleInputChange} />
+                </label>
+                <button type="submit">Add Product</button>
+            </form>
             <h2>Pending Users</h2>
             <ul>
                 {pendingUsers.map(user => (
