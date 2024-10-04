@@ -248,47 +248,15 @@ const searchProductsByName = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-//sort all upcoming activities/itinieraries based on price/rating
-const sortUpcomingActivityOrItenraries= async(req,res)=>{
-    const {sort, type}=req.query;
-    let sortCriteria;
-    if(sort=='price'){
-        sortCriteria={price:1};
-    }
-    else if (sort=='ratings'){
-        sortCriteria={ratings:1};
-    }
-    else {
-        return res.stats(400).json({message:'Invalid sort criteria'});
-    }
-    try{
-        if(type=='activity'){
-            const Activities=await Activity.find({date:{$gte:new Date()}}).sort(sort);
-            return res.status(200).json(Activities);
-        }
-        else if(type=='itinerary'){
-            const itineraries= await Itinerary.find({date:{$gte:new Date()}}).sort(sort);
-            return res.status(200).json(itineraries);
-        } else{
-            return res.status(500).json({error:error.message});
-        }
-} catch(error){
-    res.status(500).json({error:error.message});
-}
-}
-
-
 
 module.exports = {
     tourist_hello,
     tourist_register,
-    //searchTouristAttractions,
     getTourist,
     updateTouristProfile,
     sortProductsByRatings,
     getAllProducts,
     filterProduct,
     searchProductsByName,
-    filterPlacesByTag,
-    sortUpcomingActivityOrItenraries
+    filterPlacesByTag
 };

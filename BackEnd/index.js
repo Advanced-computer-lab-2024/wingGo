@@ -12,6 +12,8 @@ const advertiserRoutes = require('./routes/advertiserRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
 const productRoutes = require('./routes/productRoutes');
 const guestRoutes = require('./routes/guestRoutes');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 let isTourist = 2; //yb2a set lama el shakhs ykhtar men el form eno tourist fa  hankhdo men el frontend 
 let userType = "tourist";
@@ -21,6 +23,8 @@ const { fileURLToPath } = require('url');
 
 const app = express();
 const port = 8000;
+app.use(cors());
+app.use(bodyParser.json());
 // const port = 8000;
 
 //Connect to mongoDB (will be used later on to connect with our DB)

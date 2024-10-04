@@ -4,6 +4,12 @@ const Schema = mongoose.Schema;
 const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces', 'Castles'];
 
 const placeSchema = new Schema({
+    governerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Governer',
+        required: true
+    }
+    ,
     name: {
         type: String,
         required: true
