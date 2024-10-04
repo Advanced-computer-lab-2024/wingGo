@@ -1,4 +1,9 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect } from 'react';
+=======
+cd:// src/App.js
+import React from 'react';
+>>>>>>> Stashed changes
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './components/Home';
 import About from './components/About';

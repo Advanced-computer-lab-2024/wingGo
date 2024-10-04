@@ -260,6 +260,70 @@ const searchProductsByName = async (req, res) => {
     }
 };
 
+
+const viewTouristActivities = async (req, res) => {
+    
+    try{
+    const activities = await Activity.find({});
+  
+    for (let index = 0; index < activities.length; index++) {
+        const element = activities[index];
+        
+    }
+    res.status(200).json(activities);
+
+    } catch(error){
+    res.status(400).json({ error: error.message }); 
+    }
+  };
+
+const viewTouristItineraries = async (req, res) => {
+    
+    try{
+    const itineraries = await Itinerary.find({});
+  
+    for (let index = 0; index < itineraries.length; index++) {
+        const element = itineraries[index];
+        
+    }
+    res.status(200).json(itineraries);
+
+    } catch(error) {
+        res.status(400).json({ error: error.message }); 
+    }
+  };
+
+
+const filterTouristActivities = async (req, res) => {
+    const { budget:price, date, category, ratings } = req.query; 
+    let filter = { date: { $gte: new Date() } }; // Default filter: only upcoming activities (date >= today)
+
+    
+    if (budget) {
+        filter.budget = { $lte: budget }; 
+    }
+
+    if (date) {
+        filter.date = { $gte: new Date(date) }; 
+    }
+
+    if (category) {
+        filter.category = category; 
+    }
+
+    if (ratings) {
+        filter.ratings = { $gte: ratings }; 
+    }
+
+    try {
+        const activities = await Activity.find(filter); 
+        res.status(200).json(activities); 
+    } catch (error) {
+        res.status(400).json({ error: error.message }); 
+    }
+};
+
+
 module.exports = {
     tourist_hello,
     tourist_register,
@@ -269,5 +333,8 @@ module.exports = {
     getAllProducts,
     filterProduct,
     searchProductsByName,
-    filterPlacesByTag
+    filterPlacesByTag,
+    viewTouristActivities,
+    viewTouristItineraries,
+    filterTouristActivities
 };
