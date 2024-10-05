@@ -231,5 +231,10 @@ const deleteItinerary = async (req, res) => {
 module.exports = {
     getTourGuide,
     updateTourGuideProfile,
-    createItinerary, getItineraries,getAllItineraries, updateItinerary, deleteItinerary ,getItinerariesByTourGuide
+    createItinerary,
+    getItineraries,
+    getAllItineraries,
+    updateItinerary,
+    deleteItinerary,
+    getItinerariesByTourGuide
 };

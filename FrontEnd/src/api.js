@@ -15,7 +15,7 @@ export const getPendingUsers = async () => {
     }
 };
 
-// src/api.js
+
 export const deletePendingUser = async (userId) => {
     try {
         const response = await fetch(`${API_URL}/admin/pending-users/${userId}`, {

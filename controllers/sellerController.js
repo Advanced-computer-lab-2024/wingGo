@@ -193,5 +193,4 @@ const filterProduct = async (req, res) => {
     sortProductsByRatings,
     getAllProducts,
     filterProduct
-    
 };

@@ -147,6 +147,13 @@ const AdminDashboard = () => {
                 {products.map(product => (
                     <li key={product.id}>
                         <span>{product.name}</span>
+                        <img src={product.picture} alt={product.name} />
+                        <span>Price: ${product.price}</span>
+                        <span>Description: {product.description}</span>
+                        <span>Quantity: {product.quantity}</span>
+                        <span>Seller: {product.seller}</span>
+                        <span>Rating: {product.rating}</span>
+                        <span>Reviews: {product.reviews.join(', ')}</span>
                         <button onClick={() => setSelectedProduct(product)}>Edit</button>
                     </li>
                 ))}
@@ -196,7 +203,14 @@ const AdminDashboard = () => {
                     <ul>
                         {searchResults.map(product => (
                             <li key={product.id}>
-                                <span>{product.name} - ${product.price}</span>
+                                <span>{product.name}</span>
+                                <img src={product.picture} alt={product.name} />
+                                <span>Price: ${product.price}</span>
+                                <span>Description: {product.description}</span>
+                                <span>Quantity: {product.quantity}</span>
+                                <span>Seller: {product.seller}</span>
+                                <span>Rating: {product.rating}</span>
+                                <span>Reviews: {product.reviews.join(', ')}</span>
                             </li>
                         ))}
                     </ul>
@@ -216,7 +230,14 @@ const AdminDashboard = () => {
                     <ul>
                         {filteredProducts.map(product => (
                             <li key={product.id}>
-                                <span>{product.name} - ${product.price}</span>
+                                <span>{product.name}</span>
+                                <img src={product.picture} alt={product.name} />
+                                <span>Price: ${product.price}</span>
+                                <span>Description: {product.description}</span>
+                                <span>Quantity: {product.quantity}</span>
+                                <span>Seller: {product.seller}</span>
+                                <span>Rating: {product.rating}</span>
+                                <span>Reviews: {product.reviews.join(', ')}</span>
                             </li>
                         ))}
                     </ul>
