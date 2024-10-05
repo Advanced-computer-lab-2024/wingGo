@@ -14,5 +14,7 @@ router.get('/sortProducts', touristController.sortProductsByRatings);
 router.get('/filterProducts', touristController.filterProduct);
 router.get('/searchProductName', touristController.searchProductsByName);
 router.get('/filterPlacesByTag', touristController.filterPlacesByTag);
-router.get('/sort', touristController.sortUpcomingActivityOrItineraries);
+router.get('viewActivities',touristController.viewTouristActivities);
+router.get('viewItineraries',touristController.viewTouristItineraries);
+router.get('/filterActivities',touristController.filterTouristActivities);router.get('/sort', touristController.sortUpcomingActivityOrItineraries);
 module.exports = router;

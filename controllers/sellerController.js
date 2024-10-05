@@ -57,7 +57,7 @@ const updateSellerProfile = async (req, res) => {
 
 const getSeller = async(req,res) => {
     try{
-       
+        console.log('in seller');
         const id = req.params.id; // Use id as the unique identifier
         const sellerExist = await Seller.findById(id);
         if (!sellerExist) {
@@ -117,8 +117,7 @@ const getAllProducts = async (req, res) => {
         // If you need to send a public path for pictures stored locally
         const productData = products.map(product => ({
             name: product.name,
-            picture: `../images/${product.picture}`,  // Build image URL dynamically
-            // picture: `${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
+            picture:`${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
             price: product.price,
             description: product.description,
             quantity: product.quantity,
@@ -182,25 +181,6 @@ const filterProduct = async (req, res) => {
     }
 };
 
-const searchProductsByName = async (req, res) => {
-    try {
-        const query = req.query.name;  
-        if (!query) {
-            return res.status(400).json({ message: "Please provide a product name to search." });
-        }
-
-        // Perform a case-insensitive search for products with names that match the search query
-        const products = await Product.find({ name: { $regex: query, $options: 'i' } });
-
-        if (products.length === 0) {
-            return res.status(404).json({ message: "No products found matching your search." });
-        }
-
-        res.status(200).json(products);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
 
 
  module.exports = {
@@ -212,7 +192,6 @@ const searchProductsByName = async (req, res) => {
     editProduct,
     sortProductsByRatings,
     getAllProducts,
-    filterProduct,
-    searchProductsByName
+    filterProduct
     
 };

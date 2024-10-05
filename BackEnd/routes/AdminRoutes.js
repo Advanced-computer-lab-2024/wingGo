@@ -6,13 +6,19 @@ router.get('/getallproducts', adminController.getAllProducts);
 
 // Route to approve a pending user by id
 router.put('/approve/:id', adminController.approvePendingUserById);
+router.get('/pending-users', adminController.getPendingUsers);
+router.delete('/pending-users/:id', adminController.deletePendingUserById);
 
 // Route to delete an account by id
 router.delete('/deleteAccount/:id', adminController.deleteAccount);
+
 router.put('/product/:productId', adminController.editProduct);
+
 router.post('/addGovernor', adminController.addTourismGovernor);
 //create an activity category
 router.post('/categories', adminController.createCategory);
+
+router.post('/add-product', adminController.addProductAsAdmin);
 
 // Add a new tag
 router.put('/attractions/:id/addTags', adminController.addTag);

@@ -4,6 +4,8 @@ const Attraction = require('../models/attraction');
 const Activity= require('../models/Activity');
 const Itinerary = require ('../models/Itinerary');
 const Product = require('../models/product');
+const LoginCredentials = require('../models/LoginCredentials');
+
 
 
 const tourist_hello = (req, res) => {
@@ -12,17 +14,17 @@ const tourist_hello = (req, res) => {
 };
 
 //sort all upcoming activities/itineraries by price/ratings
-
 const tourist_register = async (req, res) => {
     // Destructure fields from the request body
-    const { username, email, password, mobileNumber, nationality, DOB, jobOrStudent  } = req.body;
+    const { username, email, password, mobileNumber, nationality, DOB, jobOrStudent } = req.body;
     
+    // Check for existing user
     const existingEmail = await Tourist.findOne({ email });
     const existingUsername = await Tourist.findOne({ username });
     const existingMobile = await Tourist.findOne({ mobileNumber });
+
     if (existingEmail) {
         return res.status(400).json({ message: 'Email is already registered.' });
-   
     }
     if (existingUsername) {
         return res.status(400).json({ message: 'Username is already registered.' });
@@ -48,7 +50,7 @@ const tourist_register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10); // 10 salt rounds
 
         // Create the new tourist with the hashed password
-        const user = await Tourist.create({
+        const user = new Tourist({
             username,
             email,
             password: hashedPassword, // Save the hashed password
@@ -58,19 +60,28 @@ const tourist_register = async (req, res) => {
             jobOrStudent 
         });
 
-        const user2 = await LoginCredentials.create({
+        // Save the tourist to the database
+        await user.save();
+
+        // Create login credentials and save it to LoginCredentials
+        const loginCredentials = new LoginCredentials({
             username,
             password: hashedPassword,
-            role: 'tourist'
+            role: 'tourist',
+            userId: user._id,  // Reference to the created tourist
+            roleModel: 'Tourist'  // Set the role model as 'Tourist'
         });
 
-        console.log('Success! Tourist registered.');
+        await loginCredentials.save();
+
+        console.log('Success! Tourist registered and login credentials created.');
         res.status(200).json(user);
     } catch (error) {
         res.status(400).json({ error: error.message });
         console.log('Error during registration:', error.message);
     }
 };
+
 
 const getTourist = async(req,res) => {
     try{
@@ -248,6 +259,70 @@ const searchProductsByName = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+
+const viewTouristActivities = async (req, res) => {
+    
+    try{
+    const activities = await Activity.find({});
+  
+    for (let index = 0; index < activities.length; index++) {
+        const element = activities[index];
+        
+    }
+    res.status(200).json(activities);
+
+    } catch(error){
+    res.status(400).json({ error: error.message }); 
+    }
+  };
+
+const viewTouristItineraries = async (req, res) => {
+    
+    try{
+    const itineraries = await Itinerary.find({});
+  
+    for (let index = 0; index < itineraries.length; index++) {
+        const element = itineraries[index];
+        
+    }
+    res.status(200).json(itineraries);
+
+    } catch(error) {
+        res.status(400).json({ error: error.message }); 
+    }
+  };
+
+
+const filterTouristActivities = async (req, res) => {
+    const { budget:price, date, category, ratings } = req.query; 
+    let filter = { date: { $gte: new Date() } }; // Default filter: only upcoming activities (date >= today)
+
+    
+    if (budget) {
+        filter.budget = { $lte: budget }; 
+    }
+
+    if (date) {
+        filter.date = { $gte: new Date(date) }; 
+    }
+
+    if (category) {
+        filter.category = category; 
+    }
+
+    if (ratings) {
+        filter.ratings = { $gte: ratings }; 
+    }
+
+    try {
+        const activities = await Activity.find(filter); 
+        res.status(200).json(activities); 
+    } catch (error) {
+        res.status(400).json({ error: error.message }); 
+    }
+};
+
 //sort all upcoming activities/itinieraries based on price/rating
 const sortUpcomingActivityOrItineraries = async (req, res) => {
     const { sort, type } = req.query;
@@ -287,5 +362,8 @@ module.exports = {
     filterProduct,
     searchProductsByName,
     filterPlacesByTag,
+    viewTouristActivities,
+    viewTouristItineraries,
+    filterTouristActivities,
     sortUpcomingActivityOrItineraries
 };
