@@ -11,6 +11,6 @@ const router = express.Router();
 router.get('/hello', guestController.guest_hello);
 
 router.get('/filterPlacesByTag', guestController.filterPlacesByTag);
-
+router.get('/sort',guestController.sortUpcomingActivityOrItenraries);
 
 module.exports = router;

@@ -248,6 +248,34 @@ const searchProductsByName = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+//sort all upcoming activities/itinieraries based on price/rating
+const sortUpcomingActivityOrItineraries = async (req, res) => {
+    const { sort, type } = req.query;
+    let sortCriteria;
+
+    if (sort === 'price') {
+        sortCriteria = { price: 1 }; // Ascending order by price
+    } else if (sort === 'ratings') {
+        sortCriteria = { ratings: -1 }; // Descending order by ratings
+    } else {
+        return res.status(400).json({ message: 'Invalid sort criteria. Use "price" or "ratings".' });
+    }
+
+    try {
+        if (type === 'activity') {
+            const activities = await Activity.find({ date: { $gte: new Date() } }).sort(sortCriteria);
+            return res.status(200).json(activities);
+        } else if (type === 'itinerary') {
+            const itineraries = await Itinerary.find({ date: { $gte: new Date() } }).sort(sortCriteria);
+            return res.status(200).json(itineraries);
+        } else {
+            return res.status(400).json({ message: 'Invalid type. Use "activity" or "itinerary".' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 module.exports = {
     tourist_hello,
@@ -258,5 +286,6 @@ module.exports = {
     getAllProducts,
     filterProduct,
     searchProductsByName,
-    filterPlacesByTag
+    filterPlacesByTag,
+    sortUpcomingActivityOrItineraries
 };
