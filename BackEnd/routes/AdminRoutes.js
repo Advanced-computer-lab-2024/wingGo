@@ -3,7 +3,7 @@ const router = express.Router();
 const adminController = require('../controllers/AdminController');
 
 router.get('/getallproducts', adminController.getAllProducts);
-
+router.get('/getAttractions', adminController.getAttractions);
 // Route to approve a pending user by id
 router.put('/approve/:id', adminController.approvePendingUserById);
 router.get('/pending-users', adminController.getPendingUsers);

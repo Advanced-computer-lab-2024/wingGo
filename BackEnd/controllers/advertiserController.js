@@ -11,7 +11,22 @@ const advertiser_hello = (req, res) => {
 };
 
 const createAdvertiserProfile = async (req, res) => {
+   
+    const id = req.params.id; // Use id as the unique identifier
+
+      
+     const advertiser = await Advertiser.findById(id);
+     
+    if (advertiser.isCreatedProfile !== 0) {
+        return res.status(400).json({ message: 'Profile already created for this advertiser.' });
+    }
+    else{
+     advertiser.isCreatedProfile = 1;
+     await advertiser.save();
      return updateAdvertiserProfile(req, res);
+    
+    //  return res.status(201).json({ message: 'Profile created successfully.' });
+    }
 };
 
 // Update advertiser profile
@@ -214,9 +229,9 @@ const deleteActivity = async (req, res) => {
 
 module.exports = {
     advertiser_hello,
-    createAdvertiserProfile,
-    updateAdvertiserProfile,
-    getAdvertiserProfile,
+    createAdvertiserProfile, //done
+    updateAdvertiserProfile, 
+    getAdvertiserProfile, //done
     createActivity,
     updateActivity,
     getActivity,
