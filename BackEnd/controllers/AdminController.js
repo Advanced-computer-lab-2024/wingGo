@@ -550,7 +550,7 @@ module.exports = {
     updateCategory, // Waiting on tasneem
     deleteCategory, // Waiting on tasneem
     getCategory, // Waiting on tasneem
-    addAdmin, // done in frontEnd, still waiting on Sylvia and Menna for BackEnd
+    addAdmin, // done in frontEnd
     sortProductsByRatings, // done in frontEnd
     getAllProducts, // done in frontEnd
     filterProduct, // done in frontEnd
