@@ -25,7 +25,24 @@ const getTourGuide = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+const createTourguideProfile = async (req, res) => {
+   
+    const id = req.params.id; // Use id as the unique identifier
 
+      
+     const tourguide = await TourGuide.findById(id);
+     
+    if (tourguide.isCreatedProfile !== 0) {
+        return res.status(400).json({ message: 'Profile already created for this tourguide.' });
+    }
+    else{
+        tourguide.isCreatedProfile = 1;
+     await tourguide.save();
+     return updateTourGuideProfile(req, res);
+    
+    //  return res.status(201).json({ message: 'Profile created successfully.' });
+    }
+};
 // Update the tour guide profile (with password hashing if updated)
 const updateTourGuideProfile = async (req, res) => {
     try {
@@ -115,20 +132,24 @@ const createItinerary = async (req, res) => {
     }
 };
 
-// Read itineraries for a specific tour guide
+// Read itinerary with tour guide id and itinerary id
 const getItineraries = async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.params;  // Itinerary ID from the URL params
+    const { tourGuideId } = req.query;  // Tour Guide ID from query params
+
     try {
-        const itinerary = await Itinerary.findById(id);
+        // Find the itinerary by ID and ensure it belongs to the correct tour guide
+        const itinerary = await Itinerary.findOne({ _id: id, tourGuideId });  // Match both the itinerary ID and tourGuideId
+
         if (!itinerary) {
-            return res.status(404).json({ message: 'Itinerary not found' });
+            return res.status(404).json({ message: 'Itinerary not found or you do not have permission to view this itinerary.' });
         }
+
         res.status(200).json(itinerary);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
-
 //get all without tour guide
 const getAllItineraries = async (req, res) => {
     try {
@@ -138,20 +159,16 @@ const getAllItineraries = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
+////////////get all Itineraries of the tourguide
 const getItinerariesByTourGuide = async (req, res) => {
-    const { id } = req.params;  // Itinerary ID from URL
-    const { tourGuideId } = req.query;  // Tour Guide ID from query
+    const { tourGuideId } = req.params;
 
     try {
-        // Find the itinerary and make sure it belongs to the tour guide
-        const itinerary = await Itinerary.findOne({ _id: id, tourGuideId });
-
-        if (!itinerary) {
-            return res.status(404).json({ message: 'Itinerary not found or you do not have permission to view this itinerary.' });
+        const itineraries = await Itinerary.find({ tourGuideId });  // Fetch by tourGuideId
+        if (!itineraries.length) {
+            return res.status(404).json({ message: 'No itineraries found for this tour guide.' });
         }
-
-        res.status(200).json({ itinerary });
+        res.status(200).json(itineraries);  // Return the itineraries
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -208,5 +225,5 @@ const deleteItinerary = async (req, res) => {
 module.exports = {
     getTourGuide,
     updateTourGuideProfile,
-    createItinerary, getItineraries,getAllItineraries, updateItinerary, deleteItinerary ,getItinerariesByTourGuide
+    createItinerary, getItineraries,getAllItineraries, updateItinerary, deleteItinerary ,getItinerariesByTourGuide,createTourguideProfile
 };
