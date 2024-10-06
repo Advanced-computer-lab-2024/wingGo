@@ -10,7 +10,7 @@ const tourGuideRoutes = require('./routes/TourGuideRoutes'); // Ensure correct p
 const govornorRoutes = require('./routes/GovornorRoutes');
 const advertiserRoutes = require('./routes/advertiserRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
-const productRoutes = require('./routes/productRoutes');
+
 const guestRoutes = require('./routes/guestRoutes');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -96,7 +96,7 @@ app.use('/tourguide', tourGuideRoutes);
 
 // app.use('/tags', tagRoutes);
 
-app.use('/product', productRoutes);
+
 
 app.use('/govornor', govornorRoutes);
 app.use('/advertiser', advertiserRoutes);
