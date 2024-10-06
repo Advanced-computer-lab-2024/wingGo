@@ -13,7 +13,7 @@ const loginCredentialsSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['tour guide', 'tourist', 'seller', 'advertiser'], // Add all roles
+        enum: ['tour guide', 'tourist', 'seller', 'advertiser', 'admin'], // Add all roles
         required: true
     },
     userId: {
