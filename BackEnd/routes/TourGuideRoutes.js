@@ -11,7 +11,7 @@ router.get('/getitinerary/:id', itineraryController.getItineraries);
 
 router.get('/getALLitineraries', itineraryController.getAllItineraries);
 
-router.get('/itineraries/tourGuide/:tourGuideId', itineraryController.getItinerariesByTourGuide);
+router.get('/itineraries/:tourGuideId', itineraryController.getItinerariesByTourGuide);
 // Update an itinerary
 router.put('/Updateitinerary/:id', itineraryController.updateItinerary);
 
@@ -19,6 +19,8 @@ router.put('/Updateitinerary/:id', itineraryController.updateItinerary);
 router.delete('/Deleteitinerary/:id', itineraryController.deleteItinerary);
 
 // Route to get a tour guide by id
+router.post('/createTourguideProfile/:id', tourGuideController.createTourguideProfile);
+
 router.get('/fetch/:id', tourGuideController.getTourGuide);
 
 // Route to update a tour guide by id

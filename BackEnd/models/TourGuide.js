@@ -22,7 +22,14 @@ const tourGuideSchema = new Schema({
     },
     previousWork: {
         type: String, // Can be a URL or description of previous work, no default
-    }
+    },
+    isCreatedProfile: {
+        type:Number,
+        default:0
+
+    }   
+
+    
 }, { timestamps: true });
 
 const TourGuide = mongoose.model('TourGuide', tourGuideSchema);
