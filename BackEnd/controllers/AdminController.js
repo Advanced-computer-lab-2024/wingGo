@@ -537,7 +537,7 @@ const getAttractions = async (req, res) => {
 
 module.exports = {
     approvePendingUserById, // done in frontEnd
-    deleteAccount, // done in frontEnd, Waiting on Menna to fix BackEnd
+    deleteAccount, // done in frontEnd
     addTourismGovernor, // done in frontEnd
     createCategory, // Waiting on tasneem
     getCategories, // Waiting on tasneem
