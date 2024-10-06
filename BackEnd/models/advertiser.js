@@ -52,7 +52,12 @@ const advertiserSchema = new Schema({
         twitter: { type: String },
         instagram: { type: String },
         linkedin: { type: String }
-    }    
+    },
+     isCreatedProfile: {
+        type:Number,
+        default:0
+
+    }   
 
 }, { timestamps: true });
 
