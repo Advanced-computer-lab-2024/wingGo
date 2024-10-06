@@ -73,3 +73,22 @@ export const deleteItinerary = async (id, tourGuideId) => {
         throw error;
     }
 };
+export const createTourGuideProfile = async (profileId,profileData) => {
+    try {
+        const response = await fetch(`${API_URL}/tourguide/createTourguideProfile/${profileId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(profileData),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'profile id is invalid');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error creating profile', error);
+        throw error;
+    }
+};
