@@ -43,6 +43,20 @@ export const getAllPlaces = async () => {
 //get place by id
 
 
+export const getPlaceById = async (placeId) => {
+    try {
+        const response = await fetch(`${API_URL}/govornor/getPlace/${placeId}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to specific place by ID');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error searching places:', error);
+        throw error;
+    }
+};
+
 //update place 
 export const updatePlace = async (placeId, placeData) => {
     try {
@@ -62,3 +76,33 @@ export const updatePlace = async (placeId, placeData) => {
         throw error;
     }
 };
+
+//delete a place
+
+
+export const deletePlace = async (placeId) => {
+    try {
+        const response = await fetch(`${API_URL}/govornor/deletePlace/${placeId}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('Place not found');
+            } else {
+                throw new Error('An error occurred while deleting the place');
+            }
+        }
+       // return await response.json();
+       return { message: "Place deleted successfully" };
+    } catch (error) {
+        console.error('Error deleting place:', error);
+        throw error;
+    }
+};
+
+
+
+
+//add tag to place
+//addTagToPlace
+//router.put('/addTag/:id', PlaceController.addTagToPlace);
