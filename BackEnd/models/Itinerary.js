@@ -6,11 +6,7 @@ const itinerarySchema = new Schema({
     tourGuideId: { type: mongoose.Schema.Types.ObjectId, ref: 'TourGuide', required: true },
     title: { type: String, required: true },
     activities: { type: String, required: true },
-    locations: [{
-        address: { type: String, required: true },
-        lat: { type: Number },  // Latitude from Nominatim
-        lng: { type: Number }   // Longitude from Nominatim
-    }],
+    locations: [{ type: String, required: true }],
     timeline: { type: String, required: true },
     duration: { type: String, required: true },
     language: { type: String, required: true },

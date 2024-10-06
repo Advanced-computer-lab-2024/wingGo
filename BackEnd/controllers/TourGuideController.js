@@ -91,19 +91,12 @@ const createItinerary = async (req, res) => {
             return res.status(400).json({ error: 'Invalid tourGuideId. Tour guide not found.' });
         }
 
-        // Fetch coordinates for each location
-        const locationDetails = await Promise.all(
-            locations.map(async (location) => {
-                const { lat, lng } = await getCoordinates(location);
-                return { address: location, lat, lng };
-            })
-        );
-
+        // Create and save the new itinerary without latitude and longitude
         const newItinerary = new Itinerary({
             tourGuideId,
             title,
             activities,
-            locations: locationDetails,
+            locations,
             timeline,
             duration,
             language,
@@ -121,6 +114,7 @@ const createItinerary = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
 // Read itineraries for a specific tour guide
 const getItineraries = async (req, res) => {
     const { id } = req.params;
@@ -164,7 +158,6 @@ const getItinerariesByTourGuide = async (req, res) => {
 };
 
 // Update itinerary
-// Update itinerary
 const updateItinerary = async (req, res) => {
     const { id } = req.params;  // Itinerary ID from URL
     const { tourGuideId } = req.query;  // Tour Guide ID from query
@@ -177,23 +170,7 @@ const updateItinerary = async (req, res) => {
             return res.status(404).json({ message: 'Itinerary not found or you do not have permission to update this itinerary.' });
         }
 
-        // Optional: Prevent updating the tour guide ID
-        if (req.body.tourGuideId) {
-            delete req.body.tourGuideId;
-        }
-
-        // Optional: Geocode the locations if provided in the update request
-        if (req.body.locations) {
-            const locationDetails = await Promise.all(
-                req.body.locations.map(async (location) => {
-                    const { lat, lng } = await getCoordinates(location.address);
-                    return { address: location.address, lat, lng };
-                })
-            );
-            req.body.locations = locationDetails;
-        }
-
-        // Update the itinerary
+        // Update the itinerary without geocoding
         Object.assign(itinerary, req.body);
         await itinerary.save();
 
@@ -231,10 +208,5 @@ const deleteItinerary = async (req, res) => {
 module.exports = {
     getTourGuide,
     updateTourGuideProfile,
-    createItinerary,
-    getItineraries,
-    getAllItineraries,
-    updateItinerary,
-    deleteItinerary,
-    getItinerariesByTourGuide
+    createItinerary, getItineraries,getAllItineraries, updateItinerary, deleteItinerary ,getItinerariesByTourGuide
 };

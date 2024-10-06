@@ -15,7 +15,7 @@ export const getPendingUsers = async () => {
     }
 };
 
-
+// src/api.js
 export const deletePendingUser = async (userId) => {
     try {
         const response = await fetch(`${API_URL}/admin/pending-users/${userId}`, {
@@ -141,6 +141,30 @@ export const deleteAccountById = async (accountId) => {
         return await response.json();
     } catch (error) {
         console.error('Error deleting account:', error);
+        throw error;
+    }
+};
+
+
+
+
+// tour guide
+export const createItinerary = async (itineraryData) => {
+    try {
+        console.log(itineraryData);
+        const response = await fetch(`${API_URL}/tourguide/Createitinerary`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(itineraryData),
+        });
+        if (!response.ok) {
+            throw new Error('Failed to create itinerary');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error creating itinerary:', error);
         throw error;
     }
 };
