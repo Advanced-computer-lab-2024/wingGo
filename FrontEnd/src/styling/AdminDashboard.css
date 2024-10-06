@@ -145,3 +145,86 @@
     background-color: #f44336;
     color: white;
 }
+
+.attractions-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.attraction-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+.attraction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.attraction-name {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.show-tags-button, .add-tag-button, .delete-tag-button, .update-tag-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.show-tags-button:hover, .add-tag-button:hover, .delete-tag-button:hover, .update-tag-button:hover {
+    background-color: #0056b3;
+}
+
+.tag-input-container {
+    margin-top: 10px;
+}
+
+.tag-input-container input {
+    padding: 5px;
+    margin-right: 5px;
+}
+
+.tag-input-container button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.tag-input-container button:hover {
+    background-color: #218838;
+}
+
+.tags-container {
+    margin-top: 10px;
+}
+
+.tags-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.tag-item {
+    background-color: #e0e0e0;
+    border-radius: 3px;
+    padding: 5px 10px;
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+.no-tags, .loading-tags {
+    font-style: italic;
+    color: #888;
+}
