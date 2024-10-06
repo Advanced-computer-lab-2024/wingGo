@@ -5,6 +5,8 @@ import About from './components/About';
 import AdminDashboard from './components/AdminDashboard';
 import Preloader from './components/Preloader';
 import './App.css';
+import GovornorDashboard from './components/GovornorDashboard';
+
 
 const App = () => {
     const [loading, setLoading] = useState(true);
@@ -29,12 +31,14 @@ const App = () => {
                                 <li><a href="/">Home</a></li>
                                 <li><a href="/about">About</a></li>
                                 <li><a href="/admin">Admin Dashboard</a></li>
+                                <li><a href='/govornor'>Govornor Dashboard</a></li>
                             </ul>
                         </nav>
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/about" element={<About />} />
                             <Route path="/admin" element={<AdminDashboard />} />
+                            <Route path="/govornor" element={<GovornorDashboard />} />        
                         </Routes>
                     </>
                 )}

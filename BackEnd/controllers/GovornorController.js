@@ -3,7 +3,7 @@ const Place = require('../models/Places');
 // Create a new place
 const createPlace = async (req, res) => {
     try {
-        const { governerId, types, historicalPeriods, ...placeData } = req.body.tags || {}; // Extract tags separately
+        const { /*governerId,*/ types, historicalPeriods, ...placeData } = req.body.tags || {}; // Extract tags separately
 
         // Validate types
         const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces/Castles'];
@@ -31,9 +31,9 @@ const createPlace = async (req, res) => {
 // Get all places
 const getAllPlaces = async (req, res) => {
 
-    const {governerId} = req.query;
+    //const {governerId} = req.query;
     try {
-        const places = await Place.find({governerId});
+        const places = await Place.find();
         res.json(places);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -173,4 +173,5 @@ module.exports = {
     deletePlace,
     addTagToPlace,
     hello
+    
 };

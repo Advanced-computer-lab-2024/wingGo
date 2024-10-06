@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const PlaceController = require('../controllers/GovernorController');
+const PlaceController = require('../controllers/GovornorController');
 
 
 router.post('/createPlace', PlaceController.createPlace);

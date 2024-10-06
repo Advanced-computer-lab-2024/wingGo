@@ -98,7 +98,7 @@ app.use('/tourguide', tourGuideRoutes);
 
 app.use('/product', productRoutes);
 
-app.use('/govonor', govornorRoutes);
+app.use('/govornor', govornorRoutes);
 app.use('/advertiser', advertiserRoutes);
 
 app.use('/tourist', touristRoutes);
