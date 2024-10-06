@@ -13,20 +13,19 @@ const loginCredentialsSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['tour guide', 'tourist', 'seller', 'advertiser'], // Add all roles
+        enum: ['tour guide', 'tourist', 'seller', 'advertiser', 'admin'], // Add 'admin' to the roles
         required: true
     },
     userId: {
         type: Schema.Types.ObjectId,
         refPath: 'roleModel',  // Dynamically reference the correct model based on role
-        required: true
+        required: function () { return this.role !== 'admin'; } // userId is required unless the role is 'admin'
     },
     roleModel: {
         type: String,
-        required: true,
+        required: function () { return this.role !== 'admin'; }, // roleModel is required unless the role is 'admin'
         enum: ['TourGuide', 'Tourist', 'Seller', 'Advertiser'], // Ensure these match your model names
         default: function () {
-            // Map the role to the correct model name
             return {
                 'tour guide': 'TourGuide',
                 'tourist': 'Tourist',

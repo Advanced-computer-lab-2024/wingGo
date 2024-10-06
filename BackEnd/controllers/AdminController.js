@@ -94,6 +94,7 @@ const addTourismGovernor= async(req,res)=> {
         res.status(500).json({ error: err.message });
     }
 }
+
 const Attraction = require('../models/attraction');
 // Admin function to add a product
 const addProductAsAdmin = async (req, res) => {
@@ -369,6 +370,11 @@ const addTag = async (req, res) => {
             return res.status(404).json({ error: 'Attraction not found' });
         }
 
+        // Check if the tag already exists
+        if (attraction.tags.includes(tag)) {
+            return res.status(400).json({ error: 'Tag already exists' });
+        }
+
         attraction.tags.push(tag);
         await attraction.save();
         res.status(200).json(attraction);
@@ -520,26 +526,36 @@ const searchProductsByName = async (req, res) => {
     }
 };
 
+const getAttractions = async (req, res) => {
+    try {
+        const attractions = await Attraction.find().populate('tags');
+        res.status(200).json(attractions);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 module.exports = {
     approvePendingUserById, // done in frontEnd
-    deleteAccount, // done in frontEnd, still not tested
-    addTourismGovernor,
-    createCategory,
-    getCategories,
-    addTag,
-    getTags,
-    updateTag,
-    deleteTag,
+    deleteAccount, // done in frontEnd
+    addTourismGovernor, // done in frontEnd
+    createCategory, // Waiting on tasneem
+    getCategories, // Waiting on tasneem
+    addTag, // done in frontEnd
+    getTags, // done in frontEnd
+    updateTag, // done in frontEnd
+    deleteTag, // done in frontEnd
     addProductAsAdmin, // done in frontEnd
     editProduct, // done in frontEnd
-    updateCategory,
-    deleteCategory,
-    getCategory,
-    addAdmin,
-    sortProductsByRatings,
-    getAllProducts,
+    updateCategory, // Waiting on tasneem
+    deleteCategory, // Waiting on tasneem
+    getCategory, // Waiting on tasneem
+    addAdmin, // done in frontEnd
+    sortProductsByRatings, // done in frontEnd
+    getAllProducts, // done in frontEnd
     filterProduct, // done in frontEnd
     searchProductsByName, // done in frontEnd
     getPendingUsers, // done in frontEnd
     deletePendingUserById, // done in frontEnd
+    getAttractions // done in frontEnd
 };
