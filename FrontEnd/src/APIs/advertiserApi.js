@@ -4,7 +4,7 @@ const API_URL = 'http://localhost:8000';
 
 export const updateAdvertiserProfile = async (id, updatedDAta) => {
     try {
-        const response = await fetch(`${API_URL}/admin/product/${id}`, {
+        const response = await fetch(`${API_URL}/advertiser/updateProfile/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

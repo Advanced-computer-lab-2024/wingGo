@@ -41,10 +41,6 @@ const updateAdvertiserProfile = async (req, res) => {
             return res.status(404).json({ message: 'Advertiser not found' });
         }
 
-        // Save the original username and email before updating
-        const originalEmail = advertiser.contactEmail;
-        const originalUsername = advertiser.contactPerson;  // Assuming contact person acts as the username
-
         // Check if the password is being updated
         if (req.body.password) {
             // Hash the new password before saving it
@@ -62,8 +58,8 @@ const updateAdvertiserProfile = async (req, res) => {
 
         // Update LoginCredentials if necessary
         if (Object.keys(loginUpdateFields).length > 0) {
-            const updatedLoginCredentials = await LoginCredentials.findByIdAndUpdate(
-                id, // Match by id (assumed to be shared between Advertiser and LoginCredentials)
+            const updatedLoginCredentials = await LoginCredentials.findOneAndUpdate(
+                { userId: id, roleModel: 'Advertiser' },  // Find by userId and roleModel for the advertiser
                 { $set: loginUpdateFields },
                 { new: true }  // Return the updated document
             );
