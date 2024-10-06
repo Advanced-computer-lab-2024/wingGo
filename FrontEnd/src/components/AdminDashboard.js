@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin, filterProductByPrice,
      searchProductsByName, deleteAccountById, addTourismGovernor, getAttractions, getTagsByAttractionId, addTag, deleteTag, updateTag
-    , addAdmin, sortProductsByRatings } from '../api';
+    , addAdmin, sortProductsByRatings } from '../APIs/adminApi';
 import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {

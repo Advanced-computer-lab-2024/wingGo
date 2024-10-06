@@ -15,7 +15,7 @@ export const getPendingUsers = async () => {
     }
 };
 
-// src/api.js
+
 export const deletePendingUser = async (userId) => {
     try {
         const response = await fetch(`${API_URL}/admin/pending-users/${userId}`, {
@@ -145,65 +145,148 @@ export const deleteAccountById = async (accountId) => {
     }
 };
 
-
-
-//for govornor
-
-//create place
-export const createPlace = async (placeData) => {
+export const addTourismGovernor = async (governorData) => {
     try {
-        const response = await fetch(`${API_URL}/govornor/createPlace`, {
+        const response = await fetch(`${API_URL}/admin/addGovernor`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(placeData),
+            body: JSON.stringify(governorData),
         });
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to create new place');
+            throw new Error(errorData.message || 'Failed to add Tourism Governor');
         }
         return await response.json();
     } catch (error) {
-        console.error('Error adding new place:', error);
+        console.error('Error adding Tourism Governor:', error);
         throw error;
     }
 };
 
-//get all places
-
-export const getAllPlaces = async () => {
+export const getAttractions = async () => {
     try {
-        const response = await fetch(`${API_URL}/govornor/getAllPlaces`);
+        const response = await fetch(`${API_URL}/admin/getAttractions`);
         if (!response.ok) {
-            throw new Error('Failed to fetch places');
+            throw new Error('Failed to fetch attractions');
         }
         return await response.json();
     } catch (error) {
-        console.error('Error fetching places:', error);
+        console.error('Error fetching attractions:', error);
         throw error;
     }
 };
 
-//get place by id
-
-
-//update place 
-export const updatePlace = async (placeId, placeData) => {
+export const getTagsByAttractionId = async (id) => {
     try {
-        const response = await fetch(`${API_URL}/govornor/updatePlace/${placeId}`, {
+        const response = await fetch(`${API_URL}/admin/attractions/${id}/tags`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch tags');
+        }
+        const data = await response.json();
+        console.log('API response for tags:', data); // Debug log
+        return data;
+    } catch (error) {
+        console.error('Error fetching tags:', error);
+        throw error;
+    }
+};
+
+export const addTag = async (id, tag) => {
+    try {
+        const response = await fetch(`${API_URL}/admin/attractions/${id}/addTags`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(placeData),
+            body: JSON.stringify({ tag }),
         });
         if (!response.ok) {
-            throw new Error('Failed to update place');
+            throw new Error('Failed to add tag');
         }
         return await response.json();
     } catch (error) {
-        console.error('Error updating place:', error);
+        console.error('Error adding tag:', error);
+        throw error;
+    }
+};
+
+export const deleteTag = async (id, tag) => {
+    try {
+        const response = await fetch(`${API_URL}/admin/attractions/${id}/deleteTag`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ tag }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete tag');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error deleting tag:', error);
+        throw error;
+    }
+};
+
+export const updateTag = async (id, oldTag, newTag) => {
+    try {
+        const response = await fetch(`${API_URL}/admin/attractions/${id}/updateTags`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ oldTag, newTag }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update tag');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating tag:', error);
+        throw error;
+    }
+};
+
+export const addAdmin = async (username, password) => {
+    try {
+        const response = await fetch(`${API_URL}/admin/add-admin`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to add admin');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error adding admin:', error);
+        throw error;
+    }
+};
+
+export const sortProductsByRatings = async () => {
+    try {
+        const response = await fetch(`${API_URL}/admin/sortProducts`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to fetch sorted products');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching sorted products:', error);
         throw error;
     }
 };

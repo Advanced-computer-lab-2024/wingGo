@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createPlace,getAllPlaces,updatePlace  } from '../api';
+import { createPlace,getAllPlaces,updatePlace  } from '../APIs/govornorApi';
 import '../styling/GovornorDashboard.css';
 
 

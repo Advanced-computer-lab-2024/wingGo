@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { createItinerary } from '../api';
+import { createItinerary } from '../APIs/tourguideApi';
 import '../styling/TourGuideDashboard.css';
 
 const TourGuideDashboard = () => {

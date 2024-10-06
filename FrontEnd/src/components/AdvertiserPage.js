@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAdvertiserProfile, createAdvertiserProfile} from '../api'; // Ensure this API call is correct
+import { getAdvertiserProfile, createAdvertiserProfile} from '../APIs/advertiserApi'; // Ensure this API call is correct
 import '../styling/AdvertiserPage.css';
 
 const AdvertiserPage = () => {

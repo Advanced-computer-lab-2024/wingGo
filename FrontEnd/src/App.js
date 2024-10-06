@@ -6,6 +6,7 @@ import AdminDashboard from './components/AdminDashboard';
 import TourGuideDashboard from './components/TourGuideDashboard'; // New Component
 import AdvertiserPage from './components/AdvertiserPage';
 import Preloader from './components/Preloader';
+import SellerPage from './components/SellerPage';
 import './App.css';
 import GovornorDashboard from './components/GovornorDashboard';
 
@@ -36,6 +37,7 @@ const App = () => {
                                 <li><a href='/govornor'>Govornor Dashboard</a></li>
                                 <li><a href="/tourguide">Tour Guide Dashboard</a></li>
                                 <li><a href="/advertiser">Advertiser</a></li>
+                                <li><a href="/seller">Seller</a></li>
                             </ul>
                         </nav>
                         <Routes>
@@ -45,6 +47,7 @@ const App = () => {
                             <Route path="/govornor" element={<GovornorDashboard />} />        
                             <Route path="/tourguide" element={<TourGuideDashboard />} />
                             <Route path="/advertiser" element={<AdvertiserPage />} />
+                            <Route path="/seller" element={<SellerPage />} />
                         </Routes>
                     </>
                 )}
