@@ -156,6 +156,7 @@ const handleDeletePlace = async (e) => {
                 <li key={place._id}>
                     <h3>{place.name}</h3>
                     <p>Description: {place.description}</p>
+                    <img src={place.picture} alt={place.name} />
                     <p>Location: {place.location}</p>
                     <p>opening Hours: {place.openingHours}</p>
                     <p>Ticket Prices: 
@@ -193,6 +194,7 @@ const handleDeletePlace = async (e) => {
                     <h3>Search Result:</h3>
                     <p>Name: {searchResult.name}</p>
                     <p>Description: {searchResult.description}</p>
+                    <img src={searchResult.picture} alt={searchResult.name} ></img>
                     <p>Location: {searchResult.location}</p>
                     <p>Opening Hours: {searchResult.openingHours}</p>
                     <p>Ticket Prices: Foreigner: {searchResult.ticketPrices.foreigner}, Native: {searchResult.ticketPrices.native}, Student: {searchResult.ticketPrices.student}</p>
