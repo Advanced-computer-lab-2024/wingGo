@@ -540,7 +540,7 @@ module.exports = {
     deleteAccount, // done in frontEnd
     addTourismGovernor, // done in frontEnd
     createCategory, // Waiting on tasneem
-    getCategories, // Waiting on tasneem
+    getCategories, // done in frontEnd
     addTag, // done in frontEnd
     getTags, // done in frontEnd
     updateTag, // done in frontEnd

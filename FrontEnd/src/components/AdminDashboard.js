@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin, filterProductByPrice,
      searchProductsByName, deleteAccountById, addTourismGovernor, getAttractions, getTagsByAttractionId, addTag, deleteTag, updateTag
-    , addAdmin, sortProductsByRatings } from '../APIs/adminApi';
+    , addAdmin, sortProductsByRatings, getCategories } from '../APIs/adminApi';
 import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -33,6 +33,9 @@ const AdminDashboard = () => {
     const [currentAction, setCurrentAction] = useState(null);
     const [newAdmin, setNewAdmin] = useState({ username: '', password: '' });
     const [sortedProducts, setSortedProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -61,6 +64,19 @@ const AdminDashboard = () => {
             }
         };
         fetchAttractions();
+
+        const fetchCategories = async () => {
+            try {
+                const categoriesData = await getCategories();
+                setCategories(categoriesData);
+                setLoading(false);
+            } catch (error) {
+                setError(error.message);
+                setLoading(false);
+            }
+        };
+    
+        fetchCategories();
     }, []);
 
     const handleAdminInputChange = (e) => {
@@ -535,6 +551,20 @@ const handleDeleteTag = async (id) => {
             </div>
             <button type="submit">Add Admin</button>
         </form>
+        <h2>Activity Categories</h2>
+        {loading ? (
+            <p>Loading...</p>
+        ) : error ? (
+            <p>Error: {error}</p>
+        ) : (
+            <ul className="categories-list">
+                {categories.map(category => (
+                    <li key={category._id} className="category-item">
+                        {category.name}
+                    </li>
+                ))}
+            </ul>
+        )}
         </div>
     );
 };

@@ -228,3 +228,17 @@
     font-style: italic;
     color: #888;
 }
+
+.categories-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.category-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    font-size: 1.1em;
+}

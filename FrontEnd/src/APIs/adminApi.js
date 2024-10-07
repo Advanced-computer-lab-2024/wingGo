@@ -290,3 +290,22 @@ export const sortProductsByRatings = async () => {
         throw error;
     }
 };
+
+export const getCategories = async () => {
+    try {
+        const response = await fetch(`${API_URL}/admin/getcategories`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to fetch categories');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+    }
+};
