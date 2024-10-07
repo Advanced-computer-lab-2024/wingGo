@@ -39,32 +39,32 @@ const filterPlacesByTag = async (req, res) => {
     }
 };
 //sort all upcoming activities/itinieraries based on price/rating
-const sortUpcomingActivityOrItineraries = async (req, res) => {
-    const { sort, type } = req.query;
-    let sortCriteria;
+// const sortUpcomingActivityOrItineraries = async (req, res) => {
+//     const { sort, type } = req.query;
+//     let sortCriteria;
 
-    if (sort === 'price') {
-        sortCriteria = { price: 1 }; // Ascending order by price
-    } else if (sort === 'ratings') {
-        sortCriteria = { ratings: -1 }; // Descending order by ratings
-    } else {
-        return res.status(400).json({ message: 'Invalid sort criteria. Use "price" or "ratings".' });
-    }
+//     if (sort === 'price') {
+//         sortCriteria = { price: 1 }; // Ascending order by price
+//     } else if (sort === 'ratings') {
+//         sortCriteria = { ratings: -1 }; // Descending order by ratings
+//     } else {
+//         return res.status(400).json({ message: 'Invalid sort criteria. Use "price" or "ratings".' });
+//     }
 
-    try {
-        if (type === 'activity') {
-            const activities = await Activity.find({ date: { $gte: new Date() } }).sort(sortCriteria);
-            return res.status(200).json(activities);
-        } else if (type === 'itinerary') {
-            const itineraries = await Itinerary.find({ availableDates: { $elemMatch: { $gte: new Date() } }}).sort(sortCriteria);
-            return res.status(200).json(itineraries);
-        } else {
-            return res.status(400).json({ message: 'Invalid type. Use "activity" or "itinerary".' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+//     try {
+//         if (type === 'activity') {
+//             const activities = await Activity.find({ date: { $gte: new Date() } }).sort(sortCriteria);
+//             return res.status(200).json(activities);
+//         } else if (type === 'itinerary') {
+//             const itineraries = await Itinerary.find({ availableDates: { $elemMatch: { $gte: new Date() } }}).sort(sortCriteria);
+//             return res.status(200).json(itineraries);
+//         } else {
+//             return res.status(400).json({ message: 'Invalid type. Use "activity" or "itinerary".' });
+//         }
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     }
+// };
 
 
 const getAllUpcomingActivities = async (req, res) => {
@@ -231,12 +231,43 @@ const filterItineraries = async (req, res) => {
     }
 };
 
+const sortUpcomingActivityOrItineraries = async (req, res) => {
+    const { sort, type } = req.query;
+    let sortCriteria;
+
+    // Determine the sorting criteria: price or ratings
+    if (sort === 'price') {
+        sortCriteria = { price: 1 }; // Ascending order by price
+    } else if (sort === 'ratings') {
+        sortCriteria = { ratings: -1 }; // Descending order by ratings
+    } else {
+        return res.status(400).json({ message: 'Invalid sort criteria. Use "price" or "ratings".' });
+    }
+
+    try {
+        const currentDate = new Date(); // Get the current date for filtering
+
+        if (type === 'activity') {
+            // Fetch and sort upcoming activities based on the sort criteria
+            const activities = await Activity.find({ date: { $gte: currentDate } }).sort(sortCriteria);
+            return res.status(200).json(activities);
+        } else if (type === 'itinerary') {
+            // Fetch and sort upcoming itineraries based on available dates and sort criteria
+            const itineraries = await Itinerary.find({ availableDates: { $elemMatch: { $gte: currentDate } } }).sort(sortCriteria);
+            return res.status(200).json(itineraries);
+        } else {
+            return res.status(400).json({ message: 'Invalid type. Use "activity" or "itinerary".' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 
 module.exports = {
     guest_hello,
     filterPlacesByTag,
-    // sortUpcomingActivityOrItenraries,
+    sortUpcomingActivityOrItineraries,
     getAllUpcomingActivities,
     getAllUpcomingIteneries,
     getAllUpcomingPlaces,

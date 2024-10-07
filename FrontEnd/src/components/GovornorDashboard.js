@@ -6,6 +6,7 @@ import '../styling/GovornorDashboard.css';
 const GovornorDashboard = () => {
     const govornorId="67025f99bb5b4c55581ab286";
     const [newPlace,setNewPlace]=useState({
+        governorId:govornorId,
         name: '',
         description : '',
         location : '',
@@ -44,6 +45,7 @@ const handleAddPlace = async (e) => {
         const response = await createPlace(newPlace)
      
         setNewPlace({
+            governorId:govornorId,
             name: '',
             description: '',
             location: '',
