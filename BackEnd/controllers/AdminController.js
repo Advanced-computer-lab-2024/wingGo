@@ -547,7 +547,7 @@ module.exports = {
     deleteTag, // done in frontEnd
     addProductAsAdmin, // done in frontEnd
     editProduct, // done in frontEnd
-    updateCategory, // Waiting on tasneem
+    updateCategory, // done in frontEnd
     deleteCategory, // Waiting on tasneem
     getCategory, // Waiting on tasneem
     addAdmin, // done in frontEnd
