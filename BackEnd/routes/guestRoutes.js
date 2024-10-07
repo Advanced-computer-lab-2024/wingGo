@@ -16,5 +16,5 @@ router.get('/viewPlaces', guestController.getAllUpcomingPlaces);
 router.get('/filterActivities', guestController.filterUpcomingActivities);
 
 
-router.get('/itineraries', filterItineraries);
+router.get('/itineraries', guestController.filterItineraries);
 module.exports = router;

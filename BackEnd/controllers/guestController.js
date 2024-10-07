@@ -176,7 +176,7 @@ const filterUpcomingActivities = async (req, res) => {
         res.status(400).json({ error: error.message }); 
     }
 };
-const Itinerary = require('../models/Itinerary');  // Assuming Itinerary is the same for guests
+  // Assuming Itinerary is the same for guests
 
 // Function to filter itineraries for guests
 const filterItineraries = async (req, res) => {
