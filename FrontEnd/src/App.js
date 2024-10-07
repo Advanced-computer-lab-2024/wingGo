@@ -12,6 +12,9 @@ import './App.css';
 import GovornorDashboard from './components/GovornorDashboard';
 import TouristDashboard from './components/TouristDashboard';
 import ActivitiesPage from './components/ActivitiesPage';
+import HistoricalPlacesPage from './components/HistoricalPlacesPage';
+import ProductsPage from './components/ProductsPage';
+import ItinerariesPage from './components/ItinerariesPage';
 
 
 const App = () => {
@@ -56,6 +59,9 @@ const App = () => {
                             <Route path="/seller" element={<SellerPage />} />
                             <Route path="/tourist" element={<TouristDashboard />} />
                             <Route path="/activities" element={<ActivitiesPage />} />
+                            <Route path="/historical-places" element={<HistoricalPlacesPage />} />
+                            <Route path="/products" element={<ProductsPage />} />
+                            <Route path="/itineraries" element={<ItinerariesPage />} />
                         </Routes>
                     </>
                 )}

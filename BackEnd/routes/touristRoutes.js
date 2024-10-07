@@ -10,6 +10,7 @@ router.get('/getallproducts', touristController.getAllProducts);
 //router.get('/search', touristController.searchTouristAttractions);
 router.get('/viewProfile/:id', touristController.getTourist);
 router.put('/update/:id',touristController.updateTouristProfile);
+router.get('/sort-upcoming', touristController.sortUpcomingActivityOrItineraries);
 
 
 router.get('/sortProducts', touristController.sortProductsByRatings);

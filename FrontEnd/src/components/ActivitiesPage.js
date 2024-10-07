@@ -43,7 +43,7 @@ const ActivitiesPage = () => {
         } else {
             // Otherwise, search for activities
             searchAllModels(query)
-                .then(data => setActivities(data))
+                .then(data => setActivities(data.activities))
                 .catch(error => console.error('Error searching activities:', error));
         }
     };
@@ -55,7 +55,7 @@ const ActivitiesPage = () => {
     };
 
     const applySort = () => {
-        sortUpcomingActivityOrItineraries(sort)
+        sortUpcomingActivityOrItineraries(sort, 'activity')
             .then(data => setActivities(data))
             .catch(error => console.error('Error sorting activities:', error));
     };

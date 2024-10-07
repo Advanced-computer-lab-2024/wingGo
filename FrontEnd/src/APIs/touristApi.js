@@ -80,9 +80,9 @@ export const searchProductsByName = async (name) => {
 };
 
 // Filter places by tag
-export const filterPlacesByTag = async (tag) => {
+export const filterPlacesByTag = async (filters) => {
     try {
-        const response = await axios.get(`${API_URL}/filterPlacesByTag`, { params: { tag } });
+        const response = await axios.get(`${API_URL}/filterPlacesByTag`, { params: {type : filters.types, historicalPeriod: filters.historicalPeriods} });
         return response.data;
     } catch (error) {
         console.error('Error filtering places by tag:', error);
@@ -116,7 +116,7 @@ export const getAllUpcomingItineraries = async () => {
 export const getAllUpcomingPlaces = async () => {
     try {
         const response = await axios.get(`${API_URL}/viewPlaces`);
-        return response.data;
+        return response.data.places;
     } catch (error) {
         console.error('Error fetching upcoming places:', error);
         throw error;
@@ -146,9 +146,9 @@ export const filterUpcomingActivities = async (filters) => {
 };
 
 // Sort upcoming activities or itineraries
-export const sortUpcomingActivityOrItineraries = async (sort) => {
+export const sortUpcomingActivityOrItineraries = async (sort, type) => {
     try {
-        const response = await axios.get(`${API_URL}/sort`, { params: { sort, type:'activity'} });
+        const response = await axios.get(`${API_URL}/sort`, { params: { sort, type: type} });
         return response.data;
     } catch (error) {
         console.error('Error sorting upcoming activities or itineraries:', error);
@@ -160,7 +160,7 @@ export const sortUpcomingActivityOrItineraries = async (sort) => {
 export const searchAllModels = async (query) => {
     try {
         const response = await axios.get(`${API_URL}/search`, { params: { query } });
-        return response.data.activities;
+        return response.data;
     } catch (error) {
         console.error('Error searching all models:', error);
         throw error;
