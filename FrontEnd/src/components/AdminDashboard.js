@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin, filterProductByPrice,
      searchProductsByName, deleteAccountById, addTourismGovernor, getAttractions, getTagsByAttractionId, addTag, deleteTag, updateTag
-    , addAdmin, sortProductsByRatings } from '../APIs/adminApi';
+    , addAdmin, sortProductsByRatings, getCategories, createCategory, updateCategory, deleteCategory, getCategory } from '../APIs/adminApi';
 import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -33,6 +33,19 @@ const AdminDashboard = () => {
     const [currentAction, setCurrentAction] = useState(null);
     const [newAdmin, setNewAdmin] = useState({ username: '', password: '' });
     const [sortedProducts, setSortedProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [categoryName, setCategoryName] = useState('');
+    const [success, setSuccess] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [updatedCategoryName, setUpdatedCategoryName] = useState('');
+    const [updateLoading, setUpdateLoading] = useState(false);
+    const [updateError, setUpdateError] = useState(null);
+    const [updateSuccess, setUpdateSuccess] = useState(null);
+    const [selectedCategoryDetails, setSelectedCategoryDetails] = useState(null);
+    const [detailsLoading, setDetailsLoading] = useState(false);
+    const [detailsError, setDetailsError] = useState(null);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -61,7 +74,75 @@ const AdminDashboard = () => {
             }
         };
         fetchAttractions();
+
+        const fetchCategories = async () => {
+            try {
+                const categoriesData = await getCategories();
+                setCategories(categoriesData);
+                setLoading(false);
+            } catch (error) {
+                setError(error.message);
+                setLoading(false);
+            }
+        };
+    
+        fetchCategories();
     }, []);
+
+    const handleViewCategoryDetails = async (id) => {
+        setDetailsLoading(true);
+        setDetailsError(null);
+        try {
+            const categoryDetails = await getCategory(id);
+            setSelectedCategoryDetails(categoryDetails);
+        } catch (error) {
+            setDetailsError(error.message);
+        } finally {
+            setDetailsLoading(false);
+        }
+    };
+
+    const handleDeleteCategory = async (id) => {
+        if (window.confirm('Are you sure you want to delete this category?')) {
+            try {
+                await deleteCategory(id);
+                setCategories(categories.filter(category => category._id !== id));
+                alert('Category deleted successfully');
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                alert('Error deleting category: ' + error.message);
+            }
+        }
+    };
+
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category);
+        setUpdatedCategoryName(category.name);
+    };
+    
+    const handleUpdatedCategoryNameChange = (e) => {
+        setUpdatedCategoryName(e.target.value);
+    };
+    
+    const handleUpdateCategory = async (e) => {
+        e.preventDefault();
+        setUpdateLoading(true);
+        setUpdateError(null);
+        setUpdateSuccess(null);
+        try {
+            const response = await updateCategory(selectedCategory._id, updatedCategoryName);
+            setUpdateSuccess('Category updated successfully');
+            setSelectedCategory(null);
+            setUpdatedCategoryName('');
+            // Optionally, refresh the categories list
+            const categoriesData = await getCategories();
+            setCategories(categoriesData);
+        } catch (error) {
+            setUpdateError(error.message);
+        } finally {
+            setUpdateLoading(false);
+        }
+    };
 
     const handleAdminInputChange = (e) => {
         const { name, value } = e.target;
@@ -296,6 +377,26 @@ const handleDeleteTag = async (id) => {
             setSearchResults(products);
         } catch (error) {
             alert(`Failed to search products: ${error.message}`);
+        }
+    };
+
+    const handleCategoryNameChange = (e) => {
+        setCategoryName(e.target.value);
+    };
+    
+    const handleCreateCategory = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+        setSuccess(null);
+        try {
+            const response = await createCategory(categoryName);
+            setSuccess(response.message);
+            setCategoryName('');
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -535,6 +636,69 @@ const handleDeleteTag = async (id) => {
             </div>
             <button type="submit">Add Admin</button>
         </form>
+        <h2>Create Activity Category</h2>
+        <form onSubmit={handleCreateCategory}>
+            <div>
+                <label htmlFor="categoryName">Category Name:</label>
+                <input
+                    type="text"
+                    id="categoryName"
+                    name="categoryName"
+                    value={categoryName}
+                    onChange={handleCategoryNameChange}
+                    required
+                />
+            </div>
+            <button type="submit" disabled={loading}>
+                {loading ? 'Creating...' : 'Create Category'}
+            </button>
+            {error && <p className="error-message">{error}</p>}
+            {success && <p className="success-message">{success}</p>}
+        </form>
+        <h2>Activity Categories</h2>
+            <ul className="categories-list">
+                {categories.map(category => (
+                    <li key={category._id} className="category-item">
+                        {category.name}
+                        <div>
+                            <button onClick={() => handleCategorySelect(category)}>Edit</button>
+                            <button onClick={() => handleDeleteCategory(category._id)}>Delete</button>
+                            <button onClick={() => handleViewCategoryDetails(category._id)}>View Details</button>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+            {selectedCategory && (
+                <form onSubmit={handleUpdateCategory}>
+                    <div>
+                        <label htmlFor="updatedCategoryName">New Category Name:</label>
+                        <input
+                            type="text"
+                            id="updatedCategoryName"
+                            name="updatedCategoryName"
+                            value={updatedCategoryName}
+                            onChange={handleUpdatedCategoryNameChange}
+                            required
+                        />
+                    </div>
+                    <button type="submit" disabled={updateLoading}>
+                        {updateLoading ? 'Updating...' : 'Update Category'}
+                    </button>
+                    {updateError && <p className="error-message">{updateError}</p>}
+                    {updateSuccess && <p className="success-message">{updateSuccess}</p>}
+                </form>
+            )}
+            {selectedCategoryDetails && (
+                <div className="category-details">
+                    <h3>Category Details</h3>
+                    <p>ID: {selectedCategoryDetails._id}</p>
+                    <p>Name: {selectedCategoryDetails.name}</p>
+                    <p>Created At: {selectedCategoryDetails.createdAt}</p>
+                    <p>Updated At: {selectedCategoryDetails.updatedAt}</p>
+                </div>
+            )}
+            {detailsLoading && <p>Loading...</p>}
+            {detailsError && <p className="error-message">{detailsError}</p>}
         </div>
     );
 };

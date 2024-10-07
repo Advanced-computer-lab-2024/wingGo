@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createPlace,getAllPlaces,updatePlace  } from '../APIs/govornorApi';
+import { createPlace,getAllPlaces,updatePlace,getPlaceById,deletePlace  } from '../APIs/govornorApi';
 import '../styling/GovornorDashboard.css';
 
 
@@ -17,6 +17,9 @@ const GovornorDashboard = () => {
     });
 const [places,setPlaces]=useState([]);
 const [selectedPlace, setSelectedPlace] = useState(null);
+const [searchPlaceId, setSearchPlaceId] = useState('');
+const [searchResult, setSearchResult] = useState(null);
+const [placeId, setPlaceId] = useState('');
 
 useEffect(()=>{
     const fetchPlaces = async () => {
@@ -74,6 +77,15 @@ const handleInputChange = (e) => {
     }));
 } 
 };
+const handleSearchById = async (e) => {
+    e.preventDefault();
+    try {
+        const place = await getPlaceById(searchPlaceId);
+        setSearchResult(place);
+    } catch (error) {
+        alert('Failed to fetch place.');
+    }
+};
 
  const handleEditPlace = async (updatedPlace) => {
     const { placeId, ...placesData } = updatedPlace;
@@ -85,6 +97,19 @@ const handleInputChange = (e) => {
         alert(response.message || "Place updated successfully");
     } catch (error) {
         alert('Failed to update place.');
+    }
+};
+
+const handleDeletePlace = async (e) => {
+    e.preventDefault();
+    try {
+        const response = await deletePlace(placeId);
+        alert( "Place deleted successfully");
+        setPlaceId('');
+        const updatedPlaces = await getAllPlaces();  // Optionally refresh the places list
+        setPlaces(updatedPlaces);    
+    } catch (error) {
+        alert('Failed to delete place: ' + error.message);
     }
 };
     return (
@@ -131,6 +156,7 @@ const handleInputChange = (e) => {
                 <li key={place._id}>
                     <h3>{place.name}</h3>
                     <p>Description: {place.description}</p>
+                    <img src={place.picture} alt={place.name} />
                     <p>Location: {place.location}</p>
                     <p>opening Hours: {place.openingHours}</p>
                     <p>Ticket Prices: 
@@ -150,7 +176,47 @@ const handleInputChange = (e) => {
                onSave={handleEditPlace}
             />
         )}
+
+            <h2>Search Place by ID</h2>
+            <form onSubmit={handleSearchById}>
+                <input
+                    type="text"
+                    placeholder="Enter Place ID"
+                    value={searchPlaceId}
+                    onChange={(e) => setSearchPlaceId(e.target.value)}
+                    required
+                />
+                <button type="submit">Search</button>
+            </form>
+
+            {searchResult && (
+                <div>
+                    <h3>Search Result:</h3>
+                    <p>Name: {searchResult.name}</p>
+                    <p>Description: {searchResult.description}</p>
+                    <img src={searchResult.picture} alt={searchResult.name} ></img>
+                    <p>Location: {searchResult.location}</p>
+                    <p>Opening Hours: {searchResult.openingHours}</p>
+                    <p>Ticket Prices: Foreigner: {searchResult.ticketPrices.foreigner}, Native: {searchResult.ticketPrices.native}, Student: {searchResult.ticketPrices.student}</p>
+                </div>
+            )}
+
+<           h2>Delete Place by ID</h2>
+            <form onSubmit={handleDeletePlace}>
+                <label htmlFor="placeId">Place ID:</label>
+                <input
+                    type="text"
+                    id="placeId"
+                    value={placeId}
+                    onChange={(e) => setPlaceId(e.target.value)}
+                    required
+                />
+                <button type="submit">Delete Place</button>
+            </form>
+
     </div>
+
+    
 );
 }
 
