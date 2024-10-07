@@ -539,7 +539,7 @@ module.exports = {
     approvePendingUserById, // done in frontEnd
     deleteAccount, // done in frontEnd
     addTourismGovernor, // done in frontEnd
-    createCategory, // Waiting on tasneem
+    createCategory, // done in frontEnd
     getCategories, // done in frontEnd
     addTag, // done in frontEnd
     getTags, // done in frontEnd

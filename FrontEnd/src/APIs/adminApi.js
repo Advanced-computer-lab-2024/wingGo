@@ -309,3 +309,23 @@ export const getCategories = async () => {
         throw error;
     }
 };
+
+export const createCategory = async (name) => {
+    try {
+        const response = await fetch(`${API_URL}/admin/categories`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to create category');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error creating category:', error);
+        throw error;
+    }
+};

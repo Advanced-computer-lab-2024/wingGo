@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin, filterProductByPrice,
      searchProductsByName, deleteAccountById, addTourismGovernor, getAttractions, getTagsByAttractionId, addTag, deleteTag, updateTag
-    , addAdmin, sortProductsByRatings, getCategories } from '../APIs/adminApi';
+    , addAdmin, sortProductsByRatings, getCategories, createCategory } from '../APIs/adminApi';
 import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -36,6 +36,8 @@ const AdminDashboard = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [categoryName, setCategoryName] = useState('');
+    const [success, setSuccess] = useState(null);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -315,6 +317,26 @@ const handleDeleteTag = async (id) => {
         }
     };
 
+    const handleCategoryNameChange = (e) => {
+        setCategoryName(e.target.value);
+    };
+    
+    const handleCreateCategory = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+        setSuccess(null);
+        try {
+            const response = await createCategory(categoryName);
+            setSuccess(response.message);
+            setCategoryName('');
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="admin-dashboard">
             <h1>Admin Dashboard</h1>
@@ -550,6 +572,25 @@ const handleDeleteTag = async (id) => {
                 />
             </div>
             <button type="submit">Add Admin</button>
+        </form>
+        <h2>Create Activity Category</h2>
+        <form onSubmit={handleCreateCategory}>
+            <div>
+                <label htmlFor="categoryName">Category Name:</label>
+                <input
+                    type="text"
+                    id="categoryName"
+                    name="categoryName"
+                    value={categoryName}
+                    onChange={handleCategoryNameChange}
+                    required
+                />
+            </div>
+            <button type="submit" disabled={loading}>
+                {loading ? 'Creating...' : 'Create Category'}
+            </button>
+            {error && <p className="error-message">{error}</p>}
+            {success && <p className="success-message">{success}</p>}
         </form>
         <h2>Activity Categories</h2>
         {loading ? (
