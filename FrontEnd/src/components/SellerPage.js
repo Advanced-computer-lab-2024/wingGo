@@ -181,57 +181,56 @@ const SellerPage = () => {
             alert(`Failed to add product: ${error.message}`);
         }
     };
-const handleEditProduct = async (e) => {
-    e.preventDefault();
 
-    console.log('Product ID being edited:', productId); // Add this line to verify productId
+    const handleEditProduct = async (e) => {
+        e.preventDefault();
 
-    const formData = new FormData(); // Create FormData to hold product data and image
-    formData.append('name', newProduct.name);
-    formData.append('price', newProduct.price);
-    formData.append('quantity', newProduct.quantity);
-    formData.append('description', newProduct.description);
-    formData.append('ratings', newProduct.ratings); // Optional
-    formData.append('reviews', newProduct.reviews); // Optional
+        console.log('Product ID being edited:', productId); // Add this line to verify productId
 
-    // Append the product image if one is selected
-    if (productImage) {
-        formData.append('picture', productImage);
-    }
+        const formData = new FormData(); // Create FormData to hold product data and image
+        formData.append('name', newProduct.name);
+        formData.append('price', newProduct.price);
+        formData.append('quantity', newProduct.quantity);
+        formData.append('description', newProduct.description);
+        formData.append('ratings', newProduct.ratings); // Optional
+        formData.append('reviews', newProduct.reviews); // Optional
 
-    try {
-        const response = await editProductAsSeller(productId, formData); // Pass FormData instead of JSON object
-        alert('Product updated successfully');
-        
-        // Update the product in allProducts state
-        setAllProducts(prevProducts => 
-            prevProducts.map(product => 
-                product._id === productId ? response.product : product
-            )
-        );
+        // Append the product image if one is selected
+        if (productImage) {
+            formData.append('picture', productImage);
+        }
 
-        // If sorted or filtered, trigger the functions again to update the view
-        if (sortOrder) handleSortProductsByRatings();
-        if (filterPrice) handleFilterByPrice();
+        try {
+            const response = await editProductAsSeller(productId, formData); // Pass FormData instead of JSON object
+            alert('Product updated successfully');
+            
+            // Update the product in allProducts state
+            setAllProducts(prevProducts => 
+                prevProducts.map(product => 
+                    product._id === productId ? response.product : product
+                )
+            );
 
-        // Clear form fields
-        setNewProduct({
-            name: '',
-            price: '',
-            quantity: '',
-            description: '',
-            ratings: '', // Clear optional field
-            reviews: '', // Clear optional field
-        });
-        setProductImage(null); // Clear the image after adding the product
-        setIsEditMode(false); // Switch back to add mode after editing
-        setProductId(''); // Clear productId after editing
-    } catch (error) {
-        alert(`Failed to update product: ${error.message}`);
-    }
-};
+            // If sorted or filtered, trigger the functions again to update the view
+            if (sortOrder) handleSortProductsByRatings();
+            if (filterPrice) handleFilterByPrice();
 
-
+            // Clear form fields
+            setNewProduct({
+                name: '',
+                price: '',
+                quantity: '',
+                description: '',
+                ratings: '', // Clear optional field
+                reviews: '', // Clear optional field
+            });
+            setProductImage(null); // Clear the image after adding the product
+            setIsEditMode(false); // Switch back to add mode after editing
+            setProductId(''); // Clear productId after editing
+        } catch (error) {
+            alert(`Failed to update product: ${error.message}`);
+        }
+    };
 
     // Function to fetch and display all products
     const handleFetchAllProducts = async () => {

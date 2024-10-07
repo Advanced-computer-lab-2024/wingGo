@@ -14,7 +14,6 @@ const tourist_hello = (req, res) => {
     console.log('yay');
 };
 
-//sort all upcoming activities/itineraries by price/ratings
 const tourist_register = async (req, res) => {
     // Destructure fields from the request body
     const { username, email, password, mobileNumber, nationality, DOB, jobOrStudent } = req.body;
@@ -76,12 +75,13 @@ const tourist_register = async (req, res) => {
         await loginCredentials.save();
 
         console.log('Success! Tourist registered and login credentials created.');
-        res.status(200).json(user);
+        res.status(201).json(user);  // <-- Change this to return 201 Created
     } catch (error) {
         res.status(400).json({ error: error.message });
         console.log('Error during registration:', error.message);
     }
 };
+
 
 
 const getTourist = async(req,res) => {

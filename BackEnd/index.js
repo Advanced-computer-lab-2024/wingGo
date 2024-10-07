@@ -15,7 +15,7 @@ const guestRoutes = require('./routes/guestRoutes');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-let isTourist = 2; //yb2a set lama el shakhs ykhtar men el form eno tourist fa  hankhdo men el frontend 
+//yb2a set lama el shakhs ykhtar men el form eno tourist fa  hankhdo men el frontend 
 let userType = "tourist";
 
 // For handling the __dirname issue with ES modules
@@ -69,20 +69,15 @@ app.get("/", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
- 
-  if (isTourist ==1){
-    touristController.tourist_register(req, res);
-  }
-  else {
-    PendingUsersController.pendinguser_register(req,res);
-    //get username,passw,email from req + field role
-    //and put in pendingUsers collection 
-    // if(userType== "tourGuide"){}
-       //let userType= role field
-      //  pendingcontroll.pendinguser_register(req, res);
-    //not tourist
+  const { role } = req.body; // Get the role from request body
+
+  if (role === 'tourist') {
+    touristController.tourist_register(req, res); // Call the tourist registration handler
+  } else {
+    PendingUsersController.pendinguser_register(req, res); // Call the pending user registration handler for other roles
   }
 });
+
 
 
 // Tourist routes

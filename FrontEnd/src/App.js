@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './components/Home';
 import About from './components/About';
+import Registerpage from './components/Registerpage';
 import AdminDashboard from './components/AdminDashboard';
 import TourGuideDashboard from './components/TourGuideDashboard'; // New Component
 import AdvertiserPage from './components/AdvertiserPage';
@@ -33,6 +34,7 @@ const App = () => {
                             <ul>
                                 <li><a href="/">Home</a></li>
                                 <li><a href="/about">About</a></li>
+                                <li><a href="/register">Register</a></li>
                                 <li><a href="/admin">Admin Dashboard</a></li>
                                 <li><a href='/govornor'>Govornor Dashboard</a></li>
                                 <li><a href="/tourguide">Tour Guide Dashboard</a></li>
@@ -43,6 +45,7 @@ const App = () => {
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/about" element={<About />} />
+                            <Route path="/register" element={<Registerpage />} />
                             <Route path="/admin" element={<AdminDashboard />} />
                             <Route path="/govornor" element={<GovornorDashboard />} />        
                             <Route path="/tourguide" element={<TourGuideDashboard />} />
