@@ -123,6 +123,35 @@ const handleDeletePlace = async (e, id) => {
         alert('Failed to delete place: ' + error.message);
     }
 };
+
+const handleAddHistoricalPeriodTag = async (e, id) => {
+    e.preventDefault();
+    const tag = prompt("Please enter the historical period tag:");
+    if (tag) {
+        try {
+            await addTagToPlace(id, tag, 'historicalPeriod');
+        } catch (error) {
+            alert('Failed to add historical period tag: ' + error.message);
+        }
+    } else {
+        alert('No tag entered.');
+    }
+};
+
+const handleAddTypeTag = async (e, id) => {
+    e.preventDefault();
+    const tag = prompt("Please enter the type tag:");
+    if (tag) {
+        try {
+            await addTagToPlace(id, tag, 'type');
+        } catch (error) {
+            alert('Failed to add type tag: ' + error.message);
+        }
+    } else {
+        alert('No tag entered.');
+    }
+};
+
 const handleAddTag = async (e) => {
     e.preventDefault();
     try {
@@ -238,6 +267,8 @@ const handleAddTag = async (e) => {
 
                     <button onClick={() => setSelectedPlace(place)}>Edit</button>
                     <button onClick={(e) => handleDeletePlace(e,place._id)}>Delete</button>
+                    <button onClick={(e) => handleAddTypeTag(e,place._id)}>Add Type Tag</button>
+                    <button onClick={(e) => handleAddHistoricalPeriodTag(e,place._id)}>Add Historical Period Tag</button>
                 </li>
             ))}
         </ul>
