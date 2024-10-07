@@ -121,9 +121,9 @@ export const updateTourGuideProfile = async (id, updatedData) => {
         throw error;
     }
 };
-export const getItineraryById = async (id) => {
+export const getItineraryById = async (id, tourGuideId) => {
     try {
-        const response = await fetch(`${API_URL}/tourguide/getitinerary/${id}`, {
+        const response = await fetch(`${API_URL}/tourguide/getitinerary/${id}?tourGuideId=${tourGuideId}`, {
             method: 'GET',
         });
 

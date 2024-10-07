@@ -35,7 +35,7 @@ const TourGuideDashboard = () => {
     const tourGuideId = "66fc472ab494061ba3a410f4"; // Hard-coded tour guide ID for demo
     const handleGetItinerary = async () => {
         try {
-            const fetchedItinerary = await getItineraryById(itineraryId);
+            const fetchedItinerary = await getItineraryById(itineraryId, tourGuideId); // Pass tourGuideId here
             setItinerary(fetchedItinerary); // Set the fetched itinerary
             setError(null); // Clear any previous errors
         } catch (err) {
@@ -584,6 +584,44 @@ const TourGuideDashboard = () => {
                     </div>
                 </div>
             )}
+            <h1>Search Itinerary by ID</h1>
+
+{/* Input field for entering itinerary ID */}
+<div className="itinerary-search">
+    <input
+        type="text"
+        placeholder="Enter Itinerary ID"
+        value={itineraryId}
+        onChange={(e) => setItineraryId(e.target.value)}
+        className="itinerary-input"
+    />
+    <button onClick={handleGetItinerary} className="search-button">
+        Search
+    </button>
+</div>
+
+{/* Error message */}
+{error && <p className="error-message">{error}</p>}
+
+{/* Display itinerary details if found */}
+{itinerary && (
+    <div className="itinerary-details">
+        <h2>{itinerary.title}</h2>
+        <p>
+    <strong>Activities:</strong> 
+    {Array.isArray(itinerary.activities) ? itinerary.activities.join(', ') : itinerary.activities}
+</p>
+<p><strong>Locations:</strong> {Array.isArray(itinerary.locations) ? itinerary.locations.join(', ') : itinerary.locations}</p>
+<p><strong>Tags:</strong> {Array.isArray(itinerary.tags) ? itinerary.tags.join(', ') : itinerary.tags}</p>
+<p><strong>Available Dates:</strong> {Array.isArray(itinerary.availableDates) ? itinerary.availableDates.join(', ') : itinerary.availableDates}</p>
+        <p><strong>Timeline:</strong> {itinerary.timeline}</p>
+        <p><strong>Duration:</strong> {itinerary.duration}</p>
+        <p><strong>Language:</strong> {itinerary.language}</p>
+        <p><strong>Price:</strong> {itinerary.price}</p>
+        <p><strong>Pickup Location:</strong> {itinerary.pickupLocation}</p>
+        <p><strong>Dropoff Location:</strong> {itinerary.dropoffLocation}</p>
+    </div>
+)}
            
         </div>
     );
