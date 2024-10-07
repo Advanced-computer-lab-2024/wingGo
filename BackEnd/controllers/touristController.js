@@ -275,7 +275,7 @@ const sortUpcomingActivityOrItineraries = async (req, res) => {
             const activities = await Activity.find({ date: { $gte: new Date() } }).sort(sortCriteria);
             return res.status(200).json(activities);
         } else if (type === 'itinerary') {
-            const itineraries = await Itinerary.find({ date: { $gte: new Date() } }).sort(sortCriteria);
+            const itineraries = await Itinerary.find({ availableDates: { $elemMatch: { $gte: new Date() } }}).sort(sortCriteria);
             return res.status(200).json(itineraries);
         } else {
             return res.status(400).json({ message: 'Invalid type. Use "activity" or "itinerary".' });
