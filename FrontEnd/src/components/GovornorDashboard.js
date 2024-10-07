@@ -4,7 +4,7 @@ import '../styling/GovornorDashboard.css';
 
 
 const GovornorDashboard = () => {
-    const govornorId="67025f99bb5b4c55581ab286";
+    const govornorId="6701e703188dcdbf662bd18e";
     const [newPlace,setNewPlace]=useState({
         name: '',
         description : '',
