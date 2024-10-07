@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getItinerariesByTourGuide, createItinerary, updateItinerary,deleteItinerary  } from '../APIs/tourguideApi';
+import { getItinerariesByTourGuide, createItinerary, updateItinerary,deleteItinerary,createTourGuideProfile ,getItineraryById ,getTourGuideProfile,updateTourGuideProfile  } from '../APIs/tourguideApi';
 import '@fortawesome/fontawesome-free/css/all.min.css'; // Import FontAwesome for icons
 import '../styling/TourGuideDashboard.css';
 
@@ -7,12 +7,22 @@ const TourGuideDashboard = () => {
     const [itineraries, setItineraries] = useState([]); // Storing itineraries
     const [selectedItinerary, setSelectedItinerary] = useState(null); // For detailed itinerary view
     const [isEditing, setIsEditing] = useState({}); // To toggle editing per field
-    const [showItineraryForm, setShowItineraryForm] = useState(false); // Toggle for create itinerary form
-
+    const [showItineraryForm, setShowItineraryForm] = useState(false); // Toggle for create itinerary form\
+    const [showProfileForm, setShowProfileForm] = useState(false); // Toggle for create profile form
+    const [profile, setProfile] = useState(false); // State for storing profile data
+    const [itineraryId, setItineraryId] = useState(''); // State to store the entered itinerary ID
+    const [itinerary, setItinerary] = useState(null); // State to store fetched itinerary details
+    const [error, setError] = useState(null); // State to store any error messag
+    const [newProfile, setNewProfile] = useState({
+        mobileNumber: '',
+        yearsOfExperience: '',
+        previousWork: ''
+    });
     // Form state for new itinerary creation
     const [title, setTitle] = useState('');
     const [activities, setActivities] = useState('');
     const [locations, setLocations] = useState('');
+    const [tags, setTags] = useState('');
     const [timeline, setTimeline] = useState('');
     const [duration, setDuration] = useState('');
     const [language, setLanguage] = useState('');
@@ -23,9 +33,30 @@ const TourGuideDashboard = () => {
     const [dropoffLocation, setDropoffLocation] = useState('');
 
     const tourGuideId = "66fc472ab494061ba3a410f4"; // Hard-coded tour guide ID for demo
+    const handleGetItinerary = async () => {
+        try {
+            const fetchedItinerary = await getItineraryById(itineraryId);
+            setItinerary(fetchedItinerary); // Set the fetched itinerary
+            setError(null); // Clear any previous errors
+        } catch (err) {
+            setError('Itinerary not found or an error occurred');
+            setItinerary(null); // Clear itinerary if there's an error
+        }
+    };
 
     // Fetch itineraries for the tour guide
     useEffect(() => {
+        
+        const fetchProfile = async () => {
+            try {
+                const fetchedProfile = await getTourGuideProfile(tourGuideId);
+                setProfile(fetchedProfile); // Save the fetched profile
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+            }
+        };
+
+        fetchProfile();
         const fetchItineraries = async () => {
             try {
                 const fetchedItineraries = await getItinerariesByTourGuide(tourGuideId);
@@ -37,22 +68,61 @@ const TourGuideDashboard = () => {
 
         fetchItineraries();
     }, []);
+    
+    const handleProfileChange = (e) => {
+        setNewProfile({
+            ...newProfile,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    // Function to handle creating a new tour guide profile
+    const handleCreateTourGuideProfile = async (e) => {
+        e.preventDefault();
+        try {
+            await createTourGuideProfile(tourGuideId, {
+                mobileNumber: newProfile.mobileNumber,
+                yearsOfExperience: newProfile.yearsOfExperience,
+                previousWork: newProfile.previousWork
+            });
+            alert('Profile created successfully!');
+            // Reset profile form after creation
+            setNewProfile({
+                mobileNumber: '',
+                yearsOfExperience: '',
+                previousWork: ''
+            });
+            setShowProfileForm(false); // Hide form after creation
+        } catch (error) {
+            console.error('Error creating profile:', error);
+            alert('Error creating profile');
+        }
+    };
+    
+
+    // Toggle to show or hide the profile form
+    const toggleProfileForm = () => {
+        setShowProfileForm(!showProfileForm);
+    };
 
     // Handle showing/hiding itinerary form
     const toggleCreateForm = () => {
         setShowItineraryForm(!showItineraryForm);
     };
 
+
     // Handle creating a new itinerary
     const handleCreateItinerary = async (e) => {
-        e.preventDefault();
 
+        e.preventDefault();
+    
         try {
             const itineraryData = {
                 tourGuideId,
                 title,
                 activities,
                 locations,
+                tags,
                 timeline,
                 duration,
                 language,
@@ -62,17 +132,31 @@ const TourGuideDashboard = () => {
                 pickupLocation,
                 dropoffLocation,
             };
-
-            await createItinerary(itineraryData);
+    
+            // Call the API to create the new itinerary
+            const createdItinerary = await createItinerary(itineraryData);
+    
+            // Update the local state immediately with the new itinerary
+            setItineraries((prevItineraries) => [...prevItineraries, createdItinerary]);
+    
             alert('Itinerary created successfully!');
             
             // Reset form fields after creation
-            setTitle(''); setActivities(''); setLocations(''); setTimeline('');
-            setDuration(''); setLanguage(''); setPrice(''); setAvailableDates('');
-            setAccessibility(false); setPickupLocation(''); setDropoffLocation('');
+            setTitle(''); 
+            setActivities(''); 
+            setLocations(''); 
+            setTags('');
+            setTimeline('');
+            setDuration(''); 
+            setLanguage(''); 
+            setPrice(''); 
+            setAvailableDates('');
+            setAccessibility(false); 
+            setPickupLocation(''); 
+            setDropoffLocation('');
             
             toggleCreateForm(); // Hide the form after submission
-
+    
         } catch (error) {
             console.error('Error creating itinerary:', error);
             alert('Error creating itinerary');
@@ -134,9 +218,125 @@ const TourGuideDashboard = () => {
             }
         }
     };
+     // Handle profile field update
+     const handleFieldChange2 = (field, value) => {
+        setProfile({ ...profile, [field]: value });
+    };
+
+    // Handle updating the profile
+    const handleUpdateProfile = async (field) => {
+        try {
+            await updateTourGuideProfile(tourGuideId, { [field]: profile[field] });
+            setIsEditing({ ...isEditing, [field]: false }); // Stop editing after saving
+            alert('Profile updated successfully!');
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert('Failed to update profile');
+        }
+    };
+
     return (
         <div className="tourguide-dashboard">
-            <h1>My Itineraries</h1>
+             <h1>Tour Guide Profile</h1>
+
+             {profile ? (
+                <div className="profile-box">
+                    {/* Username */}
+                    <div className="profile-field">
+                    <h2>
+    <i className="fas fa-user" style={{ marginRight: '10px' }}></i>
+    {profile.username}
+</h2>
+                        
+                    </div>
+
+                    {/* Email */}
+                    <div className="profile-field">
+                        <strong>Email:</strong>
+                        {isEditing.email ? (
+                            <input 
+                                type="email" 
+                                value={profile.email} 
+                                onChange={(e) => handleFieldChange2('email', e.target.value)} 
+                            />
+                        ) : (
+                            <span>{profile.email}</span>
+                        )}
+                        <i className="fas fa-pen edit-icon" onClick={() => toggleEditField('email')}></i>
+                        {isEditing.email && <button onClick={() => handleUpdateProfile('email')}>Save</button>}
+                    </div>
+
+                    {/* Mobile Number */}
+                    <div className="profile-field">
+                        <strong>Mobile Number:</strong>
+                        {isEditing.mobileNumber ? (
+                            <input 
+                                type="text" 
+                                value={profile.mobileNumber} 
+                                onChange={(e) => handleFieldChange2('mobileNumber', e.target.value)} 
+                            />
+                        ) : (
+                            <span>{profile.mobileNumber}</span>
+                        )}
+                        <i className="fas fa-pen edit-icon" onClick={() => toggleEditField('mobileNumber')}></i>
+                        {isEditing.mobileNumber && <button onClick={() => handleUpdateProfile('mobileNumber')}>Save</button>}
+                    </div>
+
+                    {/* Years of Experience */}
+                    <div className="profile-field">
+                        <strong>Years of Experience:</strong>
+                        {isEditing.yearsOfExperience ? (
+                            <input 
+                                type="number" 
+                                value={profile.yearsOfExperience} 
+                                onChange={(e) => handleFieldChange2('yearsOfExperience', e.target.value)} 
+                            />
+                        ) : (
+                            <span>{profile.yearsOfExperience}</span>
+                        )}
+                        <i className="fas fa-pen edit-icon" onClick={() => toggleEditField('yearsOfExperience')}></i>
+                        {isEditing.yearsOfExperience && <button onClick={() => handleUpdateProfile('yearsOfExperience')}>Save</button>}
+                    </div>
+
+                    {/* Previous Work */}
+                    <div className="profile-field">
+                        <strong>Previous Work:</strong>
+                        {isEditing.previousWork ? (
+                            <textarea 
+                                value={profile.previousWork} 
+                                onChange={(e) => handleFieldChange2('previousWork', e.target.value)} 
+                            />
+                        ) : (
+                            <span>{profile.previousWork}</span>
+                        )}
+                        <i className="fas fa-pen edit-icon" onClick={() => toggleEditField('previousWork')}></i>
+                        {isEditing.previousWork && <button onClick={() => handleUpdateProfile('previousWork')}>Save</button>}
+                    </div>
+                </div>
+            ) : (
+                <p>Loading profile...</p>
+            )}
+           {/* Create Profile Button */}
+           <button className="toggle-button" onClick={toggleProfileForm}>
+                {showProfileForm ? 'Close Profile Form' : 'Create Tour Guide Profile'}
+            </button>
+
+            {/* Profile Form */}
+            {showProfileForm && (
+                <div className="form-container">
+                    <h1>Create Tour Guide Profile</h1>
+                    <form onSubmit={handleCreateTourGuideProfile}>
+                        <label>Mobile Number:</label>
+                        <input type="text" name="mobileNumber" value={newProfile.mobileNumber} onChange={handleProfileChange} />
+                        <label>Years of Experience:</label>
+                        <input type="number" name="yearsOfExperience" value={newProfile.yearsOfExperience} onChange={handleProfileChange} />
+                        <label>Previous Work:</label>
+                        <textarea name="previousWork" value={newProfile.previousWork} onChange={handleProfileChange}></textarea>
+                        <button type="submit">Create Profile</button>
+                    </form>
+                </div>
+            )}
+ <h1>My Itineraries</h1>
             <button className="toggle-button" onClick={toggleCreateForm}>
                 {showItineraryForm ? 'Close' : 'Create New Itinerary'}
             </button>
@@ -151,6 +351,8 @@ const TourGuideDashboard = () => {
                         <textarea value={activities} onChange={(e) => setActivities(e.target.value)} required></textarea>
                         <label>Locations (separate by "-"):</label>
                         <input type="text" value={locations} onChange={(e) => setLocations(e.target.value.split(","))} required />
+                        <label>Tags (separate by "-"):</label>
+                        <input type="text" value={tags} onChange={(e) => setTags(e.target.value.split(","))} required />
                         <label>Timeline:</label>
                         <input type="text" value={timeline} onChange={(e) => setTimeline(e.target.value)} required />
                         <label>Duration:</label>
@@ -232,6 +434,22 @@ const TourGuideDashboard = () => {
                             )}
                             <i className="fas fa-pen edit-icon" onClick={() => toggleEditField('locations')}></i>
                             {isEditing.locations && <button onClick={() => handleUpdateItinerary('locations')}>Save</button>}
+                        </div>
+
+
+                        <div className="itinerary-field">
+                            <strong>Tags:</strong>
+                            {isEditing.tags ? (
+                                <input
+                                    type="text"
+                                    value={selectedItinerary.tags.join(", ")}
+                                    onChange={(e) => handleFieldChange('tags', e.target.value.split(","))}
+                                />
+                            ) : (
+                                <span>{selectedItinerary.tags.join(', ')}</span>
+                            )}
+                            <i className="fas fa-pen edit-icon" onClick={() => toggleEditField('tags')}></i>
+                            {isEditing.tags && <button onClick={() => handleUpdateItinerary('tags')}>Save</button>}
                         </div>
 
                         {/* Timeline */}
@@ -366,6 +584,7 @@ const TourGuideDashboard = () => {
                     </div>
                 </div>
             )}
+           
         </div>
     );
 };
