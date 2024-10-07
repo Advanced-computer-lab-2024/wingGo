@@ -111,7 +111,7 @@ const getAdvertiserProfile = async (req, res) => {
 
 const createActivity = async (req, res) => {
 
-    const {date, time, location, price, category, tags, specialDiscounts, isBookingOpen, advertiser} = req.body
+    const {name, date, time, location, price, category, tags, specialDiscounts, isBookingOpen, advertiser} = req.body
 
     const {lat, lng} = await getCoordinates(location.address);
 
@@ -120,6 +120,7 @@ const createActivity = async (req, res) => {
 
     try{
         const newActivity = new Activity({
+            name,
             date,
             time,
             location,

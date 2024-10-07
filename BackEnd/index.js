@@ -78,6 +78,13 @@ app.post("/register", (req, res) => {
   }
 });
 
+app.get("/getUsersinLogin", (req, res) => {
+
+    PendingUsersController.getUserByUsername(req,res);
+
+});
+
+
 
 
 // Tourist routes

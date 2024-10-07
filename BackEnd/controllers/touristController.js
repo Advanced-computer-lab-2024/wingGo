@@ -337,9 +337,7 @@ const getAllUpcomingActivities = async (req, res) => {
 
         // Fetch all upcoming activities
         const activities = await Activity.find({ date: { $gte: currentDate } });
-        res.status(200).json({
-            activities
-        });
+        res.status(200).json(activities);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -429,9 +427,7 @@ const filterUpcomingActivities = async (req, res) => {
     try {
         // Find activities based on the constructed filter
         const activities = await Activity.find(filter); 
-        if (activities.length === 0) {
-            return res.status(404).json({ message: 'No activities found with the specified filters' });
-        }
+        
         res.status(200).json(activities); // Return filtered activities
     } catch (error) {
         res.status(400).json({ error: error.message }); 
@@ -488,44 +484,54 @@ const searchAllModels = async (req, res) => {
     }
 };
 
+const filterItineraries = async (req, res) => {
+    const { budget, date, preferences, language } = req.query;
 
-    const filterItineraries = async (req, res) => {
-        const { budget, date, preferences, language } = req.query;
-    
-        try {
-            // Build a query object
-            let query = {};
-    
-            // Filter by budget (assuming budget is a max value here)
-            if (budget) {
-                query.budget = { $lte: budget };
-            }
-    
-            // Filter by date
-            if (date) {
-                query.date = { $gte: new Date(date) };
-            }
-    
-            // Filter by preferences
-            if (preferences) {
-                query.preferences = { $in: preferences.split(',') };
-            }
-    
-            // Filter by language
-            if (language) {
-                query.language = language;
-            }
-    
-            // Fetch itineraries from database based on query
-            const itineraries = await Itinerary.find(query);
-    
-            res.status(200).json(itineraries);
-        } catch (error) {
-            console.error('Error filtering itineraries:', error);
-            res.status(500).json({ error: 'Failed to fetch itineraries.' });
+    let filter = {}; // Initialize an empty filter object
+
+    // Always apply upcoming dates filter (availableDates >= today)
+    const currentDate = new Date();
+    filter.availableDates = { $elemMatch: { $gte: currentDate } }; // Match any upcoming date within the array
+
+    // Apply exact date filter if provided
+    if (date) {
+        const exactDate = new Date(date);
+        const startOfDay = new Date(exactDate.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(exactDate.setHours(23, 59, 59, 999));
+
+        filter.availableDates = { $elemMatch: { $gte: startOfDay, $lte: endOfDay } }; // Match exact date in array
+    }
+
+    // Apply budget filter
+    if (budget) {
+        filter.price = { $lte: budget }; // Price should be less than or equal to the specified budget
+    }
+
+    // Apply preferences filter (e.g., historic areas, beaches)
+    if (preferences) {
+        const preferenceArray = preferences.split(','); // Assuming preferences are provided as a comma-separated string
+        filter.tags = { $in: preferenceArray }; // Match itineraries that have at least one of the specified tags
+    }
+
+    // Apply language filter
+    if (language) {
+        filter.language = language; // Exact match for language
+    }
+
+    try {
+        // Find itineraries based on the constructed filter
+        const itineraries = await Itinerary.find(filter);
+
+        if (itineraries.length === 0) {
+            return res.status(404).json({ message: 'No itineraries found matching the criteria.' });
         }
-    };
-    
+
+        res.status(200).json(itineraries);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 module.exports = {
     tourist_hello,
@@ -547,5 +553,4 @@ module.exports = {
     getAllUpcomingPlaces,
     filterUpcomingActivities,
     filterItineraries
-
 };

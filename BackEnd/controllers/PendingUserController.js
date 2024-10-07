@@ -1,7 +1,32 @@
 const bcrypt = require('bcrypt');
 const PendingUser = require('../models/PendingUsers');
+const LoginCredentials = require('../models/LoginCredentials');
+
+// Method to filter by username for TESTING DONT IMPLEMENT API
+const getUserByUsername = async (req, res) => {
+    try {
+        const { username } = req.query;
+
+        // Check if username is provided
+        if (!username) {
+            return res.status(400).json({ message: 'Username query parameter is required.' });
+        }
+
+        // Search for the user in LoginCredentials by username
+        const user = await PendingUser.findOne({ username: username });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 const pendinguser_register = async (req, res) => {
+    console.log("in register");
     // Destructure fields from the request body
     const { email, username, password, role } = req.body;
     
@@ -26,5 +51,6 @@ const pendinguser_register = async (req, res) => {
 };
 
 module.exports = {
-    pendinguser_register
+    pendinguser_register,
+    getUserByUsername
 };

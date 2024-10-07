@@ -560,12 +560,12 @@ const handleDeleteTag = async (id) => {
                 />
                 <button type="submit">Add Governor</button>
             </form>
-            <h2>Attractions</h2>
+            <h2>itineraries</h2>
         <ul className="attractions-list">
             {attractions.map(attraction => (
                 <li key={attraction._id} className="attraction-item">
                     <div className="attraction-header">
-                        <span className="attraction-name">{attraction.name}</span>
+                        <span className="attraction-name">{attraction.title}</span>
                         <button className="show-tags-button" onClick={() => fetchTagsForAttraction(attraction._id)}>Show Tags</button>
                         <button className="add-tag-button" onClick={() => handleShowTagInput(attraction._id, 'add')}>Add Tag</button>
                         <button className="delete-tag-button" onClick={() => handleShowTagInput(attraction._id, 'delete')}>Delete Tag</button>

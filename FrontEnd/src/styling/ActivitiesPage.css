@@ -1,0 +1,23 @@
+/* ActivitiesPage.css */
+.activities-page {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.filters, .sort, .search {
+    margin-bottom: 20px;
+}
+
+.activity-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.activity {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin: 10px;
+    width: 200px;
+    text-align: left;
+}

@@ -178,44 +178,59 @@ const filterUpcomingActivities = async (req, res) => {
 };
   // Assuming Itinerary is the same for guests
 
-// Function to filter itineraries for guests
+
+
+
+
+
 const filterItineraries = async (req, res) => {
+    // Malak Filter
     const { budget, date, preferences, language } = req.query;
 
+    let filter = {}; // Initialize an empty filter object
+
+    // Always apply upcoming dates filter (availableDates >= today)
+    const currentDate = new Date();
+    filter.availableDates = { $elemMatch: { $gte: currentDate } }; // Match any upcoming date within the array
+
+    // Apply exact date filter if provided
+    if (date) {
+        const exactDate = new Date(date);
+        const startOfDay = new Date(exactDate.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(exactDate.setHours(23, 59, 59, 999));
+
+        filter.availableDates = { $elemMatch: { $gte: startOfDay, $lte: endOfDay } }; // Match exact date in array
+    }
+
+    // Apply budget filter
+    if (budget) {
+        filter.price = { $lte: budget }; // Price should be less than or equal to the specified budget
+    }
+
+    // Apply preferences filter (e.g., historic areas, beaches)
+    if (preferences) {
+        const preferenceArray = preferences.split(','); // Assuming preferences are provided as a comma-separated string
+        filter.tags = { $in: preferenceArray }; // Match itineraries that have at least one of the specified tags
+    }
+
+    // Apply language filter
+    if (language) {
+        filter.language = language; // Exact match for language
+    }
+
     try {
-        // Building query object based on request query parameters
-        let query = {};
+        // Find itineraries based on the constructed filter
+        const itineraries = await Itinerary.find(filter);
 
-        if (budget) {
-            query.budget = { $lte: budget };
+        if (itineraries.length === 0) {
+            return res.status(404).json({ message: 'No itineraries found matching the criteria.' });
         }
 
-        if (date) {
-            query.date = { $gte: new Date(date) };
-        }
-
-        if (preferences) {
-            query.preferences = { $in: preferences.split(',') };
-        }
-
-        if (language) {
-            query.language = language;
-        }
-
-        // Fetch itineraries from database
-        const itineraries = await Itinerary.find(query);
-
-        // Respond with the filtered itineraries
         res.status(200).json(itineraries);
     } catch (error) {
-        console.error('Error fetching itineraries:', error);
-        res.status(500).json({ error: 'Failed to fetch itineraries' });
+        res.status(500).json({ error: error.message });
     }
 };
-
-
-
-
 
 
 
