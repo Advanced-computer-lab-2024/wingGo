@@ -208,11 +208,6 @@ const filterProduct = async (req, res) => {
     }
 };
 
-
-
-
-const Place = require('../models/Places');
-
 // Filter places by type or historical period
 const filterPlacesByTag = async (req, res) => {
     try {
