@@ -92,3 +92,48 @@ export const createTourGuideProfile = async (profileId,profileData) => {
         throw error;
     }
 };
+
+export const getTourGuideProfile = async (profileId) => {
+    try {
+        const response = await axios.get(`${API_URL}/tourguide/fetch/${profileId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        throw error;
+    }
+};
+export const updateTourGuideProfile = async (id, updatedData) => {
+    try {
+        const response = await fetch(`${API_URL}/tourguide/update/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedData), // Send the data as JSON
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to edit profile');
+        }
+        return await response.json(); // Parse the response as JSON
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        throw error;
+    }
+};
+export const getItineraryById = async (id, tourGuideId) => {
+    try {
+        const response = await fetch(`${API_URL}/tourguide/getitinerary/${id}?tourGuideId=${tourGuideId}`, {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            throw new Error('Itinerary not found');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching itinerary:', error);
+        throw error;
+    }
+};

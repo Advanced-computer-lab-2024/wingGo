@@ -14,13 +14,15 @@ router.get('/sortProducts', touristController.sortProductsByRatings);
 router.get('/filterProducts', touristController.filterProduct);
 router.get('/searchProductName', touristController.searchProductsByName);
 router.get('/filterPlacesByTag', touristController.filterPlacesByTag);
-// router.get('viewActivities',touristController.viewTouristActivities);
-// router.get('viewItineraries',touristController.viewTouristItineraries);
+// router.get('/viewActivities',touristController.viewTouristActivities);
+// router.get('/viewItineraries',touristController.viewTouristItineraries);
 router.get('/viewActivities', touristController.getAllUpcomingActivities);
 router.get('/viewItineraries', touristController.getAllUpcomingIteneries);
 router.get('/viewPlaces',touristController.getAllUpcomingPlaces);
 router.get('/viewUpcoming',touristController.getAllUpcomingEvents);
 
 router.get('/filterActivities',touristController.filterUpcomingActivities);
+
 router.get('/sort', touristController.sortUpcomingActivityOrItineraries);
+router.get('/search', touristController.searchAllModels);
 module.exports = router;

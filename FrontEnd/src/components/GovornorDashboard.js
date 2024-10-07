@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createPlace,getAllPlaces,updatePlace,getPlaceById,deletePlace  } from '../APIs/govornorApi';
+import { createPlace,getAllPlaces,updatePlace,getPlaceById,deletePlace,addTagToPlace  } from '../APIs/govornorApi';
 import '../styling/GovornorDashboard.css';
 
 
@@ -13,6 +13,10 @@ const GovornorDashboard = () => {
             foreigner: 0,
             native: 0,
             student: 0
+        },
+        tags: {
+            types: [], // Initialize as an empty array
+            historicalPeriods: [] // Initialize as an empty array
         }
     });
 const [places,setPlaces]=useState([]);
@@ -20,6 +24,10 @@ const [selectedPlace, setSelectedPlace] = useState(null);
 const [searchPlaceId, setSearchPlaceId] = useState('');
 const [searchResult, setSearchResult] = useState(null);
 const [placeId, setPlaceId] = useState('');
+
+const [tag, setTag] = useState('');
+const [category, setCategory] = useState('type'); // Default to "type"
+const [placeIdForTag, setPlaceIdForTag] = useState('');
 
 useEffect(()=>{
     const fetchPlaces = async () => {
@@ -33,15 +41,15 @@ useEffect(()=>{
 const handleAddPlace = async (e) => {
     e.preventDefault();
     try {
-        const response = await createPlace(newPlace)
+        const response = await createPlace(newPlace);
      
         setNewPlace({
             name: '',
             description: '',
             location: '',
             openingHours :'',
-            ticketPrices: { foreigner: 0, native: 0, student: 0 }
-           
+            ticketPrices: { foreigner: 0, native: 0, student: 0 },
+            tags: { types: [], historicalPeriods: [] }
 
         });
     
@@ -112,6 +120,22 @@ const handleDeletePlace = async (e) => {
         alert('Failed to delete place: ' + error.message);
     }
 };
+
+const handleAddTag = async (e) => {
+    e.preventDefault();
+    try {
+        const response = await addTagToPlace(placeIdForTag, tag, category);
+        alert(response.message || "Tag added successfully");
+        const updatedPlace = await getPlaceById(placeIdForTag);
+        setPlaces(prevPlaces => prevPlaces.map(place => place._id === updatedPlace._id ? updatedPlace : place));
+
+        setTag(''); // Clear the input field after success
+        setPlaceIdForTag('');
+    } catch (error) {
+        alert(`Failed to add tag: ${error.message}`);
+    }
+};
+
     return (
         <div className="governor-dashboard">
         <h1>Govornor Dashboard </h1>
@@ -147,6 +171,46 @@ const handleDeletePlace = async (e) => {
                 Student Ticket Price:
                 <input type="number" name="ticketPrices.student" value={newPlace.ticketPrices.student} onChange={handleInputChange} required />
             </label>
+            <label>
+    Type (Optional):
+    <select
+                        value={newPlace.tags.types[0] || ''} // Show selected type
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            setNewPlace(prevState => ({
+                                ...prevState,
+                                tags: {
+                                    ...prevState.tags,
+                                    types: value ? [value] : [] // Only allow one type for simplicity
+                                }
+                            }));
+                        }}
+                    >
+        <option value="">Select a type</option>
+        <option value="Monuments">Monuments</option>
+        <option value="Museums">Museums</option>
+        <option value="Religious Sites">Religious Sites</option>
+        <option value="Palaces/Castles">Palaces/Castles</option>
+    </select>
+</label>
+<label>
+    Historical Period (Optional):
+    <input
+       type="text"
+       value={newPlace.tags.historicalPeriods.join(', ')} // Join periods for input
+       onChange={(e) => {
+           const periods = e.target.value.split(',').map(period => period.trim());
+           setNewPlace(prevState => ({
+               ...prevState,
+               tags: {
+                   ...prevState.tags,
+                   historicalPeriods: periods
+               }
+           }));
+       }}
+       placeholder="Enter historical periods separated by commas"
+    />
+</label>
             <button type="submit">Add Place</button>
         </form>
 
@@ -164,6 +228,10 @@ const handleDeletePlace = async (e) => {
                         <br />Native: ${place.ticketPrices.native} 
                         <br />Student: ${place.ticketPrices.student}
                     </p>
+                    <p>Tags:
+                <br />Type(s): {place.tags.types.join(', ')}
+                <br />Historical Period(s): {place.tags.historicalPeriods.join(', ')}
+            </p>
                     <button onClick={() => setSelectedPlace(place)}>Edit</button>
                 </li>
             ))}
@@ -198,6 +266,10 @@ const handleDeletePlace = async (e) => {
                     <p>Location: {searchResult.location}</p>
                     <p>Opening Hours: {searchResult.openingHours}</p>
                     <p>Ticket Prices: Foreigner: {searchResult.ticketPrices.foreigner}, Native: {searchResult.ticketPrices.native}, Student: {searchResult.ticketPrices.student}</p>
+                    <p>Tags:
+            <br />Type(s): {searchResult.tags.types.join(', ')}
+            <br />Historical Period(s): {searchResult.tags.historicalPeriods.join(', ')}
+        </p>
                 </div>
             )}
 
@@ -214,6 +286,36 @@ const handleDeletePlace = async (e) => {
                 <button type="submit">Delete Place</button>
             </form>
 
+            <h2>Add Tag to Place</h2>
+            <form onSubmit={handleAddTag}>
+                <label>
+                    Place ID:
+                    <input
+                        type="text"
+                        value={placeIdForTag}
+                        onChange={(e) => setPlaceIdForTag(e.target.value)}
+                        required
+                    />
+                </label>
+                <label>
+                    Tag:
+                    <input
+                        type="text"
+                        value={tag}
+                        onChange={(e) => setTag(e.target.value)}
+                        required
+                    />
+                </label>
+                <label>
+                    Category:
+                    <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                        <option value="type">Type</option>
+                        <option value="historicalPeriod">Historical Period</option>
+                    </select>
+                </label>
+                <button type="submit">Add Tag</button>
+            </form>
+
     </div>
 
     
@@ -225,16 +327,21 @@ const EditPlace = ({ place, onClose, onSave }) => {
     const [description, setDescription] = useState(place.description);
     const [location, setLocation] = useState(place.location);
     const [openingHours, setNewOpeningHours] = useState(place.openingHours);
+    const [types, setTypes] = useState(place.tags?.types || []);
+    const [historicalPeriods, setHistoricalPeriods] = useState(place.tags?.historicalPeriods || []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const updatedPlace = { 
-            placeId:place._id, 
+            placeId: place._id, 
             name, 
-            description,
+            description, 
             location, 
-            openingHours 
-            
+            openingHours, 
+            tags: {
+                types,
+                historicalPeriods
+            }
         };
         onSave(updatedPlace);
     };
@@ -254,6 +361,21 @@ const EditPlace = ({ place, onClose, onSave }) => {
 
                 <label>Opening Hours:</label>
                 <input type="text" value={openingHours} onChange={(e) => setNewOpeningHours(e.target.value)} />
+                <label>Type(s):</label>
+                <input
+                    type="text"
+                    value={types.join(', ')}  // Display types as comma-separated values
+                    onChange={(e) => setTypes(e.target.value.split(',').map(type => type.trim()))}
+                    placeholder="e.g., Monuments, Museums"
+                />
+
+                <label>Historical Period(s):</label>
+                <input
+                    type="text"
+                    value={historicalPeriods.join(', ')}  // Display historical periods as comma-separated values
+                    onChange={(e) => setHistoricalPeriods(e.target.value.split(',').map(period => period.trim()))}
+                    placeholder="e.g., Medieval, Ancient"
+                />
 
                 <button type="submit">Save</button>
                 <button type="button" onClick={onClose}>Cancel</button>
