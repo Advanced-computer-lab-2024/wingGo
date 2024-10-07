@@ -22,6 +22,8 @@ router.get('/viewPlaces',touristController.getAllUpcomingPlaces);
 router.get('/viewUpcoming',touristController.getAllUpcomingEvents);
 
 router.get('/filterActivities',touristController.filterUpcomingActivities);
+router.get('/filterItineraries',touristController.filterItineraries);
+
 
 router.get('/sort', touristController.sortUpcomingActivityOrItineraries);
 router.get('/search', touristController.searchAllModels);
