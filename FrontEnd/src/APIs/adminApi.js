@@ -349,3 +349,22 @@ export const updateCategory = async (id, name) => {
         throw error;
     }
 };
+
+export const deleteCategory = async (id) => {
+    try {
+        const response = await fetch(`${API_URL}/admin/deletecategory/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete category');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        throw error;
+    }
+};

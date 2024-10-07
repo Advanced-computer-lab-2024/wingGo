@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePendingUser, addProductAsAdmin, filterProductByPrice,
      searchProductsByName, deleteAccountById, addTourismGovernor, getAttractions, getTagsByAttractionId, addTag, deleteTag, updateTag
-    , addAdmin, sortProductsByRatings, getCategories, createCategory, updateCategory } from '../APIs/adminApi';
+    , addAdmin, sortProductsByRatings, getCategories, createCategory, updateCategory, deleteCategory } from '../APIs/adminApi';
 import '../styling/AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -85,6 +85,19 @@ const AdminDashboard = () => {
     
         fetchCategories();
     }, []);
+
+    const handleDeleteCategory = async (id) => {
+        if (window.confirm('Are you sure you want to delete this category?')) {
+            try {
+                await deleteCategory(id);
+                setCategories(categories.filter(category => category._id !== id));
+                alert('Category deleted successfully');
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                alert('Error deleting category: ' + error.message);
+            }
+        }
+    };
 
     const handleCategorySelect = (category) => {
         setSelectedCategory(category);
@@ -626,12 +639,15 @@ const handleDeleteTag = async (id) => {
             {error && <p className="error-message">{error}</p>}
             {success && <p className="success-message">{success}</p>}
         </form>
-        <h2>Activity Categories</h2>
+        <h2>Update Activity Category</h2>
         <ul className="categories-list">
             {categories.map(category => (
                 <li key={category._id} className="category-item">
                     {category.name}
-                    <button onClick={() => handleCategorySelect(category)}>Edit</button>
+                    <div>
+                        <button onClick={() => handleCategorySelect(category)}>Edit</button>
+                        <button onClick={() => handleDeleteCategory(category._id)}>Delete</button>
+                    </div>
                 </li>
             ))}
         </ul>
