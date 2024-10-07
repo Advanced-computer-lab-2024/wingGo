@@ -178,45 +178,13 @@ const filterUpcomingActivities = async (req, res) => {
 };
   // Assuming Itinerary is the same for guests
 
-// Function to filter itineraries for guests
-const filterItineraries = async (req, res) => {
-    const { budget, date, preferences, language } = req.query;
 
-    try {
-        // Building query object based on request query parameters
-        let query = {};
-
-        if (budget) {
-            query.budget = { $lte: budget };
-        }
-
-        if (date) {
-            query.date = { $gte: new Date(date) };
-        }
-
-        if (preferences) {
-            query.preferences = { $in: preferences.split(',') };
-        }
-
-        if (language) {
-            query.language = language;
-        }
-
-        // Fetch itineraries from database
-        const itineraries = await Itinerary.find(query);
-
-        // Respond with the filtered itineraries
-        res.status(200).json(itineraries);
-    } catch (error) {
-        console.error('Error fetching itineraries:', error);
-        res.status(500).json({ error: 'Failed to fetch itineraries' });
-    }
-};
 
 
 
 
 const filterItineraries = async (req, res) => {
+    // Malak Filter
     const { budget, date, preferences, language } = req.query;
 
     let filter = {}; // Initialize an empty filter object
