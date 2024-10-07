@@ -5,11 +5,9 @@ const Product = require('../models/product');
 const { default: mongoose } = require('mongoose');
 
 const updateSellerProfile = async (req, res) => {
-    console.log(req.body);
     try {
-        const id = req.params.id; // Use id as the unique identifier
+        const id = req.params.id;  // Use id as the unique identifier
         const sellerExist = await Seller.findById(id);
-        
 
         if (!sellerExist) {
             return res.status(404).json({ message: 'Seller not found' });
@@ -23,37 +21,30 @@ const updateSellerProfile = async (req, res) => {
             updateData.password = await bcrypt.hash(req.body.password, 10);
         }
 
-        // Update the seller's profile with the hashed password and other updated fields
+        // Conditionally update each field if provided
+        if (req.body.email) updateData.email = req.body.email;
+        if (req.body.username) updateData.username = req.body.username;
+        if (req.body.name) updateData.name = req.body.name;
+        if (req.body.description) updateData.description = req.body.description;
+        if (req.body.isCreatedProfile !== undefined) {
+            updateData.isCreatedProfile = req.body.isCreatedProfile;
+        }
+
+        // Update the seller profile with the new data
         const updatedSeller = await Seller.findByIdAndUpdate(id, updateData, {
             new: true,  // Return the updated document
         });
-        const loginUpdateFields = {};
-        if (req.body.username) {
-            loginUpdateFields.username = req.body.username;
-        }
-        if (req.body.password) {
-            loginUpdateFields.password =  updateData.password;  // Use the hashed password
-        }
 
-        if (Object.keys(loginUpdateFields).length > 0) {
-            // Find login credentials by tour guide id (assuming id is stored in both TourGuide and LoginCredentials models)
-            const updatedLoginCredentials = await LoginCredentials.findByIdAndUpdate(
-                id, // Match by id
-                { $set: loginUpdateFields },
-                { new: true }  // Return the updated document
-            );
-
-            if (!updatedLoginCredentials) {
-                return res.status(404).json({ message: 'Login credentials not found' });
-            }
-        }
-
-        res.status(200).json({message:'Profile and login credentials updated successfully',updatedSeller});
+        res.status(200).json({
+            message: 'Profile and login credentials updated successfully',
+            updatedSeller
+        });
 
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 const getSeller = async(req,res) => {
     try{
@@ -77,15 +68,52 @@ const getSeller = async(req,res) => {
         res.status(400).json({ error: error.message });
     }
 };
+const createSellerProfile = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const seller = await Seller.findById(id);
 
- const createSellerProfile = async (req, res) => {
-    return updateSellerProfile(req, res);
+        if (seller.isCreatedProfile !== 0) {
+            return res.status(400).json({ message: 'Profile already created for this seller.' });
+        } else {
+            seller.isCreatedProfile = 1;
+            await seller.save(); // Save the isCreatedProfile update
+            
+            // Instead of calling updateSellerProfile with res, return the updated seller profile here
+            const updateData = { ...req.body };
+            if (req.body.password) {
+                updateData.password = await bcrypt.hash(req.body.password, 10);
+            }
+            
+            // Update seller details
+            const updatedSeller = await Seller.findByIdAndUpdate(id, updateData, {
+                new: true, // Return the updated document
+            });
+
+            // Send a success response after updating everything
+            return res.status(201).json({
+                message: 'Seller profile created and updated successfully',
+                updatedSeller
+            });
+        }
+    } catch (err) {
+        return res.status(500).json({ error: 'Error creating seller profile: ' + err.message });
+    }
 };
+
+
+
+
+
+
 
 // Function to add a product
 const addProduct = async (req, res) => {
-    const { name, price, quantity, description,sellerId} = req.body;
-    // const sellerId = req.sellerId;  // Assuming sellerId comes from authentication middleware
+    const { name, price, quantity, description, sellerId } = req.body;
+    console.log('Received request to add product:', req.body);
+    
+    // Check if an image was uploaded, otherwise set picture to null
+    const picture = req.file ? req.file.filename : null;
 
     try {
         // Check if the seller exists
@@ -94,35 +122,35 @@ const addProduct = async (req, res) => {
             return res.status(404).json({ message: 'Seller not found' });
         }
 
-        // Create a new product
+        // Create a new product, conditionally including the image if available
         const newProduct = new Product({
             name,
             price,
             quantity,
             description,
-            seller: sellerId  // Link the product to the seller
+            seller: sellerId,
+            picture // Only include picture if it was uploaded
         });
 
-        // Save product to the database
+        // Save the product to the database
         await newProduct.save();
         res.status(201).json({ message: 'Product added successfully', newProduct });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
 const getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find().populate('seller', 'username');  // Populate seller username if available
+        const products = await Product.find().populate('seller', 'username');
 
-        // If you need to send a public path for pictures stored locally
         const productData = products.map(product => ({
             name: product.name,
-            picture: `../images/${product.picture}`,  // Build image URL dynamically
-            // picture: `${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
+            picture: product.picture ? `/images/${product.picture}` : null,  // Correct path to the image
             price: product.price,
             description: product.description,
             quantity: product.quantity,
-            seller: product.seller ? product.seller.username : 'Admin',  // Handle null seller field
+            seller: product.seller ? product.seller.username : 'Admin',
             ratings: product.ratings,
             reviews: product.reviews
         }));
@@ -133,10 +161,43 @@ const getAllProducts = async (req, res) => {
     }
 };
 
+const getProductImage = async (req, res) => {
+    const productId = req.params.id;
+    
+    try {
+        // Find the product by its ID
+        const product = await Product.findById(productId);
+        
+        // Check if the product exists
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        // If the product has an image
+        if (product.picture) {
+            // Serve the image from the 'images' directory
+            const imagePath = path.join(__dirname, '..', 'images', product.picture);
+            
+            // Respond with the image file
+            return res.sendFile(imagePath);
+        } else {
+            // If no image is found, return a placeholder or 404
+            return res.status(404).json({ message: 'Image not found for this product.' });
+        }
+    } catch (error) {
+        // Handle any errors
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
 // Function to edit a product
 const editProduct = async (req, res) => {
     const { productId } = req.params;
     const { name, price, quantity, description, sellerId } = req.body;
+    console.log('Received request to edit product with ID:', req.params.productId);
+    console.log('Request body:', req.body); 
   // Assuming sellerId comes from authentication middleware
 
     try {
@@ -203,6 +264,7 @@ const searchProductsByName = async (req, res) => {
 };
 
 
+
  module.exports = {
     updateSellerProfile,
     createSellerProfile,
@@ -213,6 +275,6 @@ const searchProductsByName = async (req, res) => {
     sortProductsByRatings,
     getAllProducts,
     filterProduct,
-    searchProductsByName
-    
+    searchProductsByName,
+    getProductImage
 };

@@ -104,6 +104,13 @@ app.use('/advertiser', advertiserRoutes);
 app.use('/tourist', touristRoutes);
 app.use('/guest', guestRoutes);
 
+// Serve static files from the "images" directory
+// Set up static folder
+// Serve static files from the 'images' folder
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
+
+
 
 
 

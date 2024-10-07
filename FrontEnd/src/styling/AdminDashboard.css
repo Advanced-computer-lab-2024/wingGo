@@ -228,3 +228,44 @@
     font-style: italic;
     color: #888;
 }
+
+.categories-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.admin-dashboard .category-item div {
+    display: flex;
+    gap: 10px;
+}
+
+.admin-dashboard .category-item button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.admin-dashboard .category-item button:hover {
+    background-color: #218838;
+}
+
+.admin-dashboard .category-details {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.admin-dashboard .error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+.admin-dashboard .success-message {
+    color: green;
+    margin-top: 10px;
+}
