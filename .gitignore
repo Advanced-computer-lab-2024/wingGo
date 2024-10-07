@@ -1,3 +1,5 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
 # Logs
 logs
 *.log
@@ -127,6 +129,14 @@ dist
 .yarn/unplugged
 .yarn/build-state.yml
 .yarn/install-state.gz
-.pnp.*
+.pnp
+.pnp.js
 
+# testing
+/coverage
 
+# production
+/build
+
+# misc
+.DS_Store

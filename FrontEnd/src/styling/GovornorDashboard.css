@@ -1,0 +1,147 @@
+/* src/components/GovornorDashboard.css */
+.governor-dashboard {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.governor-dashboard h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.governor-dashboard h2 {
+    color: #555;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.governor-dashboard ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.governor-dashboard li {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.governor-dashboard button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.governor-dashboard button:hover {
+    background-color: #0056b3;
+}
+
+.governor-dashboard form {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.governor-dashboard form label {
+    display: block;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.governor-dashboard form input,
+.governor-dashboard form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.governor-dashboardform button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.governor-dashboard form button:hover {
+    background-color: #218838;
+}
+
+.governor-dashboard h1 {
+    text-align: center;
+}
+
+.governor-dashboard ul {
+    list-style: none;
+    padding: 0;
+}
+
+.governor-dashboard li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.edit-place {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.edit-place h2 {
+    text-align: center;
+}
+
+.edit-place form {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-placelabel {
+    margin-bottom: 10px;
+}
+
+.edit-place input,
+.edit-place textarea {
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.edit-place button {
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.edit-place button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.edit-place button[type="button"] {
+    background-color: #f44336;
+    color: white;
+}

@@ -1,0 +1,387 @@
+/* Main container */
+.tourguide-dashboard {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #f4f4f9;
+    border-radius: 10px;
+}
+
+/* Heading styles */
+h1 {
+    text-align: center;
+    font-size: 32px;
+    color: #333;
+}
+/* Delete icon styling */
+.delete-icon {
+    font-size: 18px;
+    color: #d9534f;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.delete-icon:hover {
+    color: #c9302c;
+}
+
+/* Toggle button styles */
+.toggle-button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.toggle-button:hover {
+    background-color: #45a049;
+}
+
+/* Form container */
+.form-container {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+/* Form label and input */
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="checkbox"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+/* Checkbox styling */
+input[type="checkbox"] {
+    width: auto;
+    transform: scale(1.2);
+}
+
+/* Input focus styling */
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+/* Form button styles */
+button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.itinerary-list-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #4CAF50;
+}
+
+/* Itinerary slider styles (with auto-scrolling) */
+.itinerary-slider {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 20px;
+    gap: 15px;
+    margin-top: 20px;
+    background-color: #f4f4f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    scroll-behavior: smooth;  /* Smooth scrolling */
+}
+
+/* Itinerary card styles */
+.itinerary-card {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    min-width: 250px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+}
+.itinerary-list-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #4CAF50;
+}
+.itinerary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.itinerary-card h3 {
+    font-size: 18px;
+    color: #333;
+}
+
+/* Itinerary form overlay styles */
+.itinerary-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.itinerary-form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.itinerary-form h2 {
+    margin-bottom: 15px;
+    font-size: 24px;
+    text-align: center;
+    color: #333;
+}
+
+.itinerary-form p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.itinerary-form button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.itinerary-form button:hover {
+    background-color: #45a049;
+}
+/* Pencil icon styling */
+.edit-icon {
+    font-size: 16px;
+    color: #4CAF50;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.edit-icon:hover {
+    color: #388e3c;
+}
+
+/* Itinerary field container */
+.itinerary-field {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.itinerary-field input,
+.itinerary-field textarea {
+    width: 80%;
+    padding: 8px;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #388e3c;
+}
+/* Profile form styling */
+.form-container {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="number"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+/* Style for the profile box */
+.profile-box {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+/* Header styles for the profile box */
+.profile-box h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Paragraph styles in the profile box */
+.profile-box p {
+    font-size: 16px;
+    color: #555;
+    margin: 8px 0;
+}
+
+/* Strong tag styling for labels */
+.profile-box strong {
+    color: #000;
+    font-weight: 600;
+}
+/* Styling for the itinerary search field */
+.itinerary-search {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.itinerary-input {
+    padding: 10px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.search-button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    background-color: #45a049;
+}
+
+/* Styling for the error message */
+.error-message {
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Styling for itinerary details */
+.itinerary-details {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 20px auto;
+    text-align: left;
+}
+
+.itinerary-details h2 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.itinerary-details p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.itinerary-details strong {
+    color: #333;
+}
