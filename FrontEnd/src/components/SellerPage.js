@@ -8,7 +8,7 @@ import {
     searchProductsByNameAsSeller,
     createSellerProfile,
     updateSellerProfile,
-    getSeller  // Import getSeller
+    getSeller  // Make sure getSeller is imported
 } from '../APIs/sellerApi';
 import '../styling/Sellerpage.css';
 
@@ -21,8 +21,8 @@ const SellerPage = () => {
         price: '',
         quantity: '',
         description: '',
-        ratings: '',
-        reviews: []
+        ratings: '', // Optional
+        reviews: '', // Optional
     });
     const [productImage, setProductImage] = useState(null); // State for storing the product image
     const [productId, setProductId] = useState(''); // To store the product ID for editing
@@ -52,8 +52,22 @@ const SellerPage = () => {
 
     // State for handling seller profile fetch
     const [sellerProfile, setSellerProfile] = useState(null);
+    const [showProfile, setShowProfile] = useState(false); // State to control profile display
     const [error, setError] = useState(''); // Add error state to handle form validation
-    const [viewDetailsClicked, setViewDetailsClicked] = useState(false); // Track if "View My Details" was clicked
+
+    // Fetch seller profile when component loads
+    useEffect(() => {
+        const fetchSellerProfile = async () => {
+            try {
+                const profile = await getSeller(hardcodedSellerId);
+                setSellerProfile(profile);
+                setUpdatedSeller(profile); // Pre-fill update form with existing data
+            } catch (error) {
+                setError('Failed to fetch seller profile: ' + error.message);
+            }
+        };
+        fetchSellerProfile();
+    }, []);
 
     // Handle input changes for seller profile creation
     const handleSellerInputChange = (e) => {
@@ -76,18 +90,21 @@ const SellerPage = () => {
     // Function to create a new seller profile
     const handleCreateSellerProfile = async (e) => {
         e.preventDefault();
-
+    
         if (!newSeller.name && !newSeller.description) {
             setError('Either name or description is required.');
             return;
         }
-
+    
         try {
             const response = await createSellerProfile(newSeller);
             if (response.message === 'Seller profile created and updated successfully') {
                 alert('Profile created successfully');
                 setNewSeller({ name: '', description: '' });
                 setError('');  // Clear any error
+                // Fetch the updated seller profile immediately after creation
+                const updatedProfile = await getSeller(hardcodedSellerId);
+                setSellerProfile(updatedProfile);
             } else {
                 setError('Unexpected response: ' + response.message);
             }
@@ -100,25 +117,22 @@ const SellerPage = () => {
     // Function to update an existing seller profile
     const handleUpdateSellerProfile = async (e) => {
         e.preventDefault();
-
+    
         try {
             const response = await updateSellerProfile(updatedSeller);
-            alert('Profile updated successfully');
+            // Check if the response includes a success message
+            if (response.message === 'Profile and login credentials updated successfully') {
+                alert(response.message);  // Display success message
+                // Fetch the updated seller profile immediately after update
+                const updatedProfile = await getSeller(hardcodedSellerId);
+                setSellerProfile(updatedProfile);
+            } else {
+                alert('Unexpected response: ' + response.message);
+            }
             setError('');  // Clear any error
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'Failed to update profile: ' + error.message;
             setError(errorMessage);
-        }
-    };
-
-    // Function to fetch seller details on button click
-    const handleViewSellerDetails = async () => {
-        try {
-            const profile = await getSeller(hardcodedSellerId); // Fetch seller details
-            setSellerProfile(profile); // Set seller profile
-            setViewDetailsClicked(true); // Show the seller details
-        } catch (error) {
-            setError('Failed to fetch seller profile: ' + error.message);
         }
     };
 
@@ -144,6 +158,8 @@ const SellerPage = () => {
         formData.append('price', newProduct.price);
         formData.append('quantity', newProduct.quantity);
         formData.append('description', newProduct.description);
+        formData.append('ratings', newProduct.ratings); // Optional
+        formData.append('reviews', newProduct.reviews); // Optional
 
         if (productImage) {
             formData.append('picture', productImage); // Only append if an image is selected
@@ -157,35 +173,65 @@ const SellerPage = () => {
                 price: '',
                 quantity: '',
                 description: '',
-                ratings: '',
-                reviews: []
+                ratings: '', // Clear optional field
+                reviews: '', // Clear optional field
             });
             setProductImage(null); // Clear the image after adding the product
         } catch (error) {
             alert(`Failed to add product: ${error.message}`);
         }
     };
+const handleEditProduct = async (e) => {
+    e.preventDefault();
 
-    // Function to edit a product
-    const handleEditProduct = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await editProductAsSeller(productId, newProduct);
-            alert('Product updated successfully');
-            setNewProduct({
-                name: '',
-                price: '',
-                quantity: '',
-                description: '',
-                ratings: '',
-                reviews: []
-            });
-            setIsEditMode(false); // Switch back to add mode after editing
-            setProductId(''); // Clear productId after editing
-        } catch (error) {
-            alert(`Failed to update product: ${error.message}`);
-        }
-    };
+    console.log('Product ID being edited:', productId); // Add this line to verify productId
+
+    const formData = new FormData(); // Create FormData to hold product data and image
+    formData.append('name', newProduct.name);
+    formData.append('price', newProduct.price);
+    formData.append('quantity', newProduct.quantity);
+    formData.append('description', newProduct.description);
+    formData.append('ratings', newProduct.ratings); // Optional
+    formData.append('reviews', newProduct.reviews); // Optional
+
+    // Append the product image if one is selected
+    if (productImage) {
+        formData.append('picture', productImage);
+    }
+
+    try {
+        const response = await editProductAsSeller(productId, formData); // Pass FormData instead of JSON object
+        alert('Product updated successfully');
+        
+        // Update the product in allProducts state
+        setAllProducts(prevProducts => 
+            prevProducts.map(product => 
+                product._id === productId ? response.product : product
+            )
+        );
+
+        // If sorted or filtered, trigger the functions again to update the view
+        if (sortOrder) handleSortProductsByRatings();
+        if (filterPrice) handleFilterByPrice();
+
+        // Clear form fields
+        setNewProduct({
+            name: '',
+            price: '',
+            quantity: '',
+            description: '',
+            ratings: '', // Clear optional field
+            reviews: '', // Clear optional field
+        });
+        setProductImage(null); // Clear the image after adding the product
+        setIsEditMode(false); // Switch back to add mode after editing
+        setProductId(''); // Clear productId after editing
+    } catch (error) {
+        alert(`Failed to update product: ${error.message}`);
+    }
+};
+
+
 
     // Function to fetch and display all products
     const handleFetchAllProducts = async () => {
@@ -223,7 +269,7 @@ const SellerPage = () => {
                 setNoResults(false); // Reset noResults when products are found
             }
         } catch (error) {
-            alert(`Failed to filter products: ${error.message}`);
+            alert(`Failed to filter products: No products with such price`);
         }
     };
 
@@ -239,7 +285,7 @@ const SellerPage = () => {
                 setNoResults(false); // Reset noResults when products are found
             }
         } catch (error) {
-            alert(`Failed to search products: ${error.message}`);
+            alert(`Failed to search products:   No products with such name`);
         }
     };
 
@@ -258,7 +304,7 @@ const SellerPage = () => {
             {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error message if any */}
             <form onSubmit={handleCreateSellerProfile}>
                 <label>
-                    Name (optional):
+                    Name (Optional):
                     <input 
                         type="text" 
                         name="name" 
@@ -267,7 +313,7 @@ const SellerPage = () => {
                     />
                 </label>
                 <label>
-                    Description (optional):
+                    Description (Optional):
                     <input 
                         type="text" 
                         name="description" 
@@ -278,19 +324,16 @@ const SellerPage = () => {
                 <button type="submit">Create Seller Profile</button>
             </form>
 
-            {/* View My Details Button */}
-            <button onClick={handleViewSellerDetails}>
-                View My Details
-            </button>
-
-            {/* Show Seller Details after button is pressed */}
-            {viewDetailsClicked && sellerProfile && (
+            {/* View Seller Profile Section */}
+            <h2>View My Details</h2>
+            <button onClick={() => setShowProfile(!showProfile)}>View My Details</button>
+            {showProfile && sellerProfile && (
                 <div>
-                    <h2>Your Profile Details</h2>
-                    <p><strong>Email:</strong> {sellerProfile.email}</p>
-                    <p><strong>Username:</strong> {sellerProfile.username}</p>
+                    <h3>Seller Information</h3>
                     <p><strong>Name:</strong> {sellerProfile.name}</p>
                     <p><strong>Description:</strong> {sellerProfile.description}</p>
+                    <p><strong>Email:</strong> {sellerProfile.email}</p>
+                    <p><strong>Username:</strong> {sellerProfile.username}</p>
                 </div>
             )}
 
@@ -327,7 +370,7 @@ const SellerPage = () => {
                             />
                         </label>
                         <label>
-                            Name (optional):
+                            Name (Optional):
                             <input
                                 type="text"
                                 name="name"
@@ -336,7 +379,7 @@ const SellerPage = () => {
                             />
                         </label>
                         <label>
-                            Description (optional):
+                            Description (Optional):
                             <input
                                 type="text"
                                 name="description"
@@ -369,10 +412,6 @@ const SellerPage = () => {
                     <input type="text" name="name" value={newProduct.name} onChange={handleProdInputChange} required />
                 </label>
                 <label>
-                    Picture (optional):
-                    <input type="file" name="picture" onChange={handleFileChange} accept="image/*" />
-                </label>
-                <label>
                     Price:
                     <input type="number" name="price" value={newProduct.price} onChange={handleProdInputChange} required />
                 </label>
@@ -385,18 +424,16 @@ const SellerPage = () => {
                     <input type="text" name="description" value={newProduct.description} onChange={handleProdInputChange} required />
                 </label>
                 <label>
-                    Ratings (optional):
+                    Ratings (Optional):
                     <input type="number" name="ratings" value={newProduct.ratings} onChange={handleProdInputChange} />
                 </label>
                 <label>
-                    Reviews (optional):
-                    <input 
-                        type="text" 
-                        name="reviews" 
-                        value={newProduct.reviews} 
-                        onChange={handleProdInputChange}
-                        placeholder="Separate reviews by commas"
-                    />
+                    Reviews (Optional):
+                    <input type="text" name="reviews" value={newProduct.reviews} onChange={handleProdInputChange} />
+                </label>
+                <label>
+                    Product Image (Optional):
+                    <input type="file" name="picture" onChange={handleFileChange} accept="image/*" />
                 </label>
                 <button type="submit">{isEditMode ? 'Update Product' : 'Add Product'}</button>
             </form>
@@ -465,6 +502,18 @@ const SellerPage = () => {
                         {sortedProducts.map(product => (
                             <li key={product._id} className="product-item">
                                 <h3>{product.name}</h3>
+                                {product.picture ? (
+                                    <>
+                                        <button 
+                                            onClick={() => handleImageClick(product.picture)}
+                                            style={{ padding: '5px', marginBottom: '10px', cursor: 'pointer' }}
+                                        >
+                                            Show Image
+                                        </button>
+                                    </>
+                                ) : (
+                                    <p>No image available</p>
+                                )}
                                 <p><strong>Rating:</strong> {product.ratings}</p>
                                 <p><strong>Price:</strong> ${product.price}</p>
                                 <p><strong>Quantity:</strong> {product.quantity}</p>
@@ -500,6 +549,18 @@ const SellerPage = () => {
                         {filteredProducts.map(product => (
                             <li key={product._id} className="product-item">
                                 <h3>{product.name}</h3>
+                                {product.picture ? (
+                                    <>
+                                        <button 
+                                            onClick={() => handleImageClick(product.picture)}
+                                            style={{ padding: '5px', marginBottom: '10px', cursor: 'pointer' }}
+                                        >
+                                            Show Image
+                                        </button>
+                                    </>
+                                ) : (
+                                    <p>No image available</p>
+                                )}
                                 <p><strong>Price:</strong> ${product.price}</p>
                                 <p><strong>Quantity:</strong> {product.quantity}</p>
                                 <p><strong>Description:</strong> {product.description}</p>
@@ -534,6 +595,18 @@ const SellerPage = () => {
                         {searchResults.map(product => (
                             <li key={product._id} className="product-item">
                                 <h3>{product.name}</h3>
+                                {product.picture ? (
+                                    <>
+                                        <button 
+                                            onClick={() => handleImageClick(product.picture)}
+                                            style={{ padding: '5px', marginBottom: '10px', cursor: 'pointer' }}
+                                        >
+                                            Show Image
+                                        </button>
+                                    </>
+                                ) : (
+                                    <p>No image available</p>
+                                )}
                                 <p><strong>Price:</strong> ${product.price}</p>
                                 <p><strong>Quantity:</strong> {product.quantity}</p>
                                 <p><strong>Description:</strong> {product.description}</p>
@@ -542,7 +615,6 @@ const SellerPage = () => {
                     </ul>
                 </div>
             )}
-
         </div>
     );
 };

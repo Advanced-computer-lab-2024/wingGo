@@ -24,13 +24,16 @@ export const addProductAsSeller = async (productData) => {
         throw error;
     }
 };
-
-// Function to edit a product as a seller
 export const editProductAsSeller = async (productId, productData) => {
+    const hardcodedSellerId = '66fff4b2124570c52a7ccd03'; // Hardcoded sellerId
+
+    // Append sellerId to the formData before sending the request
+    productData.append('sellerId', hardcodedSellerId);
+
     try {
         const response = await axios.put(`${API_URL}/seller/product/${productId}`, productData, {
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'multipart/form-data',
             },
         });
 
@@ -44,6 +47,9 @@ export const editProductAsSeller = async (productId, productData) => {
         throw error;
     }
 };
+
+
+
 
 // Function to sort products by ratings
 export const sortProductsByRatingsAsSeller = async () => {
