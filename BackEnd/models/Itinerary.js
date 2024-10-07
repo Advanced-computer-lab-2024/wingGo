@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 const itinerarySchema = new Schema({
     tourGuideId: { type: mongoose.Schema.Types.ObjectId, ref: 'TourGuide', required: true },
     title: { type: String, required: true },
+    tags: [String],
     activities: { type: String, required: true },
     locations: [{ type: String, required: true }],
     timeline: { type: String, required: true },

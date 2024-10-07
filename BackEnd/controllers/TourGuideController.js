@@ -44,6 +44,7 @@ const createTourguideProfile = async (req, res) => {
     }
 };
 // Update the tour guide profile (with password hashing if updated)
+// Update the tour guide profile (with password hashing if updated)
 const updateTourGuideProfile = async (req, res) => {
     try {
         const id = req.params.id; // Use id as the unique identifier
@@ -54,10 +55,6 @@ const updateTourGuideProfile = async (req, res) => {
         if (!tourGuide) {
             return res.status(404).json({ message: 'Tour guide not found' });
         }
-
-        // Save the original username and email before updating
-        const originalEmail = tourGuide.email;
-        const originalUsername = tourGuide.username;
 
         // Check if the password is being updated
         if (req.body.password) {
@@ -75,9 +72,9 @@ const updateTourGuideProfile = async (req, res) => {
         }
 
         if (Object.keys(loginUpdateFields).length > 0) {
-            // Find login credentials by tour guide id (assuming id is stored in both TourGuide and LoginCredentials models)
-            const updatedLoginCredentials = await LoginCredentials.findByIdAndUpdate(
-                id, // Match by id
+            // Find login credentials by userId and roleModel (TourGuide)
+            const updatedLoginCredentials = await LoginCredentials.findOneAndUpdate(
+                { userId: id, roleModel: 'TourGuide' },  // Find by userId and roleModel for the tour guide
                 { $set: loginUpdateFields },
                 { new: true }  // Return the updated document
             );
@@ -96,10 +93,9 @@ const updateTourGuideProfile = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-
 // Create an itinerary
 const createItinerary = async (req, res) => {
-    const { tourGuideId, title, activities, locations, timeline, duration, language, price, availableDates, accessibility, pickupLocation, dropoffLocation, bookings } = req.body;
+    const { tourGuideId, title, activities, locations, timeline, duration, language, price, availableDates, accessibility, pickupLocation, dropoffLocation, bookings , tags} = req.body;
 
     try {
         // Validate if tourGuideId exists in the TourGuide collection
@@ -122,7 +118,8 @@ const createItinerary = async (req, res) => {
             accessibility,
             pickupLocation,
             dropoffLocation,
-            bookings
+            bookings,
+            tags
         });
 
         await newItinerary.save();
