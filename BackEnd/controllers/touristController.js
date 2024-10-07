@@ -487,6 +487,46 @@ const searchAllModels = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
+    const filterItineraries = async (req, res) => {
+        const { budget, date, preferences, language } = req.query;
+    
+        try {
+            // Build a query object
+            let query = {};
+    
+            // Filter by budget (assuming budget is a max value here)
+            if (budget) {
+                query.budget = { $lte: budget };
+            }
+    
+            // Filter by date
+            if (date) {
+                query.date = { $gte: new Date(date) };
+            }
+    
+            // Filter by preferences
+            if (preferences) {
+                query.preferences = { $in: preferences.split(',') };
+            }
+    
+            // Filter by language
+            if (language) {
+                query.language = language;
+            }
+    
+            // Fetch itineraries from database based on query
+            const itineraries = await Itinerary.find(query);
+    
+            res.status(200).json(itineraries);
+        } catch (error) {
+            console.error('Error filtering itineraries:', error);
+            res.status(500).json({ error: 'Failed to fetch itineraries.' });
+        }
+    };
+    
+
 module.exports = {
     tourist_hello,
     tourist_register,
@@ -505,5 +545,7 @@ module.exports = {
     getAllUpcomingActivities,
     getAllUpcomingIteneries,
     getAllUpcomingPlaces,
-    filterUpcomingActivities
+    filterUpcomingActivities,
+    filterItineraries
+
 };

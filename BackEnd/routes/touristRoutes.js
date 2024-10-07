@@ -25,4 +25,5 @@ router.get('/filterActivities',touristController.filterUpcomingActivities);
 
 router.get('/sort', touristController.sortUpcomingActivityOrItineraries);
 router.get('/search', touristController.searchAllModels);
+router.get('/itineraries', touristController.filterItineraries);
 module.exports = router;
