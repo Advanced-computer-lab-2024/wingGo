@@ -12,6 +12,7 @@ const TouristDashboard = () => {
             <button onClick={() => navigate('/itineraries')}>Itineraries</button>
             <button onClick={() => navigate('/historical-places')}>Historical Places</button>
             <button onClick={() => navigate('/products')}>Products</button>
+            <button onClick={() => navigate('/profile')}>Profile</button>
         </div>
     );
 };
