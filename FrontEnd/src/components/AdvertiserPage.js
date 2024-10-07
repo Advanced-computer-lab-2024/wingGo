@@ -1,14 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { updateAdvertiserProfile,getAdvertiserProfile, createAdvertiserProfile} from '../APIs/advertiserApi'; // Ensure this API call is correct
+import React, { useEffect, useState,useRef } from 'react';
+import { updateAdvertiserProfile,getAdvertiserProfile, createAdvertiserProfile,getAllActivities,createActivity,
+    getActivityById,updateActivity,deleteActivity} from '../APIs/advertiserApi'; // Ensure this API call is correct
 import '../styling/AdvertiserPage.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+/////////map
+import L from 'leaflet';  // Import Leaflet
+import 'leaflet/dist/leaflet.css';  // Import Leaflet CSS
+import markerIconPng from 'leaflet/dist/images/marker-icon.png';
+import markerShadowPng from 'leaflet/dist/images/marker-shadow.png';
+////////////////////
 
+/////map
+// Initial coordinates for Cairo, Egypt
+const initialLatLng = { lat: 30.033333, lng: 31.233334 };
+////////////
 const AdvertiserPage = () => {
 
-    const advertiserId = "670280d44e96fc474185da5f";
+    const advertiserId = "66fb37dda63c04def29f944e";
+
     const [profile, setProfile] = useState(null);
     const [error, setError] = useState(null);
     const [showForm, setShowForm] = useState(false);
-    const [showEditForm, setShowEditForm] = useState(false); // To toggle the edit form
+    const [showEditForm, setShowEditForm] = useState(false);
+     // To toggle the edit form
     const [newProfile, setNewProfile] = useState({
         companyName: '',
         website: '',
@@ -77,6 +91,8 @@ const AdvertiserPage = () => {
             alert('Failed to edit profile. Please try again.');
         }
     };
+
+
     const handleEditProfileClick = async () => {
         try {
             const data = await getAdvertiserProfile(advertiserId); 
@@ -186,6 +202,8 @@ const AdvertiserPage = () => {
                             onSave={handleEditProfile}
                         />
                     )}
+
+                    <ActivityDashboard/>
         </div>
     );
 };
@@ -331,6 +349,427 @@ const EditProfile = ({ product, onClose, onSave }) => {
 };
 
 
+const ActivityDashboard = () => {
+  const advertiserId ="66fb37dda63c04def29f944e"; 
+  const [newActivity, setNewActivity] = useState({
+    date: '',
+    time: '',
+    location: {
+      type: 'Point',
+      address: '',
+      lat: 30.033333,
+      lng: 31.233334
 
+    },
+    price: 0,
+    category: '',
+    tags: [],
+    specialDiscounts: '',
+    bookingOpen: true,
+    advertiser: advertiserId,
+    ratings: 0
+  });
+
+  const [activities, setActivities] = useState([]);
+  const [selectedActivity, setSelectedActivity] = useState(null);
+  const [searchActivityId, setSearchActivityId] = useState('');
+  const [searchResult, setSearchResult] = useState(null);
+  const [activityId, setActivityId] = useState('');
+/////////////////map////////////////
+
+const [map, setMap] = useState(null); // Initialize map state
+const [marker, setMarker] = useState(null); // Initialize marker state
+const mapRef = useRef(null); // Reference for map div
+ // Reverse geocoding to convert lat/lng into a human-readable address
+ const reverseGeocode = async (lat, lng) => {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data && data.address) {
+        return data.display_name || "Unknown location";
+      } else {
+        return "Unknown location";
+      }
+    } catch (error) {
+      console.error('Reverse geocoding error:', error);
+      return "Unknown location";
+    }
+  };
+
+///////////////////////////////////////////////////
+
+  useEffect(() => {
+    ////////////////////////map
+ 
+    const leafletMap = L.map(mapRef.current).setView([newActivity.location.lat, newActivity.location.lng], 8);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(leafletMap);
+
+    // Set marker icon explicitly
+    const icon = L.icon({
+        iconUrl: markerIconPng,
+        shadowUrl: markerShadowPng,
+    });
+    const initialMarker = L.marker([newActivity.location.lat, newActivity.location.lng], { 
+        icon, 
+        draggable: true 
+      }).addTo(leafletMap);
+  
+      // Update coordinates when marker is dragged
+      initialMarker.on('dragend', async (event) => {
+        const markerPosition = event.target.getLatLng();
+        const updatedAddress = await reverseGeocode(markerPosition.lat, markerPosition.lng);
+        setNewActivity((prevState) => ({
+          ...prevState,
+          location: {
+            ...prevState.location,
+            lat: markerPosition.lat,
+            lng: markerPosition.lng,
+            address: updatedAddress
+          }
+        }));
+      });
+  
+
+    setMarker(initialMarker);
+    setMap(leafletMap);
+ return () => {
+      leafletMap.remove();
+    
+
+    ////////////////////////////
+
+    const fetchActivities = async () => {
+      const activitiesData = await getAllActivities(advertiserId);
+      setActivities(activitiesData.activities);
+    };
+    fetchActivities();
+}}, []);
+
+//////////////////////map
+
+ // Function to handle location changes based on user input
+ const handleLocationChange = (e) => {
+    const { value } = e.target;
+    setNewActivity((prev) => ({
+        ...prev,
+        location: { ...prev.location, address: value }
+    }));
+};
+
+// Function to update the map and marker
+const updateMapLocation = (lat, lng) => {
+    map.setView([lat, lng], 13); // Re-center the map on the new location
+    marker.setLatLng([lat, lng]); // Update the marker position
+};
+
+// Function to simulate geocoding (you can replace this with a geocoding service like Nominatim)
+const handleGeocode = async () => {
+    const address = newActivity.location.address;
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const { lat, lon } = data[0];  // Get the lat/lon from the first result
+
+        // Update the map and marker position
+        map.setView([lat, lon], 13);
+        marker.setLatLng([lat, lon]);
+
+        // Update the activity's lat/lng in the state
+        setNewActivity((prev) => ({
+          ...prev,
+          location: {
+            ...prev.location,
+            lat: parseFloat(lat),
+            lng: parseFloat(lon)
+          }
+        }));
+      } else {
+        alert('No results found for the given address.');
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      alert('Failed to geocode address.');
+    }
+  };
+
+
+
+//////////////////////////////
+
+
+  const handleAddActivity = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await createActivity(newActivity);
+      setNewActivity({
+        date: '',
+        time: '',
+        location: { type: 'Point', address: '', lat: 0, lng: 0 },
+        price: 0,
+        category: '',
+        tags: [],
+        specialDiscounts: '',
+        bookingOpen: true,
+        advertiser: advertiserId,
+        ratings: 0
+      });
+
+      const updatedActivities = await getAllActivities(advertiserId);
+      setActivities(updatedActivities.activities);
+      alert(response.message || "Activity added successfully");
+
+    } catch (error) {
+      console.error('Error adding activity:', error);
+      alert('Failed to add activity.');
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name.includes('.')) {
+      const [outerKey, innerKey] = name.split('.');
+      setNewActivity(prevState => ({
+        ...prevState,
+        [outerKey]: {
+          ...prevState[outerKey],
+          [innerKey]: value
+        }
+      }));
+    } else {
+      setNewActivity(prevState => ({
+        ...prevState,
+        [name]: value
+      }));
+    }
+  };
+
+  const handleSearchById = async (e) => {
+    e.preventDefault();
+    try {
+        const activity = await getActivityById(searchActivityId, advertiserId);
+        console.log(activity); // This will log the fetched activity
+        setSearchResult(activity.activity); // Access the 'activity' property directly
+    } catch (error) {
+        console.error('Failed to fetch activity:', error);
+        alert('Failed to fetch activity.');
+    }
+};
+
+  const handleEditActivity = async (updatedActivity) => {
+    const { activityId, ...activityData } = updatedActivity;
+    try {
+      const response = await updateActivity(activityId, activityData, advertiserId);
+      setSelectedActivity(null); // Clear the selected activity
+      setActivities(prevActivities => 
+        prevActivities.map(activity => 
+          activity._id === activityId ? response.activity : activity // Update the specific activity
+        )
+      );
+      alert(response.message || "Activity updated successfully");
+    } catch (error) {
+      alert('Failed to update activity: ' + error.message);
+    }
+  };
+
+  const handleDeleteActivity = async (e, id) => {
+    e.preventDefault();
+    try {
+        await deleteActivity(id, advertiserId);
+        alert("Activity deleted successfully");
+        setActivityId('');
+        const updatedActivities = await getAllActivities(advertiserId); // Optionally refresh the activities list
+        setActivities(updatedActivities.activities);
+    } catch (error) {
+        console.error('Failed to delete activity:', error);
+        alert('Failed to delete activity: ' + error.message);
+    }
+};
+
+  return (
+    <div className="activity-dashboard">
+      <h1>Activity Dashboard</h1>
+
+      <h2>Add New Activity</h2>
+      <form onSubmit={handleAddActivity}>
+        <label>
+          Date:
+          <input type="date" name="date" value={newActivity.date} onChange={handleInputChange} required />
+        </label>
+        <label>
+          Time:
+          <input type="text" name="time" value={newActivity.time} onChange={handleInputChange} required />
+        </label>
+        <label>
+          Location Address:
+          <input type="text" name="location.address" value={newActivity.location.address} onChange={handleLocationChange} />
+          <button type="button" onClick={handleGeocode}>Show on Map</button>
+        </label>
+
+        <div ref={mapRef} style={{ width: '100%', height: '300px', marginTop: '20px' }}></div>
+
+
+        <label>
+          Price:
+          <input type="number" name="price" value={newActivity.price} onChange={handleInputChange} required />
+        </label>
+        <label>
+          Category:
+          <input type="text" name="category" value={newActivity.category} onChange={handleInputChange} required />
+        </label>
+        <label>
+          Special Discounts:
+          <input type="text" name="specialDiscounts" value={newActivity.specialDiscounts} onChange={handleInputChange} />
+        </label>
+        <label>
+          Booking Open:
+          <input type="checkbox" name="bookingOpen" checked={newActivity.bookingOpen} onChange={(e) => setNewActivity(prevState => ({ ...prevState, bookingOpen: e.target.checked }))} />
+        </label>
+        <label>
+          Advertiser ID:
+          <input type="text" name="advertiser" value={newActivity.advertiser} onChange={handleInputChange} required />
+        </label>
+        <label>
+          Ratings:
+          <input type="number" name="ratings" value={newActivity.ratings} min="0" max="5" onChange={handleInputChange} />
+        </label>
+        <button type="submit">Add Activity</button>
+      </form>
+
+      <h2>List of All Activities</h2>
+      <ul>
+        {activities.map(activity => (
+          <li key={activity._id}>
+            <h3>{activity.category}</h3>
+            <p>Location: {activity.location?.address || 'No address available'}</p>
+            <p>Date: {new Date(activity.date).toLocaleDateString()} Time: {activity.time}</p>
+            <p>Price: ${activity.price}</p>
+            <p>Special Discounts: {activity.specialDiscounts}</p>
+            <p>Booking Open: {activity.bookingOpen ? 'Yes' : 'No'}</p>
+            <p>Ratings: {activity.ratings} stars</p>
+            <button onClick={() => setSelectedActivity(activity)}>Edit</button>
+            <button onClick={(e) => handleDeleteActivity(e, activity._id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+
+      {selectedActivity && (
+        <EditActivity
+          activity={selectedActivity}
+          onClose={() => setSelectedActivity(null)}
+          onSave={handleEditActivity}
+        />
+      )}
+
+      <h2>Search Activity by ID</h2>
+      <form onSubmit={handleSearchById}>
+        <input
+          type="text"
+          placeholder="Enter Activity ID"
+          value={searchActivityId}
+          onChange={(e) => setSearchActivityId(e.target.value)}
+          required
+        />
+        <button type="submit">Search</button>
+      </form>
+
+      {searchResult && (
+    <div>
+        <h3>Search Result:</h3>
+        <p>Category: {searchResult.category || 'No category available'}</p>
+        <p>Date: {searchResult.date ? new Date(searchResult.date).toLocaleDateString() : 'Invalid Date'}</p>
+        <p>Time: {searchResult.time || 'No time available'}</p>
+        <p>Location: {searchResult.location?.address || 'No address available'}</p>
+        <p>Price: ${searchResult.price || 'Not available'}</p>
+        <p>Ratings: {searchResult.ratings || 'No ratings available'} stars</p>
+    </div>
+)}
+
+     
+    </div>
+  );
+};
+const EditActivity = ({ activity, onClose, onSave }) => {
+  const [category, setCategory] = useState(activity.category);
+  const [date, setDate] = useState(activity.date);
+  const [time, setTime] = useState(activity.time);
+  const [location, setLocation] = useState(activity.location?.address || '');
+  const [price, setPrice] = useState(activity.price);
+  const[tags,setTags]=useState(activity.tags);
+  const [discount,setDiscount]=useState(activity.discount);
+  const [bookingOpen,setBookingOpen]=useState(activity.bookingOpen);
+  const [ratings,setRatings]=useState(activity.ratings);
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const updatedActivity = {
+      activityId: activity._id,
+      category,
+      date,
+      time,
+      location: {
+        type: 'Point',
+        address: location, // Assuming this is the input address
+    },
+      price,
+      tags,
+      discount,
+      bookingOpen,
+      ratings
+
+
+    };
+    onSave(updatedActivity);
+  };
+
+  return (
+    <div className="edit-activity">
+    <h2>Edit Activity</h2>
+    <form onSubmit={handleSubmit}>
+      <label>Category:</label>
+      <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} />
+      
+      <label>Date:</label>
+      <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+      
+      <label>Time:</label>
+      <input type="text" value={time} onChange={(e) => setTime(e.target.value)} />
+      
+      <label>Location Address:</label>
+      <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} />
+      
+      <label>Price:</label>
+      <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
+      
+      <label>Tags:</label>
+      <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} />
+      
+      <label>Discount:</label>
+      <input type="number" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+      
+      <label>Booking Open:</label>
+      <input type="checkbox" checked={bookingOpen} onChange={(e) => setBookingOpen(e.target.checked)} />
+      
+      <label>Ratings:</label>
+      <input type="number" value={ratings} onChange={(e) => setRatings(e.target.value)} min="1" max="5" />
+      
+      <button type="submit">Save Changes</button>
+    </form>
+    <button onClick={onClose}>Close</button>
+  </div>
+  
+  );
+};
+  
+  
 
 export default AdvertiserPage;

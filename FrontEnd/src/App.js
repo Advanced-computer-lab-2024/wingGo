@@ -15,6 +15,7 @@ import ActivitiesPage from './components/ActivitiesPage';
 import HistoricalPlacesPage from './components/HistoricalPlacesPage';
 import ProductsPage from './components/ProductsPage';
 import ItinerariesPage from './components/ItinerariesPage';
+import GuestDashboard from './components/GuestDashboard';
 
 
 const App = () => {
@@ -46,6 +47,7 @@ const App = () => {
                                 <li><a href="/advertiser">Advertiser</a></li>
                                 <li><a href="/seller">Seller</a></li>
                                 <li><a href="/tourist">Tourist</a></li>
+                                <li><a href="/guest">Guest</a></li>
                             </ul>
                         </nav>
                         <Routes>
@@ -62,6 +64,7 @@ const App = () => {
                             <Route path="/historical-places" element={<HistoricalPlacesPage />} />
                             <Route path="/products" element={<ProductsPage />} />
                             <Route path="/itineraries" element={<ItinerariesPage />} />
+                            <Route path="/guest" element={<GuestDashboard />} />
                         </Routes>
                     </>
                 )}
