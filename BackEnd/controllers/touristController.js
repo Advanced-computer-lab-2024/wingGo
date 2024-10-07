@@ -5,7 +5,7 @@ const Activity= require('../models/Activity');
 const Itinerary = require ('../models/Itinerary');
 const Product = require('../models/product');
 const LoginCredentials = require('../models/LoginCredentials');
-
+const Place= require('../models/Places');
 
 
 const tourist_hello = (req, res) => {
@@ -208,11 +208,6 @@ const filterProduct = async (req, res) => {
     }
 };
 
-
-
-
-const Place = require('../models/Places');
-
 // Filter places by type or historical period
 const filterPlacesByTag = async (req, res) => {
     try {
@@ -350,8 +345,56 @@ const sortUpcomingActivityOrItineraries = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+// Search for attractions, activities, itineraries, or places by name, category, or tags
+const searchAllModels = async (req, res) => {
+    const { query } = req.query;  // Only extract the query term
 
+    if (!query) {
+        return res.status(400).json({ message: "Please provide a search term." });
+    }
 
+    // General search criteria for all models
+    let searchCriteria = {
+        $or: [
+            { name: { $regex: query, $options: 'i' } },  // Search by name (case-insensitive)
+            { category: { $regex: query, $options: 'i' } },  // Search by category
+            { tags: { $regex: query, $options: 'i' } }  // Search by tags
+        ]
+    };
+
+    try {
+        const attractions = await Attraction.find(searchCriteria);
+        const activities = await Activity.find(searchCriteria);
+        
+        let itinerarySearchCriteria = {
+            $or: [
+                { title: { $regex: query, $options: 'i' } },  // Search by itinerary title
+                { tags: { $regex: query, $options: 'i' } }  // Search by tags
+            ]
+        };
+        const itineraries = await Itinerary.find(itinerarySearchCriteria);
+        
+        let placeSearchCriteria = {
+            $or: [
+                { name: { $regex: query, $options: 'i' } },  // Search by place name
+                { 'tags.types': { $regex: query, $options: 'i' } },  // Search by place types
+                { 'tags.historicalPeriods': { $regex: query, $options: 'i' } }  // Search by historical periods
+            ]
+        };
+        const places = await Place.find(placeSearchCriteria);
+
+        const results = {
+            attractions,
+            activities,
+            itineraries,
+            places
+        };
+
+        res.status(200).json(results);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 module.exports = {
     tourist_hello,
     tourist_register,
@@ -365,5 +408,6 @@ module.exports = {
     viewTouristActivities,
     viewTouristItineraries,
     filterTouristActivities,
-    sortUpcomingActivityOrItineraries
+    sortUpcomingActivityOrItineraries,
+    searchAllModels
 };
