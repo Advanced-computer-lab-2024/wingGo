@@ -109,10 +109,10 @@ const handleSearchById = async (e) => {
     }
 };
 
-const handleDeletePlace = async (e) => {
+const handleDeletePlace = async (e, id) => {
     e.preventDefault();
     try {
-        const response = await deletePlace(placeId);
+        await deletePlace(id);
         alert( "Place deleted successfully");
         setPlaceId('');
         const updatedPlaces = await getAllPlaces(govornorId);  // Optionally refresh the places list
@@ -235,6 +235,7 @@ const handleAddTag = async (e) => {
             </p>
 
                     <button onClick={() => setSelectedPlace(place)}>Edit</button>
+                    <button onClick={(e) => handleDeletePlace(e,place._id)}>Delete</button>
                 </li>
             ))}
         </ul>
