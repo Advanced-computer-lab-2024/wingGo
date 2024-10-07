@@ -337,9 +337,7 @@ const getAllUpcomingActivities = async (req, res) => {
 
         // Fetch all upcoming activities
         const activities = await Activity.find({ date: { $gte: currentDate } });
-        res.status(200).json({
-            activities
-        });
+        res.status(200).json(activities);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -429,9 +427,7 @@ const filterUpcomingActivities = async (req, res) => {
     try {
         // Find activities based on the constructed filter
         const activities = await Activity.find(filter); 
-        if (activities.length === 0) {
-            return res.status(404).json({ message: 'No activities found with the specified filters' });
-        }
+        
         res.status(200).json(activities); // Return filtered activities
     } catch (error) {
         res.status(400).json({ error: error.message }); 
