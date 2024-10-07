@@ -31,9 +31,9 @@ const createPlace = async (req, res) => {
 // Get all places
 const getAllPlaces = async (req, res) => {
 
-    //const {governerId} = req.query;
+    const {govornorId} = req.query;
     try {
-        const places = await Place.find();
+        const places = await Place.find({governorId: govornorId});
         res.json(places);
     } catch (err) {
         res.status(500).json({ error: err.message });

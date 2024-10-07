@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { createPlace,getAllPlaces,updatePlace,getPlaceById,deletePlace,addTagToPlace  } from '../APIs/govornorApi';
+import { createPlace,getAllPlaces,updatePlace,getPlaceById,deletePlace ,addTagToPlace } from '../APIs/govornorApi';
 import '../styling/GovornorDashboard.css';
 
 
 const GovornorDashboard = () => {
+    const govornorId="67025f99bb5b4c55581ab286";
     const [newPlace,setNewPlace]=useState({
         name: '',
         description : '',
@@ -24,14 +25,13 @@ const [selectedPlace, setSelectedPlace] = useState(null);
 const [searchPlaceId, setSearchPlaceId] = useState('');
 const [searchResult, setSearchResult] = useState(null);
 const [placeId, setPlaceId] = useState('');
-
 const [tag, setTag] = useState('');
 const [category, setCategory] = useState('type'); // Default to "type"
 const [placeIdForTag, setPlaceIdForTag] = useState('');
 
 useEffect(()=>{
     const fetchPlaces = async () => {
-        const placesData = await getAllPlaces();
+        const placesData = await getAllPlaces(govornorId);
         setPlaces(placesData);
     };
     fetchPlaces(); 
@@ -41,7 +41,7 @@ useEffect(()=>{
 const handleAddPlace = async (e) => {
     e.preventDefault();
     try {
-        const response = await createPlace(newPlace);
+        const response = await createPlace(newPlace)
      
         setNewPlace({
             name: '',
@@ -50,11 +50,12 @@ const handleAddPlace = async (e) => {
             openingHours :'',
             ticketPrices: { foreigner: 0, native: 0, student: 0 },
             tags: { types: [], historicalPeriods: [] }
+           
 
         });
     
     console.log(newPlace);
-    const updatedPlaces = await getAllPlaces();
+    const updatedPlaces = await getAllPlaces(govornorId);
     setPlaces(updatedPlaces);
      alert(response.message || "Place added successfully");
       
@@ -100,7 +101,7 @@ const handleSearchById = async (e) => {
     try {
         const response = await updatePlace(placeId, placesData);
         setSelectedPlace(null);
-        const updatedPlaces = await getAllPlaces();
+        const updatedPlaces = await getAllPlaces(govornorId);
         setPlaces(updatedPlaces);
         alert(response.message || "Place updated successfully");
     } catch (error) {
@@ -114,13 +115,12 @@ const handleDeletePlace = async (e) => {
         const response = await deletePlace(placeId);
         alert( "Place deleted successfully");
         setPlaceId('');
-        const updatedPlaces = await getAllPlaces();  // Optionally refresh the places list
+        const updatedPlaces = await getAllPlaces(govornorId);  // Optionally refresh the places list
         setPlaces(updatedPlaces);    
     } catch (error) {
         alert('Failed to delete place: ' + error.message);
     }
 };
-
 const handleAddTag = async (e) => {
     e.preventDefault();
     try {
@@ -211,6 +211,7 @@ const handleAddTag = async (e) => {
        placeholder="Enter historical periods separated by commas"
     />
 </label>
+
             <button type="submit">Add Place</button>
         </form>
 
@@ -232,6 +233,7 @@ const handleAddTag = async (e) => {
                 <br />Type(s): {place.tags.types.join(', ')}
                 <br />Historical Period(s): {place.tags.historicalPeriods.join(', ')}
             </p>
+
                     <button onClick={() => setSelectedPlace(place)}>Edit</button>
                 </li>
             ))}
@@ -285,7 +287,6 @@ const handleAddTag = async (e) => {
                 />
                 <button type="submit">Delete Place</button>
             </form>
-
             <h2>Add Tag to Place</h2>
             <form onSubmit={handleAddTag}>
                 <label>
@@ -316,6 +317,7 @@ const handleAddTag = async (e) => {
                 <button type="submit">Add Tag</button>
             </form>
 
+
     </div>
 
     
@@ -329,19 +331,19 @@ const EditPlace = ({ place, onClose, onSave }) => {
     const [openingHours, setNewOpeningHours] = useState(place.openingHours);
     const [types, setTypes] = useState(place.tags?.types || []);
     const [historicalPeriods, setHistoricalPeriods] = useState(place.tags?.historicalPeriods || []);
+    
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const updatedPlace = { 
-            placeId: place._id, 
+            placeId:place._id, 
             name, 
-            description, 
+            description,
             location, 
-            openingHours, 
-            tags: {
-                types,
-                historicalPeriods
-            }
+            openingHours ,
+            types,
+            historicalPeriods
+            
         };
         onSave(updatedPlace);
     };
@@ -376,6 +378,8 @@ const EditPlace = ({ place, onClose, onSave }) => {
                     onChange={(e) => setHistoricalPeriods(e.target.value.split(',').map(period => period.trim()))}
                     placeholder="e.g., Medieval, Ancient"
                 />
+
+
 
                 <button type="submit">Save</button>
                 <button type="button" onClick={onClose}>Cancel</button>

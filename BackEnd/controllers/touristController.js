@@ -127,22 +127,22 @@ const getTourist = async(req,res) => {
         });
 
         // Update login credentials if necessary
-        const loginUpdateFields = {};
-        if (req.body.password) {
-            loginUpdateFields.password = updateData.password;  // Use the hashed password
-        }
+        // const loginUpdateFields = {};
+        // if (req.body.password) {
+        //     loginUpdateFields.password = updateData.password;  // Use the hashed password
+        // }
 
-        if (Object.keys(loginUpdateFields).length > 0) {
-            const updatedLoginCredentials = await LoginCredentials.findByIdAndUpdate(
-                id, // Match by id
-                { $set: loginUpdateFields },
-                { new: true }  // Return the updated document
-            );
+        // if (Object.keys(loginUpdateFields).length > 0) {
+        //     const updatedLoginCredentials = await LoginCredentials.findByIdAndUpdate(
+        //         id, // Match by id
+        //         { $set: loginUpdateFields },
+        //         { new: true }  // Return the updated document
+        //     );
 
-            if (!updatedLoginCredentials) {
-                return res.status(404).json({ message: 'Login credentials not found' });
-            }
-        }
+        //     if (!updatedLoginCredentials) {
+        //         return res.status(404).json({ message: 'Login credentials not found' });
+        //     }
+        // }
 
         res.status(200).json({
             message: 'Profile and login credentials updated successfully',

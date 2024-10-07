@@ -27,9 +27,10 @@ export const createPlace = async (placeData) => {
 
 //get all places
 
-export const getAllPlaces = async () => {
+export const getAllPlaces = async (govornorId) => {
     try {
-        const response = await fetch(`${API_URL}/govornor/getAllPlaces`);
+        const response = await fetch(`${API_URL}/govornor/getAllPlaces?govornorId=${govornorId}`);
+      
         if (!response.ok) {
             throw new Error('Failed to fetch places');
         }
@@ -99,9 +100,6 @@ export const deletePlace = async (placeId) => {
         throw error;
     }
 };
-
-//add tag to place
-
 export const addTagToPlace = async (placeId, tag, category) => {
     try {
         const response = await fetch(`${API_URL}/govornor/addTag/${placeId}`, {
@@ -121,3 +119,10 @@ export const addTagToPlace = async (placeId, tag, category) => {
         throw error;
     }
 };
+
+
+
+
+//add tag to place
+//addTagToPlace
+//router.put('/addTag/:id', PlaceController.addTagToPlace);
