@@ -143,11 +143,13 @@ const createActivity = async (req, res) => {
 
 const updateActivity = async (req, res) => {
     try {
-        const {activityID} = req.params.id; // Use id as the unique identifier
-        const {advertiserID }= req.query;
+        const {id} = req.params; // Use id as the unique identifier
+        const {advertiserId }= req.query;
+        console.log(id);
+        console.log(advertiserId);
          
         // Find the activity by id
-        const activity = await Activity.findOne({ _id: activityID, advertiser: advertiserID });
+        const activity = await Activity.findOne({ _id: id, advertiser: advertiserId });
 
         if (!activity) {
             return res.status(404).json({ message: 'Activity not found' });
