@@ -95,6 +95,17 @@ const TouristProfile = () => {
                                 />
                             </div>
                             <div className="form-group">
+                                <label htmlFor="password">Password</label>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    value={touristProfile.password}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
                                 <label htmlFor="mobileNumber">Mobile Number:</label>
                                 <input
                                     type="text"
@@ -112,17 +123,6 @@ const TouristProfile = () => {
                                     id="nationality"
                                     name="nationality"
                                     value={touristProfile.nationality}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="DOB">Date of Birth:</label>
-                                <input
-                                    type="date"
-                                    id="DOB"
-                                    name="DOB"
-                                    value={touristProfile.DOB}
                                     onChange={handleInputChange}
                                     required
                                 />

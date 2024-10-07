@@ -126,7 +126,7 @@ const getTourist = async(req,res) => {
             new: true,  // Return the updated document
         });
 
-        // Update login credentials if necessary
+        // // Update login credentials if necessary
         // const loginUpdateFields = {};
         // if (req.body.password) {
         //     loginUpdateFields.password = updateData.password;  // Use the hashed password
