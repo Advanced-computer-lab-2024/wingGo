@@ -514,9 +514,7 @@ const filterItineraries = async (req, res) => {
         // Find itineraries based on the constructed filter
         const itineraries = await Itinerary.find(filter);
 
-        if (itineraries.length === 0) {
-            return res.status(404).json({ message: 'No itineraries found matching the criteria.' });
-        }
+        
 
         res.status(200).json(itineraries);
     } catch (error) {

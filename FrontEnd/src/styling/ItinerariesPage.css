@@ -1,0 +1,19 @@
+.itineraries-page {
+    padding: 20px;
+}
+
+.filters, .sort, .search {
+    margin-bottom: 20px;
+}
+
+.itinerary-list {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.itinerary {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    width: 200px;
+}

@@ -55,7 +55,7 @@ const ActivitiesPage = () => {
     };
 
     const applySort = () => {
-        sortUpcomingActivityOrItineraries(sort)
+        sortUpcomingActivityOrItineraries(sort, 'activity')
             .then(data => setActivities(data))
             .catch(error => console.error('Error sorting activities:', error));
     };

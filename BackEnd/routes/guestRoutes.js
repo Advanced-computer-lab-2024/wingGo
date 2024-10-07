@@ -9,7 +9,7 @@ const router = express.Router();
 
 // Route to sort products by ratings
 router.get('/filterPlacesByTag', guestController.filterPlacesByTag);
-router.get('/sort',guestController.sortUpcomingActivityOrItenraries);
+// router.get('/sort',guestController.sortUpcomingActivityOrItenraries);
 router.get('/viewActivities', guestController.getAllUpcomingActivities);
 router.get('/viewItineraries', guestController.getAllUpcomingIteneries);
 router.get('/viewPlaces', guestController.getAllUpcomingPlaces);

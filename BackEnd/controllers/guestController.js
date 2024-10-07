@@ -236,7 +236,7 @@ const filterItineraries = async (req, res) => {
 module.exports = {
     guest_hello,
     filterPlacesByTag,
-    sortUpcomingActivityOrItenraries,
+    // sortUpcomingActivityOrItenraries,
     getAllUpcomingActivities,
     getAllUpcomingIteneries,
     getAllUpcomingPlaces,

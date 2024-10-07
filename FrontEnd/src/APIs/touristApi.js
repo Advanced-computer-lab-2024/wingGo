@@ -146,9 +146,9 @@ export const filterUpcomingActivities = async (filters) => {
 };
 
 // Sort upcoming activities or itineraries
-export const sortUpcomingActivityOrItineraries = async (sort) => {
+export const sortUpcomingActivityOrItineraries = async (sort, type) => {
     try {
-        const response = await axios.get(`${API_URL}/sort`, { params: { sort, type:'activity'} });
+        const response = await axios.get(`${API_URL}/sort`, { params: { sort, type: type} });
         return response.data;
     } catch (error) {
         console.error('Error sorting upcoming activities or itineraries:', error);
