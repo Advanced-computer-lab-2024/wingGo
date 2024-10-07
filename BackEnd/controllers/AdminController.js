@@ -96,7 +96,6 @@ const addTourismGovernor= async(req,res)=> {
     }
 }
 
-const Itinerary = require('../models/Itinerary');
 // Admin function to add a product
 const addProductAsAdmin = async (req, res) => {
     const { name, price, quantity, description} = req.body;
