@@ -539,17 +539,17 @@ module.exports = {
     approvePendingUserById, // done in frontEnd
     deleteAccount, // done in frontEnd
     addTourismGovernor, // done in frontEnd
-    createCategory, // Waiting on tasneem
-    getCategories, // Waiting on tasneem
+    createCategory, // done in frontEnd
+    getCategories, // done in frontEnd
     addTag, // done in frontEnd
     getTags, // done in frontEnd
     updateTag, // done in frontEnd
     deleteTag, // done in frontEnd
     addProductAsAdmin, // done in frontEnd
     editProduct, // done in frontEnd
-    updateCategory, // Waiting on tasneem
-    deleteCategory, // Waiting on tasneem
-    getCategory, // Waiting on tasneem
+    updateCategory, // done in frontEnd
+    deleteCategory, // done in frontEnd
+    getCategory, // done in frontEnd
     addAdmin, // done in frontEnd
     sortProductsByRatings, // done in frontEnd
     getAllProducts, // done in frontEnd
