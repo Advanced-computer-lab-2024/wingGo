@@ -100,9 +100,24 @@ export const deletePlace = async (placeId) => {
     }
 };
 
-
-
-
 //add tag to place
-//addTagToPlace
-//router.put('/addTag/:id', PlaceController.addTagToPlace);
+
+export const addTagToPlace = async (placeId, tag, category) => {
+    try {
+        const response = await fetch(`${API_URL}/govornor/addTag/${placeId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ tag, category }), // Send the tag and its category
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to add tag to place');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error adding tag:', error);
+        throw error;
+    }
+};
