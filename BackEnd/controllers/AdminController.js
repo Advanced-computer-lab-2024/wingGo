@@ -549,7 +549,7 @@ module.exports = {
     editProduct, // done in frontEnd
     updateCategory, // done in frontEnd
     deleteCategory, // done in frontEnd
-    getCategory, // Waiting on tasneem
+    getCategory, // done in frontEnd
     addAdmin, // done in frontEnd
     sortProductsByRatings, // done in frontEnd
     getAllProducts, // done in frontEnd

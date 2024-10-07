@@ -234,21 +234,38 @@
     padding: 0;
 }
 
-.category-item {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    font-size: 1.1em;
+.admin-dashboard .category-item div {
+    display: flex;
+    gap: 10px;
 }
 
-.error-message {
+.admin-dashboard .category-item button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.admin-dashboard .category-item button:hover {
+    background-color: #218838;
+}
+
+.admin-dashboard .category-details {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.admin-dashboard .error-message {
     color: red;
     margin-top: 10px;
 }
 
-.success-message {
+.admin-dashboard .success-message {
     color: green;
     margin-top: 10px;
 }
