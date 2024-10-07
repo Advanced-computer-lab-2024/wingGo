@@ -9,6 +9,7 @@ const ActivityCategory = require('../models/ActivityCategory');
 const Advertiser = require('../models/advertiser');
 const Product = require('../models/product');
 const mongoose = require('mongoose');
+const Itinerary = require('../models/Itinerary');
 
 
 //Create activity category
@@ -94,13 +95,11 @@ const addTourismGovernor= async(req,res)=> {
         res.status(500).json({ error: err.message });
     }
 }
-
-const Attraction = require('../models/attraction');
 // Admin function to add a product
 const addProductAsAdmin = async (req, res) => {
     const { name, price, quantity, description} = req.body;
     let { sellerId } = req.body;  // Optional seller ID provided by the admin
-
+    const picture = req.file ? req.file.filename : null;
     try {
         // If sellerId is provided, check if the seller exists
         if (sellerId) {
@@ -118,7 +117,8 @@ const addProductAsAdmin = async (req, res) => {
             price,
             quantity,
             description,
-            seller: sellerId  // Could be null if no seller
+            seller: sellerId,  // Could be null if no seller
+            picture  // only if a picture is uploaded
         });
 
         // Save the product to the database
@@ -129,11 +129,40 @@ const addProductAsAdmin = async (req, res) => {
     }
 };
 
+const getProductImage = async (req, res) => {
+    const productId = req.params.id;
+    
+    try {
+        // Find the product by its ID
+        const product = await Product.findById(productId);
+        
+        // Check if the product exists
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        // If the product has an image
+        if (product.picture) {
+            // Serve the image from the 'images' directory
+            const imagePath = path.join(__dirname, '..', 'images', product.picture);
+            
+            // Respond with the image file
+            return res.sendFile(imagePath);
+        } else {
+            // If no image is found, return a placeholder or 404
+            return res.status(404).json({ message: 'Image not found for this product.' });
+        }
+    } catch (error) {
+        // Handle any errors
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // Function to edit a product
 const editProduct = async (req, res) => {
     const { productId } = req.params;
     const { name, price, quantity, description } = req.body;
-
+    const picture = req.file ? req.file.filename : null;
     try {
         console.log('Product ID:', productId); // Add this line to log the product ID
         const product = await Product.findById(productId);
@@ -145,6 +174,7 @@ const editProduct = async (req, res) => {
         product.price = price || product.price;
         product.quantity = quantity || product.quantity;
         product.description = description || product.description;
+        
 
         await product.save();
         res.status(200).json({ message: 'Product updated successfully', product });
@@ -365,19 +395,19 @@ const addTag = async (req, res) => {
     }
 
     try {
-        const attraction = await Attraction.findById(id);
-        if (!attraction) {
-            return res.status(404).json({ error: 'Attraction not found' });
+        const itinerary = await Itinerary.findById(id);
+        if (!itinerary) {
+            return res.status(404).json({ error: 'Itinerary not found' });
         }
 
         // Check if the tag already exists
-        if (attraction.tags.includes(tag)) {
+        if (itinerary.tags.includes(tag)) {
             return res.status(400).json({ error: 'Tag already exists' });
         }
 
-        attraction.tags.push(tag);
-        await attraction.save();
-        res.status(200).json(attraction);
+        itinerary.tags.push(tag);
+        await itinerary.save();
+        res.status(200).json(itinerary);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -387,12 +417,12 @@ const getTags = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const attraction = await Attraction.findById(id);
-        if (!attraction) {
-            return res.status(404).json({ error: 'Attraction not found' });
+        const itinerary = await Itinerary.findById(id);
+        if (!itinerary) {
+            return res.status(404).json({ error: 'itinerary not found' });
         }
 
-        res.status(200).json(attraction.tags);
+        res.status(200).json(itinerary.tags);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -407,19 +437,19 @@ const updateTag = async (req, res) => {
     }
 
     try {
-        const attraction = await Attraction.findById(id);
-        if (!attraction) {
-            return res.status(404).json({ error: 'Attraction not found' });
+        const itinerary = await Itinerary.findById(id);
+        if (!itinerary) {
+            return res.status(404).json({ error: 'itinerary not found' });
         }
 
-        const tagIndex = attraction.tags.indexOf(oldTag);
+        const tagIndex = itinerary.tags.indexOf(oldTag);
         if (tagIndex === -1) {
             return res.status(404).json({ error: 'Tag not found' });
         }
 
-        attraction.tags[tagIndex] = newTag;
-        await attraction.save();
-        res.status(200).json(attraction);
+        itinerary.tags[tagIndex] = newTag;
+        await itinerary.save();
+        res.status(200).json(itinerary);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -430,14 +460,14 @@ const deleteTag = async (req, res) => {
     const { tag } = req.body;
 
     try {
-        const attraction = await Attraction.findById(id);
-        if (!attraction) {
-            return res.status(404).json({ error: 'Attraction not found' });
+        const itinerary = await Itinerary.findById(id);
+        if (!itinerary) {
+            return res.status(404).json({ error: 'itinerary not found' });
         }
 
-        attraction.tags = attraction.tags.filter(existingTag => existingTag !== tag);
-        await attraction.save();
-        res.status(200).json(attraction);
+        itinerary.tags = itinerary.tags.filter(existingTag => existingTag !== tag);
+        await itinerary.save();
+        res.status(200).json(itinerary);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -528,8 +558,8 @@ const searchProductsByName = async (req, res) => {
 
 const getAttractions = async (req, res) => {
     try {
-        const attractions = await Attraction.find().populate('tags');
-        res.status(200).json(attractions);
+        const itinerarys = await Itinerary.find().populate('tags');
+        res.status(200).json(itinerarys);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -557,5 +587,6 @@ module.exports = {
     searchProductsByName, // done in frontEnd
     getPendingUsers, // done in frontEnd
     deletePendingUserById, // done in frontEnd
-    getAttractions // done in frontEnd
+    getAttractions, // done in frontEnd
+    getProductImage
 };
