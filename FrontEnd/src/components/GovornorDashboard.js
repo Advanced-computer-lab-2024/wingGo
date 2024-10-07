@@ -45,7 +45,7 @@ const handleAddPlace = async (e) => {
         const response = await createPlace(newPlace)
      
         setNewPlace({
-            governorId:govornorId,
+            governorId: govornorId,
             name: '',
             description: '',
             location: '',
