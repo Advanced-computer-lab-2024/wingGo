@@ -97,6 +97,7 @@ const addTourismGovernor= async(req,res)=> {
 }
 
 // Admin function to add a product
+// Admin function to add a product
 const addProductAsAdmin = async (req, res) => {
     const { name, price, quantity, description} = req.body;
     let { sellerId } = req.body;  // Optional seller ID provided by the admin
@@ -130,6 +131,8 @@ const addProductAsAdmin = async (req, res) => {
     }
 };
 
+
+
 const getProductImage = async (req, res) => {
     const productId = req.params.id;
     
@@ -161,7 +164,8 @@ const getProductImage = async (req, res) => {
 
 // Function to edit a product
 const editProduct = async (req, res) => {
-    const { productId } = req.params;
+    const productId = req.params.productId;
+
     const { name, price, quantity, description } = req.body;
     const picture = req.file ? req.file.filename : null;
     try {
@@ -184,6 +188,8 @@ const editProduct = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+
 
 const filterProduct = async (req, res) => {
     try {
@@ -512,21 +518,18 @@ const addAdmin = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 const getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find().populate('seller', 'username');  // Populate seller username if available
-
-        // If you need to send a public path for pictures stored locally
+        const products = await Product.find().populate('seller', 'username');
         const productData = products.map(product => ({
             id: product._id,
             name: product.name,
-            picture: `../images/${product.picture}`,  // Build image URL dynamically
-            // picture: `${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
+            // Adjust the path to make sure it points to the correct directory
+            picture: product.picture ? `/images/${product.picture}` : null,  // Ensure the correct image path is sent
             price: product.price,
             description: product.description,
             quantity: product.quantity,
-            seller: product.seller ? product.seller.username : 'Admin',  // Handle null seller field
+            seller: product.seller ? product.seller.username : 'Admin',
             ratings: product.ratings,
             reviews: product.reviews
         }));
@@ -536,6 +539,7 @@ const getAllProducts = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 const searchProductsByName = async (req, res) => {
     try {

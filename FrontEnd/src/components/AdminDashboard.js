@@ -5,9 +5,11 @@ import { getProducts, editProduct, getPendingUsers, approvePendingUser, deletePe
     , addAdmin, sortProductsByRatings, getCategories, createCategory, updateCategory, deleteCategory, getCategory } from '../APIs/adminApi';
 import '../styling/AdminDashboard.css';
 
+
 const AdminDashboard = () => {
     const [products, setProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [productIdInput, setProductIdInput] = useState(''); // New state to capture productId from user
     const [pendingUsers, setPendingUsers] = useState([]);
     const [newProduct, setNewProduct] = useState({
         name: '',
@@ -47,6 +49,10 @@ const AdminDashboard = () => {
     const [detailsLoading, setDetailsLoading] = useState(false);
     const [detailsError, setDetailsError] = useState(null);
 
+    const handleImageClick = (imagePath) => {
+        const cleanPath = imagePath.startsWith('/images/') ? imagePath : `/images/${imagePath}`;
+        window.open(`http://localhost:8000${cleanPath}`, '_blank');
+    };
     useEffect(() => {
         const fetchProducts = async () => {
             const products = await getProducts();
@@ -64,6 +70,9 @@ const AdminDashboard = () => {
             }
         };
         fetchPendingUsers();
+          // Function to open the image in a new tab (similar to SellerPage)
+       
+
 
         const fetchAttractions = async () => {
             try {
@@ -283,18 +292,37 @@ const handleDeleteTag = async (id) => {
         }
     };
 
+    
     const handleEditProduct = async (updatedProduct) => {
         const { productId, ...productData } = updatedProduct;
+        const formData = new FormData();
+    
+        formData.append('name', productData.name);
+        formData.append('price', productData.price);
+        formData.append('quantity', productData.quantity);
+        formData.append('description', productData.description);
+    
+        if (productData.picture) {
+            formData.append('picture', productData.picture);
+        }
+    
         try {
-            await editProduct(productId, productData);
+            const response = await editProduct(productId, formData);
+            console.log(response);  // Debugging: Print the response to check the data
+            alert('Product updated successfully');
             setSelectedProduct(null);
-            const updatedProducts = await getProducts();
+            const updatedProducts = await getProducts();  // Fetch updated products list
             setProducts(updatedProducts);
         } catch (error) {
-            console.error('Failed to edit product:', error.response ? error.response.data : error.message);
+            console.error('Failed to edit product:', error);
             alert('Failed to edit product. Please try again.');
         }
     };
+    
+    
+        const handleProdIdInputChange = (e) => {
+            setProductIdInput(e.target.value); // Capture user input for productId
+        };
 
     const handleApproveUser = async (userId) => {
         try {
@@ -318,24 +346,41 @@ const handleDeleteTag = async (id) => {
         }
     };
 
-    const handleAddProduct = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await addProductAsAdmin(newProduct);
-            alert(response.message);
-            setNewProduct({
-                name: '',
-                price: '',
-                quantity: '',
-                description: '',
-                sellerId: ''
-            });
-            const products = await getProducts();
-            setProducts(products);
-        } catch (error) {
-            alert(`Failed to add product: ${error.message}`);
-        }
-    };
+    const [productImage, setProductImage] = useState(null); // State for storing the product image
+
+const handleFileChange = (e) => {
+    setProductImage(e.target.files[0]); // Save the selected file to state
+};
+
+const handleAddProduct = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(); // Use FormData to handle both text and file data
+    formData.append('name', newProduct.name);
+    formData.append('price', newProduct.price);
+    formData.append('quantity', newProduct.quantity);
+    formData.append('description', newProduct.description);
+    formData.append('sellerId', newProduct.sellerId);
+
+    if (productImage) {
+        formData.append('picture', productImage); // Only append if an image is selected
+    }
+
+    try {
+        const response = await addProductAsAdmin(formData); // Pass the formData object
+        alert('Product added successfully');
+        setNewProduct({
+            name: '',
+            price: '',
+            quantity: '',
+            description: '',
+            sellerId: ''
+        });
+        setProductImage(null); // Clear the image after adding the product
+    } catch (error) {
+        alert(`Failed to add product: ${error.message}`);
+    }
+};
+
     const handleGovInputChange = (e) => {
         const { name, value } = e.target;
         setNewGovernor(prevState => ({
@@ -405,41 +450,75 @@ const handleDeleteTag = async (id) => {
             <h1>Admin Dashboard</h1>
             <h2>Products</h2>
             <ul>
-                {products.map(product => (
-                    <li key={product.id}>
-                        <span>{product.name}</span>
-                        <img src={product.picture} alt={product.name} />
-                        <span>Price: ${product.price}</span>
-                        <span>Description: {product.description}</span>
-                        <span>Quantity: {product.quantity}</span>
-                        <span>Seller: {product.seller}</span>
-                        <span>Rating: {product.rating}</span>
-                        <span>Reviews: {product.reviews.join(', ')}</span>
-                        <button onClick={() => setSelectedProduct(product)}>Edit</button>
-                    </li>
-                ))}
-            </ul>
+            {products.map(product => (
+                <li key={product.id}>
+                    <span>{product.name}</span>
+
+                    {/* Conditional rendering for the "Show Image" button */}
+                    {product.picture ? (
+                        <button 
+                            onClick={() => handleImageClick(product.picture)} 
+                            style={{ padding: '5px', marginBottom: '10px', cursor: 'pointer' }}
+                        >
+                            Show Image
+                        </button>
+                    ) : (
+                        <p>No image available</p>
+                    )}
+
+                    <span>Price: ${product.price}</span>
+                    <span>Description: {product.description}</span>
+                    <span>Quantity: {product.quantity}</span>
+                    <span>Seller: {product.seller}</span>
+                    <span>Rating: {product.rating}</span>
+                    <span>Reviews: {product.reviews.join(', ')}</span>
+                    <button onClick={() => setSelectedProduct(product)}>Edit</button>
+
+                </li>
+            ))}
+        </ul>
+
             {selectedProduct && (
                 <EditProduct
-                    product={selectedProduct}
-                    onClose={() => setSelectedProduct(null)}
-                    onSave={handleEditProduct}
-                />
+                product={selectedProduct}
+                onClose={() => setSelectedProduct(null)}
+                onSave={handleEditProduct}
+                productIdInput={productIdInput}  // Ensure this is correctly populated
+                handleProdIdInputChange={handleProdIdInputChange}
+           />
+           
             )}
-            <h2>Sort Products by Rating</h2>
-                <button onClick={handleSortProductsByRatings}>Sort Products by Ratings</button>
-                {sortedProducts.length > 0 && (
-                    <ul className="products-list">
-                        {sortedProducts.map(product => (
-                            <li key={product._id} className="product-item">
-                                <span className="product-name">{product.name}</span>
-                                <span className="product-rating">Rating: {product.ratings}</span>
-                            </li>
-                        ))}
-                    </ul>
-        )}
+           <h2>Sort Products by Rating</h2>
+            <button onClick={handleSortProductsByRatings}>Sort Products by Ratings</button>
+            {sortedProducts.length > 0 && (
+                <ul className="products-list">
+                    {sortedProducts.map(product => (
+                        <li key={product._id} className="product-item">
+                            <span className="product-name">{product.name}</span>
+
+                            {/* Conditional rendering for the image button */}
+                            {product.picture ? (
+                                <button 
+                                    onClick={() => handleImageClick(product.picture)}
+                                    style={{ padding: '5px', marginBottom: '10px', cursor: 'pointer' }}
+                                >
+                                    Show Image
+                                </button>
+                            ) : (
+                                <p>No image available</p>
+                            )}
+
+                            <span className="product-rating">Rating: {product.ratings}</span>
+                            <span>Price: ${product.price}</span>
+                            <span>Quantity: {product.quantity}</span>
+                            <span>Description: {product.description}</span>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
             <h2>Add New Product</h2>
-            <form onSubmit={handleAddProduct}>
+             <form onSubmit={handleAddProduct} encType="multipart/form-data">
                 <label>
                     Name:
                     <input type="text" name="name" value={newProduct.name} onChange={handleProdInputChange} required />
@@ -457,11 +536,12 @@ const handleDeleteTag = async (id) => {
                     <input type="text" name="description" value={newProduct.description} onChange={handleProdInputChange} required />
                 </label>
                 <label>
-                    Seller ID (optional):
-                    <input type="text" name="sellerId" value={newProduct.sellerId} onChange={handleProdInputChange} />
+                    Product Image (Optional):
+                    <input type="file" name="picture" onChange={handleFileChange} accept="image/*" />
                 </label>
                 <button type="submit">Add Product</button>
             </form>
+
             <h2>Search Products by Name</h2>
             <form onSubmit={handleSearchProducts}>
                 <label>
@@ -471,24 +551,36 @@ const handleDeleteTag = async (id) => {
                 <button type="submit">Search</button>
             </form>
             {searchResults.length > 0 && (
-                <div>
-                    <h2>Search Results</h2>
-                    <ul>
-                        {searchResults.map(product => (
-                            <li key={product.id}>
-                                <span>{product.name}</span>
-                                <img src={product.picture} alt={product.name} />
-                                <span>Price: ${product.price}</span>
-                                <span>Description: {product.description}</span>
-                                <span>Quantity: {product.quantity}</span>
-                                <span>Seller: {product.seller}</span>
-                                <span>Rating: {product.rating}</span>
-                                <span>Reviews: {product.reviews.join(', ')}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+            <div>
+                <h2>Search Results</h2>
+                <ul>
+                    {searchResults.map(product => (
+                        <li key={product.id}>
+                            <span>{product.name}</span>
+
+                            {/* Conditional rendering for the image button */}
+                            {product.picture ? (
+                                <button 
+                                    onClick={() => handleImageClick(product.picture)}
+                                    style={{ padding: '5px', marginBottom: '10px', cursor: 'pointer' }}
+                                >
+                                    Show Image
+                                </button>
+                            ) : (
+                                <p>No image available</p>
+                            )}
+
+                            <span>Price: ${product.price}</span>
+                            <span>Description: {product.description}</span>
+                            <span>Quantity: {product.quantity}</span>
+                            <span>Seller: {product.seller}</span>
+                            <span>Rating: {product.rating}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )}
+
             <h2>Filter Products by Price</h2>
             <form onSubmit={handleFilterProducts}>
                 <label>
@@ -504,18 +596,30 @@ const handleDeleteTag = async (id) => {
                         {filteredProducts.map(product => (
                             <li key={product.id}>
                                 <span>{product.name}</span>
-                                <img src={product.picture} alt={product.name} />
+
+                                {/* Conditional rendering for the image button */}
+                                {product.picture ? (
+                                    <button 
+                                        onClick={() => handleImageClick(product.picture)}
+                                        style={{ padding: '5px', marginBottom: '10px', cursor: 'pointer' }}
+                                    >
+                                        Show Image
+                                    </button>
+                                ) : (
+                                    <p>No image available</p>
+                                )}
+
                                 <span>Price: ${product.price}</span>
                                 <span>Description: {product.description}</span>
                                 <span>Quantity: {product.quantity}</span>
                                 <span>Seller: {product.seller}</span>
                                 <span>Rating: {product.rating}</span>
-                                <span>Reviews: {product.reviews.join(', ')}</span>
                             </li>
                         ))}
                     </ul>
                 </div>
             )}
+
             <h2>Pending Users</h2>
             <ul>
                 {pendingUsers.map(user => (
@@ -560,12 +664,12 @@ const handleDeleteTag = async (id) => {
                 />
                 <button type="submit">Add Governor</button>
             </form>
-            <h2>itineraries</h2>
+            <h2>Attractions</h2>
         <ul className="attractions-list">
             {attractions.map(attraction => (
                 <li key={attraction._id} className="attraction-item">
                     <div className="attraction-header">
-                        <span className="attraction-name">{attraction.title}</span>
+                        <span className="attraction-name">{attraction.name}</span>
                         <button className="show-tags-button" onClick={() => fetchTagsForAttraction(attraction._id)}>Show Tags</button>
                         <button className="add-tag-button" onClick={() => handleShowTagInput(attraction._id, 'add')}>Add Tag</button>
                         <button className="delete-tag-button" onClick={() => handleShowTagInput(attraction._id, 'delete')}>Delete Tag</button>
@@ -703,43 +807,62 @@ const handleDeleteTag = async (id) => {
     );
 };
 
-const EditProduct = ({ product, onClose, onSave }) => {
+const EditProduct = ({ product, onClose, onSave, productIdInput, handleProdIdInputChange }) => {
     const [name, setName] = useState(product.name);
     const [price, setPrice] = useState(product.price);
     const [quantity, setQuantity] = useState(product.quantity);
     const [description, setDescription] = useState(product.description);
+    const [productImage, setProductImage] = useState(null); // State for storing the new image
+
+    const handleFileChange = (e) => {
+        setProductImage(e.target.files[0]); // Store the selected image file
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const updatedProduct = { 
-            productId: product.id, 
-            name, 
-            price, 
-            quantity, 
-            description 
+        const updatedProduct = {
+            productId: productIdInput, // Use the productId from user input
+            name,
+            price,
+            quantity,
+            description,
+            picture: productImage,  // Include the new image file
         };
-        onSave(updatedProduct);
+        onSave(updatedProduct); // Trigger save in the parent component
     };
 
     return (
         <div className="edit-product">
             <h2>Edit Product</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} encType="multipart/form-data">
+                <label>
+                    Product ID (Enter manually):
+                    <input
+                        type="text"
+                        value={productIdInput}
+                        onChange={handleProdIdInputChange}
+                        required
+                    />
+                </label>
                 <label>
                     Name:
-                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
                 </label>
                 <label>
                     Price:
-                    <input type="number" value={price} onChange={(e) => setPrice(parseFloat(e.target.value))} />
+                    <input type="number" value={price} onChange={(e) => setPrice(parseFloat(e.target.value))} required />
                 </label>
                 <label>
                     Quantity:
-                    <input type="number" value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value, 10))} />
+                    <input type="number" value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value, 10))} required />
                 </label>
                 <label>
                     Description:
-                    <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} />
+                    <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} required />
+                </label>
+                <label>
+                    Product Image (Optional):
+                    <input type="file" onChange={handleFileChange} accept="image/*" />
                 </label>
                 <button type="submit">Save</button>
                 <button type="button" onClick={onClose}>Cancel</button>
@@ -747,5 +870,6 @@ const EditProduct = ({ product, onClose, onSave }) => {
         </div>
     );
 };
+
 
 export default AdminDashboard;

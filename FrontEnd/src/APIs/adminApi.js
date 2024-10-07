@@ -48,18 +48,15 @@ export const approvePendingUser = async (userId) => {
     }
 };
 
-export const addProductAsAdmin = async (productData) => {
+export const addProductAsAdmin = async (formData) => {
     try {
         const response = await fetch(`${API_URL}/admin/add-product`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(productData),
+            body: formData, // No need to set headers when using FormData
         });
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'SellerID is invalid');
+            throw new Error(errorData.message || 'Failed to add product');
         }
         return await response.json();
     } catch (error) {
@@ -67,6 +64,7 @@ export const addProductAsAdmin = async (productData) => {
         throw error;
     }
 };
+
 
 
 export const getProducts = async () => {
@@ -106,25 +104,26 @@ export const searchProductsByName = async (name) => {
         throw error;
     }
 };
-
-export const editProduct = async (productId, productData) => {
+export const editProduct = async (productId, formData) => {
     try {
         const response = await fetch(`${API_URL}/admin/product/${productId}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(productData),
+            body: formData, // Send formData directly, which includes product data
         });
+
         if (!response.ok) {
             throw new Error('Failed to edit product');
         }
+
         return await response.json();
     } catch (error) {
         console.error('Error updating product:', error);
         throw error;
     }
 };
+
+
+
 
 export const deleteAccountById = async (accountId) => {
     try {
