@@ -5,9 +5,11 @@ const Product = require('../models/product');
 const { default: mongoose } = require('mongoose');
 
 const updateSellerProfile = async (req, res) => {
+    console.log(req.body);
     try {
-        const id = req.params.id;  // Use id as the unique identifier
+        const id = req.params.id; // Use id as the unique identifier
         const sellerExist = await Seller.findById(id);
+        
 
         if (!sellerExist) {
             return res.status(404).json({ message: 'Seller not found' });
@@ -21,29 +23,40 @@ const updateSellerProfile = async (req, res) => {
             updateData.password = await bcrypt.hash(req.body.password, 10);
         }
 
-        // Conditionally update each field if provided
-        if (req.body.email) updateData.email = req.body.email;
-        if (req.body.username) updateData.username = req.body.username;
-        if (req.body.name) updateData.name = req.body.name;
-        if (req.body.description) updateData.description = req.body.description;
-        if (req.body.isCreatedProfile !== undefined) {
-            updateData.isCreatedProfile = req.body.isCreatedProfile;
-        }
-
-        // Update the seller profile with the new data
+        // Update the seller's profile with the hashed password and other updated fields
         const updatedSeller = await Seller.findByIdAndUpdate(id, updateData, {
             new: true,  // Return the updated document
         });
+        const loginUpdateFields = {};
+        if (req.body.username) {
+            loginUpdateFields.username = req.body.username;
+        }
+        if (req.body.password) {
+            loginUpdateFields.password =  updateData.password;  // Use the hashed password
+        }
 
-        res.status(200).json({
-            message: 'Profile and login credentials updated successfully',
-            updatedSeller
-        });
+        if (Object.keys(loginUpdateFields).length > 0) {
+            // Find login credentials by tour guide id (assuming id is stored in both TourGuide and LoginCredentials models)
+            const updatedLoginCredentials = await LoginCredentials.findByIdAndUpdate(
+                id, // Match by id
+                { $set: loginUpdateFields },
+                { new: true }  // Return the updated document
+            );
+
+            if (!updatedLoginCredentials) {
+                return res.status(404).json({ message: 'Login credentials not found' });
+            }
+        }
+
+        res.status(200).json({message:'Profile and login credentials updated successfully',updatedSeller});
 
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
+
+
 
 
 const getSeller = async(req,res) => {
@@ -191,35 +204,46 @@ const getProductImage = async (req, res) => {
 };
 
 
-
 // Function to edit a product
 const editProduct = async (req, res) => {
     const { productId } = req.params;
     const { name, price, quantity, description, sellerId } = req.body;
-    console.log('Received request to edit product with ID:', req.params.productId);
-    console.log('Request body:', req.body); 
-  // Assuming sellerId comes from authentication middleware
+
+    // Check if an image was uploaded, otherwise leave the existing one
+    const picture = req.file ? req.file.filename : null;
+
+    console.log('Received request to edit product with ID:', productId);
+    console.log('Request body:', req.body);
 
     try {
+        // Check if the seller exists
+        const sellerExist = await Seller.findById(sellerId);
+        if (!sellerExist) {
+            return res.status(404).json({ message: 'Seller not found' });
+        }
+
         // Check if the product exists and belongs to the seller
         const product = await Product.findOne({ _id: productId, seller: sellerId });
         if (!product) {
             return res.status(404).json({ message: 'Product not found or you do not have permission to edit this product' });
         }
 
-        // Update product details
+        // Update product details conditionally, only updating fields provided in the request
         if (name) product.name = name;
         if (price) product.price = price;
         if (quantity) product.quantity = quantity;
         if (description) product.description = description;
+        if (picture) product.picture = picture; // Update the image only if a new one is uploaded
 
         // Save the updated product to the database
         await product.save();
+
         res.status(200).json({ message: 'Product updated successfully', product });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
 const filterProduct = async (req, res) => {
     try {
         const price = req.query.price;  // Assuming 'price' is the query parameter for price
