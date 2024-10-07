@@ -185,25 +185,19 @@ const getAllProducts = async (req, res) => {
     }
 };
 const filterProduct = async (req, res) => {
-   
     try {
-       
         const price = req.query.price;  // Assuming 'price' is the query parameter for price
 
-        // Ensure the price is provided
+        let result;
         if (price) {
             // Find products with the exact price
-            const result = await Product.find({ price: price });
-
-            // If no products are found, return a 404 response
-            if (result.length === 0) {
-                return res.status(404).json({ message: 'No products found with the specified price' });
-            }
-
-            res.status(200).json(result);
+            result = await Product.find({ price: price });
         } else {
-            res.status(400).json({ message: 'Price query parameter is required' });
+            // If no price is provided, return all products
+            result = await Product.find({});
         }
+
+        res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -231,9 +225,7 @@ const filterPlacesByTag = async (req, res) => {
         // Fetch places that match the filter
         const places = await Place.find(filter);
 
-        if (places.length === 0) {
-            return res.status(404).json({ message: 'No places found with the specified tags' });
-        }
+        
 
         res.status(200).json(places);
     } catch (err) {

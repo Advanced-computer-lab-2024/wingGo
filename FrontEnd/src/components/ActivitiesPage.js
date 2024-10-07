@@ -43,7 +43,7 @@ const ActivitiesPage = () => {
         } else {
             // Otherwise, search for activities
             searchAllModels(query)
-                .then(data => setActivities(data))
+                .then(data => setActivities(data.activities))
                 .catch(error => console.error('Error searching activities:', error));
         }
     };
