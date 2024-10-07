@@ -31,8 +31,10 @@ const TourGuideDashboard = () => {
     const [accessibility, setAccessibility] = useState(false);
     const [pickupLocation, setPickupLocation] = useState('');
     const [dropoffLocation, setDropoffLocation] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [hashedPassword, setHashedPassword] = useState('');
 
-    const tourGuideId = "66fc472ab494061ba3a410f4"; // Hard-coded tour guide ID for demo
+    const tourGuideId = "6702f8cf0c09540384492a21"; // Hard-coded tour guide ID for demo
     const handleGetItinerary = async () => {
         try {
             const fetchedItinerary = await getItineraryById(itineraryId, tourGuideId); // Pass tourGuideId here
@@ -226,6 +228,14 @@ const TourGuideDashboard = () => {
     // Handle updating the profile
     const handleUpdateProfile = async (field) => {
         try {
+            const updatedData = {
+                [field]: profile[field],
+            };
+
+            // Add password update if it's being edited
+            if (field === 'password') {
+                updatedData.password = newPassword;
+            }
             await updateTourGuideProfile(tourGuideId, { [field]: profile[field] });
             setIsEditing({ ...isEditing, [field]: false }); // Stop editing after saving
             alert('Profile updated successfully!');
@@ -245,10 +255,38 @@ const TourGuideDashboard = () => {
                     <div className="profile-field">
                     <h2>
     <i className="fas fa-user" style={{ marginRight: '10px' }}></i>
-    {profile.username}
+    {isEditing.username ? (
+                            <input 
+                                type="username" 
+                                value={profile.username} 
+                                onChange={(e) => handleFieldChange2('username', e.target.value)} 
+                            />
+                        ) : (
+                            <span>{profile.username}</span>
+                        )}
+                        <i className="fas fa-pen edit-icon" onClick={() => toggleEditField('username')}></i>
+                        {isEditing.username && <button onClick={() => handleUpdateProfile('username')}>Save</button>}
 </h2>
                         
                     </div>
+                    
+                  
+                    <strong>Password:</strong>
+            {isEditing.password ? (
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)} // User enters a new password
+              />
+            ) : (
+              <span>********</span> // Display masked password
+            )}
+            <i className="fas fa-pen edit-icon" onClick={() => toggleEditField('password')}></i>
+            {isEditing.password && (
+              <button onClick={() => handleUpdateProfile('password')}>Save</button>
+            )}
+                    
+            
 
                     {/* Email */}
                     <div className="profile-field">

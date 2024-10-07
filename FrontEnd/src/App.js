@@ -9,6 +9,8 @@ import Preloader from './components/Preloader';
 import SellerPage from './components/SellerPage';
 import './App.css';
 import GovornorDashboard from './components/GovornorDashboard';
+import TouristDashboard from './components/TouristDashboard';
+import ActivitiesPage from './components/ActivitiesPage';
 
 
 const App = () => {
@@ -38,6 +40,7 @@ const App = () => {
                                 <li><a href="/tourguide">Tour Guide Dashboard</a></li>
                                 <li><a href="/advertiser">Advertiser</a></li>
                                 <li><a href="/seller">Seller</a></li>
+                                <li><a href="/tourist">Tourist</a></li>
                             </ul>
                         </nav>
                         <Routes>
@@ -48,6 +51,8 @@ const App = () => {
                             <Route path="/tourguide" element={<TourGuideDashboard />} />
                             <Route path="/advertiser" element={<AdvertiserPage />} />
                             <Route path="/seller" element={<SellerPage />} />
+                            <Route path="/tourist" element={<TouristDashboard />} />
+                            <Route path="/activities" element={<ActivitiesPage />} />
                         </Routes>
                     </>
                 )}
