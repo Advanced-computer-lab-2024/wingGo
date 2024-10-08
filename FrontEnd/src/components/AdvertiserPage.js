@@ -352,6 +352,7 @@ const EditProfile = ({ product, onClose, onSave }) => {
 const ActivityDashboard = () => {
   const advertiserId ="66fb37dda63c04def29f944e"; 
   const [newActivity, setNewActivity] = useState({
+    name: '',
     date: '',
     time: '',
     location: {
@@ -511,6 +512,7 @@ const handleGeocode = async () => {
     try {
       const response = await createActivity(newActivity);
       setNewActivity({
+        name: '',
         date: '',
         time: '',
         location: { type: 'Point', address: '', lat: 0, lng: 0 },
@@ -600,6 +602,10 @@ const handleGeocode = async () => {
 
       <h2>Add New Activity</h2>
       <form onSubmit={handleAddActivity}>
+      <label>
+          Name:
+          <input type="text" name="name" value={newActivity.name} onChange={handleInputChange} required />
+        </label>
         <label>
           Date:
           <input type="date" name="date" value={newActivity.date} onChange={handleInputChange} required />
@@ -650,6 +656,7 @@ const handleGeocode = async () => {
           <li key={activity._id}>
             <h3>{activity.category}</h3>
             <p>Location: {activity.location?.address || 'No address available'}</p>
+            <p>Name: {activity.name}</p>
             <p>Date: {new Date(activity.date).toLocaleDateString()} Time: {activity.time}</p>
             <p>Price: ${activity.price}</p>
             <p>Special Discounts: {activity.specialDiscounts}</p>
@@ -685,6 +692,7 @@ const handleGeocode = async () => {
     <div>
         <h3>Search Result:</h3>
         <p>Category: {searchResult.category || 'No category available'}</p>
+        <p>Name: {searchResult.name || 'No name available'}</p>
         <p>Date: {searchResult.date ? new Date(searchResult.date).toLocaleDateString() : 'Invalid Date'}</p>
         <p>Time: {searchResult.time || 'No time available'}</p>
         <p>Location: {searchResult.location?.address || 'No address available'}</p>
@@ -699,6 +707,7 @@ const handleGeocode = async () => {
 };
 const EditActivity = ({ activity, onClose, onSave }) => {
   const [category, setCategory] = useState(activity.category);
+  const [name, setName] = useState(activity.name);
   const [date, setDate] = useState(activity.date);
   const [time, setTime] = useState(activity.time);
   const [location, setLocation] = useState(activity.location?.address || '');
@@ -714,6 +723,7 @@ const EditActivity = ({ activity, onClose, onSave }) => {
     const updatedActivity = {
       activityId: activity._id,
       category,
+      name,
       date,
       time,
       location: {
@@ -737,6 +747,9 @@ const EditActivity = ({ activity, onClose, onSave }) => {
     <form onSubmit={handleSubmit}>
       <label>Category:</label>
       <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} />
+
+      <label>Name:</label>
+      <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
       
       <label>Date:</label>
       <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />

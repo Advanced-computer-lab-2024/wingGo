@@ -212,6 +212,8 @@ const filterProduct = async (req, res) => {
 const deleteAccount = async (req, res) => {
     const { id } = req.params; // Extract the ID from the request parameters
 
+    console.log(id);
+
     try {
         // Ensure that the provided ID is a valid ObjectId
         if (!mongoose.Types.ObjectId.isValid(id)) {

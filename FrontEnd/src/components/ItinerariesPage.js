@@ -104,7 +104,9 @@ const ItinerariesPage = () => {
                             <p>Category: {itinerary.category}</p>
                             <p>Price: {itinerary.price}</p>
                             <p>Ratings: {itinerary.ratings}</p>
+                            <p>Language: {itinerary.language}</p>
                             <p>Tags: {itinerary.tags.join(', ')}</p>
+                            <p>Available Dates: {itinerary.availableDates.join(', ')}</p>
                         </div>
                     ))
                 ) : (

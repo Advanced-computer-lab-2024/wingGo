@@ -408,19 +408,19 @@ const SellerPage = () => {
                 )}
                 <label>
                     Name:
-                    <input type="text" name="name" value={newProduct.name} onChange={handleProdInputChange} required />
+                    <input type="text" name="name" value={newProduct.name} onChange={handleProdInputChange}  required={!isEditMode}  />
                 </label>
                 <label>
                     Price:
-                    <input type="number" name="price" value={newProduct.price} onChange={handleProdInputChange} required />
+                    <input type="number" name="price" value={newProduct.price} onChange={handleProdInputChange}  required={!isEditMode}  />
                 </label>
                 <label>
                     Quantity:
-                    <input type="number" name="quantity" value={newProduct.quantity} onChange={handleProdInputChange} required />
+                    <input type="number" name="quantity" value={newProduct.quantity} onChange={handleProdInputChange}  required={!isEditMode}  />
                 </label>
                 <label>
                     Description:
-                    <input type="text" name="description" value={newProduct.description} onChange={handleProdInputChange} required />
+                    <input type="text" name="description" value={newProduct.description} onChange={handleProdInputChange}  required={!isEditMode}  />
                 </label>
                 <label>
                     Ratings (Optional):
