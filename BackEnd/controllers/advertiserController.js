@@ -50,6 +50,12 @@ const updateAdvertiserProfile = async (req, res) => {
         // Now update the login credentials as well
         const loginUpdateFields = {};
         if (req.body.username) {
+            const existingUsername = await LoginCredentials.findOne({ username: req.body.username });
+
+            if (existingUsername) {
+                return res.status(400).json({ message: 'Username is already taken' });
+            }
+
             loginUpdateFields.username = req.body.username;  // Username update
         }
         if (req.body.password) {

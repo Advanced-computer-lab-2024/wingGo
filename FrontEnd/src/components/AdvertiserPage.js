@@ -773,7 +773,7 @@ const EditActivity = ({ activity, onClose, onSave }) => {
       <input type="checkbox" checked={bookingOpen} onChange={(e) => setBookingOpen(e.target.checked)} />
       
       <label>Ratings:</label>
-      <input type="number" value={ratings} onChange={(e) => setRatings(e.target.value)} min="1" max="5" />
+      <input type="number" value={ratings} onChange={(e) => setRatings(e.target.value)} min="0" max="5" />
       
       <button type="submit">Save Changes</button>
     </form>
