@@ -422,14 +422,14 @@ const SellerPage = () => {
                     Description:
                     <input type="text" name="description" value={newProduct.description} onChange={handleProdInputChange}  required={!isEditMode}  />
                 </label>
-                <label>
+                {/* <label>
                     Ratings (Optional):
-                    <input type="number" name="ratings" value={newProduct.ratings} onChange={handleProdInputChange} />
+                    <input type="number" name="ratings" value={newProduct.ratings} onChange={handleProdInputChange} display={!isEditMode}/>
                 </label>
                 <label>
                     Reviews (Optional):
                     <input type="text" name="reviews" value={newProduct.reviews} onChange={handleProdInputChange} />
-                </label>
+                </label> */}
                 <label>
                     Product Image (Optional):
                     <input type="file" name="picture" onChange={handleFileChange} accept="image/*" />
@@ -472,6 +472,8 @@ const SellerPage = () => {
                                     <p><strong>Quantity:</strong> {product.quantity}</p>
                                     <p><strong>Description:</strong> {product.description}</p>
                                     <p><strong>Seller:</strong> {product.seller}</p>
+                                    <p><strong>Reviews:</strong> {product.reviews}</p>
+                                    <p><strong>Ratings:</strong> {product.ratings}</p>
                                 </li>
                             ))}
                         </ul>
