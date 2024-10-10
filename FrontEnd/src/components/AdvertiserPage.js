@@ -16,7 +16,7 @@ const initialLatLng = { lat: 30.033333, lng: 31.233334 };
 ////////////
 const AdvertiserPage = () => {
 
-    const advertiserId = "66fb37dda63c04def29f944e";
+    const advertiserId = "67077683ab11089b0772dcb6";
 
     const [profile, setProfile] = useState(null);
     const [error, setError] = useState(null);
@@ -63,9 +63,11 @@ const AdvertiserPage = () => {
                 }
             });
             setShowForm(false); // Hide the form after submission
+            alert("Profile created successfully");
         } catch (error) {
             alert(error);
             setShowForm(false); 
+
         }
     };
 
@@ -86,6 +88,7 @@ const AdvertiserPage = () => {
             await updateAdvertiserProfile(advertiserId, updatedProfile);
             setProfile(updatedProfile);
             setShowEditForm(false); 
+            alert("Profile edited successfully");
         } catch (error) {
             console.error('Failed to edit profile:', error.response ? error.response.data : error.message);
             alert('Failed to edit profile. Please try again.');
@@ -350,7 +353,7 @@ const EditProfile = ({ product, onClose, onSave }) => {
 
 
 const ActivityDashboard = () => {
-  const advertiserId ="66fb37dda63c04def29f944e"; 
+  const advertiserId ="67077683ab11089b0772dcb6"; 
   const [newActivity, setNewActivity] = useState({
     name: '',
     date: '',
@@ -643,10 +646,7 @@ const handleGeocode = async () => {
           Advertiser ID:
           <input type="text" name="advertiser" value={newActivity.advertiser} onChange={handleInputChange} required />
         </label>
-        <label>
-          Ratings:
-          <input type="number" name="ratings" value={newActivity.ratings} min="0" max="5" onChange={handleInputChange} />
-        </label>
+      
         <button type="submit">Add Activity</button>
       </form>
 
@@ -772,9 +772,7 @@ const EditActivity = ({ activity, onClose, onSave }) => {
       <label>Booking Open:</label>
       <input type="checkbox" checked={bookingOpen} onChange={(e) => setBookingOpen(e.target.checked)} />
       
-      <label>Ratings:</label>
-      <input type="number" value={ratings} onChange={(e) => setRatings(e.target.value)} min="0" max="5" />
-      
+     
       <button type="submit">Save Changes</button>
     </form>
     <button onClick={onClose}>Close</button>

@@ -12,7 +12,7 @@ import {
 } from '../APIs/sellerApi';
 import '../styling/Sellerpage.css';
 
-const hardcodedSellerId = '66fff4b2124570c52a7ccd03'; // Hardcoded sellerId
+const hardcodedSellerId = '67078476ab11089b0772ddf2'; // Hardcoded sellerId
 
 const SellerPage = () => {
     // States for handling product-related functionalities
@@ -85,12 +85,13 @@ const SellerPage = () => {
             ...prevState,
             [name]: value
         }));
+        
     };
 
     // Function to create a new seller profile
     const handleCreateSellerProfile = async (e) => {
         e.preventDefault();
-    
+        console.log('rohna create');
         if (!newSeller.name && !newSeller.description) {
             setError('Either name or description is required.');
             return;
@@ -117,15 +118,31 @@ const SellerPage = () => {
     // Function to update an existing seller profile
     const handleUpdateSellerProfile = async (e) => {
         e.preventDefault();
+
+        const updateData = {
+            name: updatedSeller.name,
+            description: updatedSeller.description,
+        };
+    
+        // Only include username if it has been changed
+        if (updatedSeller.username && updatedSeller.username !== sellerProfile.username) {
+            updateData.username = updatedSeller.username;
+        }
+    
+        // Only include password if it has been changed
+        if (updatedSeller.password) {
+            updateData.password = updatedSeller.password;
+        }
     
         try {
-            const response = await updateSellerProfile(updatedSeller);
+            const response = await updateSellerProfile(updateData);
             // Check if the response includes a success message
             if (response.message === 'Profile and login credentials updated successfully') {
                 alert(response.message);  // Display success message
                 // Fetch the updated seller profile immediately after update
                 const updatedProfile = await getSeller(hardcodedSellerId);
                 setSellerProfile(updatedProfile);
+                alert("Updated successfully");
             } else {
                 alert('Unexpected response: ' + response.message);
             }
@@ -300,6 +317,7 @@ const SellerPage = () => {
 
             {/* Create Seller Profile Section */}
             <h2>Complete your profile!</h2>
+            
             {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error message if any */}
             <form onSubmit={handleCreateSellerProfile}>
                 <label>

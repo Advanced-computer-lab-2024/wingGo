@@ -127,14 +127,14 @@ const RegisterPage = () => {
                   <option value="job">Job</option>
                   <option value="student">Student</option>
                 </select>
-                <input 
+                {/* <input 
                   type="number" 
                   placeholder="Wallet Balance (Optional)" 
                   value={wallet} 
                   onChange={(e) => setWallet(e.target.value)} 
                   className="register-input"
                   aria-label="Wallet Balance (Optional)"
-                />
+                /> */}
               </>
             )}
 
@@ -144,7 +144,7 @@ const RegisterPage = () => {
               className="register-select"
             >
               <option value="tourist">Tourist</option>
-              <option value="tourGuide">Tour Guide</option>
+              <option value="tour guide">Tour Guide</option>
               <option value="seller">Seller</option>
               <option value="advertiser">Advertiser</option>
             </select>

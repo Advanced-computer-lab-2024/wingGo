@@ -34,7 +34,7 @@ const TourGuideDashboard = () => {
     const [newPassword, setNewPassword] = useState('');
     const [hashedPassword, setHashedPassword] = useState('');
 
-    const tourGuideId = "6702f8cf0c09540384492a21"; // Hard-coded tour guide ID for demo
+    const tourGuideId = "670777acab11089b0772dce1"; // Hard-coded tour guide ID for demo
     const handleGetItinerary = async () => {
         try {
             const fetchedItinerary = await getItineraryById(itineraryId, tourGuideId); // Pass tourGuideId here
@@ -97,7 +97,7 @@ const TourGuideDashboard = () => {
             setShowProfileForm(false); // Hide form after creation
         } catch (error) {
             console.error('Error creating profile:', error);
-            alert('Error creating profile');
+            alert(error);
         }
     };
     
@@ -387,9 +387,9 @@ const TourGuideDashboard = () => {
                         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
                         <label>Activities:</label>
                         <textarea value={activities} onChange={(e) => setActivities(e.target.value)} required></textarea>
-                        <label>Locations (separate by "-"):</label>
+                        <label>Locations (separate by ","):</label>
                         <input type="text" value={locations} onChange={(e) => setLocations(e.target.value.split(","))} required />
-                        <label>Tags (separate by "-"):</label>
+                        <label>Tags (separate by ","):</label>
                         <input type="text" value={tags} onChange={(e) => setTags(e.target.value.split(","))} required />
                         <label>Timeline:</label>
                         <input type="text" value={timeline} onChange={(e) => setTimeline(e.target.value)} required />

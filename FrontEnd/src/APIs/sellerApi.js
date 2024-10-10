@@ -4,7 +4,7 @@ const API_URL = 'http://localhost:8000'; // Your API base URL
 
 // Function to add a product as a seller with hardcoded sellerId
 export const addProductAsSeller = async (productData) => {
-    const hardcodedSellerId = '66fff4b2124570c52a7ccd03'; // Hardcoded sellerId
+    const hardcodedSellerId = '67078476ab11089b0772ddf2'; // Hardcoded sellerId
 
     productData.append('sellerId', hardcodedSellerId); // Append sellerId to the form data
 
@@ -25,7 +25,7 @@ export const addProductAsSeller = async (productData) => {
     }
 };
 export const editProductAsSeller = async (productId, productData) => {
-    const hardcodedSellerId = '66fff4b2124570c52a7ccd03'; // Hardcoded sellerId
+    const hardcodedSellerId = '67078476ab11089b0772ddf2'; // Hardcoded sellerId
 
     // Append sellerId to the formData before sending the request
     productData.append('sellerId', hardcodedSellerId);
@@ -109,7 +109,7 @@ export const getAllProductsAsSeller = async () => {
 
 // Function to create a seller profile
 export const createSellerProfile = async (profileData) => {
-    const hardcodedSellerId = '66fff4b2124570c52a7ccd03'; // Hardcoded sellerId
+    const hardcodedSellerId = '67078476ab11089b0772ddf2'; // Hardcoded sellerId
 
     try {
         const response = await axios.post(`${API_URL}/seller/createProfile/${hardcodedSellerId}`, profileData, {
@@ -130,7 +130,7 @@ export const createSellerProfile = async (profileData) => {
 
 // Function to update the seller profile
 export const updateSellerProfile = async (profileData) => {
-    const hardcodedSellerId = '66fff4b2124570c52a7ccd03'; // Hardcoded sellerId
+    const hardcodedSellerId = '67078476ab11089b0772ddf2'; // Hardcoded sellerId
 
     try {
         const response = await axios.put(`${API_URL}/seller/update/${hardcodedSellerId}`, profileData, {
@@ -149,7 +149,7 @@ export const updateSellerProfile = async (profileData) => {
     }
 };
 export const getSeller = async () => {
-    const hardcodedSellerId = '66fff4b2124570c52a7ccd03'; // Hardcoded sellerId
+    const hardcodedSellerId = '67078476ab11089b0772ddf2'; // Hardcoded sellerId
 
     try {
         const response = await axios.get(`${API_URL}/seller/viewProfile/get/${hardcodedSellerId}`);

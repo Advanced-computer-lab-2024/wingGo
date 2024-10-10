@@ -130,6 +130,7 @@ const handleAddHistoricalPeriodTag = async (e, id) => {
     if (tag) {
         try {
             await addTagToPlace(id, tag, 'historicalPeriod');
+            alert('Tag added Successfully');
         } catch (error) {
             alert('Failed to add historical period tag: ' + error.message);
         }
@@ -144,6 +145,7 @@ const handleAddTypeTag = async (e, id) => {
     if (tag) {
         try {
             await addTagToPlace(id, tag, 'type');
+            alert('Tag added Successfully');
         } catch (error) {
             alert('Failed to add type tag: ' + error.message);
         }

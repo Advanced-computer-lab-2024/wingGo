@@ -40,14 +40,24 @@ const updateSellerProfile = async (req, res) => {
         if (req.body.password) {
             loginUpdateFields.password =  updateData.password;  // Use the hashed password
         }
+        console.log("login update: ",loginUpdateFields);
 
         if (Object.keys(loginUpdateFields).length > 0) {
+            console.log('login fields>0');
             // Find login credentials by tour guide id (assuming id is stored in both TourGuide and LoginCredentials models)
-            const updatedLoginCredentials = await LoginCredentials.findByIdAndUpdate(
-                id, // Match by id
-                { $set: loginUpdateFields },
-                { new: true }  // Return the updated document
+            // const updatedLoginCredentials = await LoginCredentials.findByIdAndUpdate(
+            //     id, // Match by id
+            //     { $set: loginUpdateFields },
+            //     { new: true }  // Return the updated document
+            // );
+
+            const updatedLoginCredentials = await LoginCredentials.findOneAndUpdate(
+                { userId: sellerExist._id },  // Find by userId
+                { $set: loginUpdateFields },   // Update fields
+                { new: true }                  // Return the updated document
             );
+                      
+            //////
 
             if (!updatedLoginCredentials) {
                 return res.status(404).json({ message: 'Login credentials not found' });
