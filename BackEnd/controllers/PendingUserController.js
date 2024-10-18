@@ -1,6 +1,14 @@
 const bcrypt = require('bcrypt');
 const PendingUser = require('../models/PendingUsers');
 const LoginCredentials = require('../models/LoginCredentials');
+const AWS = require('aws-sdk');
+const { uploadDocument } = require('../helpers/s3Helper'); // Import the helper function
+
+
+
+
+
+
 
 // Method to filter by username for TESTING DONT IMPLEMENT API
 const getUserByUsername = async (req, res) => {
@@ -29,17 +37,23 @@ const pendinguser_register = async (req, res) => {
     console.log("in register");
     // Destructure fields from the request body
     const { email, username, password, role } = req.body;
-    
+
     try {
         // Hash the password using bcrypt before saving it
         const hashedPassword = await bcrypt.hash(password, 10); // 10 salt rounds
 
-        // Create the new pending user with the hashed password
+        // Get the URLs of the uploaded files from multer-s3
+        const IDdocumentUrl = req.files.IDdocument[0].location;
+        const certificateUrl = req.files.certificate[0].location;
+
+        // Create the new pending user with the hashed password and document URLs
         const user = await PendingUser.create({
             email,
             username,
             password: hashedPassword, // Save the hashed password
-            role
+            role,
+            IDdocument: IDdocumentUrl, // Save the ID document URL
+            certificate: certificateUrl // Save the certificate URL
         });
 
         console.log('success');
@@ -50,6 +64,9 @@ const pendinguser_register = async (req, res) => {
     }
 };
 
+module.exports = {
+    pendinguser_register
+};
 module.exports = {
     pendinguser_register,
     getUserByUsername

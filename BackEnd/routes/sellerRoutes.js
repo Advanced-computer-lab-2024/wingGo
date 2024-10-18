@@ -3,19 +3,10 @@ const router = express.Router();
 const path = require('path');
 const multer = require('multer'); // Add multer
 const sellerController = require('../controllers/sellerController');
+const  upload  = require('../uploadMiddleware');
 
 
-const storage = multer.diskStorage({
 
-    destination: (req, file, cb) => {
-        cb(null, 'images/'); // Save in 'uploads' folder
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // Save file with a unique name
-    }
-});
-
-const upload = multer({ storage: storage });
 
 
 // Define routes
@@ -29,5 +20,7 @@ router.get('/filterProducts', sellerController.filterProduct);
 router.post('/createProfile/:id', sellerController.createSellerProfile);
 router.get('/searchProductName', sellerController.searchProductsByName);
 router.get('/productImage/:id', sellerController.getProductImage);
+
+router.post('/changeLogo/:id', upload.single('file'), sellerController.changeLogo);
 
 module.exports = router;

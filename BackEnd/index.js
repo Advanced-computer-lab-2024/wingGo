@@ -10,26 +10,46 @@ const tourGuideRoutes = require('./routes/TourGuideRoutes'); // Ensure correct p
 const govornorRoutes = require('./routes/GovornorRoutes');
 const advertiserRoutes = require('./routes/advertiserRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
-
 const guestRoutes = require('./routes/guestRoutes');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { S3Client } = require('@aws-sdk/client-s3');
+require('dotenv').config();
 
-//yb2a set lama el shakhs ykhtar men el form eno tourist fa  hankhdo men el frontend 
-let userType = "tourist";
-
-// For handling the __dirname issue with ES modules
-const { fileURLToPath } = require('url');
 
 const app = express();
 const port = 8000;
 app.use(cors());
 app.use(bodyParser.json());
-// const port = 8000;
 
+const { fileURLToPath } = require('url');
 //Connect to mongoDB (will be used later on to connect with our DB)
 //put in env the port an dthe url
 const dbURI = 'mongodb+srv://winggo567:Winggo123456@winggo.s9seh.mongodb.net/wingGo?retryWrites=true&w=majority&appName=WingGo';
+// const dbURI = process.env.MONGODB_URI;
+
+
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+const BUCKET = process.env.AWS_BUCKET_NAME;
+
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: BUCKET,
+    key: function (req, file, cb) {
+      cb(null, Date.now() + file.originalname);
+    }
+  })
+});
 
 // mongoose.connect(dbURI);
 mongoose.connect(dbURI)
@@ -46,6 +66,25 @@ app.listen(port, () => {
 // Add this line to parse incoming JSON request bodies
 app.use(express.json());
 
+app.post('/upload', upload.single('file'), (req, res) => {
+  console.log(req.file);
+  res.send("Successfully uploaded "+ req.file.location + "  location");
+});
+
+
+
+app.get('/download/:filename', async (req, res) => {
+  const filename = req.params.filename;
+  let x = await s3.getObject({Bucket: BUCKET, Key: filename}).promise();
+  res.send(x.Body);
+}
+);
+
+app.delete('/delete/:filename', async (req, res) => {
+  const filename = req.params.filename;
+  let x = await s3.deleteObject({Bucket: BUCKET, Key: filename}).promise();
+  res.send("File deleted successfully");
+});
 
 /// routes
 // Route to serve the homepage
@@ -73,9 +112,16 @@ app.post("/register", (req, res) => {
 
   if (role === 'tourist') {
     touristController.tourist_register(req, res); // Call the tourist registration handler
-  } else {
-    PendingUsersController.pendinguser_register(req, res); // Call the pending user registration handler for other roles
-  }
+  }else {
+    // Apply the file upload middleware for other roles
+    upload.fields([{ name: 'IDdocument' }, { name: 'certificate' }])(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        // Call the pending user registration handler
+        PendingUsersController.pendinguser_register(req, res);
+    });
+}
 });
 
 app.get("/getUsersinLogin", (req, res) => {
@@ -116,8 +162,9 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 
 
-//Must be at the bottom so that it doesnt match right away
-app.use((req, res)=> {
-  //we could add status code bec it returns a req obj
-  res.status(404).sendFile('./views/404.html', {root: __dirname});
-});
+// //Must be at the bottom so that it doesnt match right away
+// app.use((req, res)=> {
+//   //we could add status code bec it returns a req obj
+//   res.status(404).sendFile('./views/404.html', {root: __dirname});
+// });
+

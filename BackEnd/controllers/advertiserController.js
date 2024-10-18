@@ -3,6 +3,7 @@ const Advertiser = require('../models/advertiser');
 const LoginCredentials = require('../models/LoginCredentials');
 const Activity = require('../models/Activity');
 const getCoordinates = require('../helpers/getCoordinates');
+const { uploadDocument } = require('../helpers/s3Helper');
 // const Attraction = require('../models/attraction');
 
 const advertiser_hello = (req, res) => {
@@ -232,6 +233,28 @@ const deleteActivity = async (req, res) => {
     }
 };
 
+
+const changeLogo = async (req, res) => {
+    const { id } = req.params;
+    
+
+    try {
+        const advertiser = await Advertiser.findById(id);
+
+        if (!advertiser) {
+            return res.status(404).json({ message: 'Advertiser not found' });
+        }
+        
+        const logoUrl = req.file.location;
+        advertiser.logoUrl = logoUrl;
+        await advertiser.save();
+
+        res.status(200).json({ message: 'Logo updated successfully', advertiser });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 module.exports = {
     advertiser_hello,
     createAdvertiserProfile, //done
@@ -241,5 +264,6 @@ module.exports = {
     updateActivity,
     getActivity,
     getAllActivities,
-    deleteActivity
+    deleteActivity,
+    changeLogo
 };

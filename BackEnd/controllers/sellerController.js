@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const Seller = require('../models/Seller');
 const LoginCredentials = require('../models/LoginCredentials'); 
 const Product = require('../models/product');
+const { uploadDocument } = require('../helpers/s3Helper');
 const { default: mongoose } = require('mongoose');
 
 const updateSellerProfile = async (req, res) => {
@@ -303,6 +304,26 @@ const searchProductsByName = async (req, res) => {
     }
 };
 
+const changeLogo = async (req, res) => {
+    const { id } = req.params;
+    
+
+    try {
+        const seller = await Seller.findById(id);
+        if (!seller) {
+            return res.status(404).json({ message: 'Seller not found' });
+        }
+
+        const logo = req.file.location;
+        seller.logo = logo;
+        await seller.save();
+        res.status(200).json({ message: 'Logo updated successfully', seller });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+
+}
+
 
 
  module.exports = {
@@ -316,5 +337,6 @@ const searchProductsByName = async (req, res) => {
     getAllProducts,
     filterProduct,
     searchProductsByName,
-    getProductImage
+    getProductImage,
+    changeLogo
 };

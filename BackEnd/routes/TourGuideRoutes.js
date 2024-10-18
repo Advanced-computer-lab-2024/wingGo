@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const tourGuideController = require('../controllers/TourGuideController');
 const itineraryController = require('../controllers/TourGuideController');
+const upload = require('../uploadMiddleware'); // Import the configured upload middleware
 
 // Create a new itinerary
 router.post('/Createitinerary', itineraryController.createItinerary);
@@ -25,5 +26,7 @@ router.get('/fetch/:id', tourGuideController.getTourGuide);
 
 // Route to update a tour guide by id
 router.put('/update/:id', tourGuideController.updateTourGuideProfile);
+
+router.post('/changeProfilePhoto/:id', upload.single('file'),tourGuideController.changeProfilePhoto);
 
 module.exports = router;

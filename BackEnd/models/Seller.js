@@ -25,8 +25,10 @@ const sellerSchema = new Schema({
     isCreatedProfile: {
        type:Number,
        default:0
-
-   }   
+   },
+   logo: {
+       type: String
+   },
 
 }, { timestamps: true });
 

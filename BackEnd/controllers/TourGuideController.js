@@ -225,8 +225,37 @@ const deleteItinerary = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+const changeProfilePhoto = async (req, res) => {
+
+    const { id } = req.params;  // Tour Guide ID from query
+
+    try {
+
+        // Find the tour guide by ID and check if it belongs to the tour guide
+        const tourGuide = await TourGuide.findById(id);
+
+        if (!tourGuide) {
+            return res.status(404).json({ message: 'Tour guide not found or you do not have permission to update this tour guide.' });
+        }
+
+        const photoUrl = req.file.location;
+
+        tourGuide.photo = photoUrl;
+        await tourGuide.save();
+    
+
+        res.status(200).json({ message: 'Profile updated successfully', tourGuide });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+
 module.exports = {
     getTourGuide,
     updateTourGuideProfile,
-    createItinerary, getItineraries,getAllItineraries, updateItinerary, deleteItinerary ,getItinerariesByTourGuide,createTourguideProfile
+    createItinerary, getItineraries,getAllItineraries, updateItinerary, deleteItinerary ,getItinerariesByTourGuide,createTourguideProfile,
+    changeProfilePhoto
 };

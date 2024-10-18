@@ -17,7 +17,16 @@ const touristSchema = new Schema({
     role: {
         type: String,
         required: true
-    }
+    },
+    IDdocument: {
+        type: String,
+        required: true
+    },
+    certificate: {
+        type: String,
+        required: true
+    },
+
     
 }, {timestamps: true});
 
