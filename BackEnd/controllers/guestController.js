@@ -18,7 +18,7 @@ const filterPlacesByTag = async (req, res) => {
         const { type, historicalPeriod } = req.query; // Get type and historicalPeriod from query parameters
 
         // Build the filter criteria
-        const filter = {};
+        const filter = {flagged: false };
         if (type) {
             filter['tags.types'] = type;
         }
@@ -73,10 +73,11 @@ const getAllUpcomingActivities = async (req, res) => {
         const currentDate = new Date();
 
         // Fetch all upcoming activities
-        const activities = await Activity.find({ date: { $gte: currentDate } });
-        res.status(200).json({
-            activities
+        const activities = await Activity.find({ 
+            date: { $gte: currentDate },
+            flagged: false  // Exclude flagged activities
         });
+        res.status(200).json(activities);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -88,7 +89,8 @@ const getAllUpcomingIteneries = async (req, res) => {
 
         // Fetch itineraries where at least one date in availableDates is greater than or equal to today
         const itineraries = await Itinerary.find({
-            availableDates: { $gte: currentDate }
+            availableDates: { $gte: currentDate },
+            flagged: false   // Exclude flagged itineraries
         });
 
         if (itineraries.length === 0) {
@@ -113,14 +115,8 @@ const getAllUpcomingPlaces = async (req, res) => {
         const places = await Place.find();
 
         // Filter places by opening hours (you can adjust this logic based on your openingHours format)
-        const upcomingPlaces = places.filter(place => {
-            const [openingTime, closingTime] = place.openingHours.split(" - "); // Assuming format is "9:00 AM - 7:00 PM"
-            const openTime = new Date(currentTime.toDateString() + ' ' + openingTime); // Today’s opening time
-            const closeTime = new Date(currentTime.toDateString() + ' ' + closingTime); // Today’s closing time
-
-            // Check if the place is currently open or will open later today
-            return currentTime >= openTime && currentTime <= closeTime;
-        });
+        const upcomingPlaces = places.filter( {flagged: false}
+        );
 
         if (upcomingPlaces.length === 0) {
             return res.status(404).json({ message: 'No upcoming places found based on current opening hours' });
@@ -138,7 +134,8 @@ const filterUpcomingActivities = async (req, res) => {
     console.log('in activities filter');
     const { budget, date, category, ratings } = req.query; 
     // let filter = {}; // Initialize an empty filter object
-    let filter = { date: { $gte: new Date() } }; // Default filter: only upcoming activities (date >= today)
+    let filter = { date: { $gte: new Date() },
+    flagged: false  }; // Default filter: only upcoming activities (date >= today) // Default filter: only upcoming activities (date >= today)
 
     // Apply budget filter (if provided)
     if (budget) {
@@ -186,7 +183,7 @@ const filterItineraries = async (req, res) => {
     // Malak Filter
     const { budget, date, preferences, language } = req.query;
 
-    let filter = {}; // Initialize an empty filter object
+    let filter = {flagged: false }; // Initialize  filter object
 
     // Always apply upcoming dates filter (availableDates >= today)
     const currentDate = new Date();
@@ -249,11 +246,11 @@ const sortUpcomingActivityOrItineraries = async (req, res) => {
 
         if (type === 'activity') {
             // Fetch and sort upcoming activities based on the sort criteria
-            const activities = await Activity.find({ date: { $gte: currentDate } }).sort(sortCriteria);
+            const activities = await Activity.find({ date: { $gte: currentDate } , flagged: false }).sort(sortCriteria);
             return res.status(200).json(activities);
         } else if (type === 'itinerary') {
             // Fetch and sort upcoming itineraries based on available dates and sort criteria
-            const itineraries = await Itinerary.find({ availableDates: { $elemMatch: { $gte: currentDate } } }).sort(sortCriteria);
+            const itineraries = await Itinerary.find({ availableDates: { $elemMatch: { $gte: currentDate } } , flagged: false }).sort(sortCriteria);
             return res.status(200).json(itineraries);
         } else {
             return res.status(400).json({ message: 'Invalid type. Use "activity" or "itinerary".' });

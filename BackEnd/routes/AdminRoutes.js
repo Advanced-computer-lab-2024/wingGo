@@ -52,4 +52,8 @@ router.get('/filterProducts', adminController.filterProduct);
 //Search by product name
 router.get('/searchProductName', adminController.searchProductsByName);
 
+router.put('/flagActivity/:id', adminController.flagActivity);
+router.put('/flagItinerary/:id', adminController.flagItinerary);
+router.put('/flagPlace/:id', adminController.flagPlace);
+
 module.exports = router;

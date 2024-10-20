@@ -56,7 +56,11 @@ const placeSchema = new Schema({
             type: [String],  // Flexible array for historical periods
             default: []
         }
-    }
+    },
+    flagged: {
+        type: Boolean,
+        default: false,  // Initially not flagged
+      }
 }, { timestamps: true });
 
 const Place = mongoose.model('Place', placeSchema);

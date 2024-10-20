@@ -58,6 +58,10 @@ const activitySchema = new mongoose.Schema({
     default: 0,   // Default rating of 0 if none is provided
     min: 0,
     max: 5       // Assuming a 5-star rating system
+},
+flagged: {
+  type: Boolean,
+  default: false,  // Initially not flagged
 }
 });
 

@@ -11,6 +11,7 @@ const govornorRoutes = require('./routes/GovornorRoutes');
 const advertiserRoutes = require('./routes/advertiserRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
 const guestRoutes = require('./routes/guestRoutes');
+const prefreRoutes = require('./routes/preferenceTagRoutes');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const cors = require('cors');
@@ -151,6 +152,9 @@ app.use('/advertiser', advertiserRoutes);
 
 app.use('/tourist', touristRoutes);
 app.use('/guest', guestRoutes);
+
+app.use('/prefrences', prefreRoutes);
+
 
 // Serve static files from the "images" directory
 // Set up static folder

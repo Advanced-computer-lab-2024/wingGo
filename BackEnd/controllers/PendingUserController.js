@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const PendingUser = require('../models/PendingUsers');
 const LoginCredentials = require('../models/LoginCredentials');
-const AWS = require('aws-sdk');
+// const AWS = require('aws-sdk');
 const { uploadDocument } = require('../helpers/s3Helper'); // Import the helper function
 
 

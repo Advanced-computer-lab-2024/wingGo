@@ -10,6 +10,9 @@ const Advertiser = require('../models/advertiser');
 const Product = require('../models/product');
 const mongoose = require('mongoose');
 const Itinerary = require('../models/Itinerary');
+const Place = require('../models/Places');  // Adjust the path based on your project structure
+const Activity = require('../models/Activity');  // Adjust the path based on your project structure
+
 
 
 //Create activity category
@@ -568,6 +571,48 @@ const getAttractions = async (req, res) => {
     }
 };
 
+const flagActivity = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const activity = await Activity.findByIdAndUpdate(id, { flagged: true }, { new: true });
+      if (!activity) return res.status(404).json({ message: 'Activity not found' });
+      res.status(200).json({ message: 'Activity flagged successfully', activity });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
+  const flagItinerary = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const itinerary = await Itinerary.findByIdAndUpdate(id, { flagged: true }, { new: true });
+      if (!itinerary) return res.status(404).json({ message: 'Itinerary not found' });
+      res.status(200).json({ message: 'Itinerary flagged successfully', itinerary });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
+  const flagPlace = async (req, res) => {
+    try {
+        console.log("in flag");
+      const { id } = req.params;
+      console.log(id);
+      const place = await Place.findOneAndUpdate(
+        { _id: id},  // Find by userId and roleModel for the advertiser
+        { flagged: true },
+        { new: true }  // Return the updated document
+    );
+
+      
+      if (!place) return res.status(404).json({ message: 'Place not found' });
+      res.status(200).json({ message: 'Place flagged successfully', place });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
+
 module.exports = {
     approvePendingUserById, // done in frontEnd
     deleteAccount, // done in frontEnd
@@ -591,5 +636,8 @@ module.exports = {
     getPendingUsers, // done in frontEnd
     deletePendingUserById, // done in frontEnd
     getAttractions, // done in frontEnd
-    getProductImage
+    getProductImage,
+    flagActivity,
+    flagItinerary,
+    flagPlace
 };
