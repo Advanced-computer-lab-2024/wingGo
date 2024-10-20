@@ -57,7 +57,11 @@ const advertiserSchema = new Schema({
         type:Number,
         default:0
 
-    }   
+    },
+    termsAccepted: {
+        type: Boolean,
+        default: false
+    }
 
 }, { timestamps: true });
 

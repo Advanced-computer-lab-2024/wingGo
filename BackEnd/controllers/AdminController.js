@@ -331,15 +331,17 @@ const approvePendingUserById = async (req, res) => {
     try {
         // Find the pending user by id
         const pendingUser = await PendingUser.findById(id);
+       
         if (!pendingUser) {
             return res.status(404).json({ message: 'Pending user not found' });
         }
 
         let userCollection;
         let userDocument;
-
+       
         // Check the role and create the user document in the correct collection
         if (pendingUser.role === 'tour guide') {
+            console.log("here");
             userCollection = TourGuide;
             userDocument = new TourGuide({
                 _id: pendingUser._id,

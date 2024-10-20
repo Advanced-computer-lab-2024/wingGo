@@ -23,4 +23,6 @@ router.get('/productImage/:id', sellerController.getProductImage);
 
 router.post('/changeLogo/:id', upload.single('file'), sellerController.changeLogo);
 
+router.put('/acceptterms/:id', sellerController.acceptTerms);
+
 module.exports = router;

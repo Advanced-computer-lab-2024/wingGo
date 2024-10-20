@@ -15,5 +15,6 @@ router.put('/activities/:id', advertiserController.updateActivity);
 router.post('/activities', advertiserController.createActivity);
 
 router.post('/uploadLogo/:id', upload.single('file'), advertiserController.changeLogo);
+router.put('/acceptterms/:id', advertiserController.acceptTerms);
 
 module.exports = router;

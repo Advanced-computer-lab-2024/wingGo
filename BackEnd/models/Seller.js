@@ -29,6 +29,10 @@ const sellerSchema = new Schema({
    logo: {
        type: String
    },
+   termsAccepted: {
+    type: Boolean,
+    default: false
+}
 
 }, { timestamps: true });
 

@@ -324,6 +324,20 @@ const changeLogo = async (req, res) => {
 
 }
 
+const acceptTerms = async (req, res) => {
+    const sellerId = req.params.id;
+
+    try {
+        const seller = await Seller.findByIdAndUpdate(sellerId, { termsAccepted: true }, { new: true });
+        if (!seller) {
+            return res.status(404).json({ message: 'Seller not found.' });
+        }
+        res.status(200).json({ message: 'Terms accepted successfully.', seller });
+    } catch (error) {
+        res.status(500).json({ message: 'Error accepting terms.', error });
+    }
+};
+
 
 
  module.exports = {
@@ -338,5 +352,6 @@ const changeLogo = async (req, res) => {
     filterProduct,
     searchProductsByName,
     getProductImage,
-    changeLogo
+    changeLogo,
+    acceptTerms
 };

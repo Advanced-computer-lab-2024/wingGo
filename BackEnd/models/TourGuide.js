@@ -26,11 +26,14 @@ const tourGuideSchema = new Schema({
     isCreatedProfile: {
         type:Number,
         default:0
-
     },
     photo: {
         type: String,
     },
+    termsAccepted: {
+        type: Boolean,
+        default: false
+    }
 
     
 }, { timestamps: true });

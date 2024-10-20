@@ -254,6 +254,19 @@ const changeLogo = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+const acceptTerms = async (req, res) => {
+    const advertiserId = req.params.id;
+
+    try {
+        const advertiser = await Advertiser.findByIdAndUpdate(advertiserId, { termsAccepted: true }, { new: true });
+        if (!advertiser) {
+            return res.status(404).json({ message: 'Advertiser not found.' });
+        }
+        res.status(200).json({ message: 'Terms accepted successfully.', advertiser });
+    } catch (error) {
+        res.status(500).json({ message: 'Error accepting terms.', error });
+    }
+};
 
 module.exports = {
     advertiser_hello,
@@ -265,5 +278,6 @@ module.exports = {
     getActivity,
     getAllActivities,
     deleteActivity,
-    changeLogo
+    changeLogo,
+    acceptTerms
 };

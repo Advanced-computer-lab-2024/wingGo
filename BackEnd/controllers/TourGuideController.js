@@ -251,11 +251,25 @@ const changeProfilePhoto = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+const acceptTerms = async (req, res) => {
+    const tourGuideId = req.params.id;
+
+    try {
+        const tourGuide = await TourGuide.findByIdAndUpdate(tourGuideId, { termsAccepted: true }, { new: true });
+        if (!tourGuide) {
+            return res.status(404).json({ message: 'Tour Guide not found.' });
+        }
+        res.status(200).json({ message: 'Terms accepted successfully.', tourGuide });
+    } catch (error) {
+        res.status(500).json({ message: 'Error accepting terms.', error });
+    }
+};
 
 
 module.exports = {
     getTourGuide,
     updateTourGuideProfile,
     createItinerary, getItineraries,getAllItineraries, updateItinerary, deleteItinerary ,getItinerariesByTourGuide,createTourguideProfile,
-    changeProfilePhoto
+    changeProfilePhoto,
+    acceptTerms
 };

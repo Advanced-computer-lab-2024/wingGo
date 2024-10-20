@@ -29,4 +29,6 @@ router.put('/update/:id', tourGuideController.updateTourGuideProfile);
 
 router.post('/changeProfilePhoto/:id', upload.single('file'),tourGuideController.changeProfilePhoto);
 
+router.put('/acceptterms/:id', tourGuideController.acceptTerms);
+
 module.exports = router;
