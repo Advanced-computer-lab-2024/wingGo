@@ -1,4 +1,5 @@
 const Place = require('../models/Places');
+const PreferenceTag = require('../models/PreferenceTag');
 
 // Create a new place
 const createPlace = async (req, res) => {
@@ -165,6 +166,43 @@ const addTagToPlace = async (req, res) => {
     }
 };
 
+  // Create a new preference tag
+  const createPreferenceTag = async (req, res) => {
+    try {
+        const { name } = req.body;
+        const newTag = new PreferenceTag({ name });
+        await newTag.save();
+        res.status(201).json({ message: 'Preference tag created successfully', tag: newTag });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+ 
+// Add new tags to the 'tagss' field
+const addTagUpdated = async (req, res) => {
+    const { id } = req.params;  // Place ID
+    const { tagss } = req.body;  // Array of tag IDs (from PreferenceTags collection)
+
+    try {
+        // Find the place by ID
+        const place = await Place.findById(id);
+
+        if (!place) {
+            return res.status(404).json({ message: 'Place not found' });
+        }
+
+        // Ensure the tags field is an array and contains valid ObjectId references
+        place.tagss = [...new Set([...place.tagss, ...tagss])];  // Avoid duplicates
+
+        await place.save();
+        res.status(200).json({ message: 'Tags added to place successfully', place });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 module.exports = {
     createPlace,
     getAllPlaces,
@@ -172,6 +210,8 @@ module.exports = {
     updatePlace,
     deletePlace,
     addTagToPlace,
-    hello
+    hello,
+    createPreferenceTag,
+    addTagUpdated
     
 };

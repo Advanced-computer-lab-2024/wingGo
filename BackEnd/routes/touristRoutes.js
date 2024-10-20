@@ -36,4 +36,7 @@ router.get('/sort', touristController.sortUpcomingActivityOrItineraries);
 
 router.get('/search', touristController.searchAllModels);
 router.get('/itineraries', touristController.filterItineraries);
+
+router.put('/:id/preferences', touristController.addPreferencesToTourist);
+
 module.exports = router;

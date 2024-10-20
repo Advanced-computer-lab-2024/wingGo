@@ -12,7 +12,7 @@ const mongoose = require('mongoose');
 const Itinerary = require('../models/Itinerary');
 const Place = require('../models/Places');  // Adjust the path based on your project structure
 const Activity = require('../models/Activity');  // Adjust the path based on your project structure
-
+const PreferenceTag = require('../models/PreferenceTag');
 
 
 //Create activity category
@@ -611,6 +611,61 @@ const flagActivity = async (req, res) => {
       res.status(500).json({ error: error.message });
     }
   };
+
+  // Tags after modification
+
+  // Create a new preference tag
+const createPreferenceTag = async (req, res) => {
+    try {
+        const { name } = req.body;
+        const newTag = new PreferenceTag({ name });
+        await newTag.save();
+        res.status(201).json({ message: 'Preference tag created successfully', tag: newTag });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Get all preference tags
+const getAllPreferenceTags = async (req, res) => {
+    try {
+        const tags = await PreferenceTag.find();
+        res.status(200).json(tags);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Update a preference tag by ID
+const updatePreferenceTag = async (req, res) => {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    try {
+        const updatedTag = await PreferenceTag.findByIdAndUpdate(id, { name }, { new: true });
+        if (!updatedTag) {
+            return res.status(404).json({ message: 'Preference tag not found' });
+        }
+        res.status(200).json({ message: 'Preference tag updated successfully', tag: updatedTag });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Delete a preference tag by ID
+const deletePreferenceTag = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedTag = await PreferenceTag.findByIdAndDelete(id);
+        if (!deletedTag) {
+            return res.status(404).json({ message: 'Preference tag not found' });
+        }
+        res.status(200).json({ message: 'Preference tag deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
   
 
 module.exports = {
@@ -619,10 +674,12 @@ module.exports = {
     addTourismGovernor, // done in frontEnd
     createCategory, // done in frontEnd
     getCategories, // done in frontEnd
+   ////////// will remove these///////////
     addTag, // done in frontEnd
     getTags, // done in frontEnd
     updateTag, // done in frontEnd
     deleteTag, // done in frontEnd
+    ////////////////
     addProductAsAdmin, // done in frontEnd
     editProduct, // done in frontEnd
     updateCategory, // done in frontEnd
@@ -639,5 +696,9 @@ module.exports = {
     getProductImage,
     flagActivity,
     flagItinerary,
-    flagPlace
+    flagPlace,
+    createPreferenceTag,
+    getAllPreferenceTags,
+    updatePreferenceTag,
+    deletePreferenceTag
 };

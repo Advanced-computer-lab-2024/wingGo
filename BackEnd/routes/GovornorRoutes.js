@@ -13,9 +13,15 @@ router.put('/updatePlace/:id', PlaceController.updatePlace);
 
 router.delete('/deletePlace/:id', PlaceController.deletePlace);
 
+///// dont use ////////////////////////
 router.put('/addTag/:id', PlaceController.addTagToPlace);
+///////////////////////////////////////
 
 router.get('/hello', PlaceController.hello);
 
+// Create a new preference tag
+router.post('/preferences', PlaceController.createPreferenceTag);
+// Add Tag updated
+router.put('/addTagUpdated/:id', PlaceController.addTagUpdated);
 
 module.exports = router;

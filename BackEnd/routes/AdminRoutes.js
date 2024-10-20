@@ -20,6 +20,8 @@ router.post('/categories', adminController.createCategory);
 
 router.post('/add-product', adminController.addProductAsAdmin);
 
+///////// Remove and replace by after tag update ////////////
+
 // Add a new tag
 router.put('/attractions/:id/addTags', adminController.addTag);
 
@@ -31,6 +33,19 @@ router.put('/attractions/:id/updateTags', adminController.updateTag);
 
 // Delete a tag
 router.put('/attractions/:id/deleteTag', adminController.deleteTag);
+
+/////// Remove End //////////////////////////////////////////
+
+////// after tags update /////////
+// Create a new preference tag
+router.post('/preferences', adminController.createPreferenceTag);
+// Get all preference tags
+router.get('/preferences', adminController.getAllPreferenceTags);
+// Update a preference tag by ID
+router.put('/preferences/:id', adminController.updatePreferenceTag);
+// Delete a preference tag by ID
+router.delete('/preferences/:id', adminController.deletePreferenceTag);
+/////////////////////////////////
 
 // Get all activity categories
 router.get('/getcategories', adminController.getCategories);
@@ -55,5 +70,7 @@ router.get('/searchProductName', adminController.searchProductsByName);
 router.put('/flagActivity/:id', adminController.flagActivity);
 router.put('/flagItinerary/:id', adminController.flagItinerary);
 router.put('/flagPlace/:id', adminController.flagPlace);
+
+
 
 module.exports = router;

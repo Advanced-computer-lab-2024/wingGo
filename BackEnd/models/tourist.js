@@ -38,7 +38,9 @@ const touristSchema = new Schema({
         type: Number,
         default: 0    // Initialize to zero
           
-    }
+    },
+    preferences: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PreferenceTag' }]
+
 
 }, {timestamps: true});
 

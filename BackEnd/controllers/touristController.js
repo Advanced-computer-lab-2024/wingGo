@@ -623,6 +623,48 @@ const filterItineraries = async (req, res) => {
     }
 };
 
+const addPreferencesToTourist = async (req, res) => {
+    const { id } = req.params;  // Tourist ID
+    const { preferences } = req.body;  // List of selected preference tag IDs
+
+    try {
+        const tourist = await Tourist.findById(id);
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Ensure the preferences field is an array and contains ObjectIds
+        // tourist.preferences.push(preferences);
+        // tourist.preferences = preferences || [];  // Set preferences
+
+        // Ensure the preferences field is an array and push each preference if not already present
+        if (Array.isArray(preferences)) {
+            preferences.forEach(preference => {
+                // Avoid duplicates in the preferences array
+                // if (!tourist.preferences.includes(preference)) {
+                    tourist.preferences.push(preference);
+                // }
+            });
+        } else {
+            // In case a single preference ID is provided
+            // if (!tourist.preferences.includes(preferences)) {
+                tourist.preferences.push(preferences);
+            // }
+        }
+
+        const tourist2 = await Tourist.findById(id).populate('preferences');
+        console.log(tourist2.preferences);
+
+        
+        await tourist.save();
+
+        res.status(200).json({ message: 'Preferences updated successfully', tourist });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 
 module.exports = {
     tourist_hello,
@@ -643,5 +685,6 @@ module.exports = {
     getAllUpcomingIteneries,
     getAllUpcomingPlaces,
     filterUpcomingActivities,
-    filterItineraries
+    filterItineraries,
+    addPreferencesToTourist
 };
