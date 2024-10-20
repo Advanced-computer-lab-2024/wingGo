@@ -6,6 +6,7 @@ const Itinerary = require ('../models/Itinerary');
 const Product = require('../models/product');
 const LoginCredentials = require('../models/LoginCredentials');
 const Place = require('../models/Places');
+const Complaints = require('../models/Complaints');
 
 
 
@@ -81,6 +82,26 @@ const tourist_register = async (req, res) => {
         console.log('Error during registration:', error.message);
     }
 };
+
+const addComplaint = async (req, res) => {
+    const {title, body } = req.body;
+    const touristId = req.params.id; // Extracting the tourist ID from the URL parameters
+
+    try {
+        const newComplaint = new Complaints({
+            title,
+            body,
+            tourist: touristId,
+            state: 'pending' // Default state
+        });
+
+        await newComplaint.save();
+        res.status(201).json({ message: 'Complaint filed successfully.', complaint: newComplaint });
+    } catch (error) {
+        res.status(500).json({ message: 'Error filing complaint.', error });
+    }
+}; 
+
 
 
 
@@ -686,5 +707,6 @@ module.exports = {
     getAllUpcomingPlaces,
     filterUpcomingActivities,
     filterItineraries,
+    addComplaint,
     addPreferencesToTourist
 };
