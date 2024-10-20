@@ -684,6 +684,16 @@ const addPreferencesToTourist = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+const viewComplaints = async (req, res) => {
+    const touristId = req.params.id; // Extracting the tourist ID from the URL parameters
+
+    try {
+        const complaints = await Complaints.find({ tourist: touristId }).select('title body state date');
+        res.status(200).json({ complaints });
+    } catch (error) {
+        res.status(500).json({ message: 'Error retrieving complaints.', error });
+    }
+};
 
 
 
@@ -708,5 +718,6 @@ module.exports = {
     filterUpcomingActivities,
     filterItineraries,
     addComplaint,
-    addPreferencesToTourist
+    addPreferencesToTourist,
+    viewComplaints
 };

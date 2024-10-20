@@ -38,6 +38,8 @@ router.get('/search', touristController.searchAllModels);
 router.get('/itineraries', touristController.filterItineraries);
 router.post('/complaints/:id', touristController.addComplaint);
 
+router.get('/viewmycomplaints/:id', touristController.viewComplaints);
+
 router.put('/:id/preferences', touristController.addPreferencesToTourist);
 
 module.exports = router;
