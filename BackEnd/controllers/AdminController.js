@@ -14,6 +14,7 @@ const Place = require('../models/Places');  // Adjust the path based on your pro
 const Activity = require('../models/Activity');  // Adjust the path based on your project structure
 const PreferenceTag = require('../models/PreferenceTag');
 const Admin = require('../models/Admin');
+const generatePreSignedUrl  = require('../downloadMiddleware');
 
 //Create activity category
 const createCategory= async(req,res)=>{
@@ -128,7 +129,9 @@ const addTourismGovernor = async (req, res) => {
 const addProductAsAdmin = async (req, res) => {
     const { name, price, quantity, description} = req.body;
     let { sellerId } = req.body;  // Optional seller ID provided by the admin
-    const picture = req.file ? req.file.filename : null;
+
+
+    const picture = req.file ? req.file.location : null;
     try {
         // If sellerId is provided, check if the seller exists
         if (sellerId) {
@@ -147,7 +150,7 @@ const addProductAsAdmin = async (req, res) => {
             quantity,
             description,
             seller: sellerId,  // Could be null if no seller
-            picture  // only if a picture is uploaded
+            picture: picture  // only if a picture is uploaded
         });
 
         // Save the product to the database
@@ -158,6 +161,31 @@ const addProductAsAdmin = async (req, res) => {
     }
 };
 
+const changeProductImage = async (req, res) => {
+    const { id } = req.params;
+    console.log('Product ID:', id);
+    
+
+    const picture = req.file ? req.file.location : null;
+
+    try {
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        product.picture = picture;
+        await product.save();
+        res.status(200).json({ message: 'Product image updated successfully', product });
+    
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+//WILL BE MODIFIED COMPLETELY
 const getProductImage = async (req, res) => {
     const productId = req.params.id;
     
@@ -419,6 +447,132 @@ const approvePendingUserById = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+
+const viewPendingUserID = async (req, res) => {
+
+    const { id } = req.params;
+
+    try {
+        const pendingUser = await PendingUser.findById(id);
+        if (!pendingUser) {
+            return res.status(404).json({ message: 'Pending user not found' });
+        }
+
+        const IDdocumentUrl = pendingUser.IDdocument;
+        if (!IDdocumentUrl) {
+            return res.status(404).json({ message: 'ID document not found' });
+        }
+
+        const key = IDdocumentUrl.split('/').slice(-1)[0];
+        // Generate a pre-signed URL for the ID document
+        const preSignedUrl = await generatePreSignedUrl(key);
+        
+        res.status(200).json({ url: preSignedUrl });
+
+    } catch (err) {
+        console.error('Error in viewPendingUserID:', err);
+        if (!res.headersSent) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(500).json({ error: err.message });
+    }
+
+
+}
+
+
+const downloadPendingUserID = async (req, res) => {
+
+    const { id } = req.params;
+
+    try {
+        const pendingUser = await PendingUser.findById(id);
+        if (!pendingUser) {
+            return res.status(404).json({ message: 'Pending user not found' });
+        }
+
+        const IDdocumentUrl = pendingUser.IDdocument;
+        if (!IDdocumentUrl) {
+            return res.status(404).json({ message: 'ID document not found' });
+        }
+
+        const key = IDdocumentUrl.split('/').slice(-1)[0];
+        // Generate a pre-signed URL for the ID document
+        const preSignedUrl = await generatePreSignedUrl(key);
+        
+        res.redirect(preSignedUrl);
+
+    } catch (err) {
+        console.error('Error in viewPendingUserID:', err);
+        if (!res.headersSent) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(500).json({ error: err.message });
+    }
+
+}
+
+const viewPendingUserCertificate = async (req, res) => {
+
+    const { id } = req.params;
+
+    try {
+        const pendingUser = await PendingUser.findById(id);
+        if (!pendingUser) {
+            return res.status(404).json({ message: 'Pending user not found' });
+        }
+
+        const certificateUrl = pendingUser.certificate;
+        if (!certificateUrl) {
+            return res.status(404).json({ message: 'certificate document not found' });
+        }
+
+        const key = certificateUrl.split('/').slice(-1)[0];
+        
+        const preSignedUrl = await generatePreSignedUrl(key);
+        
+        res.status(200).json({ url: preSignedUrl });
+
+    } catch (err) {
+        console.error('Error in viewPendingUserCertificate:', err);
+        if (!res.headersSent) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(500).json({ error: err.message });
+    }
+}
+
+const downloadPendingUserCertificate = async (req, res) => {
+
+    const { id } = req.params;
+
+    try {
+        const pendingUser = await PendingUser.findById(id);
+        if (!pendingUser) {
+            return res.status(404).json({ message: 'Pending user not found' });
+        }
+
+        const certificateUrl = pendingUser.certificate;
+        if (!certificateUrl) {
+            return res.status(404).json({ message: 'certificate document not found' });
+        }
+
+        const key = certificateUrl.split('/').slice(-1)[0];
+        
+        const preSignedUrl = await generatePreSignedUrl(key);
+        
+        res.redirect(preSignedUrl);
+
+    } catch (err) {
+        console.error('Error in viewPendingUserCertificate:', err);
+        if (!res.headersSent) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(500).json({ error: err.message });
+    }
+}
+
 
 const allowedTags = ['historic areas', 'beaches', 'family-friendly', 'shopping', 'budget-friendly'];
 
@@ -787,5 +941,10 @@ module.exports = {
     getAllPreferenceTags,
     updatePreferenceTag,
     deletePreferenceTag,
-    changePassword
+    changePassword,
+    viewPendingUserID,
+    downloadPendingUserID,
+    viewPendingUserCertificate,
+    downloadPendingUserCertificate,
+    changeProductImage
 };

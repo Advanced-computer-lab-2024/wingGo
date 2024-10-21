@@ -1,6 +1,10 @@
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const { S3Client } = require('@aws-sdk/client-s3');
+const {parseUrl} = require('@smithy/url-parser');
+const {hash} = require('@smithy/hash-node');
+const {formatUrl} = require('@aws-sdk/util-format-url');
+
 require('dotenv').config();
 
 // AWS S3 configuration
@@ -23,5 +27,8 @@ const upload = multer({
     }
   })
 });
+
+
+
 
 module.exports = upload;

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/AdminController');
+const upload = require('../uploadMiddleware');
 
 router.get('/getallproducts', adminController.getAllProducts);
 router.get('/getAttractions', adminController.getAttractions);
@@ -18,7 +19,7 @@ router.post('/addGovernor', adminController.addTourismGovernor);
 //create an activity category
 router.post('/categories', adminController.createCategory);
 
-router.post('/add-product', adminController.addProductAsAdmin);
+router.post('/add-product',upload.single('file'), adminController.addProductAsAdmin);
 
 ///////// Remove and replace by after tag update ////////////
 
@@ -73,4 +74,13 @@ router.put('/flagPlace/:id', adminController.flagPlace);
 
 
 router.put('/changePassword/:id', adminController.changePassword); // Define route for password change
+
+
+router.get('/viewPendingUserID/:id', adminController.viewPendingUserID);
+router.get('downloadPendingUserCertificate/:id', adminController.downloadPendingUserCertificate);
+router.get('/viewPendingUserCertificate/:id', adminController.viewPendingUserCertificate);
+router.get('/downloadPendingUserID/:id', adminController.downloadPendingUserID);
+
+
+router.post('/changeProductImage/:id', upload.single('file'), adminController.changeProductImage);
 module.exports = router;
