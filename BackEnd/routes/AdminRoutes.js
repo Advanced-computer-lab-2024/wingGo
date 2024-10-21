@@ -72,5 +72,5 @@ router.put('/flagItinerary/:id', adminController.flagItinerary);
 router.put('/flagPlace/:id', adminController.flagPlace);
 
 
-
+router.put('/changePassword/:id', adminController.changePassword); // Define route for password change
 module.exports = router;

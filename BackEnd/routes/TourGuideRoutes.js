@@ -30,5 +30,6 @@ router.put('/update/:id', tourGuideController.updateTourGuideProfile);
 router.post('/changeProfilePhoto/:id', upload.single('file'),tourGuideController.changeProfilePhoto);
 
 router.put('/acceptterms/:id', tourGuideController.acceptTerms);
+router.put('/changePassword/:id', tourGuideController.changePassword); // Define route for password change
 
 module.exports = router;

@@ -24,5 +24,6 @@ router.get('/productImage/:id', sellerController.getProductImage);
 router.post('/changeLogo/:id', upload.single('file'), sellerController.changeLogo);
 
 router.put('/acceptterms/:id', sellerController.acceptTerms);
+router.put('/changePassword/:id', sellerController.changePassword); // Define route for password change
 
 module.exports = router;

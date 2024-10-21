@@ -64,9 +64,7 @@ const pendinguser_register = async (req, res) => {
     }
 };
 
-module.exports = {
-    pendinguser_register
-};
+
 module.exports = {
     pendinguser_register,
     getUserByUsername

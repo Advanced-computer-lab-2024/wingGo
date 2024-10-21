@@ -1,5 +1,9 @@
 const Place = require('../models/Places');
 const PreferenceTag = require('../models/PreferenceTag');
+const Governor = require('../models/TourismGovernor');
+const LoginCredentials = require('../models/LoginCredentials');
+const bcrypt = require('bcrypt');
+
 
 // Create a new place
 const createPlace = async (req, res) => {
@@ -202,6 +206,56 @@ const addTagUpdated = async (req, res) => {
     }
 };
 
+const changePassword = async (req, res) => {
+    const { oldPassword, newPassword, confirmNewPassword } = req.body;
+    const { id } = req.params; // Extract user ID from the request params
+
+    try {
+        // 1. Find the user in LoginCredentials
+        const userCredentials = await LoginCredentials.findById(id);
+        if (!userCredentials) {
+            return res.status(404).json({ message: 'User credentials not found' });
+        }
+
+        // 2. Find the corresponding user in the TourGuide collection
+        const governor = await Governor.findById(userCredentials.userId);
+        if (!governor) {
+            return res.status(404).json({ message: 'Governor not found' });
+        }
+
+       
+
+        // 3. Compare the old password with the hashed password in TourGuide
+        const isMatch = await bcrypt.compare(oldPassword, governor.password);
+        console.log('Is password match:', isMatch);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Old password is incorrect' });
+        }
+
+        // 4. Check if the new password matches the confirm password
+        if (newPassword !== confirmNewPassword) {
+            return res.status(400).json({ message: 'New password and confirm password do not match' });
+        }
+
+        // 5. Hash the new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10); // Hash new password
+        
+        // 6. Update the password in LoginCredentials
+        userCredentials.password = hashedNewPassword;
+        await userCredentials.save();
+
+        // 7. Update the password in the TourGuide collection
+        governor.password = hashedNewPassword;
+        await governor.save();
+
+        res.status(200).json({ message: 'Password updated successfully in both collections' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+
 
 module.exports = {
     createPlace,
@@ -212,6 +266,7 @@ module.exports = {
     addTagToPlace,
     hello,
     createPreferenceTag,
-    addTagUpdated
+    addTagUpdated,
+    changePassword
     
 };

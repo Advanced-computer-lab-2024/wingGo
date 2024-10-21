@@ -13,7 +13,7 @@ const Itinerary = require('../models/Itinerary');
 const Place = require('../models/Places');  // Adjust the path based on your project structure
 const Activity = require('../models/Activity');  // Adjust the path based on your project structure
 const PreferenceTag = require('../models/PreferenceTag');
-
+const Admin = require('../models/Admin');
 
 //Create activity category
 const createCategory= async(req,res)=>{
@@ -83,21 +83,46 @@ const getCategory=async(req,res)=>{
     }
 }
 //add TourismGovernor to DB by username and password
-const addTourismGovernor= async(req,res)=> {
-    const{username,password}=req.body;
-    try{
-        const hashedPassword = await bcrypt.hash(password, 10);
-        //create gov.
+const addTourismGovernor = async (req, res) => {
+    const { username, password } = req.body;  // Get username and password from request body
+
+    try {
+        // Hash the password using bcrypt
+        const hashedPassword = await bcrypt.hash(password, 10);  // 10 is the salt rounds
+
+        // Check if the username already exists in LoginCredentials
+        const existingUser = await LoginCredentials.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Username already exists in Login Credentials' });
+        }
+
+        // Create a new Tourism Governor
         const newTG = new TourismGovernor({
             username,
-            password:hashedPassword,
+            password: hashedPassword,
         });
+
+        // Save the new Tourism Governor in the database
         await newTG.save();
-        res.status(200).json({message:'Tourism Governor added successfully',newTG});
+
+        // Create login credentials for the Tourism Governor
+        const loginCredentials = new LoginCredentials({
+            username: newTG.username,
+            password: newTG.password,  // Use the hashed password
+            role: 'tourism governor',
+            userId: newTG._id,  // Reference to the newly created Tourism Governor
+            roleModel: 'TourismGovernor'  // Set the role model to 'TourismGovernor'
+        });
+
+        // Save the login credentials in the database
+        await loginCredentials.save();
+
+        res.status(201).json({ message: 'Tourism Governor and Login Credentials added successfully', governor: newTG });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-}
+};
+
 
 // Admin function to add a product
 const addProductAsAdmin = async (req, res) => {
@@ -211,7 +236,6 @@ const filterProduct = async (req, res) => {
     }
 };
 
-
 const deleteAccount = async (req, res) => {
     const { id } = req.params; // Extract the ID from the request parameters
 
@@ -246,6 +270,10 @@ const deleteAccount = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+
+
+
 
 
 
@@ -347,7 +375,7 @@ const approvePendingUserById = async (req, res) => {
                 _id: pendingUser._id,
                 email: pendingUser.email,
                 username: pendingUser.username,
-                password: await bcrypt.hash(pendingUser.password, 10)
+                password:  pendingUser.password
             });
         } else if (pendingUser.role === 'seller') {
             userCollection = Seller;
@@ -355,7 +383,7 @@ const approvePendingUserById = async (req, res) => {
                 _id: pendingUser._id,
                 email: pendingUser.email,
                 username: pendingUser.username,
-                password: await bcrypt.hash(pendingUser.password, 10)
+                password: pendingUser.password
             });
         } else if (pendingUser.role === 'advertiser') {
             userCollection = Advertiser;
@@ -363,7 +391,7 @@ const approvePendingUserById = async (req, res) => {
                 _id: pendingUser._id,
                 email: pendingUser.email,
                 username: pendingUser.username,
-                password: await bcrypt.hash(pendingUser.password, 10)
+                password: pendingUser.password
             });
         } else {
             return res.status(400).json({ message: 'Invalid role' });
@@ -494,9 +522,8 @@ const addAdmin = async (req, res) => {
     const { username, password } = req.body;  // Get username and password from request body
 
     try {
-        // Check if the username already exists
+        // Check if the username already exists in LoginCredentials
         const existingUser = await LoginCredentials.findOne({ username });
-
         if (existingUser) {
             return res.status(400).json({ message: 'Username already exists' });
         }
@@ -504,15 +531,26 @@ const addAdmin = async (req, res) => {
         // Hash the password using bcrypt
         const hashedPassword = await bcrypt.hash(password, 10);  // 10 is the salt rounds
 
-        // Create a new admin
-        const newAdmin = new LoginCredentials({
+        // Create a new admin in the Admin collection
+        const newAdmin = new Admin({
             username,
-            password: hashedPassword,  // Save the hashed password
-            role: 'admin'  // Set role as 'admin'
+            password: hashedPassword  // Save the hashed password
         });
 
-        // Save the new admin in the database
+        // Save the admin to the Admin collection
         await newAdmin.save();
+
+        // Also create login credentials for the admin
+        const loginCredentials = new LoginCredentials({
+            username: newAdmin.username,
+            password: newAdmin.password,  // Use the hashed password
+            role: 'admin',
+            userId: newAdmin._id,  // Reference to the newly created Admin
+            roleModel: 'Admin'  // Set the role model to 'Admin'
+        });
+
+        // Save the login credentials in the database
+        await loginCredentials.save();
 
         res.status(201).json({ message: 'Admin added successfully', admin: newAdmin });
     } catch (error) {
@@ -563,6 +601,52 @@ const searchProductsByName = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+const changePassword = async (req, res) => {
+    const { oldPassword, newPassword, confirmNewPassword } = req.body;
+    const { id } = req.params; // Extract user ID from the request params
+
+    try {
+        // 1. Find the user in LoginCredentials
+        const userCredentials = await LoginCredentials.findById(id);
+        if (!userCredentials) {
+            return res.status(404).json({ message: 'User credentials not found' });
+        }
+
+        // 2. Compare the old password with the hashed password in LoginCredentials
+        const isMatch = await bcrypt.compare(oldPassword, userCredentials.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Old password is incorrect' });
+        }
+
+        // 3. Check if the new password matches the confirm password
+        if (newPassword !== confirmNewPassword) {
+            return res.status(400).json({ message: 'New password and confirm password do not match' });
+        }
+
+        // 4. Hash the new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        // 5. Update the password in LoginCredentials
+        userCredentials.password = hashedNewPassword;
+        await userCredentials.save();
+
+        // 6. Update the password in the Admin collection if the user is an admin
+        if (userCredentials.role === 'admin') {
+            const admin = await Admin.findById(userCredentials.userId);
+            if (admin) {
+                admin.password = hashedNewPassword;
+                await admin.save();
+            }
+        }
+
+        res.status(200).json({ message: 'Password updated successfully in both collections' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+
 
 const getAttractions = async (req, res) => {
     try {
@@ -702,5 +786,6 @@ module.exports = {
     createPreferenceTag,
     getAllPreferenceTags,
     updatePreferenceTag,
-    deletePreferenceTag
+    deletePreferenceTag,
+    changePassword
 };

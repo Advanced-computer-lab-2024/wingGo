@@ -10,6 +10,7 @@ const Complaints = require('../models/Complaints');
 
 
 
+
 const tourist_hello = (req, res) => {
     res.send('<h1>yayy</h1>');
     console.log('yay');
@@ -101,6 +102,52 @@ const addComplaint = async (req, res) => {
         res.status(500).json({ message: 'Error filing complaint.', error });
     }
 }; 
+
+
+const changePassword = async (req, res) => {
+    const { oldPassword, newPassword, confirmNewPassword } = req.body;
+    const { id } = req.params; // Extract user ID from the request params
+   
+    try {
+        // 1. Find the user in LoginCredentials
+        const userCredentials = await LoginCredentials.findById(id);
+        if (!userCredentials) {
+            return res.status(404).json({ message: 'User credentials not found' });
+        }
+
+        // 2. Find the corresponding user in the Tourist collection
+        const tourist = await Tourist.findById(userCredentials.userId);
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // 3. Compare the old password with the hashed password in LoginCredentials
+        const isMatch = await bcrypt.compare(oldPassword, userCredentials.password); // Compare old password
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Old password is incorrect' });
+        }
+
+        // 4. Check if the new password matches the confirm password
+        if (newPassword !== confirmNewPassword) {
+            return res.status(400).json({ message: 'New password and confirm password do not match' });
+        }
+
+        // 5. Hash the new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10); // Hash new password
+
+        // 6. Update the password in LoginCredentials
+        userCredentials.password = hashedNewPassword;
+        await userCredentials.save();
+
+        // 7. Update the password in the Tourist collection
+        tourist.password = hashedNewPassword;
+        await tourist.save();
+
+        res.status(200).json({ message: 'Password updated successfully in both collections' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
 
 
@@ -697,6 +744,9 @@ const viewComplaints = async (req, res) => {
 
 
 
+
+
+
 module.exports = {
     tourist_hello,
     tourist_register,
@@ -719,5 +769,6 @@ module.exports = {
     filterItineraries,
     addComplaint,
     addPreferencesToTourist,
-    viewComplaints
+    viewComplaints,
+    changePassword
 };

@@ -17,4 +17,6 @@ router.post('/activities', advertiserController.createActivity);
 router.post('/uploadLogo/:id', upload.single('file'), advertiserController.changeLogo);
 router.put('/acceptterms/:id', advertiserController.acceptTerms);
 
+router.put('/changePassword/:id', advertiserController.changePassword); // Define route for password change
+
 module.exports = router;

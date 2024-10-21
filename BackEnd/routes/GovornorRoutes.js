@@ -3,6 +3,7 @@ const router = express.Router();
 const PlaceController = require('../controllers/GovornorController');
 
 
+
 router.post('/createPlace', PlaceController.createPlace);
 
 router.get('/getAllPlaces', PlaceController.getAllPlaces);
@@ -23,5 +24,7 @@ router.get('/hello', PlaceController.hello);
 router.post('/preferences', PlaceController.createPreferenceTag);
 // Add Tag updated
 router.put('/addTagUpdated/:id', PlaceController.addTagUpdated);
+
+router.put('/changePassword/:id', PlaceController.changePassword); // Define route for password change
 
 module.exports = router;

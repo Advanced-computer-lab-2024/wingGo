@@ -43,7 +43,59 @@ const createTourguideProfile = async (req, res) => {
     //  return res.status(201).json({ message: 'Profile created successfully.' });
     }
 };
-// Update the tour guide profile (with password hashing if updated)
+
+const changePassword = async (req, res) => {
+    const { oldPassword, newPassword, confirmNewPassword } = req.body;
+    const { id } = req.params; // Extract user ID from the request params
+
+    try {
+        // 1. Find the user in LoginCredentials
+        const userCredentials = await LoginCredentials.findById(id);
+        if (!userCredentials) {
+            return res.status(404).json({ message: 'User credentials not found' });
+        }
+
+        // 2. Find the corresponding user in the TourGuide collection
+        const tourGuide = await TourGuide.findById(userCredentials.userId);
+        if (!tourGuide) {
+            return res.status(404).json({ message: 'TourGuide not found' });
+        }
+
+        console.log('Old Password (entered):', oldPassword);
+        const hashedoldPassword = await bcrypt.hash(oldPassword, 10); // Hash new password
+        console.log('Old Password (hashed):', hashedoldPassword);
+        console.log('Stored Hashed Password:', tourGuide.password);
+
+        // 3. Compare the old password with the hashed password in TourGuide
+        const isMatch = await bcrypt.compare(oldPassword, tourGuide.password);
+        console.log('Is password match:', isMatch);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Old password is incorrect' });
+        }
+
+        // 4. Check if the new password matches the confirm password
+        if (newPassword !== confirmNewPassword) {
+            return res.status(400).json({ message: 'New password and confirm password do not match' });
+        }
+
+        // 5. Hash the new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10); // Hash new password
+        
+        // 6. Update the password in LoginCredentials
+        userCredentials.password = hashedNewPassword;
+        await userCredentials.save();
+
+        // 7. Update the password in the TourGuide collection
+        tourGuide.password = hashedNewPassword;
+        await tourGuide.save();
+
+        res.status(200).json({ message: 'Password updated successfully in both collections' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 // Update the tour guide profile (with password hashing if updated)
 const updateTourGuideProfile = async (req, res) => {
     try {
@@ -271,5 +323,5 @@ module.exports = {
     updateTourGuideProfile,
     createItinerary, getItineraries,getAllItineraries, updateItinerary, deleteItinerary ,getItinerariesByTourGuide,createTourguideProfile,
     changeProfilePhoto,
-    acceptTerms
+    acceptTerms, changePassword
 };
