@@ -3,6 +3,7 @@ const Seller = require('../models/Seller');
 const LoginCredentials = require('../models/LoginCredentials'); 
 const Product = require('../models/product');
 const { uploadDocument } = require('../helpers/s3Helper');
+const generatePreSignedUrl = require('../downloadMiddleware');
 const { default: mongoose } = require('mongoose');
 
 const updateSellerProfile = async (req, res) => {
@@ -140,10 +141,12 @@ const createSellerProfile = async (req, res) => {
 // Function to add a product
 const addProduct = async (req, res) => {
     const { name, price, quantity, description, sellerId } = req.body;
+
+    
     console.log('Received request to add product:', req.body);
     
     // Check if an image was uploaded, otherwise set picture to null
-    const picture = req.file ? req.file.filename : null;
+    const picture = req.file ? req.file.location : null;
 
     try {
         // Check if the seller exists
@@ -159,7 +162,7 @@ const addProduct = async (req, res) => {
             quantity,
             description,
             seller: sellerId,
-            picture // Only include picture if it was uploaded
+            picture:picture // Only include picture if it was uploaded
         });
 
         // Save the product to the database
@@ -169,6 +172,8 @@ const addProduct = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+
 
 const getAllProducts = async (req, res) => {
     try {
@@ -205,11 +210,12 @@ const getProductImage = async (req, res) => {
 
         // If the product has an image
         if (product.picture) {
-            // Serve the image from the 'images' directory
-            const imagePath = path.join(__dirname, '..', 'images', product.picture);
-            
-            // Respond with the image file
-            return res.sendFile(imagePath);
+            const key = certificateUrl.split('/').slice(-1)[0];
+        
+            const preSignedUrl = await generatePreSignedUrl(key);
+
+            return res.status(200).json({ url: preSignedUrl });
+
         } else {
             // If no image is found, return a placeholder or 404
             return res.status(404).json({ message: 'Image not found for this product.' });
@@ -221,13 +227,47 @@ const getProductImage = async (req, res) => {
 };
 
 
+const downloadProductImage = async (req, res) => {  
+    
+
+    const { id } = req.params;
+    
+    try {
+        const product = await Product.findById(id)
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+    
+        const pictureUrl = product.picture;
+        if (!pictureUrl) {
+            return res.status(404).json({ message: 'Picture not found' });
+        }
+    
+        const key = pictureUrl.split('/').slice(-1)[0];
+        // Generate a pre-signed URL for the picture
+        const preSignedUrl = await generatePreSignedUrl(key);
+    
+        res.redirect(preSignedUrl);
+    
+    } catch (err) {
+        console.error('Error in downloadProductImage:', err);
+        if (!res.headersSent) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(500).json({ error: err.message });
+    }
+    
+    
+};
+
+
 // Function to edit a product
 const editProduct = async (req, res) => {
     const { productId } = req.params;
     const { name, price, quantity, description, sellerId } = req.body;
 
     // Check if an image was uploaded, otherwise leave the existing one
-    const picture = req.file ? req.file.filename : null;
+    const picture = req.file ? req.file.location : null;
 
     console.log('Received request to edit product with ID:', productId);
     console.log('Request body:', req.body);
@@ -405,5 +445,6 @@ const changePassword = async (req, res) => {
     getProductImage,
     changeLogo,
     acceptTerms,
-    changePassword
+    changePassword,
+    downloadProductImage
 };

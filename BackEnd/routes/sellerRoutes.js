@@ -13,8 +13,8 @@ const  upload  = require('../uploadMiddleware');
 router.get('/getallproducts', sellerController.getAllProducts);
 router.put('/update/:id', sellerController.updateSellerProfile);
 router.get('/viewProfile/get/:id', sellerController.getSeller);
-router.post('/addProduct', upload.single('picture'), sellerController.addProduct);  // Use multer middleware for file upload
-router.put('/product/:productId', upload.single('picture'), sellerController.editProduct);
+router.post('/addProduct', upload.single('file'), sellerController.addProduct);  // Use multer middleware for file upload
+router.put('/product/:productId', upload.single('file'), sellerController.editProduct);
 router.get('/sortProducts', sellerController.sortProductsByRatings);
 router.get('/filterProducts', sellerController.filterProduct);
 router.post('/createProfile/:id', sellerController.createSellerProfile);
@@ -25,5 +25,7 @@ router.post('/changeLogo/:id', upload.single('file'), sellerController.changeLog
 
 router.put('/acceptterms/:id', sellerController.acceptTerms);
 router.put('/changePassword/:id', sellerController.changePassword); // Define route for password change
+
+router.get('/downloadProductImage/:id', sellerController.downloadProductImage);
 
 module.exports = router;

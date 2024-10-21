@@ -83,4 +83,7 @@ router.get('/downloadPendingUserID/:id', adminController.downloadPendingUserID);
 
 
 router.post('/changeProductImage/:id', upload.single('file'), adminController.changeProductImage);
+
+router.get('/getProductImage/:id', adminController.getProductImage);
+router.get('/downloadProductImage/:id', adminController.downloadProductImage);
 module.exports = router;
