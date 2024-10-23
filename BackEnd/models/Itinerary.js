@@ -26,7 +26,8 @@ const itinerarySchema = new Schema({
     flagged: {
         type: Boolean,
         default: false,  // Initially not flagged
-      }
+      },
+    touristIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }]
 }, { timestamps: true });
 
 const Itinerary = mongoose.model('Itinerary', itinerarySchema);

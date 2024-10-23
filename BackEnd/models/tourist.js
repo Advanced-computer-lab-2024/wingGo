@@ -39,7 +39,27 @@ const touristSchema = new Schema({
         default: 0    // Initialize to zero
           
     },
-    preferences: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PreferenceTag' }]
+    loyaltyPoints: {
+        type: Number,
+        default: 0    // Initialize to zero
+          
+    },
+    badge: {
+        level: {
+            type: Number,
+            default: 1    // Default level is 1
+        },
+        amount: {
+            type: Number,
+            default: 0.5  // Default amount is 0.5
+        }
+    },
+    bookedItineraries: [{
+        itineraryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Itinerary' },
+        bookingDate: { type: Date} // Default to the current date
+    }] ,
+    preferences: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PreferenceTag' }],
+  
 
 
 }, {timestamps: true});

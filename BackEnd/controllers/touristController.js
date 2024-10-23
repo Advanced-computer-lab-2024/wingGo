@@ -741,6 +741,58 @@ const viewComplaints = async (req, res) => {
         res.status(500).json({ message: 'Error retrieving complaints.', error });
     }
 };
+// const bookTicket = async (req, res) => {
+//     const { touristId, itineraryId } = req.params; // Extracting touristId and itineraryId from URL parameters
+//     const { bookingDate } = req.query;
+
+//     try {
+//         // Step 1: Add touristId to the Itinerary's touristIDs array
+//         const itineraryUpdate = await Itinerary.findByIdAndUpdate(
+//             itineraryId, 
+//             { $push: { touristIDs: touristId } }, 
+//             { new: true }
+//         );
+        
+//         if (!itineraryUpdate) {
+//             return res.status(404).json({ message: 'Itinerary not found or update failed' });
+//         }
+     
+//         const parsedDate = new Date(bookingDate);
+
+//         const bookingObject = {
+//             itineraryId: itineraryId,
+//             bookingDate: parsedDate // Use the parsed date
+//         };
+
+//         const itineraryPrice = itineraryUpdate.price;
+//         const reqTourist = await Tourist.findById(touristId)
+//         const oldAmount=reqTourist.badge.amount;
+//         const oldPoints=reqTourist.loyaltyPoints;
+//         newPoints=(itineraryPrice * oldAmount)+oldPoints;
+
+
+
+
+//         // Step 4: Add bookingObject to the Tourist's bookedItineraries array
+//         const touristUpdate = await Tourist.findByIdAndUpdate(
+//             touristId, 
+//             { $push: { bookedItineraries: bookingObject } }, // Push the booking object
+//             { new: true }
+//         );
+        
+//         if (!touristUpdate) {
+//             return res.status(404).json({ message: 'Tourist not found or update failed' });
+//         }
+
+//         return res.status(200).json({
+//             message: 'Booking successful',
+//             itinerary: itineraryUpdate,
+//             tourist: touristUpdate
+//         });
+//     } catch (error) {
+//         return res.status(500).json({ message: 'Error during the booking process.', error });
+//     }
+// };
 
 
 
@@ -770,5 +822,6 @@ module.exports = {
     addComplaint,
     addPreferencesToTourist,
     viewComplaints,
-    changePassword
+    changePassword,
+    // bookTicket,
 };
