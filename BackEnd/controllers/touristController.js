@@ -769,14 +769,26 @@ const viewComplaints = async (req, res) => {
 //         const oldAmount=reqTourist.badge.amount;
 //         const oldPoints=reqTourist.loyaltyPoints;
 //         newPoints=(itineraryPrice * oldAmount)+oldPoints;
-
-
-
-
-//         // Step 4: Add bookingObject to the Tourist's bookedItineraries array
+//         let newLevel = reqTourist.badge.level; // Start with the current level
+//         let newAmount = oldAmount;
+//         if(newPoints>(100)**3){
+//             newLevel=2;
+//             newAmount=1;
+//         }
+//         else if (newPoints>(500)**3) {
+//             newLevel=3;
+//             newAmount=1.5;
+//         }
 //         const touristUpdate = await Tourist.findByIdAndUpdate(
 //             touristId, 
-//             { $push: { bookedItineraries: bookingObject } }, // Push the booking object
+//             { 
+//                 $push: { bookedItineraries: bookingObject }, // Add the booking
+//                 $set: { 
+//                     loyaltyPoints: newPoints,          // Update loyalty points
+//                     'badge.level': newLevel,           // Update badge level
+//                     'badge.amount': newAmount          // Update badge amount
+//                 }
+//             }, 
 //             { new: true }
 //         );
         

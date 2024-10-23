@@ -43,5 +43,5 @@ router.get('/viewmycomplaints/:id', touristController.viewComplaints);
 router.put('/:id/preferences', touristController.addPreferencesToTourist);
 
 router.put('/changePassword/:id', touristController.changePassword); // Define route for password change
-router.post('/bookticket/:touristId/:itineraryId', touristController.bookTicket);
+// router.post('/bookticket/:touristId/:itineraryId', touristController.bookTicket);
 module.exports = router;
