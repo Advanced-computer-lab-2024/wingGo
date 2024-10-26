@@ -62,7 +62,8 @@ const activitySchema = new mongoose.Schema({
 flagged: {
   type: Boolean,
   default: false,  // Initially not flagged
-}
+},
+touristIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }]
 });
 
 const Activity = mongoose.model('Activity', activitySchema);

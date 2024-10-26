@@ -741,72 +741,350 @@ const viewComplaints = async (req, res) => {
         res.status(500).json({ message: 'Error retrieving complaints.', error });
     }
 };
-// const bookTicket = async (req, res) => {
-//     const { touristId, itineraryId } = req.params; // Extracting touristId and itineraryId from URL parameters
-//     const { bookingDate } = req.query;
+const bookItinerary = async (req, res) => {
+    const { touristId, itineraryId } = req.params; // Extracting touristId and itineraryId from URL parameters
+    const { bookingDate } = req.query;
 
-//     try {
-//         // Step 1: Add touristId to the Itinerary's touristIDs array
-//         const itineraryUpdate = await Itinerary.findByIdAndUpdate(
-//             itineraryId, 
-//             { $push: { touristIDs: touristId } }, 
-//             { new: true }
-//         );
+    try {
+       
+        const parsedDate = new Date(bookingDate);
+
+        const bookingObject = {
+            itineraryId: itineraryId,
+            bookingDate: parsedDate // Use the parsed date
+        };
+
+        // Retrieve tourist details and check if itineraryId is already booked
+        const reqTourist = await Tourist.findById(touristId);
+        if (!reqTourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check if the itineraryId is already in bookedItineraries
+        const isAlreadyBooked = reqTourist.bookedItineraries.some(
+            (booking) => booking.itineraryId.toString() === itineraryId
+        );
+
+        if (isAlreadyBooked) {
+            return res.status(400).json({ message: 'Itinerary already booked by this tourist' });
+        }
+        const itineraryUpdate = await Itinerary.findByIdAndUpdate(
+            itineraryId, 
+            { $addToSet: { touristIDs: touristId } }, // Use $addToSet to avoid duplicates
+            { new: true }
+        );
         
-//         if (!itineraryUpdate) {
-//             return res.status(404).json({ message: 'Itinerary not found or update failed' });
-//         }
-     
-//         const parsedDate = new Date(bookingDate);
+        if (!itineraryUpdate) {
+            return res.status(404).json({ message: 'Itinerary not found or update failed' });
+        }
 
-//         const bookingObject = {
-//             itineraryId: itineraryId,
-//             bookingDate: parsedDate // Use the parsed date
-//         };
-
-//         const itineraryPrice = itineraryUpdate.price;
-//         const reqTourist = await Tourist.findById(touristId)
-//         const oldAmount=reqTourist.badge.amount;
-//         const oldPoints=reqTourist.loyaltyPoints;
-//         newPoints=(itineraryPrice * oldAmount)+oldPoints;
-//         let newLevel = reqTourist.badge.level; // Start with the current level
-//         let newAmount = oldAmount;
-//         if(newPoints>(100)**3){
-//             newLevel=2;
-//             newAmount=1;
-//         }
-//         else if (newPoints>(500)**3) {
-//             newLevel=3;
-//             newAmount=1.5;
-//         }
-//         const touristUpdate = await Tourist.findByIdAndUpdate(
-//             touristId, 
-//             { 
-//                 $push: { bookedItineraries: bookingObject }, // Add the booking
-//                 $set: { 
-//                     loyaltyPoints: newPoints,          // Update loyalty points
-//                     'badge.level': newLevel,           // Update badge level
-//                     'badge.amount': newAmount          // Update badge amount
-//                 }
-//             }, 
-//             { new: true }
-//         );
+        // Calculate new points and badge details
+        const itineraryPrice = itineraryUpdate.price;
+        const oldAmount = reqTourist.badge.amount;
+        const oldPoints = reqTourist.loyaltyPoints;
+        const newPoints = (itineraryPrice * oldAmount) + oldPoints;
         
-//         if (!touristUpdate) {
-//             return res.status(404).json({ message: 'Tourist not found or update failed' });
-//         }
+        let newLevel = reqTourist.badge.level;
+        let newAmount = oldAmount;
+        
+        if (newPoints > 100000) {
+            newLevel = 2;
+            newAmount = 1;
+        }
+        if (newPoints > 500000) {
+            newLevel = 3;
+            newAmount = 1.5;
+        }
 
-//         return res.status(200).json({
-//             message: 'Booking successful',
-//             itinerary: itineraryUpdate,
-//             tourist: touristUpdate
-//         });
-//     } catch (error) {
-//         return res.status(500).json({ message: 'Error during the booking process.', error });
-//     }
-// };
+        // Update the tourist's booked itineraries and other details
+        const touristUpdate = await Tourist.findByIdAndUpdate(
+            touristId, 
+            { 
+                $push: { bookedItineraries: bookingObject }, // Add the booking
+                $set: { 
+                    loyaltyPoints: newPoints,          // Update loyalty points
+                    'badge.level': newLevel,           // Update badge level
+                    'badge.amount': newAmount          // Update badge amount
+                }
+            }, 
+            { new: true }
+        );
 
+        if (!touristUpdate) {
+            return res.status(404).json({ message: 'Tourist update failed' });
+        }
 
+        return res.status(200).json({
+            message: 'Booking successful',
+            itinerary: itineraryUpdate,
+            tourist: touristUpdate
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error during the booking process.', error });
+    }
+};
+
+const cancelItinerary = async (req, res) => {
+    const { touristId, itineraryId } = req.params; // Extracting touristId and itineraryId from URL parameters
+
+    try {
+        // Step 1: Fetch the tourist with the given touristId
+        const tourist = await Tourist.findById(touristId);
+
+        // Check if the tourist exists
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found.' });
+        }
+
+        // Step 2: Check if the itinerary exists in the tourist's bookedItineraries array
+        const itinerary = tourist.bookedItineraries.find(
+            itinerary => itinerary.itineraryId.toString() === itineraryId
+        );
+
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found for this tourist.' });
+        }
+
+        // Step 3: Check if the booking date is more than 48 hours from now
+        const now = new Date();
+        const bookingDate = itinerary.bookingDate;
+        const diffInMilliseconds = bookingDate.getTime() - now.getTime();
+
+        if (diffInMilliseconds < 48 * 60 * 60 * 1000) {
+            return res.status(400).json({ message: 'Cannot cancel the itinerary within 48 hours of the booking date.' });
+        }
+
+        // Step 4: Remove the specific itinerary from the bookedItineraries array using $pull
+        const touristUpdate = await Tourist.findByIdAndUpdate(
+            touristId,
+            { $pull: { bookedItineraries: { itineraryId: itineraryId } } }, // Removes the matching object
+            { new: true }
+        );
+
+        if (!touristUpdate) {
+            return res.status(404).json({ message: 'Failed to update tourist bookings.' });
+        }
+
+        // Step 5: Remove the touristId from the itinerary's touristIDs array
+        const itineraryUpdate = await Itinerary.findByIdAndUpdate(
+            itineraryId,
+            { $pull: { touristIDs: touristId } }, // Use $pull to remove the touristId from touristIDs
+            { new: true }
+        );
+
+        if (!itineraryUpdate) {
+            return res.status(404).json({ message: 'Itinerary not found or failed to update.' });
+        }
+
+        return res.status(200).json({
+            message: 'Itinerary cancelled successfully.',
+            tourist: touristUpdate,
+            itinerary: itineraryUpdate
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Error cancelling the booking process.', error });
+    }
+};
+const redeemPoints = async (req, res) => {
+    const { touristId } = req.params; // Extracting touristId from URL parameters
+
+    try {
+        // Step 1: Fetch the tourist with the given touristId
+        const tourist = await Tourist.findById(touristId);
+
+        // Check if the tourist exists
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found.' });
+        }
+      
+        // Calculate the value to be added to the wallet
+        const oldPoints = tourist.loyaltyPoints;
+        let newPoints = 0;
+        let newLevel = 1;
+        let newAmount = 0.5;
+        const toBeAdded = (oldPoints / 10000) * 100; // Conversion rate for points to wallet amount
+
+        if (oldPoints < 10000) {
+            return res.status(400).json({ 
+                message: 'Insufficient loyalty points. You need at least 10,000 points to redeem into your wallet.' 
+            });
+        }
+
+        // Update the tourist document
+        const touristUpdate = await Tourist.findByIdAndUpdate(
+            touristId, 
+            { 
+                $set: { 
+                    loyaltyPoints: newPoints,          // Reset loyalty points
+                    'badge.level': newLevel,           // Reset badge level
+                    'badge.amount': newAmount          // Reset badge amount
+                },
+                $inc: { wallet: toBeAdded }           // Increment wallet by toBeAdded amount
+            }, 
+            { new: true }
+        );
+
+        if (!touristUpdate) {
+            return res.status(404).json({ message: 'Tourist update failed' });
+        }
+
+        return res.status(200).json({
+            message: 'Points redeemed successfully and added to wallet.',
+            tourist: touristUpdate
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Error redeeming points.', error });
+    }
+};
+const bookActivity = async (req, res) => {
+    const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
+
+    try {
+        // Retrieve tourist details and check if the activityId is already booked
+        const reqTourist = await Tourist.findById(touristId);
+        if (!reqTourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check if the activityId is already in bookedActivities
+        const isAlreadyBooked = reqTourist.bookedActivities.some(
+            (booking) => booking.toString() === activityId
+        );
+
+        if (isAlreadyBooked) {
+            return res.status(400).json({ message: 'Activity already booked by this tourist' });
+        }
+
+        // Add the tourist to the activity's touristIDs array
+        const activityUpdate = await Activity.findByIdAndUpdate(
+            activityId, 
+            { $addToSet: { touristIDs: touristId } }, // Use $addToSet to avoid duplicates
+            { new: true }
+        );
+
+        if (!activityUpdate) {
+            return res.status(404).json({ message: 'Activity not found or update failed' });
+        }
+
+        // Calculate new points and badge details based on the activity's price
+        const activityPrice = activityUpdate.price;
+        const oldAmount = reqTourist.badge.amount;
+        const oldPoints = reqTourist.loyaltyPoints;
+        const newPoints = (activityPrice * oldAmount) + oldPoints;
+
+        // Determine new badge level and amount based on newPoints
+        let newLevel = reqTourist.badge.level;
+        let newAmount = oldAmount;
+
+        if (newPoints > 100000) {
+            newLevel = 2;
+            newAmount = 1;
+        }
+        if (newPoints > 500000) {
+            newLevel = 3;
+            newAmount = 1.5;
+        }
+
+        // Update the tourist's booked activities and other details
+        const touristUpdate = await Tourist.findByIdAndUpdate(
+            touristId, 
+            { 
+                $addToSet: { bookedActivities: activityId }, // Add the activity to bookedActivities
+                $set: { 
+                    loyaltyPoints: newPoints,          // Update loyalty points
+                    'badge.level': newLevel,           // Update badge level
+                    'badge.amount': newAmount          // Update badge amount
+                }
+            }, 
+            { new: true }
+        );
+
+        if (!touristUpdate) {
+            return res.status(404).json({ message: 'Tourist update failed' });
+        }
+
+        return res.status(200).json({
+            message: 'Activity booking successful',
+            activity: activityUpdate,
+            tourist: touristUpdate
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error during the activity booking process.', error });
+    }
+};
+const cancelActivity = async (req, res) => {
+    const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
+
+    try {
+        // Step 1: Fetch the tourist with the given touristId and populate bookedActivities
+        const tourist = await Tourist.findById(touristId).populate('bookedActivities');
+
+        // Check if the tourist exists
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found.' });
+        }
+
+        // Step 2: Check if the activity exists in the tourist's bookedActivities array
+        const activity = tourist.bookedActivities.find(
+            activity => activity._id.toString() === activityId
+        );
+
+        // console.log('Retrieved Activity:', activity); // Debugging line
+
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found for this tourist.' });
+        }
+
+        // Step 3: Check if the booking date is more than 48 hours from now
+        const now = new Date();
+        const bookingDate = activity.date; // Ensure this is the correct path
+
+        // Check if bookingDate is valid
+        if (!bookingDate) {
+            return res.status(400).json({ message: 'Booking date is not valid.' });
+        }
+
+        const diffInMilliseconds = bookingDate.getTime() - now.getTime();
+
+        if (diffInMilliseconds < 48 * 60 * 60 * 1000) {
+            return res.status(400).json({ message: 'Cannot cancel the activity within 48 hours of the booking date.' });
+        }
+
+        // Step 4: Remove the specific activity from the bookedActivities array using $pull
+        const touristUpdate = await Tourist.findByIdAndUpdate(
+            touristId,
+            { $pull: { bookedActivities: activityId } },
+            { new: true }
+        );
+
+        if (!touristUpdate) {
+            return res.status(404).json({ message: 'Failed to update tourist bookings.' });
+        }
+
+        // Step 5: Remove the touristId from the activity's touristIDs array
+        const activityUpdate = await Activity.findByIdAndUpdate(
+            activityId,
+            { $pull: { touristIDs: touristId } },
+            { new: true }
+        );
+
+        if (!activityUpdate) {
+            return res.status(404).json({ message: 'Activity not found or failed to update.' });
+        }
+
+        return res.status(200).json({
+            message: 'Activity cancelled successfully.',
+            tourist: touristUpdate,
+            activity: activityUpdate
+        });
+
+    } catch (error) {
+        console.error('Error cancelling the booking process:', error); // Log the error for debugging
+        return res.status(500).json({ message: 'Error cancelling the booking process.', error });
+    }
+};
 
 
 
@@ -835,5 +1113,9 @@ module.exports = {
     addPreferencesToTourist,
     viewComplaints,
     changePassword,
-    // bookTicket,
+    bookItinerary,
+    cancelItinerary,
+    redeemPoints,
+    bookActivity,
+    cancelActivity
 };

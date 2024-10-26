@@ -60,6 +60,7 @@ const touristSchema = new Schema({
     }] ,
     preferences: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PreferenceTag' }],
   
+    bookedActivities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity' }]
 
 
 }, {timestamps: true});

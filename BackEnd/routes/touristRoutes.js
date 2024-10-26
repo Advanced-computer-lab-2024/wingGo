@@ -43,5 +43,10 @@ router.get('/viewmycomplaints/:id', touristController.viewComplaints);
 router.put('/:id/preferences', touristController.addPreferencesToTourist);
 
 router.put('/changePassword/:id', touristController.changePassword); // Define route for password change
-// router.post('/bookticket/:touristId/:itineraryId', touristController.bookTicket);
+router.post('/bookItinerary/:touristId/:itineraryId', touristController.bookItinerary);
+router.delete('/cancelItinerary/:touristId/:itineraryId', touristController.cancelItinerary);
+router.put('/redeemPoints/:touristId', touristController.redeemPoints);
+router.post('/bookActivity/:touristId/:activityId', touristController.bookActivity);
+router.delete('/cancelActivity/:touristId/:activityId', touristController.cancelActivity);
+
 module.exports = router;

@@ -452,7 +452,7 @@ const approvePendingUserById = async (req, res) => {
                 username: pendingUser.username,
                 password: pendingUser.password
             });
-        } else {
+         } else {
             return res.status(400).json({ message: 'Invalid role' });
         }
 
