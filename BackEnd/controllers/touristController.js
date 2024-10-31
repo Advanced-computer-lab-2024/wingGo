@@ -1354,6 +1354,49 @@ const commentOnActivity = async (req, res) => {
         res.status(500).json({ message: 'Error processing comment', error });
     }
 };
+
+
+const deleteTouristIfEligible = async (req, res) => {
+    const { id } = req.params;  // Tourist ID
+
+    try {
+        // Find the tourist by ID
+        const tourist = await Tourist.findById(id);
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check bookedItineraries for upcoming bookings
+        const hasUpcomingItinerary = tourist.bookedItineraries.some(booking => {
+            console.log("date it "+ (new Date(booking.bookingDate) >= new Date()));
+            return new Date(booking.bookingDate) >= new Date();
+        });
+
+        if (hasUpcomingItinerary) {
+            return res.status(400).json({ message: 'Cannot delete tourist account: There is an upcoming itinerary booking.' });
+        }
+
+        // Check bookedActivities for upcoming bookings
+        const hasUpcomingActivity = await Activity.exists({
+            _id: { $in: tourist.bookedActivities },
+            date: { $gte: new Date() }
+        });
+
+        if (hasUpcomingActivity) {
+            return res.status(400).json({ message: 'Cannot delete tourist account: There is an upcoming activity booking.' });
+        }
+
+        // Delete the tourist account and associated login credentials
+        await Tourist.findByIdAndDelete(id);
+        await LoginCredentials.deleteOne({ userId: id, roleModel: 'Tourist' });
+
+        res.status(200).json({ message: 'Tourist account and associated data deleted successfully.' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 module.exports = {
     tourist_hello,
     tourist_register,
@@ -1387,5 +1430,6 @@ module.exports = {
     rateProduct,
     reviewProduct,
     rateActivity,
-    commentOnActivity
+    commentOnActivity,
+    deleteTouristIfEligible
 };

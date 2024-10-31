@@ -318,6 +318,48 @@ const changePassword = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+c=1;
+const requestAccountDeletion = async (req, res) => {
+    try {
+        const { id } = req.params;  // Advertiser ID
+
+        // Find all activities related to this advertiser
+        const activities = await Activity.find({ advertiser: id });
+
+        // Check for any upcoming activities with bookings
+        const hasUpcomingActivitiesWithBookings = activities.some(activity => {
+            const today = new Date();
+            console.log(c+" "+activity.date >= today);
+           console.log(c+" "+ activity.touristIDs && activity.touristIDs.length > 0);
+           c++;
+            return activity.date >= today && activity.touristIDs && activity.touristIDs.length > 0;
+        });
+
+        
+
+        if (hasUpcomingActivitiesWithBookings) {
+            return res.status(400).json({
+                message: "Cannot delete account: there are upcoming activities with bookings."
+            });
+        }
+
+        // Delete all activities associated with the advertiser
+        await Activity.deleteMany({ advertiser: id });
+
+        // Delete the advertiser profile and related login credentials
+        const advertiser = await Advertiser.findByIdAndDelete(id);
+        await LoginCredentials.findOneAndDelete({ userId: id, roleModel: 'Advertiser' });
+
+        if (!advertiser) {
+            return res.status(404).json({ message: "Advertiser account not found." });
+        }
+
+        res.status(200).json({ message: "Account and all associated data deleted successfully." });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 module.exports = {
     advertiser_hello,
@@ -331,5 +373,6 @@ module.exports = {
     deleteActivity,
     changeLogo,
     acceptTerms,
-    changePassword
+    changePassword,
+    requestAccountDeletion
 };
