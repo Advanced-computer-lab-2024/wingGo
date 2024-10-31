@@ -36,8 +36,14 @@ const productSchema = new Schema({
     reviews: {
         type: [String], // Array of strings for reviews
         required: false
+    },
+    sales: { 
+        type: Number, 
+        default: 0, 
+        required: true } 
+
     }
-}, { timestamps: true });
+, { timestamps: true });
 
 const Product = mongoose.model('Product', productSchema);
 

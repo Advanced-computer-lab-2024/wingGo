@@ -429,7 +429,23 @@ const changePassword = async (req, res) => {
     }
 };
 
+const getProductQuantityAndSales = async (req, res) => {
+    try {
+        // Fetch only the name, quantity, and sales fields of each product
+        const products = await Product.find({}, "name quantity sales");
 
+        // Check if products exist
+        if (!products || products.length === 0) {
+            return res.status(404).json({ message: 'No products found.' });
+        }
+
+        // Send success response with product data
+        res.status(200).json({ message: 'Product data retrieved successfully', products });
+    } catch (error) {
+        // Handle any errors that occur
+        res.status(500).json({ message: 'Error fetching product data', error: error.message });
+    }
+};
 
  module.exports = {
     updateSellerProfile,
@@ -446,5 +462,6 @@ const changePassword = async (req, res) => {
     changeLogo,
     acceptTerms,
     changePassword,
-    downloadProductImage
+    downloadProductImage,
+    getProductQuantityAndSales
 };
