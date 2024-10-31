@@ -1086,9 +1086,225 @@ const cancelActivity = async (req, res) => {
     }
 };
 
+const purchaseProduct = async (req, res) => {
+    const { touristId, productId } = req.params;
 
+    try {
+        const tourist = await Tourist.findById(touristId);
+        const product = await Product.findById(productId);
 
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        if (product.quantity <= 0) {
+            return res.status(400).json({ message: 'Product out of stock' });
+        }
 
+        // Decrease product quantity
+        product.quantity -= 1;
+
+        // Add product to purchasedProducts array
+        tourist.purchasedProducts.push({ productId: product._id, purchaseDate: new Date() });
+
+        // Save changes
+        await tourist.save();
+        await product.save();
+
+        res.status(200).json({
+            message: 'Product purchased successfully',
+            product,
+            tourist
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error processing purchase', error });
+    }
+};
+const rateProduct = async (req, res) => {
+    const { touristId, productId } = req.params;
+    const { rating } = req.body; // Expecting a rating in the body
+
+    try {
+        console.log(`Received request: Tourist ID: ${touristId}, Product ID: ${productId}, Rating: ${rating}`);
+
+        // Check if tourist exists
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            console.error('Tourist not found');
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check if product exists
+        const product = await Product.findById(productId);
+        if (!product) {
+            console.error('Product not found');
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        // Check if the tourist has purchased the product
+        const purchasedProduct = tourist.purchasedProducts.find(
+            (purchase) => purchase.productId.toString() === productId
+        );
+
+        if (!purchasedProduct) {
+            console.error('Product not purchased by this tourist');
+            return res.status(400).json({ message: 'Product not purchased by this tourist' });
+        }
+
+        // Initialize `ratings` array if it doesn't exist
+        if (!Array.isArray(product.ratings)) {
+            product.ratings = [];
+        }
+
+        // Check if the tourist has already rated this product
+        const existingRatingIndex = product.ratings.findIndex(
+            (review) => review.touristId.toString() === touristId
+        );
+
+        if (existingRatingIndex > -1) {
+            // Update the existing rating if the tourist has already rated the product
+            console.log('Updating existing rating');
+            product.ratings[existingRatingIndex].rating = rating;
+        } else {
+            // Add a new rating if the tourist hasn't rated this product yet
+            console.log('Adding new rating');
+            product.ratings.push({ touristId, rating });
+        }
+
+        // Save the updated product
+        await product.save();
+
+        res.status(200).json({
+            message: 'Product rated successfully',
+            product
+        });
+    } catch (error) {
+        console.error('Error processing rating:', error);  // Log the full error for debugging
+        res.status(500).json({ message: 'Error processing rating', error });
+    }
+};
+const reviewProduct = async (req, res) => {
+    const { touristId, productId } = req.params;
+    const { review } = req.body; // Expecting a review text in the body
+
+    try {
+        console.log(`Received request: Tourist ID: ${touristId}, Product ID: ${productId}, Review: ${review}`);
+
+        // Check if tourist exists
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            console.error('Tourist not found');
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check if product exists
+        const product = await Product.findById(productId);
+        if (!product) {
+            console.error('Product not found');
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        // Check if the tourist has purchased the product
+        const purchasedProduct = tourist.purchasedProducts.find(
+            (purchase) => purchase.productId.toString() === productId
+        );
+
+        if (!purchasedProduct) {
+            console.error('Product not purchased by this tourist');
+            return res.status(400).json({ message: 'Product not purchased by this tourist' });
+        }
+
+        // Initialize `reviews` array if it doesn't exist
+        if (!Array.isArray(product.reviews)) {
+            product.reviews = [];
+        }
+
+        // Check if the tourist has already reviewed this product
+        const existingReviewIndex = product.reviews.findIndex(
+            (review) => review.touristId.toString() === touristId
+        );
+
+        if (existingReviewIndex > -1) {
+            // Update the existing review if the tourist has already reviewed the product
+            console.log('Updating existing review');
+            product.reviews[existingReviewIndex].review = review;
+        } else {
+            // Add a new review if the tourist hasn't reviewed this product yet
+            console.log('Adding new review');
+            product.reviews.push({ touristId, review });
+        }
+
+        // Save the updated product with the new or updated review
+        await product.save();
+
+        res.status(200).json({
+            message: 'Product reviewed successfully',
+            product
+        });
+    } catch (error) {
+        console.error('Error processing review:', error);  // Log the full error for debugging
+        res.status(500).json({ message: 'Error processing review', error });
+    }
+};
+const rateActivity = async (req, res) => {
+    const { touristId, activityId } = req.params;
+    const { rating } = req.body; // Expecting a rating in the body
+
+    try {
+        console.log(`Received request: Tourist ID: ${touristId}, Activity ID: ${activityId}, Rating: ${rating}`);
+
+        // Check if tourist exists
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check if activity exists
+        const activity = await Activity.findById(activityId);
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found' });
+        }
+
+        // Check if the tourist has attended (booked) the activity
+        const attendedActivity = tourist.bookedActivities.includes(activityId);
+        if (!attendedActivity) {
+            return res.status(400).json({ message: 'Activity not attended by this tourist' });
+        }
+
+        // Initialize `ratings` array if it doesn't exist
+        if (!Array.isArray(activity.ratings)) {
+            activity.ratings = [];
+        }
+
+        // Check if the tourist has already rated this activity
+        const existingRatingIndex = activity.ratings.findIndex(
+            (review) => review.touristId.toString() === touristId
+        );
+
+        if (existingRatingIndex > -1) {
+            // Update the existing rating if the tourist has already rated the activity
+            console.log('Updating existing rating');
+            activity.ratings[existingRatingIndex].rating = rating;
+        } else {
+            // Add a new rating if the tourist hasn't rated this activity yet
+            console.log('Adding new rating');
+            activity.ratings.push({ touristId, rating });
+        }
+
+        // Save the updated activity
+        await activity.save();
+
+        res.status(200).json({
+            message: 'Activity rated successfully',
+            activity
+        });
+    } catch (error) {
+        console.error('Error processing rating:', error);  // Log the full error for debugging
+        res.status(500).json({ message: 'Error processing rating', error });
+    }
+};
 module.exports = {
     tourist_hello,
     tourist_register,
@@ -1117,5 +1333,9 @@ module.exports = {
     cancelItinerary,
     redeemPoints,
     bookActivity,
-    cancelActivity
+    cancelActivity,
+    purchaseProduct,
+    rateProduct,
+    reviewProduct,
+    rateActivity
 };

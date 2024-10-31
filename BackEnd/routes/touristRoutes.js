@@ -48,5 +48,8 @@ router.delete('/cancelItinerary/:touristId/:itineraryId', touristController.canc
 router.put('/redeemPoints/:touristId', touristController.redeemPoints);
 router.post('/bookActivity/:touristId/:activityId', touristController.bookActivity);
 router.delete('/cancelActivity/:touristId/:activityId', touristController.cancelActivity);
-
+router.post('/purchaseProduct/:touristId/:productId', touristController.purchaseProduct);
+router.post('/rateProduct/:touristId/:productId', touristController.rateProduct);
+router.post('/reviewProduct/:touristId/:productId', touristController.reviewProduct);
+router.post('/rateActivity/:touristId/:activityId', touristController.rateActivity);
 module.exports = router;
