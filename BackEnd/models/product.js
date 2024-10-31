@@ -22,6 +22,11 @@ const productSchema = new Schema({
         type: Number, // This should be quantity instead of price
         required: true
     },
+    sales: { 
+        type: Number, 
+        default: 0, 
+        required: true
+    }, 
     seller: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Seller',
