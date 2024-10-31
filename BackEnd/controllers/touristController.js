@@ -770,7 +770,7 @@ const bookItinerary = async (req, res) => {
         }
         const itineraryUpdate = await Itinerary.findByIdAndUpdate(
             itineraryId, 
-            { $addToSet: { touristIDs: touristId } }, // Use $addToSet to avoid duplicates
+            { $addToSet: { touristIDs: { touristId: touristId, bookingDate: parsedDate } } }, // Add the object with both touristId and bookingDate
             { new: true }
         );
         
@@ -868,7 +868,7 @@ const cancelItinerary = async (req, res) => {
         // Step 5: Remove the touristId from the itinerary's touristIDs array
         const itineraryUpdate = await Itinerary.findByIdAndUpdate(
             itineraryId,
-            { $pull: { touristIDs: touristId } }, // Use $pull to remove the touristId from touristIDs
+            { $pull: { touristIDs: { touristId: touristId } } }, // Pulls the object containing the touristId
             { new: true }
         );
 
