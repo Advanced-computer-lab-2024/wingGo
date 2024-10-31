@@ -88,4 +88,5 @@ router.get('/getProductImage/:id', adminController.getProductImage);
 router.get('/downloadProductImage/:id', adminController.downloadProductImage);
 router.put('/updateComplaint/ :id', adminController.updateComplaintState);
 router.get('productQuantityAndSales', adminController.getProductQuantityAndSales);
+router.get('/getcomplaints', adminController.getAllComplaints);
 module.exports = router;

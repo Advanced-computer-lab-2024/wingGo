@@ -28,22 +28,19 @@ const productSchema = new Schema({
         required: false,
         default: null 
     },
-    ratings: {
-        type: Number,
-        required: false,
-        default: 0
-    },
-    reviews: {
-        type: [String], // Array of strings for reviews
-        required: false
-    },
-    sales: { 
-        type: Number, 
-        default: 0, 
-        required: true } 
-
-    }
-, { timestamps: true });
+    ratings: [
+        {
+            touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
+            rating:  { type: Number, required: true, min: 1, max: 5 }
+        }
+    ],
+    reviews: [
+        {
+            touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
+            review: { type: String, required: true }
+        }
+    ]
+}, { timestamps: true });
 
 const Product = mongoose.model('Product', productSchema);
 

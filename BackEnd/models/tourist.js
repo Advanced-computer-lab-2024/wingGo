@@ -54,6 +54,13 @@ const touristSchema = new Schema({
             default: 0.5  // Default amount is 0.5
         }
     },
+    purchasedProducts: [
+        {
+            productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+            purchaseDate: { type: Date, default: Date.now },
+            rating: { type: Number, min: 1, max: 5 }  // Add a rating field for each purchased product
+        }
+    ],
     bookedItineraries: [{
         itineraryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Itinerary' },
         bookingDate: { type: Date} // Default to the current date
