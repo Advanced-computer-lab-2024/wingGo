@@ -86,4 +86,5 @@ router.post('/changeProductImage/:id', upload.single('file'), adminController.ch
 
 router.get('/getProductImage/:id', adminController.getProductImage);
 router.get('/downloadProductImage/:id', adminController.downloadProductImage);
+router.get('/getcomplaints', adminController.getAllComplaints);
 module.exports = router;

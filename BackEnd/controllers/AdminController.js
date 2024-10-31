@@ -14,6 +14,7 @@ const Place = require('../models/Places');  // Adjust the path based on your pro
 const Activity = require('../models/Activity');  // Adjust the path based on your project structure
 const PreferenceTag = require('../models/PreferenceTag');
 const Admin = require('../models/Admin');
+const Complaint=require('../models/Complaints');
 const generatePreSignedUrl  = require('../downloadMiddleware');
 
 //Create activity category
@@ -937,6 +938,15 @@ const deletePreferenceTag = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+//view list of complaints
+const getAllComplaints = async (req, res) => {
+    try {
+        const complaints = await Complaint.find({}, 'title state');
+        res.status(200).json(complaints);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
   
 
 module.exports = {
@@ -978,5 +988,6 @@ module.exports = {
     viewPendingUserCertificate,
     downloadPendingUserCertificate,
     changeProductImage,
-    downloadProductImage
+    downloadProductImage,
+    getAllComplaints
 };
