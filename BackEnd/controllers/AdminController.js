@@ -947,6 +947,30 @@ const getAllComplaints = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+//view details of complaint
+const getDetailsOfComplaint=async(req,res)=>{
+    const { id } = req.params;
+    try{
+        const details=await Complaint.findById(id);
+        res.status(200).json(details);
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+};
+//reply to complaint
+const replyComplaint=async(req,res)=>{
+    const { id } = req.params;
+    const{reply}=req.body;
+    try{
+        const complaint=await Complaint.findById(id);
+        complaint.reply.push(reply);
+        await complaint.save();
+        res.status(200).json(complaint);
+    } catch(error){
+        res.status(500).json({erorr:error.message})
+    }
+
+}
   
 
 module.exports = {
@@ -989,5 +1013,7 @@ module.exports = {
     downloadPendingUserCertificate,
     changeProductImage,
     downloadProductImage,
-    getAllComplaints
+    getAllComplaints,
+    getDetailsOfComplaint,
+    replyComplaint
 };

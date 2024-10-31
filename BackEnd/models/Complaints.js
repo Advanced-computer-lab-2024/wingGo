@@ -23,6 +23,10 @@ const complaintsSchema = new Schema({
     type: String,
     enum: ['pending', 'resolved'],
     default: 'pending'
+  },
+  reply: {
+    type: [String], 
+    defualt:[]
   }
 }, { timestamps: true });
 
