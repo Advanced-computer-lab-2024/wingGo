@@ -52,4 +52,5 @@ router.post('/purchaseProduct/:touristId/:productId', touristController.purchase
 router.post('/rateProduct/:touristId/:productId', touristController.rateProduct);
 router.post('/reviewProduct/:touristId/:productId', touristController.reviewProduct);
 router.post('/rateActivity/:touristId/:activityId', touristController.rateActivity);
+router.post('/commentOnActivity/:touristId/:activityId', touristController.commentOnActivity);
 module.exports = router;

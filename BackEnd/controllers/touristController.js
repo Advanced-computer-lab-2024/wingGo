@@ -1305,6 +1305,55 @@ const rateActivity = async (req, res) => {
         res.status(500).json({ message: 'Error processing rating', error });
     }
 };
+const commentOnActivity = async (req, res) => {
+    const { touristId, activityId } = req.params;
+    const { comment } = req.body; // Expecting a comment in the body
+
+    try {
+        console.log(`Received request: Tourist ID: ${touristId}, Activity ID: ${activityId}, Comment: ${comment}`);
+
+        // Check if tourist exists
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            console.error('Tourist not found');
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check if activity exists
+        const activity = await Activity.findById(activityId);
+        if (!activity) {
+            console.error('Activity not found');
+            return res.status(404).json({ message: 'Activity not found' });
+        }
+
+        // Check if the tourist has attended (booked) the activity
+        const attendedActivity = tourist.bookedActivities.includes(activityId);
+        if (!attendedActivity) {
+            console.error('Activity not attended by this tourist');
+            return res.status(400).json({ message: 'Activity not attended by this tourist' });
+        }
+
+        // Initialize `comments` array if it doesn't exist
+        if (!Array.isArray(activity.comments)) {
+            activity.comments = [];
+        }
+
+        // Add the new comment as a separate entry, even if the tourist has commented before
+        activity.comments.push({ touristId, comment });
+        console.log('Adding new comment');
+
+        // Save the updated activity
+        await activity.save();
+
+        res.status(200).json({
+            message: 'Comment added successfully',
+            activity
+        });
+    } catch (error) {
+        console.error('Error processing comment:', error);  // Log the full error for debugging
+        res.status(500).json({ message: 'Error processing comment', error });
+    }
+};
 module.exports = {
     tourist_hello,
     tourist_register,
@@ -1337,5 +1386,6 @@ module.exports = {
     purchaseProduct,
     rateProduct,
     reviewProduct,
-    rateActivity
+    rateActivity,
+    commentOnActivity
 };

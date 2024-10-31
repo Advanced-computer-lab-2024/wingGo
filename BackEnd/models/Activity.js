@@ -59,6 +59,12 @@ const activitySchema = new mongoose.Schema({
       rating: { type: Number, required: true, min: 1, max: 5 }
     }
   ],
+  comments: [
+    {
+      touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
+      comment: { type: String, required: true }
+    }
+  ],
 flagged: {
   type: Boolean,
   default: false,  // Initially not flagged
