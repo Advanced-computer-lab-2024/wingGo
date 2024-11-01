@@ -28,4 +28,6 @@ router.put('/changePassword/:id', sellerController.changePassword); // Define ro
 
 router.get('/downloadProductImage/:id', sellerController.downloadProductImage);
 
+router.get('productQuantityAndSales', sellerController.getProductQuantityAndSales);
+
 module.exports = router;

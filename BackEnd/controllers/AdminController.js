@@ -973,6 +973,53 @@ const replyComplaint=async(req,res)=>{
 }
   
 
+const updateComplaintState = async (req, res) => {
+    const { id } = req.params;
+    const { state } = req.body;
+
+    // Validate the state value
+    if (!['pending', 'resolved'].includes(state)) {
+        return res.status(400).json({ message: "Invalid state value. Must be 'pending' or 'resolved'." });
+    }
+
+    try {
+        // Find the complaint by ID
+        const complaint = await Complaints.findById(id);
+        if (!complaint) {
+            return res.status(404).json({ message: 'Complaint not found' });
+        }
+
+        // Update the complaint's state
+        complaint.state = state;
+        await complaint.save();
+
+        // Send a success response with updated complaint
+        res.status(200).json({ message: 'Complaint status updated successfully', complaint });
+    } catch (error) {
+        // Handle any errors that occur
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const getProductQuantityAndSales = async (req, res) => {
+    try {
+        // Fetch only the name, quantity, and sales fields of each product
+        const products = await Product.find({}, "name quantity sales");
+
+        // Check if products exist
+        if (!products || products.length === 0) {
+            return res.status(404).json({ message: 'No products found.' });
+        }
+
+        // Send success response with product data
+        res.status(200).json({ message: 'Product data retrieved successfully', products });
+    } catch (error) {
+        // Handle any errors that occur
+        res.status(500).json({ message: 'Error fetching product data', error: error.message });
+    }
+};
+
+
 module.exports = {
     approvePendingUserById, // done in frontEnd
     deleteAccount, // done in frontEnd
@@ -1014,6 +1061,8 @@ module.exports = {
     changeProductImage,
     downloadProductImage,
     getAllComplaints,
+    updateComplaintState,
+    getProductQuantityAndSales,
     getDetailsOfComplaint,
     replyComplaint
 };

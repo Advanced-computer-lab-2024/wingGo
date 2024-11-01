@@ -19,4 +19,7 @@ router.put('/acceptterms/:id', advertiserController.acceptTerms);
 
 router.put('/changePassword/:id', advertiserController.changePassword); // Define route for password change
 
+router.delete('/requestAccountDeletion/:id', advertiserController.requestAccountDeletion);
+
+
 module.exports = router;
