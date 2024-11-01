@@ -32,7 +32,8 @@ router.get('/downloadProductImage/:id', sellerController.downloadProductImage);
 router.delete('/deleteSeller/:id', sellerController.deleteSellerAccount);
 
 
-router.get('productQuantityAndSales', sellerController.getProductQuantityAndSales);
+router.get('/productQuantityAndSales/:productId', sellerController.getProductQuantityAndSales);
+router.get('/productsQuantityAndSales', sellerController.getAllProductsQuantityAndSales);
 
 router.put('/changearchive/:id',sellerController.ArchiveUnarchiveProduct);
 

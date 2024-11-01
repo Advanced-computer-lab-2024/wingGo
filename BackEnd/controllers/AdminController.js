@@ -984,7 +984,7 @@ const updateComplaintState = async (req, res) => {
 
     try {
         // Find the complaint by ID
-        const complaint = await Complaints.findById(id);
+        const complaint = await Complaint.findById(id);
         if (!complaint) {
             return res.status(404).json({ message: 'Complaint not found' });
         }
@@ -1002,15 +1002,35 @@ const updateComplaintState = async (req, res) => {
 };
 
 const getProductQuantityAndSales = async (req, res) => {
+    const { productId } = req.params; // Assuming productId is passed as a route parameter
+    try {
+        // Fetch the product by ID and select only quantity and sales fields
+        const product = await Product.findById(productId).select('quantity sales');
+        
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        res.status(200).json({
+            message: 'Product data retrieved successfully',
+            product: {
+                quantity: product.quantity,
+                sales: product.sales
+            }
+        });
+    } catch (error) {
+        // Handle any errors that occur
+        res.status(500).json({ message: 'Error fetching product data', error: error.message });
+    }
+};
+const getAllProductsQuantityAndSales = async (req, res) => {
     try {
         // Fetch only the name, quantity, and sales fields of each product
         const products = await Product.find({}, "name quantity sales");
-
         // Check if products exist
         if (!products || products.length === 0) {
             return res.status(404).json({ message: 'No products found.' });
         }
-
         // Send success response with product data
         res.status(200).json({ message: 'Product data retrieved successfully', products });
     } catch (error) {
@@ -1018,6 +1038,7 @@ const getProductQuantityAndSales = async (req, res) => {
         res.status(500).json({ message: 'Error fetching product data', error: error.message });
     }
 };
+
 //archive/unarchive a product
 const ArchiveUnarchiveProduct=async(req,res)=>{
     const {id}=req.params;
@@ -1138,6 +1159,7 @@ module.exports = {
     getAllComplaints,
     updateComplaintState,
     getProductQuantityAndSales,
+    getAllProductsQuantityAndSales,
     getDetailsOfComplaint,
     replyComplaint,
     ArchiveUnarchiveProduct,

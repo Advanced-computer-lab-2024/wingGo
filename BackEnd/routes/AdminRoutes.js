@@ -86,8 +86,9 @@ router.post('/changeProductImage/:id', upload.single('file'), adminController.ch
 
 router.get('/getProductImage/:id', adminController.getProductImage);
 router.get('/downloadProductImage/:id', adminController.downloadProductImage);
-router.put('/updateComplaint/ :id', adminController.updateComplaintState);
-router.get('productQuantityAndSales', adminController.getProductQuantityAndSales);
+router.put('/updateComplaint/:id', adminController.updateComplaintState);
+router.get('/productQuantityAndSales/:productId', adminController.getProductQuantityAndSales);
+router.get('/productsQuantityAndSales', adminController.getAllProductsQuantityAndSales);
 router.get('/getcomplaints', adminController.getAllComplaints);
 router.get('/detailscomplaint/:id', adminController.getDetailsOfComplaint);
 router.post('/replytocomplaint/:id',adminController.replyComplaint);
