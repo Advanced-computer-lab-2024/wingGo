@@ -44,7 +44,12 @@ const productSchema = new Schema({
             touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
             review: { type: String, required: true }
         }
-    ]
+    ],
+    archive:{
+        type:Boolean,
+        default:false,
+        required:true
+    }
 }, { timestamps: true });
 
 const Product = mongoose.model('Product', productSchema);

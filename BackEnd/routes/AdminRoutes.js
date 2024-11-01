@@ -91,4 +91,5 @@ router.get('productQuantityAndSales', adminController.getProductQuantityAndSales
 router.get('/getcomplaints', adminController.getAllComplaints);
 router.get('/detailscomplaint/:id', adminController.getDetailsOfComplaint);
 router.post('/replytocomplaint/:id',adminController.replyComplaint);
+router.put('/changearchive/:id',adminController.ArchiveUnarchiveProduct);
 module.exports = router;

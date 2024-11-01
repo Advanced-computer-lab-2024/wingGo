@@ -30,4 +30,7 @@ router.get('/downloadProductImage/:id', sellerController.downloadProductImage);
 
 router.get('productQuantityAndSales', sellerController.getProductQuantityAndSales);
 
+router.put('/changearchive/:id',sellerController.ArchiveUnarchiveProduct);
+
+
 module.exports = router;

@@ -26,7 +26,8 @@ const complaintsSchema = new Schema({
   },
   reply: {
     type: [String], 
-    defualt:[]
+    defualt:[],
+    required:true
   }
 }, { timestamps: true });
 

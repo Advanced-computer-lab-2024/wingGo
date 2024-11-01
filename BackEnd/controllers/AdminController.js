@@ -1018,6 +1018,21 @@ const getProductQuantityAndSales = async (req, res) => {
         res.status(500).json({ message: 'Error fetching product data', error: error.message });
     }
 };
+//archive/unarchive a product
+const ArchiveUnarchiveProduct=async(req,res)=>{
+    const {id}=req.params;
+    const {value}=req.body;
+    try{
+        const updatedProduct = await Product.findByIdAndUpdate(
+            id,
+            { archive: value }, // Update only the archive field
+            { new: true, runValidators: true } // Options: return the updated document, run validation
+        );    
+        res.status(200).json(updatedProduct);
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+}
 
 
 module.exports = {
@@ -1064,5 +1079,6 @@ module.exports = {
     updateComplaintState,
     getProductQuantityAndSales,
     getDetailsOfComplaint,
-    replyComplaint
+    replyComplaint,
+    ArchiveUnarchiveProduct
 };
