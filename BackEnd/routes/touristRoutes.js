@@ -66,4 +66,7 @@ router.post('/commenttourguide/:touristId/:tourGuideId', touristController.comme
 router.get('/searchFlights', touristController.searchFlights);
 router.post('/bookFlight/:touristId', touristController.bookFlight);
 
+router.post('/shareViaEmail/:touristId/:itemId', touristController.shareViaEmail); // To be done with FrontEnd
+router.post('/shareViaLink/:touristId/:itemId', touristController.shareViaLink); // To be done with FrontEnd
+
 module.exports = router;

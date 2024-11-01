@@ -11,6 +11,7 @@ const axios = require('axios');
 const FlightBooking = require('../models/FlightBooking');
 const mongoose = require('mongoose');
 const TourGuide = require('../models/TourGuide');
+const nodemailer = require('nodemailer');
 
 
 
@@ -1801,6 +1802,112 @@ const searchFlights = async (req, res) => {
         res.status(500).json({ message: 'Error booking flight', error: error.response?.data || error.message });
       }
     };
+
+    const shareViaEmail = async (req, res) => { // To be done with FrontEnd
+        const { email, type, id } = req.body;
+
+        if (!email || !type || !id) {
+            return res.status(400).json({ message: 'Please provide email, type, and id' });
+        }
+
+        try {
+            let item;
+            let itemType;
+
+            switch (type) {
+                case 'activity':
+                    item = await Activity.findById(id);
+                    itemType = 'Activity';
+                    break;
+                case 'itinerary':
+                    item = await Itinerary.findById(id);
+                    itemType = 'Itinerary';
+                    break;
+                case 'place':
+                    item = await Place.findById(id);
+                    itemType = 'Place';
+                    break;
+                default:
+                    return res.status(400).json({ message: 'Invalid type. Use "activity", "itinerary", or "place".' });
+            }
+
+            if (!item) {
+                return res.status(404).json({ message: `${itemType} not found` });
+            }
+
+            const link = `${req.protocol}://${req.get('host')}/${type}/${id}`;
+
+            // Send email logic here (using a service like nodemailer)
+            // Example:
+            // await sendEmail(email, `Check out this ${itemType}`, `Here is the link: ${link}`);
+            // Create a transporter object using the default SMTP transport
+            let transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL_USER, // Your email address
+                    pass: process.env.EMAIL_PASS  // Your email password
+                }
+            });
+
+            // Send email
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER, // Sender address
+                to: email, // List of receivers
+                subject: `Check out this ${itemType}`, // Subject line
+                text: `Here is the link: ${link}`, // Plain text body
+                html: `<p>Here is the link: <a href="${link}">${link}</a></p>` // HTML body
+            });
+
+            res.status(200).json({ message: `${itemType} shared successfully via email`, link });
+        } catch (error) {
+            res.status(500).json({ message: 'Error sharing via email', error });
+        }
+    };
+
+    const shareViaLink = (req, res) => { // To be done with FrontEnd
+        const { type, id } = req.body;
+
+        if (!type || !id) {
+            return res.status(400).json({ message: 'Please provide type and id' });
+        }
+
+        try {
+            const link = `${req.protocol}://${req.get('host')}/${type}/${id}`;
+            res.status(200).json({ message: 'Link generated successfully', link });
+        } catch (error) {
+            res.status(500).json({ message: 'Error generating link', error });
+        }
+    };
+
+    const convertCurrency = async (amount, fromCurrency, toCurrency) => {
+        try {
+            const response = await axios.get('https://api.exchangerate-api.com/v4/latest/' + fromCurrency);
+            const rate = response.data.rates[toCurrency];
+            return amount * rate;
+        } catch (error) {
+            console.error('Error converting currency:', error.message);
+            throw new Error('Failed to convert currency');
+        }
+    };
+
+    const updateProductPricesToCurrency = async (req, res) => {
+        const { currency = 'USD' } = req.query;  // Default currency is USD
+    
+        try {
+            const products = await Product.find();
+            await Promise.all(products.map(async product => {
+                if (currency !== 'USD') {
+                    const priceInCurrency = await convertCurrency(product.price, 'USD', currency);
+                    product.price = priceInCurrency;
+                    await product.save();
+                }
+            }));
+    
+            res.status(200).json({ message: 'Product prices updated successfully' });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    };
   
 
 
@@ -1845,5 +1952,9 @@ module.exports = {
     rateItinerary,
     commentOnItinerary,
     rateTourGuide,
-    commentOnTourGuide
+    commentOnTourGuide,
+    shareViaEmail,
+    shareViaLink,
+    convertCurrency,
+    updateProductPricesToCurrency
 };
