@@ -22,6 +22,11 @@ const productSchema = new Schema({
         type: Number, // This should be quantity instead of price
         required: true
     },
+    sales: { 
+        type: Number, 
+        default: 0, 
+        required: true
+    }, 
     seller: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Seller',
@@ -39,7 +44,12 @@ const productSchema = new Schema({
             touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
             review: { type: String, required: true }
         }
-    ]
+    ],
+    archive:{
+        type:Boolean,
+        default:false,
+        required:true
+    }
 }, { timestamps: true });
 
 const Product = mongoose.model('Product', productSchema);

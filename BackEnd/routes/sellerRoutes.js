@@ -32,4 +32,9 @@ router.get('/downloadProductImage/:id', sellerController.downloadProductImage);
 router.delete('/deleteSeller/:id', sellerController.deleteSellerAccount);
 
 
+router.get('productQuantityAndSales', sellerController.getProductQuantityAndSales);
+
+router.put('/changearchive/:id',sellerController.ArchiveUnarchiveProduct);
+
+
 module.exports = router;

@@ -223,12 +223,14 @@ const getTourist = async(req,res) => {
 };
 const sortProductsByRatings = async (req, res) => {
     try {
-        const products = await Product.find().sort({ ratings: -1 });
+        // Find products where archive is false and sort by ratings in descending order
+        const products = await Product.find({ Archive: false }).sort({ ratings: -1 });
         res.status(200).json(products);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
+
 
 const getAllProducts = async (req, res) => {
     try {
@@ -259,10 +261,10 @@ const filterProduct = async (req, res) => {
         let result;
         if (price) {
             // Find products with the exact price
-            result = await Product.find({ price: price });
+            result = await Product.find({ price: price, Archive:false });
         } else {
             // If no price is provided, return all products
-            result = await Product.find({});
+            result = await Product.find({Archive:false});
         }
 
         res.status(200).json(result);
@@ -305,7 +307,7 @@ const searchProductsByName = async (req, res) => {
         }
 
         // Perform a case-insensitive search for products with names that match the search query
-        const products = await Product.find({ name: { $regex: query, $options: 'i' } });
+        const products = await Product.find({ name: { $regex: query, $options: 'i' },Archive:false });
 
         if (products.length === 0) {
             return res.status(404).json({ message: "No products found matching your search." });

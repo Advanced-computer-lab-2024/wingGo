@@ -483,6 +483,39 @@ const deleteSellerAccount = async (req, res) => {
 
 
 
+
+const getProductQuantityAndSales = async (req, res) => {
+    try {
+        // Fetch only the name, quantity, and sales fields of each product
+        const products = await Product.find({}, "name quantity sales");
+
+        // Check if products exist
+        if (!products || products.length === 0) {
+            return res.status(404).json({ message: 'No products found.' });
+        }
+
+        // Send success response with product data
+        res.status(200).json({ message: 'Product data retrieved successfully', products });
+    } catch (error) {
+        // Handle any errors that occur
+        res.status(500).json({ message: 'Error fetching product data', error: error.message });
+    }
+};
+const ArchiveUnarchiveProduct=async(req,res)=>{
+    const {id}=req.params;
+    const {value}=req.body;
+    try{
+        const updatedProduct = await Product.findByIdAndUpdate(
+            id,
+            { archive: value }, // Update only the archive field
+            { new: true, runValidators: true } // Options: return the updated document, run validation
+        );    
+        res.status(200).json(updatedProduct);
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+}
+
  module.exports = {
     updateSellerProfile,
     createSellerProfile,
@@ -501,5 +534,7 @@ const deleteSellerAccount = async (req, res) => {
     downloadProductImage,
     deleteSellerAccount,
     seller_hello,
-    requestAccountDeletion
+    requestAccountDeletion,
+    getProductQuantityAndSales,
+    ArchiveUnarchiveProduct
 };

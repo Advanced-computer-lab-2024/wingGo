@@ -947,6 +947,129 @@ const getAllComplaints = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+//view details of complaint
+const getDetailsOfComplaint=async(req,res)=>{
+    const { id } = req.params;
+    try{
+        const details=await Complaint.findById(id);
+        res.status(200).json(details);
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+};
+//reply to complaint
+const replyComplaint=async(req,res)=>{
+    const { id } = req.params;
+    const{reply}=req.body;
+    try{
+        const complaint=await Complaint.findById(id);
+        complaint.reply.push(reply);
+        await complaint.save();
+        res.status(200).json(complaint);
+    } catch(error){
+        res.status(500).json({erorr:error.message})
+    }
+
+}
+  
+
+const updateComplaintState = async (req, res) => {
+    const { id } = req.params;
+    const { state } = req.body;
+
+    // Validate the state value
+    if (!['pending', 'resolved'].includes(state)) {
+        return res.status(400).json({ message: "Invalid state value. Must be 'pending' or 'resolved'." });
+    }
+
+    try {
+        // Find the complaint by ID
+        const complaint = await Complaints.findById(id);
+        if (!complaint) {
+            return res.status(404).json({ message: 'Complaint not found' });
+        }
+
+        // Update the complaint's state
+        complaint.state = state;
+        await complaint.save();
+
+        // Send a success response with updated complaint
+        res.status(200).json({ message: 'Complaint status updated successfully', complaint });
+    } catch (error) {
+        // Handle any errors that occur
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const getProductQuantityAndSales = async (req, res) => {
+    try {
+        // Fetch only the name, quantity, and sales fields of each product
+        const products = await Product.find({}, "name quantity sales");
+
+        // Check if products exist
+        if (!products || products.length === 0) {
+            return res.status(404).json({ message: 'No products found.' });
+        }
+
+        // Send success response with product data
+        res.status(200).json({ message: 'Product data retrieved successfully', products });
+    } catch (error) {
+        // Handle any errors that occur
+        res.status(500).json({ message: 'Error fetching product data', error: error.message });
+    }
+};
+//archive/unarchive a product
+const ArchiveUnarchiveProduct=async(req,res)=>{
+    const {id}=req.params;
+    const {value}=req.body;
+    try{
+        const updatedProduct = await Product.findByIdAndUpdate(
+            id,
+            { archive: value }, // Update only the archive field
+            { new: true, runValidators: true } // Options: return the updated document, run validation
+        );    
+        res.status(200).json(updatedProduct);
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+}
+// Sort complaints by date
+const sortComplaintsByDate = async (req, res) => {
+    const { order } = req.query; // Use 'asc' for ascending or 'desc' for descending
+
+    try {
+        // Sort complaints based on date, default to descending if not specified
+        const sortOrder = order === 'asc' ? 1 : -1;
+        const complaints = await Complaint.find().sort({ date: sortOrder });
+
+        res.status(200).json(complaints);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+// Filter complaints by status
+const filterComplaintsByStatus = async (req, res) => {
+    const { status } = req.query; // 'pending' or 'resolved'
+
+    try {
+        // Ensure the status provided is valid
+        if (!['pending', 'resolved'].includes(status)) {
+            return res.status(400).json({ message: "Invalid status value. Must be 'pending' or 'resolved'." });
+        }
+
+        // Find complaints by the given status
+        const complaints = await Complaint.find({ state: status });
+        if (complaints.length === 0) {
+            return res.status(404).json({ message: 'No complaints found with the specified status' });
+        }
+
+        res.status(200).json(complaints);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 
 
   
@@ -991,5 +1114,12 @@ module.exports = {
     downloadPendingUserCertificate,
     changeProductImage,
     downloadProductImage,
-    getAllComplaints
+    getAllComplaints,
+    updateComplaintState,
+    getProductQuantityAndSales,
+    getDetailsOfComplaint,
+    replyComplaint,
+    ArchiveUnarchiveProduct,
+    sortComplaintsByDate,
+    filterComplaintsByStatus
 };
