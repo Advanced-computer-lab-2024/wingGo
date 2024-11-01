@@ -278,18 +278,14 @@ const filterProduct = async (req, res) => {
 
 // Filter places by type or historical period
 const filterPlacesByTag = async (req, res) => {
-    const { tag, historicalPeriod } = req.query;
+    const {tag} = req.query;
 
     const filterCriteria = {
         flagged: false  // Exclude flagged places
     };
 
     if (tag) {
-        filterCriteria['tags.types'] = tag; // Filter by tag
-    }
-
-    if (historicalPeriod) {
-        filterCriteria['tags.historicalPeriods'] = historicalPeriod; // Filter by historical period
+        filterCriteria['tagss'] = tag; // Filter by tag
     }
 
     try {
@@ -623,13 +619,14 @@ const searchAllModels = async (req, res) => {
             flagged: false 
         };
         const itineraries = await Itinerary.find(itinerarySearchCriteria);
-        
+              
+
         let placeSearchCriteria = {
             $or: [
                 { name: { $regex: query, $options: 'i' } },  // Search by place name
-                { 'tags.types': { $regex: query, $options: 'i' } },  // Search by place types
-                { 'tags.historicalPeriods': { $regex: query, $options: 'i' } }  // Search by historical periods
-            ]
+                { tagss: { $regex: query, $options: 'i' } }
+            ],
+            flagged: false 
         };
         const places = await Place.find(placeSearchCriteria);
 
