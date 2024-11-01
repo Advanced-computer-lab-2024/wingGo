@@ -17,12 +17,24 @@ const itinerarySchema = new Schema({
     pickupLocation: { type: String, required: true },
     dropoffLocation: { type: String, required: true },
     bookings: { type: Number, default: 0 },
-    ratings: {
+    ratings: [{
         type: Number, // Assuming ratings are numeric
         default: 0,   // Default rating of 0 if none is provided
         min: 0,
         max: 5       // Assuming a 5-star rating system
+    }],
+    averageRating: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5
     },
+    comment: [
+        {
+            tourist: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
+            text: { type: String, required: true },
+        }
+    ],
     flagged: {
         type: Boolean,
         default: false,  // Initially not flagged

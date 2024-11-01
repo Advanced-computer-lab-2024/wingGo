@@ -48,5 +48,11 @@ router.delete('/cancelItinerary/:touristId/:itineraryId', touristController.canc
 router.put('/redeemPoints/:touristId', touristController.redeemPoints);
 router.post('/bookActivity/:touristId/:activityId', touristController.bookActivity);
 router.delete('/cancelActivity/:touristId/:activityId', touristController.cancelActivity);
+router.get('/completedItineraries/:touristId', touristController.getCompletedItineraries);
+router.post('/rateItinerary/:touristId/:itineraryId', touristController.rateItinerary);
+router.post('/commentItinerary/:touristId/:itineraryId', touristController.commentOnItinerary);
+router.post('/ratetourguide/:touristId/:tourGuideId', touristController.rateTourGuide);
+router.post('/commenttourguide/:touristId/:tourGuideId', touristController.commentOnTourGuide);
+
 
 module.exports = router;
