@@ -358,6 +358,33 @@ const deleteTourGuideAccount = async (req, res) => {
     }
 };
 
+// Method to activate or deactivate an itinerary
+// we dont check if it belongs to the tourguide 3shan aslan msh hanedih el option ela lw bt belong to him
+const activateOrDeactivateItinerary = async (req, res) => {
+    const { id } = req.params;  // Itinerary ID from URL parameters
+    const { deactivate } = req.body;  // Boolean value from request body
+
+    try {
+        // Find the itinerary by ID
+        const itinerary = await Itinerary.findById(id);
+
+        // Check if the itinerary exists and belongs to the tour guide
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found' });
+        }
+
+        // Update the deactivated field based on the provided boolean value
+        itinerary.deactivated = deactivate;
+        await itinerary.save();
+
+        res.status(200).json({
+            message: `Itinerary has been ${deactivate ? 'deactivated' : 'activated'} successfully.`,
+            itinerary,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 module.exports = {
     getTourGuide,
@@ -365,5 +392,6 @@ module.exports = {
     createItinerary, getItineraries,getAllItineraries, updateItinerary, deleteItinerary ,getItinerariesByTourGuide,createTourguideProfile,
     changeProfilePhoto,
     acceptTerms, changePassword,
-    deleteTourGuideAccount
+    deleteTourGuideAccount,
+    activateOrDeactivateItinerary
 };

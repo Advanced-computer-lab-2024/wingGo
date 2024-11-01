@@ -353,8 +353,9 @@ const searchProductsByName = async (req, res) => {
 //         res.status(500).json({ error: error.message });
 //     }
 // };
+
 const sortUpcomingActivityOrItineraries = async (req, res) => {
-    const { sort, type } = req.query;
+    const { sort, type, touristId } = req.query;  // Add touristId to query parameters
     let sortCriteria;
 
     // Determine the sorting criteria: price or ratings
@@ -374,8 +375,29 @@ const sortUpcomingActivityOrItineraries = async (req, res) => {
             const activities = await Activity.find({ date: { $gte: currentDate } , flagged: false }).sort(sortCriteria);
             return res.status(200).json(activities);
         } else if (type === 'itinerary') {
-            // Fetch and sort upcoming itineraries based on available dates and sort criteria
-            const itineraries = await Itinerary.find({ availableDates: { $elemMatch: { $gte: currentDate } } , flagged: false }).sort(sortCriteria);
+            // Fetch the tourist to access their booked itineraries
+            const tourist = await Tourist.findById(touristId);
+
+            // If tourist not found, return error
+            if (!tourist) {
+                return res.status(404).json({ message: 'Tourist not found' });
+            }
+
+            // Get list of itinerary IDs that the tourist has booked
+            const bookedItineraryIds = tourist.bookedItineraries.map(item => item.itineraryId);
+
+            console.log()
+
+            // Fetch and sort upcoming itineraries based on criteria
+            const itineraries = await Itinerary.find({
+                availableDates: { $elemMatch: { $gte: currentDate } },  // Match upcoming dates
+                flagged: false,
+                $or: [
+                    { deactivated: false },  // Not deactivated
+                    { _id: { $in: bookedItineraryIds }, deactivated: true }  // Deactivated but booked by tourist
+                ]
+            }).sort(sortCriteria);
+
             return res.status(200).json(itineraries);
         } else {
             return res.status(400).json({ message: 'Invalid type. Use "activity" or "itinerary".' });
@@ -384,6 +406,8 @@ const sortUpcomingActivityOrItineraries = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
 
 
 // Get all upcoming activities, itineraries, and historical places/museums
@@ -477,22 +501,37 @@ const getAllUpcomingActivities = async (req, res) => {
 };
 
 const getAllUpcomingIteneries = async (req, res) => {
+    const { touristId } = req.query;  // Extract touristId from query parameters
+
     try {
         const currentDate = new Date();
 
-        // Fetch itineraries where at least one date in availableDates is greater than or equal to today
+        // Fetch the tourist to get their booked itineraries
+        const tourist = await Tourist.findById(touristId);
+
+        // If tourist not found, return error
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Get list of itinerary IDs that the tourist has booked
+        const bookedItineraryIds = tourist.bookedItineraries.map(item => item.itineraryId);
+
+        // Fetch itineraries where at least one date in availableDates is upcoming, excluding flagged itineraries
         const itineraries = await Itinerary.find({
-            availableDates: { $gte: currentDate }
-            ,flagged: false  // Exclude flagged itineraries
+            availableDates: { $elemMatch: { $gte: currentDate } },  // Match upcoming dates
+            flagged: false,  // Exclude flagged itineraries
+            $or: [
+                { deactivated: false },  // Not deactivated
+                { _id: { $in: bookedItineraryIds }, deactivated: true }  // Deactivated but booked by tourist
+            ]
         });
 
         if (itineraries.length === 0) {
             return res.status(404).json({ message: 'No upcoming itineraries found' });
         }
 
-        res.status(200).json({
-            itineraries
-        });
+        res.status(200).json({ itineraries });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -596,7 +635,7 @@ const filterUpcomingActivities = async (req, res) => {
 };
 // Search for attractions, activities, itineraries, or places by name, category, or tags
 const searchAllModels = async (req, res) => {
-    const { query } = req.query;  // Only extract the query term
+    const { query, touristId  } = req.query;  // Only extract the query term
 
     if (!query) {
         return res.status(400).json({ message: "Please provide a search term." });
@@ -616,14 +655,23 @@ const searchAllModels = async (req, res) => {
         const attractions = await Attraction.find(searchCriteria);
         const activities = await Activity.find(searchCriteria);
         
-        let itinerarySearchCriteria = {
-            $or: [
-                { title: { $regex: query, $options: 'i' } },  // Search by itinerary title
-                { tags: { $regex: query, $options: 'i' } }  // Search by tags
-            ],
-            flagged: false 
-        };
-        const itineraries = await Itinerary.find(itinerarySearchCriteria);
+       // Fetch the tourist to get their booked itineraries
+       const tourist = await Tourist.findById(touristId);
+       const bookedItineraryIds = tourist ? tourist.bookedItineraries.map(item => item.itineraryId) : [];
+
+       // Itinerary search criteria with deactivation check
+       let itinerarySearchCriteria = {
+           $or: [
+               { title: { $regex: query, $options: 'i' } },  // Search by itinerary title
+               { tags: { $regex: query, $options: 'i' } }  // Search by tags
+           ],
+           flagged: false,
+           $or: [
+               { deactivated: false },  // Include only active itineraries
+               { _id: { $in: bookedItineraryIds }, deactivated: true }  // Or include deactivated itineraries that are booked by this tourist
+           ]
+       };
+       const itineraries = await Itinerary.find(itinerarySearchCriteria);
               
 
         let placeSearchCriteria = {
@@ -649,9 +697,9 @@ const searchAllModels = async (req, res) => {
 };
 
 const filterItineraries = async (req, res) => {
-    const { budget, date, preferences, language } = req.query;
+    const { budget, date, preferences, language, touristId } = req.query;
 
-    let filter = {flagged: false }; // Initialize afilter object
+    let filter = { flagged: false }; // Initialize filter object
 
     // Always apply upcoming dates filter (availableDates >= today)
     const currentDate = new Date();
@@ -683,10 +731,20 @@ const filterItineraries = async (req, res) => {
     }
 
     try {
+        // Fetch the tourist to get their booked itineraries
+        const tourist = await Tourist.findById(touristId);
+
+        // Get list of itinerary IDs that the tourist has booked
+        const bookedItineraryIds = tourist ? tourist.bookedItineraries.map(item => item.itineraryId) : [];
+
+        // Add deactivated filter condition
+        filter.$or = [
+            { deactivated: false },  // Include active itineraries
+            { _id: { $in: bookedItineraryIds }, deactivated: true }  // Include deactivated but booked by tourist
+        ];
+
         // Find itineraries based on the constructed filter
         const itineraries = await Itinerary.find(filter);
-
-        
 
         res.status(200).json(itineraries);
     } catch (error) {

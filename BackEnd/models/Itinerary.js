@@ -39,6 +39,10 @@ const itinerarySchema = new Schema({
         type: Boolean,
         default: false,  // Initially not flagged
       },
+    deactivated:{
+        type: Boolean,
+        default: false,  // Initially not deactivated
+      },
   touristIDs: [{
     touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
     bookingDate: { type: Date} // Default to the current date

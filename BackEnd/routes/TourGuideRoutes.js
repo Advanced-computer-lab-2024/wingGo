@@ -34,5 +34,7 @@ router.put('/changePassword/:id', tourGuideController.changePassword); // Define
 
 router.delete('/deleteAccount/:id', tourGuideController.deleteTourGuideAccount);
 
+router.put('/activateOrDeactivateItinerary/:id', tourGuideController.activateOrDeactivateItinerary);
+
 
 module.exports = router;
