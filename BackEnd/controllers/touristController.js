@@ -619,7 +619,8 @@ const searchAllModels = async (req, res) => {
             $or: [
                 { title: { $regex: query, $options: 'i' } },  // Search by itinerary title
                 { tags: { $regex: query, $options: 'i' } }  // Search by tags
-            ]
+            ],
+            flagged: false 
         };
         const itineraries = await Itinerary.find(itinerarySearchCriteria);
         

@@ -62,7 +62,7 @@ const placeSchema = new Schema({
         default: false,  // Initially not flagged
       },
 
-      tagss: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PreferenceTag' }] 
+      tagss: [{  type: String }] 
 }, { timestamps: true });
 
 const Place = mongoose.model('Place', placeSchema);

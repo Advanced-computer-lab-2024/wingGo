@@ -255,6 +255,45 @@ const changePassword = async (req, res) => {
     }
 };
 
+// Method to get all active preference tags
+const getActivePreferenceTags = async (req, res) => {
+    try {
+        const tags = await PreferenceTag.find({ isActive: true });
+        res.status(200).json(tags);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Method to add a tag to a place by tag ID
+const addTagToPlace2 = async (req, res) => {
+    const { id: placeId } = req.params;  // Place ID
+    const { tagId } = req.body;  // Preference Tag ID
+
+    try {
+        // Find the preference tag
+        const tag = await PreferenceTag.findById(tagId);
+        if (!tag || !tag.isActive) {
+            return res.status(404).json({ message: 'Tag not found or inactive' });
+        }
+
+        // Add the tag name to the `tagss` array in the place
+        const updatedPlace = await Place.findByIdAndUpdate(
+            placeId,
+            { $addToSet: { tagss: tag.name } },  // Add only unique tags
+            { new: true }
+        );
+
+        if (!updatedPlace) {
+            return res.status(404).json({ message: 'Place not found' });
+        }
+
+        res.status(200).json({ message: 'Tag added to place successfully', place: updatedPlace });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 
 module.exports = {
@@ -267,6 +306,8 @@ module.exports = {
     hello,
     createPreferenceTag,
     addTagUpdated,
-    changePassword
+    changePassword,
+    getActivePreferenceTags,
+    addTagToPlace2
     
 };

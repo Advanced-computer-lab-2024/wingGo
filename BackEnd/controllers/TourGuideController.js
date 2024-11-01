@@ -318,10 +318,52 @@ const acceptTerms = async (req, res) => {
 };
 
 
+const deleteTourGuideAccount = async (req, res) => {
+    const { id } = req.params;  // Tour Guide ID
+
+    try {
+        // Find the tour guide
+        const tourGuide = await TourGuide.findById(id);
+        if (!tourGuide) {
+            return res.status(404).json({ message: 'Tour guide not found' });
+        }
+
+        // Check each itinerary created by the tour guide
+        const itineraries = await Itinerary.find({ tourGuideId: id });
+        
+        for (let itinerary of itineraries) {
+            // Check if any upcoming bookings exist
+            for (let booking of itinerary.touristIDs) {
+                if (booking.bookingDate >= new Date()) { // If there's a future booking date
+                    return res.status(400).json({
+                        message: 'Cannot delete account: Upcoming itinerary bookings exist.'
+                    });
+                }
+            }
+        }
+
+        // If no future bookings, delete itineraries and account
+        await Itinerary.deleteMany({ tourGuideId: id }); // Delete all itineraries by this guide
+        const tourguidedel =await TourGuide.findByIdAndDelete(id); 
+
+        await LoginCredentials.findOneAndDelete({ userId: id, roleModel: 'TourGuide' });
+
+        if (!tourguidedel) {
+            return res.status(404).json({ message: "tour guide account not found." });
+        }
+     
+        res.status(200).json({ message: 'Tour guide account and itineraries deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 module.exports = {
     getTourGuide,
     updateTourGuideProfile,
     createItinerary, getItineraries,getAllItineraries, updateItinerary, deleteItinerary ,getItinerariesByTourGuide,createTourguideProfile,
     changeProfilePhoto,
-    acceptTerms, changePassword
+    acceptTerms, changePassword,
+    deleteTourGuideAccount
 };
