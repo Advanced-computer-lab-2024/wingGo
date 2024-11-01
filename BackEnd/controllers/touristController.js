@@ -7,6 +7,9 @@ const Product = require('../models/product');
 const LoginCredentials = require('../models/LoginCredentials');
 const Place = require('../models/Places');
 const Complaints = require('../models/Complaints');
+const axios = require('axios');
+const FlightBooking = require('../models/FlightBooking');
+const mongoose = require('mongoose');
 
 
 
@@ -1397,6 +1400,180 @@ const deleteTouristIfEligible = async (req, res) => {
 };
 
 
+const getAccessToken = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.append('grant_type', 'client_credentials');
+      params.append('client_id', process.env.AMADEUS_API_KEY);
+      params.append('client_secret', process.env.AMADEUS_API_SECRET);
+  
+      const response = await axios.post('https://test.api.amadeus.com/v1/security/oauth2/token', params, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+  
+      const accessToken = response.data.access_token;
+      
+      return accessToken;
+    } catch (error) {
+      console.error('Error fetching token:', error.response?.data || error.message);
+      throw new Error('Failed to retrieve access token');
+    }
+  };
+
+
+const searchFlights = async (req, res) => {
+    const { origin, destination, departureDate } = req.query;
+
+    if (!origin || !destination || !departureDate) {
+        return res.status(400).json({ message: 'Please provide origin, destination, and departureDate' });
+    }
+
+    try {
+      
+  
+      const accessToken = await getAccessToken();
+      console.log("Token retrieved successfully:", accessToken);
+  
+      const flightResponse = await axios.get('https://test.api.amadeus.com/v2/shopping/flight-offers', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        params: {
+          originLocationCode: origin,
+          destinationLocationCode: destination,
+          departureDate: departureDate,
+          adults: 1,
+        },
+      });
+      
+      res.status(200).json(flightResponse.data);
+    } catch (error) {
+        console.error("Error fetching token:", error.response?.data || error.message);
+        res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
+    }
+  };
+
+  const bookFlight = async (req, res) => {
+    const { flightOffers } = req.body;
+    const { touristId } = req.params;
+
+    
+    
+    try {
+        const type = "flight-order";
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+          return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+
+        const name = tourist.username;
+        var dob = tourist.DOB;
+        //change dob format to YYYY-MM-DD
+        dob = dob.toISOString().split('T')[0];
+        const email = tourist.email;
+
+        
+
+    
+        const accessToken = await getAccessToken();
+
+        console.log("Im gonna end myself");
+         // Step 1: Validate flight offer with Amadeus Flight Offers Price API
+    const priceValidationResponse = await axios.post(
+        'https://test.api.amadeus.com/v1/shopping/flight-offers/pricing',
+        { data: 
+            { 
+                type: 'flight-offers-pricing', 
+                flightOffers: [flightOffers],
+            } 
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'X-HTTP-Method-Override': 'GET',
+          },
+        }
+      );
+      console.log("Nevermind I'm still here");
+  
+      const validatedFlightOffer = priceValidationResponse.data;
+    //   console.log('Validated Flight Offer:', validatedFlightOffer);
+    //   console.log('Validated Flight Offer:', validatedFlightOffer.data.flightOffers[0]);
+    
+        // Step 2: Use the access token to create a booking with Amadeus
+        const amadeusResponse = await axios.post(
+          'https://test.api.amadeus.com/v1/booking/flight-orders',
+          {
+            data: 
+            {
+                type,
+                flightOffers: [validatedFlightOffer.data.flightOffers[0]],
+                travelers: [
+                    {
+                        id: "1",
+                        dateOfBirth: dob,
+                        name: {
+                        firstName: name,
+                        lastName: name
+                        },
+                        contact: {
+                            emailAddress: email,
+                        }
+                    }
+                ]
+            }
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+    
+        // Step 3: Extract a summary of the booking details from Amadeus' response
+        const flight = amadeusResponse.data.data; // Assuming the response has data array
+        const flightOffer = flight.flightOffers[0];
+        console.log('Flight Offer:', flightOffer);
+        const flightId = flight.id;
+        console.log('FlightID:', flightId);
+        
+
+        const summary = {
+            flightId: flightId,
+          userId: touristId,  // Add the user if authenticated
+          origin: flightOffer.itineraries[0].segments[0].departure.iataCode,
+          destination: flightOffer.itineraries[0].segments.slice(-1)[0].arrival.iataCode,
+          departureDate: flightOffer.itineraries[0].segments[0].departure.at,
+          arrivalDate: flightOffer.itineraries[0].segments.slice(-1)[0].arrival.at,
+          duration: flightOffer.itineraries[0].duration,
+          price: {
+            currency: flightOffer.price.currency,
+            total: flightOffer.price.total,
+          },
+          airline: flightOffer.validatingAirlineCodes[0],
+          flightNumber: flightOffer.itineraries[0].segments[0].number,
+          createdAt: new Date(),
+        };
+    
+        // Step 4: Save the summary to MongoDB
+        const newBooking = new FlightBooking(summary);
+        await newBooking.save();
+    
+        res.status(201).json({ message: 'Flight booked successfully', booking: newBooking });
+      } catch (error) {
+        console.error('Error booking flight:', error.response?.data || error.message);
+        res.status(500).json({ message: 'Error booking flight', error: error.response?.data || error.message });
+      }
+    };
+  
+
+
 module.exports = {
     tourist_hello,
     tourist_register,
@@ -1431,5 +1608,7 @@ module.exports = {
     reviewProduct,
     rateActivity,
     commentOnActivity,
-    deleteTouristIfEligible
+    deleteTouristIfEligible,
+    searchFlights,
+    bookFlight
 };

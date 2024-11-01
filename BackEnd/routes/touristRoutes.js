@@ -56,4 +56,7 @@ router.post('/commentOnActivity/:touristId/:activityId', touristController.comme
 
 router.delete('/delete/:id', touristController.deleteTouristIfEligible);
 
+router.get('/searchFlights', touristController.searchFlights);
+router.post('/bookFlight/:touristId', touristController.bookFlight);
+
 module.exports = router;
