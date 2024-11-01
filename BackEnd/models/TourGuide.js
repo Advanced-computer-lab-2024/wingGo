@@ -33,8 +33,15 @@ const tourGuideSchema = new Schema({
     termsAccepted: {
         type: Boolean,
         default: false
-    }
-
+    },
+    ratings: [{ type: Number, min: 0, max: 5 }],
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
+    comment: [
+        {
+            tourist: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
+            text: { type: String, required: true },
+        }
+    ],
     
 }, { timestamps: true });
 

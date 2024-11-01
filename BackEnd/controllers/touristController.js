@@ -10,7 +10,7 @@ const Complaints = require('../models/Complaints');
 const axios = require('axios');
 const FlightBooking = require('../models/FlightBooking');
 const mongoose = require('mongoose');
-
+const TourGuide = require('../models/TourGuide');
 
 
 
@@ -1397,8 +1397,176 @@ const deleteTouristIfEligible = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+};const getCompletedItineraries = async (req, res) => {
+    const { touristId } = req.params;
+    const currentDate = new Date();
+
+    try {
+        // Find the tourist and filter their booked itineraries based on past booking dates
+        const tourist = await Tourist.findById(touristId).populate('bookedItineraries.itineraryId');
+        
+        if (!tourist) {
+            //return res.status(404).json({ message: 'Tourist not found' });
+       return [];
+        }
+
+        // Filter for completed itineraries
+        const completedItineraries = tourist.bookedItineraries.filter(booking =>
+            booking.bookingDate < currentDate // Check if the booking date is in the past
+        ).map(booking => booking.itineraryId);
+
+    //   res.status(200).json(completedItineraries);
+     return completedItineraries;
+    } catch (error) {
+        console.error('Error fetching completed itineraries:', error);
+        res.status(500).json({ error: 'An error occurred while retrieving completed itineraries' });
+    }
+};
+//function to rate an itinerary but i want to add a check to ensure that the tourist has actually booked the itinerary before rating it and use the getCompletedItineraries function to check if the itinerary is in the list of completed itineraries
+
+const rateItinerary = async (req, res) => {
+    const { touristId, itineraryId } = req.params;
+    const { rating } = req.body;
+
+    try {
+        // Fetch the completed itineraries for the tourist
+        const completedItineraries = await getCompletedItineraries({ params: { touristId } }, res);
+
+        // Check if the itinerary is in the list of completed itineraries
+        const isCompleted = completedItineraries.some(itinerary => itinerary._id.toString() === itineraryId);
+
+        if (!isCompleted) {
+            return res.status(400).json({ message: 'You can only rate itineraries that you have completed.' });
+        }
+
+        // Find the itinerary and add the rating
+        const itinerary = await Itinerary.findById(itineraryId);
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found' });
+        }
+
+        // Add the new rating to the ratings array
+        itinerary.ratings.push(rating);
+
+        // Recalculate the average rating
+        const totalRatings = itinerary.ratings.length;
+        const sumRatings = itinerary.ratings.reduce((sum, r) => sum + r, 0);  // Ratings are numeric values
+        itinerary.averageRating = sumRatings / totalRatings;
+
+        await itinerary.save();
+
+        res.status(200).json({ message: 'Itinerary rated successfully', itinerary });
+    } catch (error) {
+        console.error('Error in rateItinerary:', error.message);
+        res.status(500).json({ error: 'An error occurred while rating the itinerary.' });
+    }
 };
 
+
+
+
+const commentOnItinerary = async (req, res) => {
+    const { touristId, itineraryId } = req.params;
+    const { comment } = req.body;
+
+    try {
+        // Fetch the completed itineraries for the tourist
+        const completedItineraries = await getCompletedItineraries({ params: { touristId } }, res);
+
+        // Check if the itinerary is in the list of completed itineraries
+        const isCompleted = completedItineraries.some(itinerary => itinerary._id.toString() === itineraryId);
+
+        if (!isCompleted) {
+            return res.status(400).json({ message: 'You can only comment on itineraries that you have completed.' });
+        }
+
+        // Find the itinerary and add the comment
+        const itinerary = await Itinerary.findById(itineraryId);
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found' });
+        }
+
+        // Add the comment to the itinerary
+        itinerary.comment.push({ tourist: touristId, text: comment });
+        await itinerary.save();
+
+        res.status(200).json({ message: 'Comment added successfully', itinerary });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+//function to rate tourguide using the tourguide id and use the getCompletedItineraries function to check if the tourguide is in the list of completed itineraries
+const rateTourGuide = async (req, res) => {
+    const { touristId, tourGuideId } = req.params;
+    const { rating } = req.body;
+console.log(tourGuideId);
+    try {
+        // Fetch the completed itineraries for the tourist
+        const completedItineraries = await getCompletedItineraries({ params: { touristId } }, res);
+
+        // Check if the tourGuideId is in the list of completed itineraries
+        const isCompleted = completedItineraries.some(itinerary => itinerary.tourGuideId.toString() === tourGuideId);
+
+        if (!isCompleted) {
+            return res.status(400).json({ message: 'You can only rate tour guides that you have interacted with.' });
+        }
+console.log("isCompleted=true");
+        // Find the tour guide and add the rating
+        const tourGuide = await TourGuide.findById(tourGuideId);
+        if (!tourGuide) {
+            return res.status(404).json({ message: 'Tour guide not found' });
+        }
+
+        // Add the new rating to the ratings array
+        tourGuide.ratings.push(rating);
+
+        // Recalculate the average rating
+        const totalRatings = tourGuide.ratings.length;
+        const sumRatings = tourGuide.ratings.reduce((sum, r) => sum + r, 0);  // Ratings are numeric values
+        tourGuide.averageRating = sumRatings / totalRatings;
+
+        await tourGuide.save();
+
+        res.status(200).json({ message: 'Tour guide rated successfully', tourGuide });
+    } catch (error) {
+        console.error('Error in rateTourGuide:', error.message);
+        res.status(500).json({ error: 'An error occurred while rating the tour guide.' });
+    }
+};
+//function to comment on tourguide using the tourguide id and use the getCompletedItineraries function to check if the tourguide is in the list of completed itineraries
+const commentOnTourGuide = async (req, res) => {
+    const { touristId, tourGuideId } = req.params;
+    const { comment } = req.body;
+
+    try {
+        // Fetch the completed itineraries for the tourist
+        const completedItineraries = await getCompletedItineraries({ params: { touristId } }, res);
+
+        // Check if the tourGuideId is in the list of completed itineraries
+        const isCompleted = completedItineraries.some(itinerary => itinerary.tourGuideId.toString() === tourGuideId);
+
+        if (!isCompleted) {
+            return res.status(400).json({ message: 'You can only comment on tour guides that you have interacted with.' });
+        }
+
+        // Find the tour guide and add the comment
+        const tourGuide = await TourGuide.findById(tourGuideId);
+        if (!tourGuide) {
+            return res.status(404).json({ message: 'Tour guide not found' });
+        }
+
+        // Add the comment to the tour guide
+        tourGuide.comment.push({ tourist: touristId, text: comment });
+        await tourGuide.save();
+
+        res.status(200).json({ message: 'Comment added successfully', tourGuide });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 const getAccessToken = async () => {
     try {
@@ -1610,5 +1778,10 @@ module.exports = {
     commentOnActivity,
     deleteTouristIfEligible,
     searchFlights,
-    bookFlight
+    bookFlight,
+    getCompletedItineraries,
+    rateItinerary,
+    commentOnItinerary,
+    rateTourGuide,
+    commentOnTourGuide
 };

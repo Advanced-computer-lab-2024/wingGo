@@ -56,6 +56,13 @@ router.post('/commentOnActivity/:touristId/:activityId', touristController.comme
 
 router.delete('/delete/:id', touristController.deleteTouristIfEligible);
 
+router.get('/completedItineraries/:touristId', touristController.getCompletedItineraries);
+router.post('/rateItinerary/:touristId/:itineraryId', touristController.rateItinerary);
+router.post('/commentItinerary/:touristId/:itineraryId', touristController.commentOnItinerary);
+router.post('/ratetourguide/:touristId/:tourGuideId', touristController.rateTourGuide);
+router.post('/commenttourguide/:touristId/:tourGuideId', touristController.commentOnTourGuide);
+
+
 router.get('/searchFlights', touristController.searchFlights);
 router.post('/bookFlight/:touristId', touristController.bookFlight);
 
