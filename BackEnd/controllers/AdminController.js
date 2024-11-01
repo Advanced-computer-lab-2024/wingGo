@@ -1047,8 +1047,30 @@ const sortComplaintsByDate = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-// Filter complaints by status
+// // Filter complaints by status
+// const filterComplaintsByStatus = async (req, res) => {
+//     console.log("hi");
+//     const { status } = req.query; // 'pending' or 'resolved'
+
+//     try {
+//         // Ensure the status provided is valid
+//         if (!['pending', 'resolved'].includes(status)) {
+//             return res.status(400).json({ message: "Invalid status value. Must be 'pending' or 'resolved'." });
+//         }
+
+//         // Find complaints by the given status
+//         const complaints = await Complaint.find({ state: status });
+//         if (complaints.length === 0) {
+//             return res.status(404).json({ message: 'No complaints found with the specified status' });
+//         }
+
+//         res.status(200).json(complaints);
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     }
+// };
 const filterComplaintsByStatus = async (req, res) => {
+    // console.log("hi");
     const { status } = req.query; // 'pending' or 'resolved'
 
     try {
@@ -1068,7 +1090,6 @@ const filterComplaintsByStatus = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 
 
 

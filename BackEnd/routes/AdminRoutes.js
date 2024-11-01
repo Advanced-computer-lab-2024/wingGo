@@ -93,5 +93,8 @@ router.get('/detailscomplaint/:id', adminController.getDetailsOfComplaint);
 router.post('/replytocomplaint/:id',adminController.replyComplaint);
 router.put('/changearchive/:id',adminController.ArchiveUnarchiveProduct);
 
+/// Complaints
+router.get('/filterComplaints', adminController.filterComplaintsByStatus);
+router.get('/sortComplaints', adminController.sortComplaintsByDate);
 
 module.exports = router;
