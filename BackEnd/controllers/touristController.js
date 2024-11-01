@@ -1397,7 +1397,11 @@ const deleteTouristIfEligible = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-};const getCompletedItineraries = async (req, res) => {
+};
+
+
+
+const getCompletedItineraries = async (req, res) => {
     const { touristId } = req.params;
     const currentDate = new Date();
 
