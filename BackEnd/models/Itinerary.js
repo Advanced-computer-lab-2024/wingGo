@@ -39,8 +39,12 @@ const itinerarySchema = new Schema({
         type: Boolean,
         default: false,  // Initially not flagged
       },
-    touristIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }]
+  touristIDs: [{
+    touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
+    bookingDate: { type: Date} // Default to the current date
+}]
 }, { timestamps: true });
+
 
 const Itinerary = mongoose.model('Itinerary', itinerarySchema);
 module.exports = Itinerary;

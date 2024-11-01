@@ -48,11 +48,21 @@ router.delete('/cancelItinerary/:touristId/:itineraryId', touristController.canc
 router.put('/redeemPoints/:touristId', touristController.redeemPoints);
 router.post('/bookActivity/:touristId/:activityId', touristController.bookActivity);
 router.delete('/cancelActivity/:touristId/:activityId', touristController.cancelActivity);
+<<<<<<< HEAD
 router.get('/completedItineraries/:touristId', touristController.getCompletedItineraries);
 router.post('/rateItinerary/:touristId/:itineraryId', touristController.rateItinerary);
 router.post('/commentItinerary/:touristId/:itineraryId', touristController.commentOnItinerary);
 router.post('/ratetourguide/:touristId/:tourGuideId', touristController.rateTourGuide);
 router.post('/commenttourguide/:touristId/:tourGuideId', touristController.commentOnTourGuide);
 
+=======
+router.post('/purchaseProduct/:touristId/:productId', touristController.purchaseProduct);
+router.post('/rateProduct/:touristId/:productId', touristController.rateProduct);
+router.post('/reviewProduct/:touristId/:productId', touristController.reviewProduct);
+router.post('/rateActivity/:touristId/:activityId', touristController.rateActivity);
+router.post('/commentOnActivity/:touristId/:activityId', touristController.commentOnActivity);
+
+router.delete('/delete/:id', touristController.deleteTouristIfEligible);
+>>>>>>> dfbb60dd0021c6bfd15deef76e75b93d1ee250dc
 
 module.exports = router;

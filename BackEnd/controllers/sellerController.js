@@ -6,6 +6,11 @@ const { uploadDocument } = require('../helpers/s3Helper');
 const generatePreSignedUrl = require('../downloadMiddleware');
 const { default: mongoose } = require('mongoose');
 
+const seller_hello = (req, res) => {
+    console.log('Seller route hit!'); // Add this log
+    res.send('<h1>yayy Seller</h1>');
+};
+
 const updateSellerProfile = async (req, res) => {
     console.log(req.body);
     try {
@@ -430,6 +435,86 @@ const changePassword = async (req, res) => {
 };
 
 
+const requestAccountDeletion = async (req, res) => {
+    try {
+        const { id } = req.params;  // Advertiser ID
+
+        // Find all activities related to this advertiser
+    
+        // Delete the advertiser profile and related login credentials
+        const seller = await Seller.findByIdAndDelete(id);
+        await LoginCredentials.findOneAndDelete({ userId: id, roleModel: 'Seller' });
+
+        if (!seller) {
+            return res.status(404).json({ message: "Seller account not found." });
+        }
+
+        res.status(200).json({ message: "Account and all associated data deleted successfully." });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const deleteSellerAccount = async (req, res) => {
+    const { id } = req.params; // Seller ID
+    console.log("in delete ");
+
+    try {
+        // Find the seller account
+        const sellerAccount = await Seller.findById(id);
+        if (!sellerAccount) {
+            return res.status(404).json({ message: 'Seller not found' });
+        }
+
+        console.log("before");
+        // Delete the seller account
+        await Seller.findByIdAndDelete(id);
+        console.log("after");
+
+        // Delete the seller's login credentials
+        await LoginCredentials.findOneAndDelete({ userId: id, roleModel: 'Seller' });
+
+        res.status(200).json({ message: 'Seller account and login credentials deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+
+
+const getProductQuantityAndSales = async (req, res) => {
+    try {
+        // Fetch only the name, quantity, and sales fields of each product
+        const products = await Product.find({}, "name quantity sales");
+
+        // Check if products exist
+        if (!products || products.length === 0) {
+            return res.status(404).json({ message: 'No products found.' });
+        }
+
+        // Send success response with product data
+        res.status(200).json({ message: 'Product data retrieved successfully', products });
+    } catch (error) {
+        // Handle any errors that occur
+        res.status(500).json({ message: 'Error fetching product data', error: error.message });
+    }
+};
+const ArchiveUnarchiveProduct=async(req,res)=>{
+    const {id}=req.params;
+    const {value}=req.body;
+    try{
+        const updatedProduct = await Product.findByIdAndUpdate(
+            id,
+            { archive: value }, // Update only the archive field
+            { new: true, runValidators: true } // Options: return the updated document, run validation
+        );    
+        res.status(200).json(updatedProduct);
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+}
 
  module.exports = {
     updateSellerProfile,
@@ -446,5 +531,10 @@ const changePassword = async (req, res) => {
     changeLogo,
     acceptTerms,
     changePassword,
-    downloadProductImage
+    downloadProductImage,
+    deleteSellerAccount,
+    seller_hello,
+    requestAccountDeletion,
+    getProductQuantityAndSales,
+    ArchiveUnarchiveProduct
 };

@@ -22,20 +22,33 @@ const productSchema = new Schema({
         type: Number, // This should be quantity instead of price
         required: true
     },
+    sales: { 
+        type: Number, 
+        default: 0, 
+        required: true
+    }, 
     seller: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Seller',
         required: false,
         default: null 
     },
-    ratings: {
-        type: Number,
-        required: false,
-        default: 0
-    },
-    reviews: {
-        type: [String], // Array of strings for reviews
-        required: false
+    ratings: [
+        {
+            touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
+            rating:  { type: Number, required: true, min: 1, max: 5 }
+        }
+    ],
+    reviews: [
+        {
+            touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
+            review: { type: String, required: true }
+        }
+    ],
+    archive:{
+        type:Boolean,
+        default:false,
+        required:true
     }
 }, { timestamps: true });
 

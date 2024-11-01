@@ -8,29 +8,46 @@ const bcrypt = require('bcrypt');
 // Create a new place
 const createPlace = async (req, res) => {
     try {
-        const { /*governerId,*/ types, historicalPeriods, ...placeData } = req.body.tags || {}; // Extract tags separately
+        const { tagss, ...placeData } = req.body; // Extract tagss separately
 
-        // Validate types
-        const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces/Castles'];
-        if (types && types.some(type => !allowedTypes.includes(type))) {
-            return res.status(400).json({ message: 'Invalid type in types array. Allowed values are Monuments, Museums, Religious Sites, Palaces/Castles.' });
-        }
-
-        // Create a new place with validated tags
+        // Create a new place with the new tagss field
         const place = new Place({
-            ...req.body,  // Spread the rest of the place data (e.g., name, description, location)
-            tags: {
-                types: types || [],  // Use an empty array if types are missing
-                historicalPeriods: historicalPeriods || []  // Use an empty array if historicalPeriods are missing
-            }
+            ...placeData,  // Spread the rest of the place data (e.g., name, description, location)
+            tagss: tagss || []  // Use an empty array if tagss is missing
         });
 
         await place.save();
-        res.status(201).json(place);
+        res.status(201).json({ message: 'Place created successfully', place });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
 };
+
+// const createPlace = async (req, res) => {
+//     try {
+//         const { /*governerId,*/ types, historicalPeriods, ...placeData } = req.body.tags || {}; // Extract tags separately
+
+//         // Validate types
+//         const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces/Castles'];
+//         if (types && types.some(type => !allowedTypes.includes(type))) {
+//             return res.status(400).json({ message: 'Invalid type in types array. Allowed values are Monuments, Museums, Religious Sites, Palaces/Castles.' });
+//         }
+
+//         // Create a new place with validated tags
+//         const place = new Place({
+//             ...req.body,  // Spread the rest of the place data (e.g., name, description, location)
+//             tags: {
+//                 types: types || [],  // Use an empty array if types are missing
+//                 historicalPeriods: historicalPeriods || []  // Use an empty array if historicalPeriods are missing
+//             }
+//         });
+
+//         await place.save();
+//         res.status(201).json(place);
+//     } catch (err) {
+//         res.status(400).json({ error: err.message });
+//     }
+// };
 
 
 // Get all places
@@ -71,44 +88,74 @@ const hello = async (req, res) => {
 
 // Update an existing place
 const updatePlace = async (req, res) => {
-
-    const {governerId} = req.query;
+    const { governorId } = req.query;
     try {
-        const { types, historicalPeriods, ...placeData } = req.body;
-
-        // Validate types if provided
-        const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces/Castles'];
-        if (types && types.some(type => !allowedTypes.includes(type))) {
-            return res.status(400).json({ message: 'Invalid type in types array. Allowed values are Monuments, Museums, Religious Sites, Palaces/Castles.' });
-        }
+        const { tagss, ...placeData } = req.body; // Extract tagss separately
 
         // Find the place by ID and update with the new data
-        const place = await Place.findOne({governerId, _id: req.params.id});
+        const place = await Place.findOne({governorId, _id: req.params.id });
         if (!place) {
             return res.status(404).json({ message: 'Place not found' });
         }
 
-        if(req.body.governerId){
-            req.body.governerId.delete;
+        if (req.body.governorId) {
+            delete req.body.governorId;
         }
 
         // Update place data
         Object.assign(place, placeData);
 
-        // Explicitly update tags (types and historicalPeriods)
-        if (types) {
-            place.tags.types = types;
-        }
-        if (historicalPeriods) {
-            place.tags.historicalPeriods = historicalPeriods;
+        // Explicitly update the new tagss field
+        if (tagss) {
+            place.tagss = tagss;
         }
 
         await place.save();
-        res.json(place);
+        res.json({ message: 'Place updated successfully', place });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
 };
+
+// const updatePlace = async (req, res) => {
+
+//     const {governerId} = req.query;
+//     try {
+//         const { types, historicalPeriods, ...placeData } = req.body;
+
+//         // Validate types if provided
+//         const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces/Castles'];
+//         if (types && types.some(type => !allowedTypes.includes(type))) {
+//             return res.status(400).json({ message: 'Invalid type in types array. Allowed values are Monuments, Museums, Religious Sites, Palaces/Castles.' });
+//         }
+
+//         // Find the place by ID and update with the new data
+//         const place = await Place.findOne({governerId, _id: req.params.id});
+//         if (!place) {
+//             return res.status(404).json({ message: 'Place not found' });
+//         }
+
+//         if(req.body.governerId){
+//             req.body.governerId.delete;
+//         }
+
+//         // Update place data
+//         Object.assign(place, placeData);
+
+//         // Explicitly update tags (types and historicalPeriods)
+//         if (types) {
+//             place.tags.types = types;
+//         }
+//         if (historicalPeriods) {
+//             place.tags.historicalPeriods = historicalPeriods;
+//         }
+
+//         await place.save();
+//         res.json(place);
+//     } catch (err) {
+//         res.status(400).json({ error: err.message });
+//     }
+// };
 
 
 // Delete a place
@@ -255,6 +302,45 @@ const changePassword = async (req, res) => {
     }
 };
 
+// Method to get all active preference tags
+const getActivePreferenceTags = async (req, res) => {
+    try {
+        const tags = await PreferenceTag.find({ isActive: true });
+        res.status(200).json(tags);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Method to add a tag to a place by tag ID
+const addTagToPlace2 = async (req, res) => {
+    const { id: placeId } = req.params;  // Place ID
+    const { tagId } = req.body;  // Preference Tag ID
+
+    try {
+        // Find the preference tag
+        const tag = await PreferenceTag.findById(tagId);
+        if (!tag || !tag.isActive) {
+            return res.status(404).json({ message: 'Tag not found or inactive' });
+        }
+
+        // Add the tag name to the `tagss` array in the place
+        const updatedPlace = await Place.findByIdAndUpdate(
+            placeId,
+            { $addToSet: { tagss: tag.name } },  // Add only unique tags
+            { new: true }
+        );
+
+        if (!updatedPlace) {
+            return res.status(404).json({ message: 'Place not found' });
+        }
+
+        res.status(200).json({ message: 'Tag added to place successfully', place: updatedPlace });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 
 module.exports = {
@@ -267,6 +353,8 @@ module.exports = {
     hello,
     createPreferenceTag,
     addTagUpdated,
-    changePassword
+    changePassword,
+    getActivePreferenceTags,
+    addTagToPlace2
     
 };

@@ -10,6 +10,7 @@ const  upload  = require('../uploadMiddleware');
 
 
 // Define routes
+router.get('/hello', sellerController.seller_hello);
 router.get('/getallproducts', sellerController.getAllProducts);
 router.put('/update/:id', sellerController.updateSellerProfile);
 router.get('/viewProfile/get/:id', sellerController.getSeller);
@@ -27,5 +28,13 @@ router.put('/acceptterms/:id', sellerController.acceptTerms);
 router.put('/changePassword/:id', sellerController.changePassword); // Define route for password change
 
 router.get('/downloadProductImage/:id', sellerController.downloadProductImage);
+
+router.delete('/deleteSeller/:id', sellerController.deleteSellerAccount);
+
+
+router.get('productQuantityAndSales', sellerController.getProductQuantityAndSales);
+
+router.put('/changearchive/:id',sellerController.ArchiveUnarchiveProduct);
+
 
 module.exports = router;

@@ -223,12 +223,14 @@ const getTourist = async(req,res) => {
 };
 const sortProductsByRatings = async (req, res) => {
     try {
-        const products = await Product.find().sort({ ratings: -1 });
+        // Find products where archive is false and sort by ratings in descending order
+        const products = await Product.find({ Archive: false }).sort({ ratings: -1 });
         res.status(200).json(products);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
+
 
 const getAllProducts = async (req, res) => {
     try {
@@ -259,10 +261,10 @@ const filterProduct = async (req, res) => {
         let result;
         if (price) {
             // Find products with the exact price
-            result = await Product.find({ price: price });
+            result = await Product.find({ price: price, Archive:false });
         } else {
             // If no price is provided, return all products
-            result = await Product.find({});
+            result = await Product.find({Archive:false});
         }
 
         res.status(200).json(result);
@@ -278,18 +280,14 @@ const filterProduct = async (req, res) => {
 
 // Filter places by type or historical period
 const filterPlacesByTag = async (req, res) => {
-    const { tag, historicalPeriod } = req.query;
+    const {tag} = req.query;
 
     const filterCriteria = {
         flagged: false  // Exclude flagged places
     };
 
     if (tag) {
-        filterCriteria['tags.types'] = tag; // Filter by tag
-    }
-
-    if (historicalPeriod) {
-        filterCriteria['tags.historicalPeriods'] = historicalPeriod; // Filter by historical period
+        filterCriteria['tagss'] = tag; // Filter by tag
     }
 
     try {
@@ -309,7 +307,7 @@ const searchProductsByName = async (req, res) => {
         }
 
         // Perform a case-insensitive search for products with names that match the search query
-        const products = await Product.find({ name: { $regex: query, $options: 'i' } });
+        const products = await Product.find({ name: { $regex: query, $options: 'i' },Archive:false });
 
         if (products.length === 0) {
             return res.status(404).json({ message: "No products found matching your search." });
@@ -619,16 +617,18 @@ const searchAllModels = async (req, res) => {
             $or: [
                 { title: { $regex: query, $options: 'i' } },  // Search by itinerary title
                 { tags: { $regex: query, $options: 'i' } }  // Search by tags
-            ]
+            ],
+            flagged: false 
         };
         const itineraries = await Itinerary.find(itinerarySearchCriteria);
-        
+              
+
         let placeSearchCriteria = {
             $or: [
                 { name: { $regex: query, $options: 'i' } },  // Search by place name
-                { 'tags.types': { $regex: query, $options: 'i' } },  // Search by place types
-                { 'tags.historicalPeriods': { $regex: query, $options: 'i' } }  // Search by historical periods
-            ]
+                { tagss: { $regex: query, $options: 'i' } }
+            ],
+            flagged: false 
         };
         const places = await Place.find(placeSearchCriteria);
 
@@ -770,7 +770,7 @@ const bookItinerary = async (req, res) => {
         }
         const itineraryUpdate = await Itinerary.findByIdAndUpdate(
             itineraryId, 
-            { $addToSet: { touristIDs: touristId } }, // Use $addToSet to avoid duplicates
+            { $addToSet: { touristIDs: { touristId: touristId, bookingDate: parsedDate } } }, // Add the object with both touristId and bookingDate
             { new: true }
         );
         
@@ -868,7 +868,7 @@ const cancelItinerary = async (req, res) => {
         // Step 5: Remove the touristId from the itinerary's touristIDs array
         const itineraryUpdate = await Itinerary.findByIdAndUpdate(
             itineraryId,
-            { $pull: { touristIDs: touristId } }, // Use $pull to remove the touristId from touristIDs
+            { $pull: { touristIDs: { touristId: touristId } } }, // Pulls the object containing the touristId
             { new: true }
         );
 
@@ -1086,7 +1086,315 @@ const cancelActivity = async (req, res) => {
     }
 };
 
-const getCompletedItineraries = async (req, res) => {
+const purchaseProduct = async (req, res) => {
+    const { touristId, productId } = req.params;
+
+    try {
+        const tourist = await Tourist.findById(touristId);
+        const product = await Product.findById(productId);
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        if (product.quantity <= 0) {
+            return res.status(400).json({ message: 'Product out of stock' });
+        }
+
+        // Decrease product quantity
+        product.quantity -= 1;
+
+        // Add product to purchasedProducts array
+        tourist.purchasedProducts.push({ productId: product._id, purchaseDate: new Date() });
+
+        // Save changes
+        await tourist.save();
+        await product.save();
+
+        res.status(200).json({
+            message: 'Product purchased successfully',
+            product,
+            tourist
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error processing purchase', error });
+    }
+};
+const rateProduct = async (req, res) => {
+    const { touristId, productId } = req.params;
+    const { rating } = req.body; // Expecting a rating in the body
+
+    try {
+        console.log(`Received request: Tourist ID: ${touristId}, Product ID: ${productId}, Rating: ${rating}`);
+
+        // Check if tourist exists
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            console.error('Tourist not found');
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check if product exists
+        const product = await Product.findById(productId);
+        if (!product) {
+            console.error('Product not found');
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        // Check if the tourist has purchased the product
+        const purchasedProduct = tourist.purchasedProducts.find(
+            (purchase) => purchase.productId.toString() === productId
+        );
+
+        if (!purchasedProduct) {
+            console.error('Product not purchased by this tourist');
+            return res.status(400).json({ message: 'Product not purchased by this tourist' });
+        }
+
+        // Initialize `ratings` array if it doesn't exist
+        if (!Array.isArray(product.ratings)) {
+            product.ratings = [];
+        }
+
+        // Check if the tourist has already rated this product
+        const existingRatingIndex = product.ratings.findIndex(
+            (review) => review.touristId.toString() === touristId
+        );
+
+        if (existingRatingIndex > -1) {
+            // Update the existing rating if the tourist has already rated the product
+            console.log('Updating existing rating');
+            product.ratings[existingRatingIndex].rating = rating;
+        } else {
+            // Add a new rating if the tourist hasn't rated this product yet
+            console.log('Adding new rating');
+            product.ratings.push({ touristId, rating });
+        }
+
+        // Save the updated product
+        await product.save();
+
+        res.status(200).json({
+            message: 'Product rated successfully',
+            product
+        });
+    } catch (error) {
+        console.error('Error processing rating:', error);  // Log the full error for debugging
+        res.status(500).json({ message: 'Error processing rating', error });
+    }
+};
+const reviewProduct = async (req, res) => {
+    const { touristId, productId } = req.params;
+    const { review } = req.body; // Expecting a review text in the body
+
+    try {
+        console.log(`Received request: Tourist ID: ${touristId}, Product ID: ${productId}, Review: ${review}`);
+
+        // Check if tourist exists
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            console.error('Tourist not found');
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check if product exists
+        const product = await Product.findById(productId);
+        if (!product) {
+            console.error('Product not found');
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        // Check if the tourist has purchased the product
+        const purchasedProduct = tourist.purchasedProducts.find(
+            (purchase) => purchase.productId.toString() === productId
+        );
+
+        if (!purchasedProduct) {
+            console.error('Product not purchased by this tourist');
+            return res.status(400).json({ message: 'Product not purchased by this tourist' });
+        }
+
+        // Initialize `reviews` array if it doesn't exist
+        if (!Array.isArray(product.reviews)) {
+            product.reviews = [];
+        }
+
+        // Check if the tourist has already reviewed this product
+        const existingReviewIndex = product.reviews.findIndex(
+            (review) => review.touristId.toString() === touristId
+        );
+
+        if (existingReviewIndex > -1) {
+            // Update the existing review if the tourist has already reviewed the product
+            console.log('Updating existing review');
+            product.reviews[existingReviewIndex].review = review;
+        } else {
+            // Add a new review if the tourist hasn't reviewed this product yet
+            console.log('Adding new review');
+            product.reviews.push({ touristId, review });
+        }
+
+        // Save the updated product with the new or updated review
+        await product.save();
+
+        res.status(200).json({
+            message: 'Product reviewed successfully',
+            product
+        });
+    } catch (error) {
+        console.error('Error processing review:', error);  // Log the full error for debugging
+        res.status(500).json({ message: 'Error processing review', error });
+    }
+};
+const rateActivity = async (req, res) => {
+    const { touristId, activityId } = req.params;
+    const { rating } = req.body; // Expecting a rating in the body
+
+    try {
+        console.log(`Received request: Tourist ID: ${touristId}, Activity ID: ${activityId}, Rating: ${rating}`);
+
+        // Check if tourist exists
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check if activity exists
+        const activity = await Activity.findById(activityId);
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found' });
+        }
+
+        // Check if the tourist has attended (booked) the activity
+        const attendedActivity = tourist.bookedActivities.includes(activityId);
+        if (!attendedActivity) {
+            return res.status(400).json({ message: 'Activity not attended by this tourist' });
+        }
+
+        // Initialize `ratings` array if it doesn't exist
+        if (!Array.isArray(activity.ratings)) {
+            activity.ratings = [];
+        }
+
+        // Check if the tourist has already rated this activity
+        const existingRatingIndex = activity.ratings.findIndex(
+            (review) => review.touristId.toString() === touristId
+        );
+
+        if (existingRatingIndex > -1) {
+            // Update the existing rating if the tourist has already rated the activity
+            console.log('Updating existing rating');
+            activity.ratings[existingRatingIndex].rating = rating;
+        } else {
+            // Add a new rating if the tourist hasn't rated this activity yet
+            console.log('Adding new rating');
+            activity.ratings.push({ touristId, rating });
+        }
+
+        // Save the updated activity
+        await activity.save();
+
+        res.status(200).json({
+            message: 'Activity rated successfully',
+            activity
+        });
+    } catch (error) {
+        console.error('Error processing rating:', error);  // Log the full error for debugging
+        res.status(500).json({ message: 'Error processing rating', error });
+    }
+};
+const commentOnActivity = async (req, res) => {
+    const { touristId, activityId } = req.params;
+    const { comment } = req.body; // Expecting a comment in the body
+
+    try {
+        console.log(`Received request: Tourist ID: ${touristId}, Activity ID: ${activityId}, Comment: ${comment}`);
+
+        // Check if tourist exists
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            console.error('Tourist not found');
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check if activity exists
+        const activity = await Activity.findById(activityId);
+        if (!activity) {
+            console.error('Activity not found');
+            return res.status(404).json({ message: 'Activity not found' });
+        }
+
+        // Check if the tourist has attended (booked) the activity
+        const attendedActivity = tourist.bookedActivities.includes(activityId);
+        if (!attendedActivity) {
+            console.error('Activity not attended by this tourist');
+            return res.status(400).json({ message: 'Activity not attended by this tourist' });
+        }
+
+        // Initialize `comments` array if it doesn't exist
+        if (!Array.isArray(activity.comments)) {
+            activity.comments = [];
+        }
+
+        // Add the new comment as a separate entry, even if the tourist has commented before
+        activity.comments.push({ touristId, comment });
+        console.log('Adding new comment');
+
+        // Save the updated activity
+        await activity.save();
+
+        res.status(200).json({
+            message: 'Comment added successfully',
+            activity
+        });
+    } catch (error) {
+        console.error('Error processing comment:', error);  // Log the full error for debugging
+        res.status(500).json({ message: 'Error processing comment', error });
+    }
+};
+
+
+const deleteTouristIfEligible = async (req, res) => {
+    const { id } = req.params;  // Tourist ID
+
+    try {
+        // Find the tourist by ID
+        const tourist = await Tourist.findById(id);
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check bookedItineraries for upcoming bookings
+        const hasUpcomingItinerary = tourist.bookedItineraries.some(booking => {
+            console.log("date it "+ (new Date(booking.bookingDate) >= new Date()));
+            return new Date(booking.bookingDate) >= new Date();
+        });
+
+        if (hasUpcomingItinerary) {
+            return res.status(400).json({ message: 'Cannot delete tourist account: There is an upcoming itinerary booking.' });
+        }
+
+        // Check bookedActivities for upcoming bookings
+        const hasUpcomingActivity = await Activity.exists({
+            _id: { $in: tourist.bookedActivities },
+            date: { $gte: new Date() }
+        });
+
+        if (hasUpcomingActivity) {
+            return res.status(400).json({ message: 'Cannot delete tourist account: There is an upcoming activity booking.' });
+        }
+
+        // Delete the tourist account and associated login credentials
+        await Tourist.findByIdAndDelete(id);
+        await LoginCredentials.deleteOne({ userId: id, roleModel: 'Tourist' });
+
+        res.status(200).json({ message: 'Tourist account and associated data deleted successfully.' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};const getCompletedItineraries = async (req, res) => {
     const { touristId } = req.params;
     const currentDate = new Date();
 
@@ -1286,6 +1594,12 @@ module.exports = {
     redeemPoints,
     bookActivity,
     cancelActivity,
+    purchaseProduct,
+    rateProduct,
+    reviewProduct,
+    rateActivity,
+    commentOnActivity,
+    deleteTouristIfEligible,
     getCompletedItineraries,
     rateItinerary,
     commentOnItinerary,
