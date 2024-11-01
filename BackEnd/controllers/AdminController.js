@@ -1033,6 +1033,43 @@ const ArchiveUnarchiveProduct=async(req,res)=>{
         res.status(500).json({error:error.message});
     }
 }
+// Sort complaints by date
+const sortComplaintsByDate = async (req, res) => {
+    const { order } = req.query; // Use 'asc' for ascending or 'desc' for descending
+
+    try {
+        // Sort complaints based on date, default to descending if not specified
+        const sortOrder = order === 'asc' ? 1 : -1;
+        const complaints = await Complaint.find().sort({ date: sortOrder });
+
+        res.status(200).json(complaints);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+// Filter complaints by status
+const filterComplaintsByStatus = async (req, res) => {
+    const { status } = req.query; // 'pending' or 'resolved'
+
+    try {
+        // Ensure the status provided is valid
+        if (!['pending', 'resolved'].includes(status)) {
+            return res.status(400).json({ message: "Invalid status value. Must be 'pending' or 'resolved'." });
+        }
+
+        // Find complaints by the given status
+        const complaints = await Complaint.find({ state: status });
+        if (complaints.length === 0) {
+            return res.status(404).json({ message: 'No complaints found with the specified status' });
+        }
+
+        res.status(200).json(complaints);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 
 
 module.exports = {
@@ -1080,5 +1117,7 @@ module.exports = {
     getProductQuantityAndSales,
     getDetailsOfComplaint,
     replyComplaint,
-    ArchiveUnarchiveProduct
+    ArchiveUnarchiveProduct,
+    sortComplaintsByDate,
+    filterComplaintsByStatus
 };
