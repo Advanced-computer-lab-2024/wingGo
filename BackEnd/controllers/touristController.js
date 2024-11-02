@@ -12,6 +12,7 @@ const FlightBooking = require('../models/FlightBooking');
 const mongoose = require('mongoose');
 const TourGuide = require('../models/TourGuide');
 const nodemailer = require('nodemailer');
+const HotelBooking = require('../models/HotelBooking');
 
 
 
@@ -1686,7 +1687,7 @@ const searchFlights = async (req, res) => {
     }
   };
 
-  const bookFlight = async (req, res) => {
+const bookFlight = async (req, res) => {
     const { flightOffers } = req.body;
     const { touristId } = req.params;
 
@@ -1733,9 +1734,7 @@ const searchFlights = async (req, res) => {
       console.log("Nevermind I'm still here");
   
       const validatedFlightOffer = priceValidationResponse.data;
-    //   console.log('Validated Flight Offer:', validatedFlightOffer);
-    //   console.log('Validated Flight Offer:', validatedFlightOffer.data.flightOffers[0]);
-    
+       
         // Step 2: Use the access token to create a booking with Amadeus
         const amadeusResponse = await axios.post(
           'https://test.api.amadeus.com/v1/booking/flight-orders',
@@ -1801,7 +1800,7 @@ const searchFlights = async (req, res) => {
         console.error('Error booking flight:', error.response?.data || error.message);
         res.status(500).json({ message: 'Error booking flight', error: error.response?.data || error.message });
       }
-    };
+};
 
     const shareViaEmail = async (req, res) => { // To be done with FrontEnd
         const { email, type, id } = req.body;
@@ -1908,7 +1907,266 @@ const searchFlights = async (req, res) => {
             res.status(500).json({ error: err.message });
         }
     };
+
+
   
+    const searchHotelsByCity = async (cityCode) => {
+
+        
+
+        if (!cityCode) {
+            return res.status(400).json({ message: 'Please provide cityCode' });
+        }
+
+        try {
+      
+  
+        const accessToken = await getAccessToken();
+        console.log("Token retrieved successfully:", accessToken);
+    
+        const hotelResponse = await axios.get('https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city', {
+            headers: {
+            Authorization: `Bearer ${accessToken}`,
+            },
+            params: {
+                cityCode: cityCode,
+            },
+        });
+        
+        return hotelResponse.data;
+        } catch (error) {
+            console.error("Error fetching token:", error.response?.data || error.message);
+            return { message: 'Error fetching token', error: error.response?.data || error.message };
+        }
+
+    };
+
+    const searchHotelsByGeoLocation = async (latitude,longitude) => {
+        
+    
+        if (!latitude || !longitude) {
+            return res.status(400).json({ message: 'Please provide latitude and longitude' });
+        }
+        
+        try {
+            const accessToken = await getAccessToken();
+    
+            const hotelResponse = await axios.get('https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-geocode', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                params: {
+                    latitude: latitude,
+                    longitude: longitude,
+                },
+            });
+    
+            return hotelResponse.data;
+
+        } catch (error) {
+            console.error("Error fetching token:", error.response?.data || error.message);
+            return { message: 'Error fetching token', error: error.response?.data || error.message };
+        }
+    }
+
+    const getHotelOffersByCity = async (req, res) => {
+
+        const { cityCode } = req.query;
+
+        if (!cityCode) {
+            return res.status(400).json({ message: 'Please provide cityCode' });
+        }
+
+        try {
+
+            const accessToken = await getAccessToken();
+            console.log("Token retrieved successfully:", accessToken);
+
+            const hotelSearchResponse = await searchHotelsByCity(cityCode);
+            console.log("Hotel Search Response:", hotelSearchResponse);
+
+            const hotelIds = hotelSearchResponse.data.slice(0,10).map(hotel => hotel.hotelId);
+            console.log("Hotel IDs:", hotelIds);
+
+            const hotelOffersResponse = await axios.get('https://test.api.amadeus.com/v3/shopping/hotel-offers', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                params: {
+                    hotelIds: hotelIds,
+                
+                },
+                paramsSerializer: params => {
+                  return Object.keys(params)
+                    .map(key => `${key}=${encodeURIComponent(params[key].join(','))}`)
+                    .join('&');
+                },
+            });
+
+            res.status(200).json(hotelOffersResponse.data);
+
+        } catch (error) {
+            console.error("Error fetching token:", error.response?.data || error.message);
+            res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
+        }
+    }
+
+    const getHotelOffersByLocation = async (req, res) => {
+
+        const { latitude, longitude } = req.query;
+
+        if (!latitude || !longitude) {
+            return res.status(400).json({ message: 'Please provide latitude and longitude' });
+        }
+
+        try {
+
+            const accessToken = await getAccessToken();
+            console.log("Token retrieved successfully:", accessToken);
+
+            const hotelSearchResponse = await searchHotelsByGeoLocation(latitude,longitude);
+            console.log("Hotel Search Response:", hotelSearchResponse);
+
+            const hotelIds = hotelSearchResponse.data.slice(0,10).map(hotel => hotel.hotelId);
+            console.log("Hotel IDs:", hotelIds);
+
+            const hotelOffersResponse = await axios.get('https://test.api.amadeus.com/v3/shopping/hotel-offers', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                params: {
+                    hotelIds: hotelIds,
+                
+                },
+                paramsSerializer: params => {
+                  return Object.keys(params)
+                    .map(key => `${key}=${encodeURIComponent(params[key].join(','))}`)
+                    .join('&');
+                },
+            });
+
+            res.status(200).json(hotelOffersResponse.data);
+
+        } catch (error) {
+            console.error("Error fetching token:", error.response?.data || error.message);
+            res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
+        }
+
+    };
+
+    const bookHotel = async (req, res) => {
+
+        const { hotelOffers } = req.body;
+        const { touristId } = req.params;
+
+        try {
+            const type = "hotel-order";
+            const tourist = await Tourist.findById(touristId);
+
+            if (!tourist) {
+                return res.status(404).json({ message: 'Tourist not found' });
+            }
+            const name = tourist.username;
+            const email = tourist.email;
+            const mobileNumber  = tourist.mobileNumber;
+            var dob = tourist.DOB;
+            //change dob format to YYYY-MM-DD
+            dob = dob.toISOString().split('T')[0];
+            
+            
+            const accessToken = await getAccessToken();
+            console.log("Token retrieved successfully:", accessToken);
+             // Extract fields from hotelOffers for booking
+             const offerId = hotelOffers.offers[0].id;  // Retrieve the offer ID
+             const checkInDate = hotelOffers.offers[0].checkInDate;  // Check-in date
+             const checkOutDate = hotelOffers.offers[0].checkOutDate;  // Check-out date
+             const roomType = hotelOffers.offers[0].room.type;  // Room type
+             const rateCode = hotelOffers.offers[0].rateCode;  // Rate code
+             const totalPrice = hotelOffers.offers[0].price.total;  // Total price for the offer
+             const currency = hotelOffers.offers[0].price.currency;  // Currency of the offer
+
+            
+            const bookingResponse = await axios.post(
+                'https://test.api.amadeus.com/v2/booking/hotel-orders',
+                {
+                    
+                        data: {
+                            type: type,
+                            guests: [
+                                {
+                                    tid: 1,
+                                    firstName: name,
+                                    lastName: name,
+                                    phone: mobileNumber,
+                                    email: email
+                                  }
+                            ],
+                            roomAssociations: [
+                                {
+                                    hotelOfferId: offerId,
+                                    guestReferences: [{ guestReference: "1" }],
+                                },
+                            ],
+                            travelAgent: {
+                                contact: { email: email },
+                            },
+                            payment: {
+                                method: "CREDIT_CARD",
+                                paymentCard: {
+                                    paymentCardInfo:
+                                    {
+                                        vendorCode: "VI",
+                                        cardNumber: "4111111111111111",
+                                        expiryDate: "2028-01",
+                                        holderName: "BOB SMITH",
+                                    }
+                                },
+                                
+                            }
+                            
+                        },
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+
+              const data = bookingResponse.data.data;
+              console.log('Hotel Booking Response:', JSON.stringify(data, null, 2)); // Print full response
+
+    const bookingSummary = {
+      bookingId: data.id,
+      bookingStatus: data.hotelBookings[0].bookingStatus,
+      confirmationNumber: data.hotelBookings[0].hotelProviderInformation[0].confirmationNumber,
+      checkInDate: new Date(data.hotelBookings[0].hotelOffer.checkInDate),
+      checkOutDate: new Date(data.hotelBookings[0].hotelOffer.checkOutDate),
+      guests: 
+        {
+            adults: 1
+        }
+      ,
+      hotel: {
+        hotelId: data.hotelBookings[0].hotel.hotelId,
+        name: data.hotelBookings[0].hotel.name,
+        address: data.hotelBookings[0].hotel.address,
+      },
+    };
+
+              const newBooking = new HotelBooking(bookingSummary);
+              await newBooking.save();
+
+                res.status(201).json({ message: 'Hotel booked successfully', booking: newBooking });
+        }
+        catch (error) {
+            console.error('Error booking hotel:', error.response?.data || error.message);
+            res.status(500).json({ message: 'Error booking hotel', error: error.response?.data || error.message });
+        }
+    }
+
+                
 
 
 module.exports = {
@@ -1956,5 +2214,10 @@ module.exports = {
     shareViaEmail,
     shareViaLink,
     convertCurrency,
-    updateProductPricesToCurrency
+    updateProductPricesToCurrency,
+    searchHotelsByCity,
+    searchHotelsByGeoLocation,
+    getHotelOffersByCity,
+    getHotelOffersByLocation,
+    bookHotel
 };

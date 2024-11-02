@@ -69,4 +69,10 @@ router.post('/bookFlight/:touristId', touristController.bookFlight);
 router.post('/shareViaEmail/:touristId/:itemId', touristController.shareViaEmail); // To be done with FrontEnd
 router.post('/shareViaLink/:touristId/:itemId', touristController.shareViaLink); // To be done with FrontEnd
 
+
+router.get('/searchHotelsByCity', touristController.getHotelOffersByCity);
+router.get('/searchHotelsByLocation', touristController.getHotelOffersByLocation);
+router.post('/bookHotel/:touristId', touristController.bookHotel);
+
+
 module.exports = router;

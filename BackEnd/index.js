@@ -32,6 +32,12 @@ const dbURI = 'mongodb+srv://winggo567:Winggo123456@winggo.s9seh.mongodb.net/win
 // const dbURI = process.env.MONGODB_URI;
 
 
+const Amadeus = require('amadeus');
+
+const amadeus = new Amadeus({
+  clientId: process.env.AMADEUS_API_KEY,
+  clientSecret: process.env.AMADEUS_API_SECRET,
+});
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -40,6 +46,8 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
+
+
 const BUCKET = process.env.AWS_BUCKET_NAME;
 
 const upload = multer({
