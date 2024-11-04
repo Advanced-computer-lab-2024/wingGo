@@ -32,16 +32,19 @@ const placeSchema = new Schema({
     },
     ticketPrices: {
         foreigner: {
-            type: Number,
-            required: true
+            type: Number
+            // ,
+            // required: true
         },
         native: {
-            type: Number,
-            required: true
+            type: Number
+            // ,
+            // required: true
         },
         student: {
-            type: Number,
-            required: true
+            type: Number
+            // ,
+            // required: true
         }
     },
 

@@ -576,10 +576,14 @@ const getAllUpcomingPlaces = async (req, res) => {
 
         // Fetch all places
         const places = await Place.find();
+        console.log("here");
 
         // Filter places by opening hours (you can adjust this logic based on your openingHours format)
         const upcomingPlaces = places.filter(place => !place.flagged);
 
+      
+
+        console.log("here 2");
 
         if (upcomingPlaces.length === 0) {
             return res.status(404).json({ message: 'No upcoming places found based on current opening hours' });

@@ -368,6 +368,35 @@ export interface Itinerary {
   }[];
 }
 
+export interface Activity {
+  _id: string;
+  name: string;
+  date: Date;
+  time: string;
+  location: {
+    type: 'Point';
+    address: string;
+    lat?: number;
+    lng?: number;
+  };
+  price: number;
+  category: string;
+  tags?: string[];
+  specialDiscounts?: string;
+  bookingOpen?: boolean;
+  advertiser: string; // Referencing an ObjectId for the advertiser
+  ratings: {
+    touristId: string; // Referencing an ObjectId for the tourist
+    rating: number;
+  }[];
+  comments: {
+    touristId: string; // Referencing an ObjectId for the tourist
+    comment: string;
+  }[];
+  flagged?: boolean;
+  touristIDs?: string[]; // Array of tourist ObjectIds
+}
+
 
   export interface Place {
     _id: string;

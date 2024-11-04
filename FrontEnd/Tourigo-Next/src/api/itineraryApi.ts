@@ -2,7 +2,6 @@
 
 import axios from 'axios';
 import { Itinerary } from '../interFace/interFace';
-const API_URL = 'http://localhost:8000/tourist';
 
 export const fetchAllItineraries = async (): Promise<Itinerary[]> => {
     try {
@@ -10,6 +9,22 @@ export const fetchAllItineraries = async (): Promise<Itinerary[]> => {
         return response.data.itineraries;
     } catch (error) {
         console.error("Error fetching itineraries:", error);
+        throw error;
+    }
+};
+
+export const fetchFilteredItineraries = async (filters: {
+    budget?: number;
+    date?: string;
+    preferences?: string;
+    language?: string;
+    touristId?: string;
+}): Promise<Itinerary[]> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/tourist/filterItineraries`, { params: filters });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching filtered itineraries:", error);
         throw error;
     }
 };
