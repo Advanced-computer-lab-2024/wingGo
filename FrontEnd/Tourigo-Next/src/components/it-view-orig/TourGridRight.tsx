@@ -18,31 +18,23 @@ interface FilterOptions {
 const TourGridRight = () => {
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [filters, setFilters] = useState<FilterOptions>({});
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const fetchItineraries = async () => {
-    const data = await getItinerariesData();
-    setItineraries(data);
-  };
-
-  const fetchFilteredItineraries = async (filters: FilterOptions) => {
-    const data = await getFilteredItinerariesData(filters);
-    setItineraries(data); // Update itineraries
-  };
-
+  // Load initial data only once
   useEffect(() => {
-    fetchItineraries();
-  }, []);
+    const loadInitialData = async () => {
+      const data = await getItinerariesData();
+      setItineraries(data);
+      setIsInitialLoad(false);
+    };
+    if (isInitialLoad) loadInitialData();
+  }, [isInitialLoad]);
 
   const applyFilters = async (newFilters: FilterOptions) => {
-    setFilters(newFilters); // Update filter state
-    await fetchFilteredItineraries(newFilters); // Fetch filtered data
+    setFilters(newFilters);
+    const data = await getFilteredItinerariesData(newFilters);
+    setItineraries(data);
   };
-
-  useEffect(() => {
-    if (Object.keys(filters).length > 0) {
-      fetchFilteredItineraries(filters); // Apply filters whenever they change
-    }
-  }, [filters]);
 
   return (
     <>
