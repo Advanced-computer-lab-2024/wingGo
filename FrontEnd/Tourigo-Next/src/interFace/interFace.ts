@@ -336,3 +336,34 @@ export interface File {
 export interface idType {
   id: number;
 }
+
+
+export interface Itinerary {
+  _id: string;
+  tourGuideId: string;
+  title: string;
+  tags: string[];
+  activities: string;
+  locations: string[];
+  timeline: string;
+  duration: string;
+  language: string;
+  price: number;
+  availableDates: Date[];
+  accessibility: boolean;
+  pickupLocation: string;
+  dropoffLocation: string;
+  bookings: number;
+  ratings: number[];
+  averageRating: number;
+  comment: {
+      tourist: string;
+      text: string;
+  }[];
+  flagged: boolean;
+  deactivated: boolean;
+  touristIDs: {
+      touristId: string;
+      bookingDate: Date;
+  }[];
+}
