@@ -367,3 +367,21 @@ export interface Itinerary {
       bookingDate: Date;
   }[];
 }
+
+
+  export interface Place {
+    _id: string;
+    governorId: string;
+    name: string;
+    description: string;
+    pictures: string[];// Array of image URLs
+    location: string;
+    openingHours: string;
+    ticketPrices:{
+      foreigner: number;
+      native: number;
+      student: number;
+  };
+    flagged: boolean;
+    tagss: string[];
+};
