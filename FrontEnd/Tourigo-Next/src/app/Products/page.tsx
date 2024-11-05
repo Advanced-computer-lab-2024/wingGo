@@ -1,4 +1,4 @@
-import ShopMain from '@/components/shop/ShopMain';
+import ShopMain from '@/components/Products/ShopMain';
 import MetaData from '@/hooks/useMetaData';
 import Wrapper from '@/layout/DefaultWrapper';
 import React from 'react';
@@ -6,7 +6,7 @@ import React from 'react';
 const page = () => {
     return (
         <>
-            <MetaData pageTitle="Shop">
+            <MetaData pageTitle="Products">
                 <Wrapper>
                     <main>
                         <ShopMain />
