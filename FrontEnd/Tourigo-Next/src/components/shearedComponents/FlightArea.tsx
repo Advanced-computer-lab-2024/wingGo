@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import tourImgFive from "../../../public/assets/images/tour/tour-img-5.png";
 import { imageLoader } from "@/hooks/image-loader";
 import { searchFlights } from "@/api/FlightApi";
+import { set } from "react-hook-form";
 
 
 
@@ -13,6 +14,7 @@ interface FlightAreaProps {
     destination: string;
     departureDate: Date | null;
     searchTriggered: boolean;
+    setSearchTriggered: (value: boolean) => void;
   }
 
 const FlightArea: React.FC<FlightAreaProps> = ({
@@ -20,6 +22,7 @@ const FlightArea: React.FC<FlightAreaProps> = ({
     destination,
     departureDate,
     searchTriggered,
+    setSearchTriggered
 }) => {
   
   const [tripData, setTripData] = useState<any[]>([]);
@@ -33,7 +36,7 @@ const FlightArea: React.FC<FlightAreaProps> = ({
             departureDate: departureDate?.toISOString().split('T')[0] || '',
 
         });
-        const data = await response.data;
+        const data = await response;
         setTripData(data);
         console.log('Trip data:', data);
       } catch (error) {
@@ -43,6 +46,7 @@ const FlightArea: React.FC<FlightAreaProps> = ({
 
     if (searchTriggered && origin && destination && departureDate) {
         fetchTripData();
+        setSearchTriggered(false);
     }
   }, [searchTriggered, origin, destination, departureDate?.toISOString().split('T')[0]]);
 
@@ -88,6 +92,18 @@ const FlightArea: React.FC<FlightAreaProps> = ({
                         {formatSegments(item.itineraries[0].segments)}
                       </Link>
                     </span>
+                  </div>
+                  
+                  <div className="col-lg-2 text-center" style={{ position: 'absolute', bottom: '0px', right: '10px', width: '150px' }}>
+                    <Link href="buttonLink" className="bd-switch-btn has-left w-100">
+                      <div className="bd-switch-default">
+                        <span>{item.price.total + " $"}</span>
+                      </div>
+                      <div className="bd-switch-hover">
+                        <span>Book Now</span>
+                      </div>
+                    </Link>
+                   
                   </div>
                 </div>
               </div>

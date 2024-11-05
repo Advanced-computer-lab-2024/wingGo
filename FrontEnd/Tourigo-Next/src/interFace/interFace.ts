@@ -283,6 +283,7 @@ export interface ProductsType {
   labelColor?: string;
   totalCart?: number;
   shiping?: number;
+  
 }
 // menu data type
 // menu-data type
@@ -418,3 +419,28 @@ export interface Activity {
     flagged: boolean;
     tagss: string[];
 };
+
+
+
+export interface Product {
+  _id?: string;
+  name: string;
+  image: StaticImageData;
+  imageTwo?: StaticImageData;
+  price: number;
+  description: string;
+  quantity: number;
+  sales: number;
+  seller?: string | null;
+  ratings: {
+    touristId: string; // Referencing an ObjectId for the tourist
+    rating: number;
+  }[];
+  reviews: {
+    touristId: string; // Referencing an ObjectId for the tourist
+    review: string;
+  }[];
+  archive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
