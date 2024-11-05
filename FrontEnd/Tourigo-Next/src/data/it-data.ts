@@ -1,6 +1,6 @@
 // it-data.ts
 
-import { fetchAllItineraries, fetchFilteredItineraries } from '@/api/itineraryApi';
+import { fetchAllItineraries, fetchFilteredItineraries, searchItineraries, fetchAdminItineraries, fetchTourGuideItineraries } from '@/api/itineraryApi';
 import { Itinerary } from '../interFace/interFace';
 const API_URL = 'http://localhost:8000/tourist';
 
@@ -10,6 +10,29 @@ export const getItinerariesData = async (): Promise<Itinerary[]> => {
         return itineraries;
     } catch (error) {
         console.error("Error loading itineraries:", error);
+        return [];
+    }
+};
+
+// Admin-specific data fetch
+export const getAdminItinerariesData = async (): Promise<Itinerary[]> => {
+    try {
+        const itineraries = await fetchAdminItineraries();
+        return itineraries;
+    } catch (error) {
+        console.error("Error loading admin itineraries:", error);
+        return [];
+    }
+};
+
+
+// Tour guide-specific data fetch
+export const getTourGuideItinerariesData = async (): Promise<Itinerary[]> => {
+    try {
+        const itineraries = await fetchTourGuideItineraries();
+        return itineraries;
+    } catch (error) {
+        console.error("Error loading tour guide itineraries:", error);
         return [];
     }
 };
@@ -27,6 +50,17 @@ export const getFilteredItinerariesData = async (filters: {
         return itineraries;
     } catch (error) {
         console.error("Error loading filtered itineraries:", error);
+        return [];
+    }
+};
+
+// Add function to handle search itineraries
+export const getSearchItinerariesData = async (query: string): Promise<Itinerary[]> => {
+    try {
+        const itineraries = await searchItineraries(query);
+        return itineraries;
+    } catch (error) {
+        console.error("Error searching itineraries:", error);
         return [];
     }
 };

@@ -1,21 +1,18 @@
-// TourGridRight.tsx
+// TourGridRightTourGuide.tsx
 "use client";
 import React, { useEffect, useState } from "react";
 import TourSingleCard from "../common/tourElements/TourSingleCardIt";
 import { Itinerary } from "@/interFace/interFace";
-import { getItinerariesData, getFilteredItinerariesData } from "@/data/it-data";
+import { getTourGuideItinerariesData } from "@/data/it-data";
 import ItinerariesContentHeader from "@/elements/itineraries/it-header";
 import ItinerariesSidebarMain from "../itinerariesSidebar/ItinerariesSidebarMain";
 
 interface FilterOptions {
   budget?: number;
-  date?: string;
-  preferences?: string;
   language?: string;
-  touristId?: string;
 }
 
-const TourGridRight = () => {
+const TourGridRightTourGuide = () => {
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [filteredItineraries, setFilteredItineraries] = useState<Itinerary[]>([]);
   const [filters, setFilters] = useState<FilterOptions>({});
@@ -24,37 +21,36 @@ const TourGridRight = () => {
   // Load initial data
   useEffect(() => {
     const loadInitialData = async () => {
-      const data = await getItinerariesData();
+      const data = await getTourGuideItinerariesData();
       setItineraries(data);
       setFilteredItineraries(data); // Initialize with full data
     };
     loadInitialData();
   }, []);
 
+  // Apply filters locally
   const applyFilters = (newFilters: FilterOptions) => {
     setFilters(newFilters);
-    const filteredData = itineraries.filter(itinerary => {
-      // Apply budget filter, date filter, preferences, etc.
+    const filteredData = itineraries.filter((itinerary) => {
       let matches = true;
       if (newFilters.budget !== undefined) matches = matches && itinerary.price <= newFilters.budget;
       if (newFilters.language) matches = matches && itinerary.language === newFilters.language;
-      // Add more conditions as necessary
       return matches;
     });
     setFilteredItineraries(filteredData);
   };
 
+  // Apply search locally
   const applySearch = (query: string) => {
     setSearchQuery(query);
     if (query) {
-      const searchedData = filteredItineraries.filter(itinerary =>
+      const searchedData = filteredItineraries.filter((itinerary) =>
         itinerary.title.toLowerCase().includes(query.toLowerCase()) ||
-        itinerary.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+        itinerary.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
       );
       setFilteredItineraries(searchedData);
     } else {
-      // Reset to filtered data if query is cleared
-      applyFilters(filters);
+      applyFilters(filters); // Re-apply filters if search query is cleared
     }
   };
 
@@ -73,12 +69,13 @@ const TourGridRight = () => {
                     className="col-xxl-4 col-xl-6 col-lg-6 col-md-6"
                     tourWrapperClass="tour-wrapper style-one"
                     isparentClass={true}
+                    isTourGuide={true} // Set isTourGuide to true for tour guide view
                   />
                 ))}
               </div>
             </div>
             <div className="col-xxl-4 col-xl-4 col-lg-5">
-              <ItinerariesSidebarMain applyFilters={applyFilters} applySearch={applySearch}/>
+              <ItinerariesSidebarMain applyFilters={applyFilters} applySearch={applySearch} />
             </div>
           </div>
         </div>
@@ -87,4 +84,4 @@ const TourGridRight = () => {
   );
 };
 
-export default TourGridRight;
+export default TourGridRightTourGuide;

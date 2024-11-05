@@ -649,13 +649,18 @@ const searchAllModels = async (req, res) => {
 
     // General search criteria for all models
     let searchCriteria = {
-        $or: [
-            { name: { $regex: query, $options: 'i' } },  // Search by name (case-insensitive)
-            { category: { $regex: query, $options: 'i' } },  // Search by category
-            { tags: { $regex: query, $options: 'i' } }  // Search by tags
-        ],
-        flagged: false 
-    };
+    $and: [
+        {
+            $or: [
+                { name: { $regex: query, $options: 'i' } },      // Search by name (case-insensitive)
+                { category: { $regex: query, $options: 'i' } },  // Search by category
+                { tags: { $regex: query, $options: 'i' } }       // Search by tags
+            ]
+        },
+        { flagged: false }
+    ]
+};
+
 
     try {
         const attractions = await Attraction.find(searchCriteria);
@@ -667,26 +672,37 @@ const searchAllModels = async (req, res) => {
 
        // Itinerary search criteria with deactivation check
        let itinerarySearchCriteria = {
-           $or: [
-               { title: { $regex: query, $options: 'i' } },  // Search by itinerary title
-               { tags: { $regex: query, $options: 'i' } }  // Search by tags
-           ],
-           flagged: false,
-           $or: [
-               { deactivated: false },  // Include only active itineraries
-               { _id: { $in: bookedItineraryIds }, deactivated: true }  // Or include deactivated itineraries that are booked by this tourist
-           ]
-       };
+        $and: [
+            {
+                $or: [
+                    { title: { $regex: query, $options: 'i' } },  // Search by itinerary title
+                    { tags: { $regex: query, $options: 'i' } }    // Search by tags
+                ]
+            },
+            { flagged: false },
+            {
+                $or: [
+                    { deactivated: false },                         // Include only active itineraries
+                    { _id: { $in: bookedItineraryIds }, deactivated: true }  // Or include deactivated itineraries that are booked by this tourist
+                ]
+            }
+        ]
+    };
        const itineraries = await Itinerary.find(itinerarySearchCriteria);
               
 
-        let placeSearchCriteria = {
-            $or: [
-                { name: { $regex: query, $options: 'i' } },  // Search by place name
-                { tagss: { $regex: query, $options: 'i' } }
-            ],
-            flagged: false 
-        };
+       let placeSearchCriteria = {
+        $and: [
+            {
+                $or: [
+                    { name: { $regex: query, $options: 'i' } },  // Search by place name
+                    { tagss: { $regex: query, $options: 'i' } }  // Search by tags
+                ]
+            },
+            { flagged: false }
+        ]
+    };
+    
         const places = await Place.find(placeSearchCriteria);
 
         const results = {
@@ -1659,22 +1675,24 @@ const getAccessToken = async () => {
   };
 
 
-const searchFlights = async (req, res) => {
-    const { origin, destination, departureDate } = req.query;
-
-    if (!origin || !destination || !departureDate) {
-        return res.status(400).json({ message: 'Please provide origin, destination, and departureDate' });
-    }
+const searchFlights = async (origin, destination, departureDate, accessToken) => {
 
     try {
       
+        console.log("Origin:", origin);
+        console.log("Destination:", destination);
+        console.log("Departure Date:", departureDate);
+        
+        const newAccessToken = await getAccessToken();
+        if(!origin || !destination || !departureDate){
+            return { message: 'Please provide origin, destination, and departureDate' };
+        }
   
-      const accessToken = await getAccessToken();
       console.log("Token retrieved successfully:", accessToken);
   
       const flightResponse = await axios.get('https://test.api.amadeus.com/v2/shopping/flight-offers', {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${newAccessToken}`,
         },
         params: {
           originLocationCode: origin,
@@ -1683,13 +1701,51 @@ const searchFlights = async (req, res) => {
           adults: 1,
         },
       });
-      
-      res.status(200).json(flightResponse.data);
+      console.log("searchFlights is done");
+      return flightResponse.data;
     } catch (error) {
-        console.error("Error fetching token:", error.response?.data || error.message);
-        res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
+        console.error('Error fetching flights:', error.response?.data || error.message);
+        return { message: 'Error fetching token', error: error.response?.data || error.message };
     }
   };
+
+  const getFlightPrices = async (req, res) => {
+    const { origin, destination, departureDate } = req.query;
+
+    
+    
+
+    if (!origin || !destination || !departureDate) {
+        return res.status(400).json({ message: 'Please provide origin, destination, and departureDate' });
+    }
+
+    try {
+        const accessToken = await getAccessToken();
+        console.log('Token retrieved successfully:', accessToken);
+
+        const FlightSearchResponse = await searchFlights(origin, destination, departureDate, accessToken);
+        console.log("Flight Search Response:", FlightSearchResponse.data);
+
+        const flightResponse = await axios.post('https://test.api.amadeus.com/v1/shopping/flight-offers/pricing', {
+            data: {
+              type: 'flight-offers-pricing',
+              flightOffers: FlightSearchResponse.data.slice(0,6),
+            },
+          }, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+              'X-HTTP-Method-Override': 'GET',
+            },
+          });
+
+        res.status(200).json(flightResponse.data);
+    } catch (error) {
+        console.error('Error fetching token:', error.response?.data || error.message);
+        res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
+    }
+};
+
 
 const bookFlight = async (req, res) => {
     const { flightOffers } = req.body;
@@ -1701,6 +1757,8 @@ const bookFlight = async (req, res) => {
         const type = "flight-order";
         const tourist = await Tourist.findById(touristId);
 
+        const priceValidationResponse = flightOffers;
+
         if (!tourist) {
           return res.status(404).json({ message: 'Tourist not found' });
         }
@@ -1711,7 +1769,7 @@ const bookFlight = async (req, res) => {
         //change dob format to YYYY-MM-DD
         dob = dob.toISOString().split('T')[0];
         const email = tourist.email;
-
+        const wallet = tourist.wallet;
         
 
     
@@ -1719,25 +1777,13 @@ const bookFlight = async (req, res) => {
 
         console.log("Im gonna end myself");
          // Step 1: Validate flight offer with Amadeus Flight Offers Price API
-    const priceValidationResponse = await axios.post(
-        'https://test.api.amadeus.com/v1/shopping/flight-offers/pricing',
-        { data: 
-            { 
-                type: 'flight-offers-pricing', 
-                flightOffers: [flightOffers],
-            } 
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-            'X-HTTP-Method-Override': 'GET',
-          },
-        }
-      );
-      console.log("Nevermind I'm still here");
+    
   
-      const validatedFlightOffer = priceValidationResponse.data;
+      const validatedFlightOffer = priceValidationResponse;
+console.log("validatedFlightOffer:", validatedFlightOffer);
+      if(validatedFlightOffer.price.total > wallet){
+        return res.status(400).json({ message: 'Insufficient funds in wallet' });
+        }
        
         // Step 2: Use the access token to create a booking with Amadeus
         const amadeusResponse = await axios.post(
@@ -1746,7 +1792,7 @@ const bookFlight = async (req, res) => {
             data: 
             {
                 type,
-                flightOffers: [validatedFlightOffer.data.flightOffers[0]],
+                flightOffers: [validatedFlightOffer],
                 travelers: [
                     {
                         id: "1",
@@ -1769,7 +1815,8 @@ const bookFlight = async (req, res) => {
             },
           }
         );
-    
+        
+        await Tourist.findByIdAndUpdate(touristId, { wallet: wallet - validatedFlightOffer.price.total });
         // Step 3: Extract a summary of the booking details from Amadeus' response
         const flight = amadeusResponse.data.data; // Assuming the response has data array
         const flightOffer = flight.flightOffers[0];
@@ -2073,6 +2120,8 @@ const bookFlight = async (req, res) => {
             const name = tourist.username;
             const email = tourist.email;
             const mobileNumber  = tourist.mobileNumber;
+            const wallet = tourist.wallet;
+            console.log("wallet: ", wallet);
             var dob = tourist.DOB;
             //change dob format to YYYY-MM-DD
             dob = dob.toISOString().split('T')[0];
@@ -2087,9 +2136,14 @@ const bookFlight = async (req, res) => {
              const roomType = hotelOffers.offers[0].room.type;  // Room type
              const rateCode = hotelOffers.offers[0].rateCode;  // Rate code
              const totalPrice = hotelOffers.offers[0].price.total;  // Total price for the offer
+             console.log("Total Price: ", totalPrice);
              const currency = hotelOffers.offers[0].price.currency;  // Currency of the offer
 
-            
+            if(wallet < totalPrice){
+                return res.status(400).json({ message: 'Insufficient funds in wallet' });
+            }
+            const newWallet = wallet - totalPrice;
+
             const bookingResponse = await axios.post(
                 'https://test.api.amadeus.com/v2/booking/hotel-orders',
                 {
@@ -2137,6 +2191,9 @@ const bookFlight = async (req, res) => {
                         },
                     }
                 );
+                
+                await Tourist.findByIdAndUpdate(touristId, { wallet: newWallet });
+
 
               const data = bookingResponse.data.data;
               console.log('Hotel Booking Response:', JSON.stringify(data, null, 2)); // Print full response
@@ -2223,5 +2280,6 @@ module.exports = {
     searchHotelsByGeoLocation,
     getHotelOffersByCity,
     getHotelOffersByLocation,
-    bookHotel
+    bookHotel,
+    getFlightPrices
 };

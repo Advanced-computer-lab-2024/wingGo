@@ -2,19 +2,26 @@
 import React, { useState } from "react";
 import SidebarCategories from "./SidebarCategories";
 import SidebarTags from "./SidebarTags";
-import SidebarSearchInputBox from "../shearedComponents/SidebarSearchInputBox";
+import SidebarSearchInputBox from "../shearedComponents/SidebarSearchInputBoxIt";
 import RangeFilter from "./RangeFilter";
 
 interface ItinerariesSidebarMainProps {
     applyFilters: (filters: { budget?: number; date?: string; preferences?: string; language?: string }) => void;
+    applySearch: (query: string) => void;  // New prop for search functionality
   }
 
-  const ItinerariesSidebarMain: React.FC<ItinerariesSidebarMainProps> = ({ applyFilters }) => {
-//   const [priceRange, setPriceRange] = useState([0, 500]);
+  const ItinerariesSidebarMain: React.FC<ItinerariesSidebarMainProps> = ({ applyFilters, applySearch }) => {
+    const [searchQuery, setSearchQuery] = useState<string>("");
 
   const handlePriceChange = (range: number[]) => {
     // setPriceRange(range);
     applyFilters({ budget: range[1] }); // Send max price as budget
+  };
+
+   // Handles search input change and applies search
+   const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    applySearch(query);
   };
 
   return (
@@ -23,7 +30,7 @@ interface ItinerariesSidebarMainProps {
         <div className="sidebar-widget widget">
           <h6 className="sidebar-widget-title small mb-15">Search Itineraries</h6>
           <div className="sidebar-search">
-            <SidebarSearchInputBox placeHolder="Search Itineraries" />
+          <SidebarSearchInputBox placeHolder="Search Itineraries" onSearch={handleSearch} />
           </div>
         </div>
         <div className="sidebar-widget-divider"></div>

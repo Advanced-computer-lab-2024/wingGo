@@ -32,7 +32,7 @@ const TourSingleCard = ({
           <div className={tourWrapperClass}>
             <div className="p-relative">
               <div className="tour-thumb image-overly">
-                <Link href={`/tour-details/${tour._id}`}>
+                <Link href={`/activity-details/${tour._id}`}>
                   <Image
                     src="/images/default-image.jpg" // Placeholder image
                     loader={imageLoader}
@@ -47,7 +47,7 @@ const TourSingleCard = ({
                 </button>
                 <div className="tour-location">
                   <span>
-                    <Link href={`/tour-details/${tour._id}`}>
+                    <Link href={`/activity-details/${tour._id}`}>
                       <i className="fa-regular fa-location-dot"></i>{" "}
                       {tour.location.address || "Location not available"}
                     </Link>
@@ -67,7 +67,7 @@ const TourSingleCard = ({
                 </div>
               </div>
               <h5 className="tour-title fw-5 underline custom_mb-5">
-                <Link href={`/tour-details/${tour._id}`}>
+                <Link href={`/activity-details/${tour._id}`}>
                   {tour.name}
                 </Link>
               </h5>
