@@ -1726,10 +1726,14 @@ const searchFlights = async (origin, destination, departureDate, accessToken) =>
         const FlightSearchResponse = await searchFlights(origin, destination, departureDate, accessToken);
         console.log("Flight Search Response:", FlightSearchResponse.data);
 
+        if(FlightSearchResponse.data.length > 6){
+            FlightSearchResponse.data = FlightSearchResponse.data.slice(0,6);
+        }
+
         const flightResponse = await axios.post('https://test.api.amadeus.com/v1/shopping/flight-offers/pricing', {
             data: {
               type: 'flight-offers-pricing',
-              flightOffers: FlightSearchResponse.data.slice(0,6),
+              flightOffers: FlightSearchResponse.data,
             },
           }, {
             headers: {
