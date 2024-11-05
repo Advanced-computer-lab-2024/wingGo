@@ -20,7 +20,7 @@ const PlaceElement = ({ item, wrapperClass }: IPlacePropsType) => {
         {/* Thumbnail Section */}
         <div className="p-relative">
           <div className="activity-thumb image-overly">
-            <Link href={`/places-details/${item._id}`}>
+            <Link href={`/place-details/${item._id}`}>
               <Image
                 src={item.pictures[0]}
                 loader={imageLoader}
@@ -37,7 +37,7 @@ const PlaceElement = ({ item, wrapperClass }: IPlacePropsType) => {
             </button>
             <div className="tour-location">
               <span>
-                <Link href={`/places-details/${item._id}`}>
+                <Link href={`/place-details/${item._id}`}>
                   <i className="fa-regular fa-location-dot"></i> {item.location || "Location not available"}
                 </Link>
               </span>
@@ -61,14 +61,14 @@ const PlaceElement = ({ item, wrapperClass }: IPlacePropsType) => {
 
           {/* Place Name */}
           <h6 className="tour-title fw-5 underline custom_mb-5">
-            <Link href={`/places-details/${item._id}`}>
+            <Link href={`/place-details/${item._id}`}>
               {item.name}
             </Link>
           </h6>
 
           {/* Book Now Button */}
           <div className="tour-btn">
-            <Link href={`/places-details/${item._id}`} className="bd-text-btn style-two">
+            <Link href={`/place-details/${item._id}`} className="bd-text-btn style-two">
               View Details
               <span className="icon__box">
                 <i className="fa-regular fa-arrow-right-long icon__first"></i>
