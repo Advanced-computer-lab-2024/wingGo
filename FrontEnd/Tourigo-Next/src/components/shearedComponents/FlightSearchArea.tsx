@@ -10,6 +10,7 @@ import SidebarSearchInputBox from "./SidebarSearchInputBox";
 import ReactDatePicker from "react-datepicker";
 import DatePicker from 'react-datepicker';
 
+
 import InputBox from "./InputBox";
 
 interface FlightSearchAreaProps {
@@ -65,34 +66,30 @@ const FlightSearchArea: React.FC<FlightSearchAreaProps> = ({
 
           <div className="sidebar-widget-divider"></div>
 
-          <div className="sidebar-widget widget">
+            <div className="sidebar-widget widget w-100">
             <h6 className="sidebar-widget-title small mb-15">
-                Select Departure Date
+              Select Departure Date
             </h6>
+            <div className="sidebar-search">
             <DatePicker
-                selected={departureDate}
-                onChange={(date) => {setDepartureDate(date); console.log(date?.toISOString().split('T')[0] || '')}}
-                dateFormat="yyyy-MM-dd"
-                placeholderText="YYYY-MM-DD"
-                className="form-control"
+              selected={departureDate}
+              onChange={(date) => {setDepartureDate(date); console.log(date?.toISOString().split('T')[0] || '')}}
+              dateFormat="yyyy-MM-dd"
+              placeholderText="YYYY-MM-DD"
+              className="form-control w-100"
+              wrapperClassName="w-100"
             />
-          </div>
-
-          <div className="col-lg-2 mt-30" onClick={handleSearchClick}>
-              <Link
-                href="#"
-                className="bd-primary-btn btn-style has-arrow is-bg btn-quaternary radius-60"
-              >
-                <span className="bd-primary-btn-arrow arrow-right">
-                  <i className="fa-regular fa-arrow-right"></i>
-                </span>
-                <span className="bd-primary-btn-text">Search Flights</span>
-                <span className="bd-primary-btn-circle"></span>
-                <span className="bd-primary-btn-arrow arrow-left">
-                  <i className="fa-regular fa-arrow-right"></i>
-                </span>
-              </Link>
             </div>
+            </div>
+
+          <div className="col-lg-2 mt-30 w-100" onClick={handleSearchClick}>
+          <button className="bd-btn btn-style radius-4 w-100" type="submit">
+              Search Flights
+              <span>
+                <i className="fa-regular fa-arrow-right"></i>
+              </span>
+            </button>
+          </div>
           
           
           

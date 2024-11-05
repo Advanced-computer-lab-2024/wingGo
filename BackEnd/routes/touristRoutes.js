@@ -63,7 +63,7 @@ router.post('/ratetourguide/:touristId/:tourGuideId', touristController.rateTour
 router.post('/commenttourguide/:touristId/:tourGuideId', touristController.commentOnTourGuide);
 
 
-router.get('/searchFlights', touristController.searchFlights);
+router.get('/searchFlights', touristController.getFlightPrices);
 router.post('/bookFlight/:touristId', touristController.bookFlight);
 
 router.post('/shareViaEmail/:touristId/:itemId', touristController.shareViaEmail); // To be done with FrontEnd

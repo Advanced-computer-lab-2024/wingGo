@@ -35,7 +35,10 @@ const SearchFlights = () => {
                 origin={origin}
                 destination={destination}
                 departureDate={departureDate}
-                searchTriggered={searchTriggered}/>
+                searchTriggered={searchTriggered}
+                setSearchTriggered={setSearchTriggered}
+                />
+                
               {/*pagination area*/}
               <PaginationWrapperTwo />
             </div>
