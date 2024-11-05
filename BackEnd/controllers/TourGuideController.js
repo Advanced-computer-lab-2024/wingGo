@@ -188,16 +188,32 @@ const createItinerary = async (req, res) => {
 };
 
 // Read itinerary with tour guide id and itinerary id
+// const getItineraries = async (req, res) => {
+//     const { id } = req.params;  // Itinerary ID from the URL params
+//     const { tourGuideId } = req.query;  // Tour Guide ID from query params
+
+//     try {
+//         // Find the itinerary by ID and ensure it belongs to the correct tour guide
+//         const itinerary = await Itinerary.findOne({ _id: id, tourGuideId });  // Match both the itinerary ID and tourGuideId
+
+//         if (!itinerary) {
+//             return res.status(404).json({ message: 'Itinerary not found or you do not have permission to view this itinerary.' });
+//         }
+
+//         res.status(200).json(itinerary);
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// };
 const getItineraries = async (req, res) => {
     const { id } = req.params;  // Itinerary ID from the URL params
-    const { tourGuideId } = req.query;  // Tour Guide ID from query params
 
     try {
         // Find the itinerary by ID and ensure it belongs to the correct tour guide
-        const itinerary = await Itinerary.findOne({ _id: id, tourGuideId });  // Match both the itinerary ID and tourGuideId
+        const itinerary = await Itinerary.findOne({ _id: id});  // Match both the itinerary ID and tourGuideId
 
         if (!itinerary) {
-            return res.status(404).json({ message: 'Itinerary not found or you do not have permission to view this itinerary.' });
+            return res.status(404).json({ message: 'Itinerary not found.' });
         }
 
         res.status(200).json(itinerary);
@@ -205,6 +221,7 @@ const getItineraries = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
 //get all without tour guide
 const getAllItineraries = async (req, res) => {
     try {

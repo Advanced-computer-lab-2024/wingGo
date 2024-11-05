@@ -1,6 +1,6 @@
 // it-data.ts
 
-import { fetchAllItineraries, fetchFilteredItineraries, searchItineraries, fetchAdminItineraries } from '@/api/itineraryApi';
+import { fetchAllItineraries, fetchFilteredItineraries, searchItineraries, fetchAdminItineraries, fetchTourGuideItineraries } from '@/api/itineraryApi';
 import { Itinerary } from '../interFace/interFace';
 const API_URL = 'http://localhost:8000/tourist';
 
@@ -25,6 +25,17 @@ export const getAdminItinerariesData = async (): Promise<Itinerary[]> => {
     }
 };
 
+
+// Tour guide-specific data fetch
+export const getTourGuideItinerariesData = async (): Promise<Itinerary[]> => {
+    try {
+        const itineraries = await fetchTourGuideItineraries();
+        return itineraries;
+    } catch (error) {
+        console.error("Error loading tour guide itineraries:", error);
+        return [];
+    }
+};
 
 
 export const getFilteredItinerariesData = async (filters: {
