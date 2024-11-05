@@ -3,6 +3,7 @@ const Advertiser = require('../models/advertiser');
 const LoginCredentials = require('../models/LoginCredentials');
 const Activity = require('../models/Activity');
 const getCoordinates = require('../helpers/getCoordinates');
+const Transport = require('../models/Transport');
 const { uploadDocument } = require('../helpers/s3Helper');
 // const Attraction = require('../models/attraction');
 
@@ -360,6 +361,99 @@ const requestAccountDeletion = async (req, res) => {
     }
 };
 
+const createTransport = async (req, res) => {
+    const { type, duration, price } = req.body;
+
+    try {
+        const newTransport = new Transport({ type, duration, price, touristID: null });
+        await newTransport.save();
+        res.status(201).json(newTransport);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const getAllTransports = async (req, res) => {
+    try {
+        const transports = await Transport.find();
+        res.status(200).json(transports);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const getTransportById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const transport = await Transport.findById(id);
+        if (!transport) {
+            return res.status(404).json({ message: 'Transport not found' });
+        }
+        res.status(200).json(transport);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Read All Unbooked Transports
+const getAllUnbookedTransports = async (req, res) => {
+    try {
+        const transports = await Transport.find({ touristID: null });
+        res.status(200).json(transports);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Read Unbooked Transport by ID
+const getUnbookedTransportById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const transport = await Transport.findOne({ _id: id, touristID: null });
+        if (!transport) {
+            return res.status(404).json({ message: 'Transport not found or already booked' });
+        }
+        res.status(200).json(transport);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const updateTransport = async (req, res) => {
+    const { id } = req.params;
+    const { type, duration, price, touristID } = req.body;
+
+    try {
+        const updatedTransport = await Transport.findByIdAndUpdate(
+            id,
+            { type, duration, price, touristID },
+            { new: true }
+        );
+        if (!updatedTransport) {
+            return res.status(404).json({ message: 'Transport not found' });
+        }
+        res.status(200).json(updatedTransport);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const deleteTransport = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedTransport = await Transport.findByIdAndDelete(id);
+        if (!deletedTransport) {
+            return res.status(404).json({ message: 'Transport not found' });
+        }
+        res.status(200).json({ message: 'Transport deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 module.exports = {
     advertiser_hello,
@@ -374,5 +468,12 @@ module.exports = {
     changeLogo,
     acceptTerms,
     changePassword,
-    requestAccountDeletion
+    requestAccountDeletion,
+    createTransport,
+    getAllTransports,
+    getTransportById,
+    updateTransport,
+    deleteTransport,
+    getAllUnbookedTransports,
+    getUnbookedTransportById
 };

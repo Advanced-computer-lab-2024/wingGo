@@ -13,6 +13,7 @@ const mongoose = require('mongoose');
 const TourGuide = require('../models/TourGuide');
 const nodemailer = require('nodemailer');
 const HotelBooking = require('../models/HotelBooking');
+const Transport = require('../models/Transport');
 
 
 
@@ -64,7 +65,11 @@ const tourist_register = async (req, res) => {
             mobileNumber,
             nationality,
             DOB,
-            jobOrStudent 
+            jobOrStudent,
+            wallet: 0,  // Initialize wallet balance to zero
+            loyaltyPoints: 0,  // Initialize loyalty points to zero
+            badges: [],  // Initialize badges as an empty array
+            transports: [],  // Initialize transports as an empty array 
         });
 
         // Save the tourist to the database
@@ -2186,6 +2191,48 @@ const bookFlight = async (req, res) => {
         }
     }
 
+    const bookTransport = async (req, res) => {
+        const { touristId, transportId } = req.params;
+    
+        try {
+            // Find the tourist by ID
+            const tourist = await Tourist.findById(touristId);
+            if (!tourist) {
+                return res.status(404).json({ message: 'Tourist not found' });
+            }
+    
+            // Find the transport by ID
+            const transport = await Transport.findById(transportId);
+            if (!transport) {
+                return res.status(404).json({ message: 'Transport not found' });
+            }
+    
+            // Check if the tourist has enough funds in their wallet
+            if (tourist.wallet < transport.price) {
+                return res.status(400).json({ message: 'Insufficient funds in wallet' });
+            }
+    
+            // Subtract the price of the transport from the tourist's wallet
+            tourist.wallet -= transport.price;
+    
+            // Add the tourist ID to the transport's touristID field
+            transport.touristID = touristId;
+            await transport.save();
+    
+            // Add the transport ID to the tourist's transports field
+            tourist.transports.push(transportId);
+            await tourist.save();
+    
+            res.status(200).json({
+                message: 'Transport booked successfully',
+                transport,
+                tourist
+            });
+        } catch (error) {
+            res.status(500).json({ message: 'Error booking transport', error: error.message });
+        }
+    };
+
                 
 
 
@@ -2239,5 +2286,6 @@ module.exports = {
     searchHotelsByGeoLocation,
     getHotelOffersByCity,
     getHotelOffersByLocation,
-    bookHotel
+    bookHotel,
+    bookTransport
 };

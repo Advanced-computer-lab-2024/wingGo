@@ -1,5 +1,6 @@
 const express = require("express");
 const touristController= require('../controllers/touristController');
+const advertiserController = require('../controllers/advertiserController');
 
 const router = express.Router();
 
@@ -73,6 +74,8 @@ router.post('/shareViaLink/:touristId/:itemId', touristController.shareViaLink);
 router.get('/searchHotelsByCity', touristController.getHotelOffersByCity);
 router.get('/searchHotelsByLocation', touristController.getHotelOffersByLocation);
 router.post('/bookHotel/:touristId', touristController.bookHotel);
-
+// Read All Transports (for tourists)
+router.get('/transports', advertiserController.getAllTransports);
+router.put('/bookTransport/:touristId/:transportId', touristController.bookTransport);
 
 module.exports = router;
