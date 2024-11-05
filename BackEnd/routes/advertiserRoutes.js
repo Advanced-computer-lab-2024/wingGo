@@ -20,6 +20,19 @@ router.put('/acceptterms/:id', advertiserController.acceptTerms);
 router.put('/changePassword/:id', advertiserController.changePassword); // Define route for password change
 
 router.delete('/requestAccountDeletion/:id', advertiserController.requestAccountDeletion);
+// Create Transport
+router.post('/createTransport', advertiserController.createTransport);
 
+// Read All Transports
+router.get('/transports', advertiserController.getAllTransports);
+
+// Read Transport by ID
+router.get('/transports/:id', advertiserController.getTransportById);
+
+// Update Transport
+router.put('/updateTransport/:id', advertiserController.updateTransport);
+
+// Delete Transport
+router.delete('/deleteTransport/:id', advertiserController.deleteTransport);
 
 module.exports = router;

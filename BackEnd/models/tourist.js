@@ -54,6 +54,12 @@ const touristSchema = new Schema({
             default: 0.5  // Default amount is 0.5
         }
     },
+    transports: [
+        { 
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Transport'
+         }
+        ],
     purchasedProducts: [
         {
             productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
