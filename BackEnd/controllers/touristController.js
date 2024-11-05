@@ -649,13 +649,18 @@ const searchAllModels = async (req, res) => {
 
     // General search criteria for all models
     let searchCriteria = {
-        $or: [
-            { name: { $regex: query, $options: 'i' } },  // Search by name (case-insensitive)
-            { category: { $regex: query, $options: 'i' } },  // Search by category
-            { tags: { $regex: query, $options: 'i' } }  // Search by tags
-        ],
-        flagged: false 
-    };
+    $and: [
+        {
+            $or: [
+                { name: { $regex: query, $options: 'i' } },      // Search by name (case-insensitive)
+                { category: { $regex: query, $options: 'i' } },  // Search by category
+                { tags: { $regex: query, $options: 'i' } }       // Search by tags
+            ]
+        },
+        { flagged: false }
+    ]
+};
+
 
     try {
         const attractions = await Attraction.find(searchCriteria);
@@ -667,26 +672,37 @@ const searchAllModels = async (req, res) => {
 
        // Itinerary search criteria with deactivation check
        let itinerarySearchCriteria = {
-           $or: [
-               { title: { $regex: query, $options: 'i' } },  // Search by itinerary title
-               { tags: { $regex: query, $options: 'i' } }  // Search by tags
-           ],
-           flagged: false,
-           $or: [
-               { deactivated: false },  // Include only active itineraries
-               { _id: { $in: bookedItineraryIds }, deactivated: true }  // Or include deactivated itineraries that are booked by this tourist
-           ]
-       };
+        $and: [
+            {
+                $or: [
+                    { title: { $regex: query, $options: 'i' } },  // Search by itinerary title
+                    { tags: { $regex: query, $options: 'i' } }    // Search by tags
+                ]
+            },
+            { flagged: false },
+            {
+                $or: [
+                    { deactivated: false },                         // Include only active itineraries
+                    { _id: { $in: bookedItineraryIds }, deactivated: true }  // Or include deactivated itineraries that are booked by this tourist
+                ]
+            }
+        ]
+    };
        const itineraries = await Itinerary.find(itinerarySearchCriteria);
               
 
-        let placeSearchCriteria = {
-            $or: [
-                { name: { $regex: query, $options: 'i' } },  // Search by place name
-                { tagss: { $regex: query, $options: 'i' } }
-            ],
-            flagged: false 
-        };
+       let placeSearchCriteria = {
+        $and: [
+            {
+                $or: [
+                    { name: { $regex: query, $options: 'i' } },  // Search by place name
+                    { tagss: { $regex: query, $options: 'i' } }  // Search by tags
+                ]
+            },
+            { flagged: false }
+        ]
+    };
+    
         const places = await Place.find(placeSearchCriteria);
 
         const results = {

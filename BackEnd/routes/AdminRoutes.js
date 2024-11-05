@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/AdminController');
+const itineraryController = require('../controllers/TourGuideController');
 const upload = require('../uploadMiddleware');
+
+router.get('/getALLitineraries', adminController.getAllItineraries);
 
 router.get('/getallproducts', adminController.getAllProducts);
 router.get('/getAttractions', adminController.getAttractions);

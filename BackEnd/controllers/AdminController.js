@@ -854,16 +854,34 @@ const flagActivity = async (req, res) => {
     }
   };
   
-  const flagItinerary = async (req, res) => {
+//   const flagItinerary = async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const itinerary = await Itinerary.findByIdAndUpdate(id, { flagged: true }, { new: true });
+//       if (!itinerary) return res.status(404).json({ message: 'Itinerary not found' });
+//       res.status(200).json({ message: 'Itinerary flagged successfully', itinerary });
+//     } catch (error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//   };
+
+const flagItinerary = async (req, res) => {
     try {
       const { id } = req.params;
-      const itinerary = await Itinerary.findByIdAndUpdate(id, { flagged: true }, { new: true });
+      const { flagged } = req.body;  // Get the flagged status from the request body
+  
+      // Update the itinerary's flagged status based on the provided flagged value
+      const itinerary = await Itinerary.findByIdAndUpdate(id, { flagged }, { new: true });
+  
       if (!itinerary) return res.status(404).json({ message: 'Itinerary not found' });
-      res.status(200).json({ message: 'Itinerary flagged successfully', itinerary });
+  
+      const message = flagged ? 'Itinerary flagged successfully' : 'Itinerary unflagged successfully';
+      res.status(200).json({ message, itinerary });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   };
+  
   
   const flagPlace = async (req, res) => {
     try {
@@ -1112,7 +1130,14 @@ const filterComplaintsByStatus = async (req, res) => {
     }
 };
 
-
+const getAllItineraries = async (req, res) => {
+    try {
+        const itineraries = await Itinerary.find();  // Fetch all itineraries
+        res.status(200).json(itineraries);  // Return the array of itineraries
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
   
 
@@ -1164,5 +1189,6 @@ module.exports = {
     replyComplaint,
     ArchiveUnarchiveProduct,
     sortComplaintsByDate,
-    filterComplaintsByStatus
+    filterComplaintsByStatus,
+    getAllItineraries
 };

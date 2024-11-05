@@ -7,13 +7,16 @@ import useGlobalContext from "@/hooks/use-context";
 import { Itinerary } from "@/interFace/interFace";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
+import { toggleFlagItinerary } from '@/api/itineraryApi';
 
 interface ItourPropsType {
   tour: Itinerary; // Use Itinerary type
   className: string;
   tourWrapperClass: string;
   isparentClass: boolean;
+  isAdmin?: boolean; // Optional prop to check if the view is admin
 }
 
 const TourSingleCard = ({
@@ -21,9 +24,25 @@ const TourSingleCard = ({
   className,
   tourWrapperClass,
   isparentClass,
+  isAdmin = false,
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const rating = tour.averageRating || 1; // Use Itinerary's averageRating, default to 1
+
+  // Local state to keep track of the flagged status
+  const [isFlagged, setIsFlagged] = useState(tour.flagged);
+
+const handleFlagItinerary = async () => {
+    try {
+        // Toggle the flagged state in the backend
+        await toggleFlagItinerary(tour._id, !isFlagged);
+
+        // Update the local state to reflect the new flagged status
+        setIsFlagged((prevFlagged) => !prevFlagged);
+    } catch (error) {
+        console.error("Error updating flagged status:", error);
+    }
+};
 
   return (
     <>
@@ -66,11 +85,29 @@ const TourSingleCard = ({
                   </span>
                 </div>
               </div>
-              <h5 className="tour-title fw-5 underline custom_mb-5">
-                <Link href={`/tour-details/${tour._id}`}>
-                  {tour.title}
-                </Link>
-              </h5>
+              <div className="d-flex justify-content-between align-items-center">
+                <h5 className="tour-title fw-5 underline custom_mb-5">
+                  <Link href={`/tour-details/${tour._id}`}>
+                    {tour.title}
+                  </Link>
+                </h5>
+                {isAdmin && (
+                  <button
+                    onClick={handleFlagItinerary}
+                    className="flag-itinerary-button"
+                    style={{
+                      backgroundColor: isFlagged ? "green" : "red",
+                      color: "white",
+                      padding: "8px 16px",      // Adjust padding to make the button bigger
+                      fontSize: "14px",          // Increase font size
+                      borderRadius: "4px",       // Adjust border radius as desired
+                      cursor: "pointer",
+                    }}
+                  >
+                    {isFlagged ? "Unflag" : "Flag"}
+                  </button>
+                )}
+              </div>
               <span className="tour-price b3">
                 ${tour.price.toLocaleString("en-US")}
               </span>
