@@ -2,9 +2,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-
+import tourImgFive from "../../../public/assets/images/tour/tour-img-5.png";
 import { imageLoader } from "@/hooks/image-loader";
 import { searchFlights } from "@/api/FlightApi";
+
+
 
 interface FlightAreaProps {
     origin: string;
@@ -44,17 +46,26 @@ const FlightArea: React.FC<FlightAreaProps> = ({
     }
   }, [searchTriggered, origin, destination, departureDate?.toISOString().split('T')[0]]);
 
+  const formatSegments = (segments: any[]) => {
+    const codes = segments.map(segment => segment.departure.iataCode);
+    codes.push(segments[segments.length - 1].arrival.iataCode); // Add the final destination
+    return codes.join('->');
+  };
+
   return (
     <>
       <div className="row gy-24">
+        <div className="col-12">
+          <h2>Total Flights Found: {tripData.length}</h2> {/* Display the length of the array */}
+        </div>
         {tripData &&
-          tripData.slice(12, 16).map((item) => (
+          tripData.map((item) => (
             <div key={item.id} className="col-xl-6 col-lg-6 col-md-6">
               <div className="trip-wrapper trip-style-one p-relative">
                 <div className="trip-thumb image-overly">
                   <Link href={`/destinations-details/${item?.id}`}>
                     <Image
-                      src={item.img}
+                      src={tourImgFive}
                       loader={imageLoader}
                       style={{ width: "100%", height: "auto" }}
                       alt="image"
@@ -64,15 +75,17 @@ const FlightArea: React.FC<FlightAreaProps> = ({
                 <div className="trip-tag">
                   <div className="trip-number">
                     <span>
-                      <Link href={`/destinations-details/${item?.id}`}>
-                        {item.tripCount} Tour
+                    <Link href={`/destinations-details/${item?.id}`}>
+                        {item.itineraries[0].segments.length - 1 === 0
+                          ? "Direct Flight"
+                          : `${item.itineraries[0].segments.length - 1} Transit Stops`}
                       </Link>
                     </span>
                   </div>
                   <div className="trip-location">
                     <span>
                       <Link href={`/destinations-details/${item?.id}`}>
-                        {item.tripLocation}
+                        {formatSegments(item.itineraries[0].segments)}
                       </Link>
                     </span>
                   </div>
@@ -80,72 +93,7 @@ const FlightArea: React.FC<FlightAreaProps> = ({
               </div>
             </div>
           ))}
-        {tripData &&
-          tripData.slice(16, 17).map((item) => (
-            <div key={item.id} className="col-xl-12 col-lg-12 col-md-12">
-              <div className="trip-wrapper trip-style-one p-relative">
-                <div className="trip-thumb image-overly">
-                  <Link href={`/destinations-details/${item?.id}`}>
-                    <Image
-                      src={item.img}
-                      loader={imageLoader}
-                      style={{ width: "100%", height: "auto" }}
-                      alt="image"
-                    />
-                  </Link>
-                </div>
-                <div className="trip-tag">
-                  <div className="trip-number">
-                    <span>
-                      <Link href={`/destinations-details/${item?.id}`}>
-                        {item.tripCount} Tour
-                      </Link>
-                    </span>
-                  </div>
-                  <div className="trip-location">
-                    <span>
-                      <Link href={`/destinations-details/${item?.id}`}>
-                        {item.tripLocation}
-                      </Link>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        {tripData &&
-          tripData.slice(17, 19).map((item) => (
-            <div key={item.id} className="col-xl-6 col-lg-6 col-md-6">
-              <div className="trip-wrapper trip-style-one p-relative">
-                <div className="trip-thumb image-overly">
-                  <Link href={`/destinations-details/${item?.id}`}>
-                    <Image
-                      src={item.img}
-                      loader={imageLoader}
-                      style={{ width: "100%", height: "auto" }}
-                      alt="image"
-                    />
-                  </Link>
-                </div>
-                <div className="trip-tag">
-                  <div className="trip-number">
-                    <span>
-                      <Link href={`/destinations-details/${item?.id}`}>
-                        {item.tripCount} Tour
-                      </Link>
-                    </span>
-                  </div>
-                  <div className="trip-location">
-                    <span>
-                      <Link href={`/destinations-details/${item?.id}`}>
-                        {item.tripLocation}
-                      </Link>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+        
       </div>
     </>
   );
