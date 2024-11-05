@@ -336,6 +336,9 @@ export interface File {
 export interface idType {
   id: number;
 }
+export interface idTypeNew {
+  id: string;
+}
 
 
 export interface Itinerary {
@@ -371,6 +374,7 @@ export interface Itinerary {
 export interface Activity {
   _id: string;
   name: string;
+  img: StaticImageData;
   date: Date;
   time: string;
   location: {
