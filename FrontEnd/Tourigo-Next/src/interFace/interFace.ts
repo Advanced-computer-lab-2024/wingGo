@@ -374,7 +374,7 @@ export interface Itinerary {
 
 export interface BookedItinerary {
   itinerary: Itinerary;
-  bookingDate: string;
+  bookingDate: Date;
 }
 
 export interface Activity {

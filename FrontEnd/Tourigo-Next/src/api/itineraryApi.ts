@@ -145,3 +145,15 @@ export const commentOnTourGuideApi = async (touristId: string, tourGuideId: stri
         throw error;
     }
 };
+
+
+// Cancel Itinerary function -> touristId will be hardcoded in the folder of it-act-history fi BookingHistory.tsx
+export const cancelItineraryApi = async (touristId: string, itineraryId: string) => {
+    try {
+        const response = await axios.delete(`http://localhost:8000/tourist/cancelItinerary/${touristId}/${itineraryId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error canceling itinerary:", error);
+        throw error;
+    }
+};
