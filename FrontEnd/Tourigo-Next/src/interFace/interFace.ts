@@ -372,6 +372,11 @@ export interface Itinerary {
   }[];
 }
 
+export interface BookedItinerary {
+  itinerary: Itinerary;
+  bookingDate: string;
+}
+
 export interface Activity {
   _id: string;
   name: string;

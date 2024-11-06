@@ -1517,6 +1517,8 @@ const rateItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params;
     const { rating } = req.body;
 
+    console.log('rate ');
+
     try {
         // Fetch the completed itineraries for the tourist
         const completedItineraries = await getCompletedItineraries({ params: { touristId } }, res);
@@ -1549,6 +1551,8 @@ const rateItinerary = async (req, res) => {
         console.error('Error in rateItinerary:', error.message);
         res.status(500).json({ error: 'An error occurred while rating the itinerary.' });
     }
+
+    console.log('rate done');
 };
 
 
@@ -1557,6 +1561,8 @@ const rateItinerary = async (req, res) => {
 const commentOnItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params;
     const { comment } = req.body;
+
+    console.log('comment');
 
     try {
         // Fetch the completed itineraries for the tourist
@@ -1583,6 +1589,8 @@ const commentOnItinerary = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+
+    console.log('rate done');
 };
 
 
@@ -2278,7 +2286,31 @@ console.log("validatedFlightOffer:", validatedFlightOffer);
         }
     };
 
-                
+    const getBookedItineraries = async (req, res) => {
+        const { touristId } = req.params;
+    
+        try {
+            // Find the tourist by ID and populate the itinerary details
+            const tourist = await Tourist.findById(touristId).populate({
+                path: 'bookedItineraries.itineraryId',
+                model: 'Itinerary'
+            });
+    
+            if (!tourist) {
+                return res.status(404).json({ message: 'Tourist not found' });
+            }
+    
+            // Extract and format the itinerary data
+            const bookedItineraries = tourist.bookedItineraries.map((booking) => ({
+                itinerary: booking.itineraryId,
+                bookingDate: booking.bookingDate
+            }));
+    
+            res.status(200).json(bookedItineraries);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };              
 
 
 module.exports = {
@@ -2333,5 +2365,6 @@ module.exports = {
     getHotelOffersByLocation,
     bookHotel,
     bookTransport,
-    getFlightPrices
+    getFlightPrices,
+    getBookedItineraries
 };

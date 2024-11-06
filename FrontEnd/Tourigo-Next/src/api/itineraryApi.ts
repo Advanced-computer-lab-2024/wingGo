@@ -1,11 +1,14 @@
 // itineraryApi.ts
 
 import axios from 'axios';
-import { Itinerary } from '../interFace/interFace';
+import { Itinerary, BookedItinerary } from '../interFace/interFace';
+
+const touristId = '67240ed8c40a7f3005a1d01d';
+const tourGuideId = '67244655313a2a345110c1e6';  // Hardcoded tour guide ID
 
 export const fetchAllItineraries = async (): Promise<Itinerary[]> => {
     try {
-        const response = await axios.get('http://localhost:8000/tourist/viewItineraries?touristId=67240ed8c40a7f3005a1d01d');
+        const response = await axios.get(`http://localhost:8000/tourist/viewItineraries?touristId=${touristId}`);
         return response.data.itineraries;
     } catch (error) {
         console.error("Error fetching itineraries:", error);
@@ -27,7 +30,7 @@ export const fetchAdminItineraries = async (): Promise<Itinerary[]> => {
 // Tour guide-specific fetch
 export const fetchTourGuideItineraries = async (): Promise<Itinerary[]> => {
     try {
-        const tourGuideId = '67244655313a2a345110c1e6';  // Hardcoded tour guide ID
+        
         const response = await axios.get(`http://localhost:8000/tourguide/itineraries/${tourGuideId}`);
         return response.data;  // Return itineraries for the specific tour guide
     } catch (error) {
@@ -36,7 +39,7 @@ export const fetchTourGuideItineraries = async (): Promise<Itinerary[]> => {
     }
 };
 
-export const fetchFilteredItineraries = async (filters: {
+export const fetchFilteredItineraries = async (filters: {  ////done with frontend
     budget?: number;
     date?: string;
     preferences?: string;
@@ -52,7 +55,7 @@ export const fetchFilteredItineraries = async (filters: {
     }
 };
 
-export const searchItineraries = async (query: string): Promise<Itinerary[]> => {
+export const searchItineraries = async (query: string): Promise<Itinerary[]> => { ////done with frontend
     try {
         const response = await axios.get(`http://localhost:8000/tourist/search`, {
             params: { query },
@@ -63,6 +66,19 @@ export const searchItineraries = async (query: string): Promise<Itinerary[]> => 
         throw error;
     }
 };
+
+// Fetch booked itineraries for a specific tourist
+export const fetchBookedItineraries = async (touristId: string): Promise<BookedItinerary[]> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/tourist/booked-itineraries/${touristId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching booked itineraries:", error);
+        throw error;
+    }
+};
+
+
 
 
 // Function to flag/unflag an itinerary for admin
@@ -86,3 +102,46 @@ export const toggleItineraryActivation = async (id: string, deactivate: boolean)
 };
 
 
+//the next 4 will be hardcoded in the folder of it-act-history fi BookingHistory.tsx passed to the ratetabarea
+
+export const rateItineraryApi = async (touristId : string, itineraryId : string, rating : Number) => {
+    try {
+        const response = await axios.post(`http://localhost:8000/tourist/rateItinerary/${touristId}/${itineraryId}`, { rating });
+        return response.data;
+    } catch (error) {
+        console.error('Error rating itinerary:', error);
+        throw error;
+    }
+};
+
+export const commentOnItineraryApi = async (touristId : string, itineraryId : string, comment : string) => {
+    try {
+        const response = await axios.post(`http://localhost:8000/tourist/commentItinerary/${touristId}/${itineraryId}`, { comment });
+        return response.data;
+    } catch (error) {
+        console.error('Error commenting on itinerary:', error);
+        throw error;
+    }
+};
+
+// API function to rate a tour guide
+export const rateTourGuideApi = async (touristId: string, tourGuideId: string, rating: number) => {
+    try {
+        const response = await axios.post(`http://localhost:8000/tourist/ratetourguide/${touristId}/${tourGuideId}`, { rating });
+        return response.data;
+    } catch (error) {
+        console.error("Error rating tour guide:", error);
+        throw error;
+    }
+};
+
+// API function to comment on a tour guide
+export const commentOnTourGuideApi = async (touristId: string, tourGuideId: string, comment: string) => {
+    try {
+        const response = await axios.post(`http://localhost:8000/tourist/commenttourguide/${touristId}/${tourGuideId}`, { comment });
+        return response.data;
+    } catch (error) {
+        console.error("Error commenting on tour guide:", error);
+        throw error;
+    }
+};
