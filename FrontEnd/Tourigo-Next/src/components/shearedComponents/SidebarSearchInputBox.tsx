@@ -37,7 +37,7 @@ const SidebarSearchInputBox = ({ placeHolder }: propsType) => {
           placeholder={`Search ${placeHolder ? placeHolder : ""}`}
         />
         <button type="submit">
-          {" "}
+          {"  "}
           <i className="far fa-search"></i>{" "}
         </button>
       </form>

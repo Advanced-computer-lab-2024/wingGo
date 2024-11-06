@@ -70,7 +70,7 @@ const FlightSearchArea: React.FC<FlightSearchAreaProps> = ({
             <h6 className="sidebar-widget-title small mb-15">
               Select Departure Date
             </h6>
-            <div className="sidebar-search">
+            
             <DatePicker
               selected={departureDate}
               onChange={(date) => {setDepartureDate(date); console.log(date?.toISOString().split('T')[0] || '')}}
@@ -79,7 +79,6 @@ const FlightSearchArea: React.FC<FlightSearchAreaProps> = ({
               className="form-control w-100"
               wrapperClassName="w-100"
             />
-            </div>
             </div>
 
           <div className="col-lg-2 mt-30 w-100" onClick={handleSearchClick}>
