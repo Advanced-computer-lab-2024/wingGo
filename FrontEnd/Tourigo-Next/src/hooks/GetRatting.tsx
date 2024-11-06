@@ -1,3 +1,4 @@
+//GetRatting.tsx
 import Link from "next/link";
 import React from "react";
 interface rattingType {

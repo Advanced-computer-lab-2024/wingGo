@@ -75,6 +75,7 @@ const ShopContentSingleCard = ({ item, classItem }: propsType) => {
             <div className="product-rating">
               {item.rating && <GetRatting averageRating={item?.rating} />}
             </div>
+            
             <h5 className="product-title underline custom_mb-5">
               <Link href={`/shop-details/${item.id}`}>{item.title}</Link>
             </h5>

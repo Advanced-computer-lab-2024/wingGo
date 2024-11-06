@@ -1,5 +1,6 @@
 const express = require("express");
 const touristController= require('../controllers/touristController');
+const advertiserController = require('../controllers/advertiserController');
 
 const router = express.Router();
 
@@ -63,7 +64,7 @@ router.post('/ratetourguide/:touristId/:tourGuideId', touristController.rateTour
 router.post('/commenttourguide/:touristId/:tourGuideId', touristController.commentOnTourGuide);
 
 
-router.get('/searchFlights', touristController.searchFlights);
+router.get('/searchFlights', touristController.getFlightPrices);
 router.post('/bookFlight/:touristId', touristController.bookFlight);
 
 router.post('/shareViaEmail/:touristId/:itemId', touristController.shareViaEmail); // To be done with FrontEnd
@@ -73,6 +74,10 @@ router.post('/shareViaLink/:touristId/:itemId', touristController.shareViaLink);
 router.get('/searchHotelsByCity', touristController.getHotelOffersByCity);
 router.get('/searchHotelsByLocation', touristController.getHotelOffersByLocation);
 router.post('/bookHotel/:touristId', touristController.bookHotel);
+// Read All Transports (for tourists)
+router.get('/transports', advertiserController.getAllTransports);
+router.put('/bookTransport/:touristId/:transportId', touristController.bookTransport);
 
+router.get('/booked-itineraries/:touristId', touristController.getBookedItineraries);
 
 module.exports = router;

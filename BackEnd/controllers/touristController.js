@@ -13,6 +13,7 @@ const mongoose = require('mongoose');
 const TourGuide = require('../models/TourGuide');
 const nodemailer = require('nodemailer');
 const HotelBooking = require('../models/HotelBooking');
+const Transport = require('../models/Transport');
 
 
 
@@ -64,7 +65,11 @@ const tourist_register = async (req, res) => {
             mobileNumber,
             nationality,
             DOB,
-            jobOrStudent 
+            jobOrStudent,
+            wallet: 0,  // Initialize wallet balance to zero
+            loyaltyPoints: 0,  // Initialize loyalty points to zero
+            badges: [],  // Initialize badges as an empty array
+            transports: [],  // Initialize transports as an empty array 
         });
 
         // Save the tourist to the database
@@ -1512,6 +1517,8 @@ const rateItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params;
     const { rating } = req.body;
 
+    console.log('rate ');
+
     try {
         // Fetch the completed itineraries for the tourist
         const completedItineraries = await getCompletedItineraries({ params: { touristId } }, res);
@@ -1544,6 +1551,8 @@ const rateItinerary = async (req, res) => {
         console.error('Error in rateItinerary:', error.message);
         res.status(500).json({ error: 'An error occurred while rating the itinerary.' });
     }
+
+    console.log('rate done');
 };
 
 
@@ -1552,6 +1561,8 @@ const rateItinerary = async (req, res) => {
 const commentOnItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params;
     const { comment } = req.body;
+
+    console.log('comment');
 
     try {
         // Fetch the completed itineraries for the tourist
@@ -1578,6 +1589,8 @@ const commentOnItinerary = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+
+    console.log('rate done');
 };
 
 
@@ -1675,22 +1688,24 @@ const getAccessToken = async () => {
   };
 
 
-const searchFlights = async (req, res) => {
-    const { origin, destination, departureDate } = req.query;
-
-    if (!origin || !destination || !departureDate) {
-        return res.status(400).json({ message: 'Please provide origin, destination, and departureDate' });
-    }
+const searchFlights = async (origin, destination, departureDate, accessToken) => {
 
     try {
       
+        console.log("Origin:", origin);
+        console.log("Destination:", destination);
+        console.log("Departure Date:", departureDate);
+        
+        const newAccessToken = await getAccessToken();
+        if(!origin || !destination || !departureDate){
+            return { message: 'Please provide origin, destination, and departureDate' };
+        }
   
-      const accessToken = await getAccessToken();
       console.log("Token retrieved successfully:", accessToken);
   
       const flightResponse = await axios.get('https://test.api.amadeus.com/v2/shopping/flight-offers', {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${newAccessToken}`,
         },
         params: {
           originLocationCode: origin,
@@ -1699,13 +1714,55 @@ const searchFlights = async (req, res) => {
           adults: 1,
         },
       });
-      
-      res.status(200).json(flightResponse.data);
+      console.log("searchFlights is done");
+      return flightResponse.data;
     } catch (error) {
-        console.error("Error fetching token:", error.response?.data || error.message);
-        res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
+        console.error('Error fetching flights:', error.response?.data || error.message);
+        return { message: 'Error fetching token', error: error.response?.data || error.message };
     }
   };
+
+  const getFlightPrices = async (req, res) => {
+    const { origin, destination, departureDate } = req.query;
+
+    
+    
+
+    if (!origin || !destination || !departureDate) {
+        return res.status(400).json({ message: 'Please provide origin, destination, and departureDate' });
+    }
+
+    try {
+        const accessToken = await getAccessToken();
+        console.log('Token retrieved successfully:', accessToken);
+
+        const FlightSearchResponse = await searchFlights(origin, destination, departureDate, accessToken);
+        console.log("Flight Search Response:", FlightSearchResponse.data);
+
+        if(FlightSearchResponse.data.length > 6){
+            FlightSearchResponse.data = FlightSearchResponse.data.slice(0,6);
+        }
+
+        const flightResponse = await axios.post('https://test.api.amadeus.com/v1/shopping/flight-offers/pricing', {
+            data: {
+              type: 'flight-offers-pricing',
+              flightOffers: FlightSearchResponse.data,
+            },
+          }, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+              'X-HTTP-Method-Override': 'GET',
+            },
+          });
+
+        res.status(200).json(flightResponse.data);
+    } catch (error) {
+        console.error('Error fetching token:', error.response?.data || error.message);
+        res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
+    }
+};
+
 
 const bookFlight = async (req, res) => {
     const { flightOffers } = req.body;
@@ -1717,6 +1774,8 @@ const bookFlight = async (req, res) => {
         const type = "flight-order";
         const tourist = await Tourist.findById(touristId);
 
+        const priceValidationResponse = flightOffers;
+
         if (!tourist) {
           return res.status(404).json({ message: 'Tourist not found' });
         }
@@ -1727,7 +1786,7 @@ const bookFlight = async (req, res) => {
         //change dob format to YYYY-MM-DD
         dob = dob.toISOString().split('T')[0];
         const email = tourist.email;
-
+        const wallet = tourist.wallet;
         
 
     
@@ -1735,25 +1794,13 @@ const bookFlight = async (req, res) => {
 
         console.log("Im gonna end myself");
          // Step 1: Validate flight offer with Amadeus Flight Offers Price API
-    const priceValidationResponse = await axios.post(
-        'https://test.api.amadeus.com/v1/shopping/flight-offers/pricing',
-        { data: 
-            { 
-                type: 'flight-offers-pricing', 
-                flightOffers: [flightOffers],
-            } 
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-            'X-HTTP-Method-Override': 'GET',
-          },
-        }
-      );
-      console.log("Nevermind I'm still here");
+    
   
-      const validatedFlightOffer = priceValidationResponse.data;
+      const validatedFlightOffer = priceValidationResponse;
+console.log("validatedFlightOffer:", validatedFlightOffer);
+      if(validatedFlightOffer.price.total > wallet){
+        return res.status(400).json({ message: 'Insufficient funds in wallet' });
+        }
        
         // Step 2: Use the access token to create a booking with Amadeus
         const amadeusResponse = await axios.post(
@@ -1762,7 +1809,7 @@ const bookFlight = async (req, res) => {
             data: 
             {
                 type,
-                flightOffers: [validatedFlightOffer.data.flightOffers[0]],
+                flightOffers: [validatedFlightOffer],
                 travelers: [
                     {
                         id: "1",
@@ -1785,7 +1832,8 @@ const bookFlight = async (req, res) => {
             },
           }
         );
-    
+        
+        await Tourist.findByIdAndUpdate(touristId, { wallet: wallet - validatedFlightOffer.price.total });
         // Step 3: Extract a summary of the booking details from Amadeus' response
         const flight = amadeusResponse.data.data; // Assuming the response has data array
         const flightOffer = flight.flightOffers[0];
@@ -1863,14 +1911,14 @@ const bookFlight = async (req, res) => {
             let transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
-                    user: process.env.EMAIL_USER, // Your email address
-                    pass: process.env.EMAIL_PASS  // Your email password
+                    user: "winggo567@gmail.com", // Your email address
+                    pass: "Winggo123456"  // Your email password
                 }
             });
 
             // Send email
             await transporter.sendMail({
-                from: process.env.EMAIL_USER, // Sender address
+                from: "winggo567@gmail.com", // Sender address
                 to: email, // List of receivers
                 subject: `Check out this ${itemType}`, // Subject line
                 text: `Here is the link: ${link}`, // Plain text body
@@ -2089,6 +2137,8 @@ const bookFlight = async (req, res) => {
             const name = tourist.username;
             const email = tourist.email;
             const mobileNumber  = tourist.mobileNumber;
+            const wallet = tourist.wallet;
+            console.log("wallet: ", wallet);
             var dob = tourist.DOB;
             //change dob format to YYYY-MM-DD
             dob = dob.toISOString().split('T')[0];
@@ -2103,9 +2153,14 @@ const bookFlight = async (req, res) => {
              const roomType = hotelOffers.offers[0].room.type;  // Room type
              const rateCode = hotelOffers.offers[0].rateCode;  // Rate code
              const totalPrice = hotelOffers.offers[0].price.total;  // Total price for the offer
+             console.log("Total Price: ", totalPrice);
              const currency = hotelOffers.offers[0].price.currency;  // Currency of the offer
 
-            
+            if(wallet < totalPrice){
+                return res.status(400).json({ message: 'Insufficient funds in wallet' });
+            }
+            const newWallet = wallet - totalPrice;
+
             const bookingResponse = await axios.post(
                 'https://test.api.amadeus.com/v2/booking/hotel-orders',
                 {
@@ -2153,6 +2208,9 @@ const bookFlight = async (req, res) => {
                         },
                     }
                 );
+                
+                await Tourist.findByIdAndUpdate(touristId, { wallet: newWallet });
+
 
               const data = bookingResponse.data.data;
               console.log('Hotel Booking Response:', JSON.stringify(data, null, 2)); // Print full response
@@ -2186,7 +2244,73 @@ const bookFlight = async (req, res) => {
         }
     }
 
-                
+    const bookTransport = async (req, res) => {
+        const { touristId, transportId } = req.params;
+    
+        try {
+            // Find the tourist by ID
+            const tourist = await Tourist.findById(touristId);
+            if (!tourist) {
+                return res.status(404).json({ message: 'Tourist not found' });
+            }
+    
+            // Find the transport by ID
+            const transport = await Transport.findById(transportId);
+            if (!transport) {
+                return res.status(404).json({ message: 'Transport not found' });
+            }
+    
+            // Check if the tourist has enough funds in their wallet
+            if (tourist.wallet < transport.price) {
+                return res.status(400).json({ message: 'Insufficient funds in wallet' });
+            }
+    
+            // Subtract the price of the transport from the tourist's wallet
+            tourist.wallet -= transport.price;
+    
+            // Add the tourist ID to the transport's touristID field
+            transport.touristID = touristId;
+            await transport.save();
+    
+            // Add the transport ID to the tourist's transports field
+            tourist.transports.push(transportId);
+            await tourist.save();
+    
+            res.status(200).json({
+                message: 'Transport booked successfully',
+                transport,
+                tourist
+            });
+        } catch (error) {
+            res.status(500).json({ message: 'Error booking transport', error: error.message });
+        }
+    };
+
+    const getBookedItineraries = async (req, res) => {
+        const { touristId } = req.params;
+    
+        try {
+            // Find the tourist by ID and populate the itinerary details
+            const tourist = await Tourist.findById(touristId).populate({
+                path: 'bookedItineraries.itineraryId',
+                model: 'Itinerary'
+            });
+    
+            if (!tourist) {
+                return res.status(404).json({ message: 'Tourist not found' });
+            }
+    
+            // Extract and format the itinerary data
+            const bookedItineraries = tourist.bookedItineraries.map((booking) => ({
+                itinerary: booking.itineraryId,
+                bookingDate: booking.bookingDate
+            }));
+    
+            res.status(200).json(bookedItineraries);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };              
 
 
 module.exports = {
@@ -2239,5 +2363,8 @@ module.exports = {
     searchHotelsByGeoLocation,
     getHotelOffersByCity,
     getHotelOffersByLocation,
-    bookHotel
+    bookHotel,
+    bookTransport,
+    getFlightPrices,
+    getBookedItineraries
 };

@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import axios from "axios";
-import { toggleFlagItinerary } from '@/api/itineraryApi';
+import { toggleFlagItinerary, toggleItineraryActivation } from '@/api/itineraryApi';
 
 interface ItourPropsType {
   tour: Itinerary; // Use Itinerary type
@@ -17,6 +17,7 @@ interface ItourPropsType {
   tourWrapperClass: string;
   isparentClass: boolean;
   isAdmin?: boolean; // Optional prop to check if the view is admin
+  isTourGuide?: boolean; // Optional prop to check if the view is tour guide
 }
 
 const TourSingleCard = ({
@@ -25,24 +26,33 @@ const TourSingleCard = ({
   tourWrapperClass,
   isparentClass,
   isAdmin = false,
+  isTourGuide = false,
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const rating = tour.averageRating || 1; // Use Itinerary's averageRating, default to 1
 
-  // Local state to keep track of the flagged status
+  // Local state to keep track of the flagged and deactivated status
   const [isFlagged, setIsFlagged] = useState(tour.flagged);
+  const [isDeactivated, setIsDeactivated] = useState(tour.deactivated);
 
-const handleFlagItinerary = async () => {
+  const handleFlagItinerary = async () => {
     try {
-        // Toggle the flagged state in the backend
-        await toggleFlagItinerary(tour._id, !isFlagged);
-
-        // Update the local state to reflect the new flagged status
-        setIsFlagged((prevFlagged) => !prevFlagged);
+      // Toggle the flagged state in the backend
+      await toggleFlagItinerary(tour._id, !isFlagged);
+      setIsFlagged((prevFlagged) => !prevFlagged);
     } catch (error) {
-        console.error("Error updating flagged status:", error);
+      console.error("Error updating flagged status:", error);
     }
-};
+  };
+
+  const handleToggleActivation = async () => {
+    try {
+      await toggleItineraryActivation(tour._id, !isDeactivated);
+      setIsDeactivated((prevDeactivated) => !prevDeactivated);
+    } catch (error) {
+      console.error("Error toggling activation status:", error);
+    }
+  };
 
   return (
     <>
@@ -51,9 +61,9 @@ const handleFlagItinerary = async () => {
           <div className={tourWrapperClass}>
             <div className="p-relative">
               <div className="tour-thumb image-overly">
-                <Link href={`/tour-details/${tour._id}`}>
+                <Link href={`/it-details/${tour._id}`}>
                   <Image
-                    src="/images/default-image.jpg" // Placeholder image
+                    src="/images/default-image.jpg"
                     loader={imageLoader}
                     style={{ width: "100%", height: "auto" }}
                     alt="Itinerary Image"
@@ -66,7 +76,7 @@ const handleFlagItinerary = async () => {
                 </button>
                 <div className="tour-location">
                   <span>
-                    <Link href={`/tour-details/${tour._id}`}>
+                    <Link href={`/it-details/${tour._id}`}>
                       <i className="fa-regular fa-location-dot"></i>{" "}
                       {tour.locations[0] || "Location not available"}
                     </Link>
@@ -87,7 +97,7 @@ const handleFlagItinerary = async () => {
               </div>
               <div className="d-flex justify-content-between align-items-center">
                 <h5 className="tour-title fw-5 underline custom_mb-5">
-                  <Link href={`/tour-details/${tour._id}`}>
+                  <Link href={`/it-details/${tour._id}`}>
                     {tour.title}
                   </Link>
                 </h5>
@@ -98,13 +108,29 @@ const handleFlagItinerary = async () => {
                     style={{
                       backgroundColor: isFlagged ? "green" : "red",
                       color: "white",
-                      padding: "8px 16px",      // Adjust padding to make the button bigger
-                      fontSize: "14px",          // Increase font size
-                      borderRadius: "4px",       // Adjust border radius as desired
+                      padding: "8px 16px",
+                      fontSize: "14px",
+                      borderRadius: "4px",
                       cursor: "pointer",
                     }}
                   >
                     {isFlagged ? "Unflag" : "Flag"}
+                  </button>
+                )}
+                {isTourGuide && (
+                  <button
+                    onClick={handleToggleActivation}
+                    className="activate-itinerary-button"
+                    style={{
+                      backgroundColor: isDeactivated ? "orange" : "blue",
+                      color: "white",
+                      padding: "8px 16px",
+                      fontSize: "14px",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {isDeactivated ? "Activate" : "Deactivate"}
                   </button>
                 )}
               </div>
@@ -138,10 +164,7 @@ const handleFlagItinerary = async () => {
           </div>
         </div>
       ) : (
-        // Non-parent layout, adjust as needed
-        <div className={tourWrapperClass}>
-          {/* Non-parent layout logic can go here if needed */}
-        </div>
+        <div className={tourWrapperClass}></div>
       )}
     </>
   );

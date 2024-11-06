@@ -18,10 +18,24 @@ export const searchFlights = async (params: FlightSearchParams): Promise<any> =>
           departureDate: params.departureDate,
         },
       });
-      console.log('Flight data:', response.data);
-      return response.data;
+      console.log('Flight dataaaa:', response.data.data.flightOffers);
+      return response.data.data.flightOffers;
     } catch (error) {
       console.error('Error fetching flight data:', error);
       throw error;
     }
   };
+
+  export const bookflight = async (params: any): Promise<any> => {
+    try {
+      console.log('booking flight:', params);
+      const response = await axios.post<any>(`${API_URL}/bookFlight/670032f480b8a5dc77e2a155`, {
+        flightOffers: params,
+      });
+      console.log('booking data:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching flight data:', error);
+      return error;
+    }
+  }

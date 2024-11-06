@@ -9,6 +9,7 @@
     "mobiscroll": "^3.0.0-beta6",
     "mobiscroll-react": "^4.0.0",
     "react-select": "^5.8.2",
+    "react-rating-stars-component": "^2.2.0",
     "util": "^0.12.5"
   }
 }
