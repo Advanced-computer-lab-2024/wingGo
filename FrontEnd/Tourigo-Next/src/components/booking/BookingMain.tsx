@@ -5,7 +5,7 @@ import Booking from './Booking';
 const BookingMain = () => {
     return (
         <>
-            <Breadcrumb titleOne='Booking Form' titleTwo='Booking Form'/>
+            <Breadcrumb titleOne='Booking Form' titleTwo='Booking)) Form'/>
             <Booking />
         </>
     );
