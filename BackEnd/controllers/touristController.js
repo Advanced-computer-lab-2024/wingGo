@@ -1911,14 +1911,14 @@ console.log("validatedFlightOffer:", validatedFlightOffer);
             let transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
-                    user: process.env.EMAIL_USER, // Your email address
-                    pass: process.env.EMAIL_PASS  // Your email password
+                    user: "winggo567@gmail.com", // Your email address
+                    pass: "Winggo123456"  // Your email password
                 }
             });
 
             // Send email
             await transporter.sendMail({
-                from: process.env.EMAIL_USER, // Sender address
+                from: "winggo567@gmail.com", // Sender address
                 to: email, // List of receivers
                 subject: `Check out this ${itemType}`, // Subject line
                 text: `Here is the link: ${link}`, // Plain text body
