@@ -120,10 +120,10 @@ const createActivity = async (req, res) => {
 
     const {name, date, time, location, price, category, tags, specialDiscounts, isBookingOpen, advertiser} = req.body
 
-    const {lat, lng} = await getCoordinates(location.address);
+    // const {lat, lng} = await getCoordinates(location.address);
 
-    location.lat = lat;
-    location.lng = lng;
+    // location.lat = lat;
+    // location.lng = lng;
 
     try{
         const newActivity = new Activity({

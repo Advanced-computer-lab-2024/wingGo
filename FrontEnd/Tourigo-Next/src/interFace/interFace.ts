@@ -374,7 +374,7 @@ export interface Itinerary {
 export interface Activity {
   _id: string;
   name: string;
-  img: StaticImageData;
+  // img: StaticImageData;
   date: Date;
   time: string;
   location: {

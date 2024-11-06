@@ -51,12 +51,12 @@ const TourDetails = ({ id }: idTypeNew) => {
                 <div className="tour-details-wrapper">
                   <div className="tour-details mb-25">
                     <div className="tour-details-thumb details-slide-full mb-30">
-                      <Image
+                      {/* <Image
                         src={data?.img}
                         loader={imageLoader}
                         style={{ width: "100%", height: "auto" }}
                         alt="image"
-                      />
+                      /> */}
                     </div>
                     <div className="tour-details-content">
                       <div className="tour-details-badge d-flex gap--5 mb-10">
