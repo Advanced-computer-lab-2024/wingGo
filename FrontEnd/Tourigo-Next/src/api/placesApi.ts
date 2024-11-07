@@ -13,3 +13,12 @@ export const fetchAllPlaces = async (): Promise<Place[]> => {
         throw error;
     }
 };
+export const createPlace = async (placeData: any): Promise<any> => {
+    try {
+        const response = await axios.post(`http://localhost:8000/govornor/createPlace`, placeData);
+        return response.data.place; // Return the created place data
+    } catch (error) {
+        console.error("Error creating place:", error);
+        throw error;
+    }
+};
