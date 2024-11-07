@@ -77,6 +77,7 @@ router.post('/bookHotel/:touristId', touristController.bookHotel);
 // Read All Transports (for tourists)
 router.get('/transports', advertiserController.getAllTransports);
 router.put('/bookTransport/:touristId/:transportId', touristController.bookTransport);
+router.get('/:id', touristController.getTouristById);
 
 router.get('/booked-itineraries/:touristId', touristController.getBookedItineraries);
 
