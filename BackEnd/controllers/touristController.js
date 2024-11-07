@@ -644,6 +644,8 @@ const filterUpcomingActivities = async (req, res) => {
         res.status(400).json({ error: error.message }); 
     }
 };
+
+
 // Search for attractions, activities, itineraries, or places by name, category, or tags
 const searchAllModels = async (req, res) => {
     const { query, touristId  } = req.query;  // Only extract the query term

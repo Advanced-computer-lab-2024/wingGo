@@ -1,3 +1,4 @@
+//TourDetails.tsx
 "use client";
 import { imageLoader } from "@/hooks/image-loader";
 import React, { useEffect, useState } from "react";
