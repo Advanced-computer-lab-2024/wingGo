@@ -24,5 +24,3 @@ export const getComplaintsDataTourist=async():Promise<Complaint[]>=>{
     }
 };
 
-
-

@@ -32,6 +32,12 @@ const ComplaintDetails  = ({ id }: idTypeNew) => {
     fetchComplaintDetails();
   }, [id]);
 
+  const handleReplyPosted = (reply: string) => {
+    if (data) {
+      setData({ ...data, reply: [...(data.reply || []), reply] });
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
   if (!data) return <div>No complaint found.</div>;
 
@@ -52,6 +58,24 @@ const ComplaintDetails  = ({ id }: idTypeNew) => {
             <h4 className="mb-2 text-secondary">Details:</h4>
             <p className="text-muted" style={{ lineHeight: '1.6' }}>{data.body}</p>
           </div>
+
+      {/* Admin Replies Section */}
+      <div className="complaint-replies">
+        <h4 className="mb-2 text-secondary">Admin Replies:</h4>
+        {data.reply && data.reply.length > 0 ? (
+          data.reply.map((reply, index) => (
+            <div key={index} className="reply-item">
+              <p>{reply}</p>
+            </div>
+          ))
+        ) : (
+          <p>No replies yet.</p>
+        )}
+      </div>
+
+
+          
+          <TourDetailTabArea ComplaintData={data} onReplyPosted={handleReplyPosted} />
         </div>
       </div>
     </section>
