@@ -449,3 +449,17 @@ export interface Product {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface Complaint{
+ 
+    _id?: string;
+    title: string;
+    body: string;
+    date: Date;
+    tourist: string; // ObjectId as a string referencing a Tourist
+    state: 'pending' | 'resolved';
+    reply: string[];
+
+  }
+
+
