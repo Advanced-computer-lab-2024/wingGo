@@ -1,3 +1,4 @@
+//ProductDetailsSection.tsx
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Thumbs, Controller, Navigation } from "swiper/modules";
@@ -19,8 +20,8 @@ import ReviewComments from "./ReviewComments";
 import StarRating from "@/components/Products/StarRating"; 
 import { fetchSellerData } from "@/api/productApi"; // Adjust the import path as necessary
 import { calculateAverageRating } from "@/utils/utils"; // Adjust the import path as necessary
-const ProductDetailsSection = ({ id }: idTypeNew) => {
-  console.log("Product ID:", id);
+const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string }) => {
+  console.log("userRole:", userRole);
   
   const [products, setProducts] = useState<Product[]>([]);
   const [item, setItem] = useState<Product | null>(null);

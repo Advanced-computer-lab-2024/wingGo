@@ -13,9 +13,10 @@ import { calculateAverageRating } from "@/utils/utils"; // Adjust the import pat
 interface propsType {
   item: Product;
   classItem: string;
+  userRole: "Tourist" | "Admin" | "Seller"; // Add userRole prop
 }
 
-const ShopContentSingleCard = ({ item, classItem }: propsType) => {
+const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
   const { setModalData } = useGlobalContext();
   const dispatch = useAppDispatch();
 
@@ -34,7 +35,9 @@ const ShopContentSingleCard = ({ item, classItem }: propsType) => {
       <div className={classItem}>
         <div className="product-wrapper">
           <div className="product-image-wrapper image-hover-effect">
-            <Link href={`/Product-details/${item._id}`} className="product-image">
+            <Link href={`/Product-details/${item._id}/${userRole}`} className="product-image">
+            
+            
               <div className="product-image-one">
                 <Image src={item.image} alt="image not found" />
               </div>
@@ -83,8 +86,9 @@ const ShopContentSingleCard = ({ item, classItem }: propsType) => {
             </div>
             <h5 className="product-title underline custom_mb-5">
              
-              <Link href={`/Product-details/${item._id}`}>
+              <Link href={`/product-details/${item._id}/${userRole}`}>
                     {item.name}
+                   
                   </Link>
             </h5>
             <div className="product-price">

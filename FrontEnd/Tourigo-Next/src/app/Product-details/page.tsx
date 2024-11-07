@@ -5,12 +5,13 @@ import React from "react";
 
 const page = () => {
   const id = "";
+  const userRole='';
   return (
     <>
       <MetaData pageTitle="Shop Details">
         <Wrapper>
           <main>
-            <ShopDetailsMain id={id} />
+            <ShopDetailsMain id={id} userRole={userRole}/>
           </main>
         </Wrapper>
       </MetaData>
