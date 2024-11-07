@@ -7,7 +7,7 @@ import DashBreadCrumb from '../common/breadcrumb/DashBreadCrumb';
 const DashboardMain = () => {
     return (
         <>
-            <DashBreadCrumb titleOne='Complaints Dashboard' titleTwo='View Complaints' />
+            <DashBreadCrumb titleOne='My Complaints' titleTwo='View my Complaints' />
             {/* <AlertArea /> */}
             {/* <CardBoxArea /> */}
             <RecentActivity />

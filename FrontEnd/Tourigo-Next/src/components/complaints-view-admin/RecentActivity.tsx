@@ -67,7 +67,9 @@ const ComplaintsList = () => {
                                                         <div className="recent-activity-title-box d-flex align-items-center gap-10">
                                                             <div>
                                                                 <h5 className="complaint-title fw-5 underline">
-                                                                    <Link href="/complaint-details">{complaint.title}</Link>
+                                                                <Link href={`/complaint-details/${complaint._id}`}>
+                                                                  {complaint.title}
+                                                                </Link>
                                                                 </h5>
                                                                 <p>Status: {complaint.state}</p>
                                                             </div>
