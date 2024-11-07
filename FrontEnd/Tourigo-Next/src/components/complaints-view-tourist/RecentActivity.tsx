@@ -69,7 +69,7 @@ const ComplaintsList = () => {
                                                     </td>
                                                     <td>
                                                         <ul className="recent-activity-list">
-                                                            <li className="trip-title" style={{ float: 'right' }}>Sent On: 
+                                                            <li className="trip-title" style={{ float: 'right' , paddingRight: '10px' }}>Sent On: 
                                                             <span className="trip-date">
                                                                     {complaint.date ? new Date(complaint.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
                                                                 </span>

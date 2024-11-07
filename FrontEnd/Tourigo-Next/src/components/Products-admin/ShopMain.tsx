@@ -32,7 +32,7 @@ const ShopMain = () => {
                         classItem="col-xxl-4 col-xl-4 col-lg4 col-md-4 col-sm-6"
                         key={index}
                         item={item}
-                        userRole="Tourist"
+                        userRole="Admin"
                       />
                     ))}
                   </div>

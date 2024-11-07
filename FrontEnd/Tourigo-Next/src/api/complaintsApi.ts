@@ -26,3 +26,25 @@ export const fetchTouristComplaints = async (): Promise<Complaint[]> => {
         throw error;
     }
 };
+
+
+export const replyToComplaint = async (complaintId: string, reply: string) => {
+    try {
+      const response = await axios.post(`/replytocomplaint/${complaintId}`, { reply });
+      return response.data;
+    } catch (error) {
+      console.error("Error replying to complaint:", error);
+      throw error;
+    }
+  };
+
+
+  export const updateComplaintStatus = async (id: string, newState: 'pending' | 'resolved'): Promise<Complaint> => {
+    try {
+        const response = await axios.put(`http://localhost:8000/admin/updateComplaint/${id}`, { state: newState });
+        return response.data.complaint;
+    } catch (error) {
+        console.error("Error updating complaint status:", error);
+        throw error;
+    }
+};

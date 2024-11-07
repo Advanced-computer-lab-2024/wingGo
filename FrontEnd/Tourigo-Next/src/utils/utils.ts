@@ -11,3 +11,15 @@ export const calculateAverageRating = (ratings: { rating: number }[]): number =>
   const total = ratings.reduce((sum, { rating }) => sum + rating, 0);
   return total / ratings.length;
 };
+
+import axios from 'axios';
+
+export const fetchTouristData = async (touristId: string) => {
+  try {
+    const response = await axios.get(`/api/tourists/${touristId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching tourist data:', error);
+    return null;
+  }
+};

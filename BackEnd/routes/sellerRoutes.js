@@ -31,6 +31,7 @@ router.get('/downloadProductImage/:id', sellerController.downloadProductImage);
 
 router.delete('/deleteSeller/:id', sellerController.deleteSellerAccount);
 
+router.get('/:id', sellerController.getSellerById);
 
 router.get('/productQuantityAndSales/:productId', sellerController.getProductQuantityAndSales);
 router.get('/productsQuantityAndSales', sellerController.getAllProductsQuantityAndSales);

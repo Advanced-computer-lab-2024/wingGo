@@ -283,7 +283,6 @@ export interface ProductsType {
   labelColor?: string;
   totalCart?: number;
   shiping?: number;
-  
 }
 // menu data type
 // menu-data type
@@ -452,7 +451,7 @@ export interface Product {
 
 export interface Complaint{
  
-    _id?: string;
+    _id: string;
     title: string;
     body: string;
     date: Date;

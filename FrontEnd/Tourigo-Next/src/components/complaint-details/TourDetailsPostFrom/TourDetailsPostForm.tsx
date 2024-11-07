@@ -1,66 +1,51 @@
 //TourDetailsPostForm.tsx
 import GetRatting from "@/hooks/GetRatting";
 import React from "react";
+import { Complaint } from "@/interFace/interFace";
+import axios from "axios";
+import { useState } from "react";
 
-const TourDetailsPostForm = () => {
+interface TourDetailsPostFormProps {
+  complaintId: string;
+  onReplyPosted: (reply: string) => void;
+}
+const TourDetailsPostForm: React.FC<TourDetailsPostFormProps> = ({ complaintId, onReplyPosted }) => {
+  const [replyText, setReplyText] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+
+  const handlePostComment = async () => {
+    if (!replyText) return;
+    try {
+      await axios.post(`http://localhost:8000/admin/replytocomplaint/${complaintId}`, {
+        reply: replyText,
+      });
+      onReplyPosted(replyText); // Notify parent component with new reply
+      setReplyText(""); // Clear input
+      setShowPopup(true);
+
+      // Hide the pop-up after 3 seconds
+      setTimeout(() => setShowPopup(false), 3000);
+
+    } catch (error) {
+      console.error("Failed to post reply:", error);
+    }
+  };
+  
   return (
     <div className="post-comment-form">
       <div className="post-comments-title">
-        <h4 className="mb-15">Leave a Review</h4>
-        <span className="d-block mb-25">
-          Your email address will not be published. Required fields are marked *
-        </span>
-      </div>
-      <div className="tour-details-star-review-box">
-        <div className="tour-details-star-review-box-single">
-          <p className="tour-details-star-review-box-text">Service</p>
-          <div className="rating-color ratting-space">
-            <GetRatting averageRating={5} />
-          </div>
-        </div>
-        <div className="tour-details-star-review-box-single">
-          <p className="tour-details-star-review-box-text">Locations</p>
-          <div className="rating-color ratting-space">
-            <GetRatting averageRating={5} />
-          </div>
-        </div>
-        <div className="tour-details-star-review-box-single">
-          <p className="tour-details-star-review-box-text">Amenities</p>
-          <div className="tourigo-ratings-two ratting-space">
-            <GetRatting averageRating={5} />
-          </div>
-        </div>
-        <div className="tour-details-star-review-box-single">
-          <p className="tour-details-star-review-box-text">Prices</p>
-          <div className="tourigo-ratings-two ratting-space">
-            <GetRatting averageRating={5} />
-          </div>
-        </div>
-        <div className="tour-details-star-review-box-single">
-          <p className="tour-details-star-review-box-text">Food</p>
-          <div className="tourigo-ratings-two ratting-space">
-            <GetRatting averageRating={5} />
-          </div>
-        </div>
+        <h4 className="mb-15">Admin Reply</h4>
       </div>
       <form>
         <div className="row gy-24">
-          <div className="col-xl-6">
-            <div className="input-box">
-              <input type="text" placeholder="Name" />
-            </div>
-          </div>
-          <div className="col-xl-6">
-            <div className="input-box">
-              <input type="email" placeholder="Email" />
-            </div>
-          </div>
           <div className="col-xl-12">
             <div className="input-box">
               <textarea
                 cols={30}
                 rows={10}
                 placeholder="Type Comment here"
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)} // Bind input to state
               ></textarea>
             </div>
           </div>
@@ -69,6 +54,7 @@ const TourDetailsPostForm = () => {
               <button
                 type="button"
                 className="bd-primary-btn btn-style has-arrow is-bg radius-60"
+                onClick={handlePostComment} // Trigger handlePostComment
               >
                 <span className="bd-primary-btn-arrow arrow-right">
                   <i className="fa-regular fa-arrow-right"></i>
@@ -83,8 +69,16 @@ const TourDetailsPostForm = () => {
           </div>
         </div>
       </form>
+
+       {/* Pop-up message */}
+       {showPopup && (
+        <div className="popup-message">
+          <p>Reply posted successfully!</p>
+        </div>
+      )}
     </div>
   );
 };
 
 export default TourDetailsPostForm;
+
