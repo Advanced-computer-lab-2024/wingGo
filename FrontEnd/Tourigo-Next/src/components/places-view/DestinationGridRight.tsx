@@ -27,18 +27,7 @@ const DestinationGridRight = () => {
           {/* Main content area */}
           <div className="col-xxl-8 col-xl-8 col-lg-7">
             <div className="row gy-24">
-              {places.map((place) => (
-                <div
-                  key={place._id}
-                  className="col-xxl-4 col-xl-6 col-lg-6 col-md-6"
-                >
-                  {/* Render PlaceElement with each place */}
-                  <PlaceElement
-                    item={place}
-                    wrapperClass="place-wrapper style-one"
-                  />
-                </div>
-              ))}
+             
             </div>
             {/* Pagination component */}
             <PaginationWrapperTwo />

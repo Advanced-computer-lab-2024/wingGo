@@ -1,3 +1,4 @@
+//RecentActivity.tsx
 'use client'
 import { recentActivityData } from '@/data/recent-activity-data';
 import { imageLoader } from '@/hooks/image-loader';
@@ -9,45 +10,78 @@ import { Complaint } from '@/interFace/interFace';
 import { fetchComplaints } from '@/api/complaintsApi';
 import { getComplaintsData } from '@/data/complaints-data';
 
+
 const ComplaintsList = () => {
     const [complaints, setComplaints] = useState<Complaint[]>([]);
+    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'resolved'>('all');
+    const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
     useEffect(() => {
-        const fetchComplaints = async () => {
+        const fetchComplaintsData = async () => {
             try {
-                const response = await getComplaintsData();
-                // Check if the complaints have valid date values
-                response.forEach((complaint) => {
-                    if (complaint.date) {
-                        console.log("Complaint date:", complaint.date);
-                    } else {
-                        console.log("Complaint has no date:", complaint);
-                    }
-                });
-
+                const response = await fetchComplaints();
                 setComplaints(response);
             } catch (error) {
                 console.error("Error fetching complaints:", error);
             }
         };
 
-        fetchComplaints();
+        fetchComplaintsData();
     }, []);
+
+    // Filter complaints based on the selected status
+    const filteredComplaints = complaints.filter((complaint) => 
+        statusFilter === 'all' || complaint.state === statusFilter
+    );
+
+    // Sort the filtered complaints by date
+    const sortedComplaints = [...filteredComplaints].sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
 
     return (
         <section className="bd-recent-activity section-space-small-bottom">
-            <div className="container"  style={{ paddingTop: "40px" }}>
+            <div className="container" style={{ paddingTop: "40px" }}>
+                
+                
                 <div className="row">
                     <div className="col-xxl-12">
                         <div className="recent-activity-wrapper">
                             <div className="section-title-wrapper section-title-space">
                                 <h2 className="section-title">Complaints</h2>
                             </div>
+                            <div className="row mb-3 d-flex align-items-center" style={{ gap: "20px", paddingBottom: "60px" }}>
+                    <div className="col-auto">
+                        <label htmlFor="statusFilter" className="me-2">Status:</label>
+                        <select
+                            id="statusFilter"
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'pending' | 'resolved')}
+                        >
+                            <option value="all">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                    </div>
+                    <div className="col-auto">
+                        <label htmlFor="sortOrder" className="me-2">Sort by Date:</label>
+                        <select
+                            id="sortOrder"
+                            value={sortOrder}
+                            onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+                        >
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                        </select>
+                    </div>
+                </div>
                             <div className="recent-activity-content">
                                 <div className="table-responsive">
                                     <table className="table mb-0">
                                         <tbody>
-                                            {complaints.map((complaint) => (
+                                            {sortedComplaints.map((complaint) => (
                                                 <tr key={complaint._id} className="table-custom">
                                                     <td>
                                                         <div className="dashboard-thumb-wrapper p-relative">
