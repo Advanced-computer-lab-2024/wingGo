@@ -1,3 +1,4 @@
+//ShopContentSingleCard.tsx
 "use client";
 import useGlobalContext from "@/hooks/use-context";
 import { Product } from "@/interFace/interFace";
@@ -86,7 +87,7 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
             </div>
             <h5 className="product-title underline custom_mb-5">
              
-              <Link href={`/product-details/${item._id}/${userRole}`}>
+              <Link href={`/Product-details/${item._id}/${userRole}`}>
                     {item.name}
                    
                   </Link>
