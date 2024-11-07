@@ -959,7 +959,7 @@ const deletePreferenceTag = async (req, res) => {
 //view list of complaints
 const getAllComplaints = async (req, res) => {
     try {
-        const complaints = await Complaint.find({}, 'title state');
+        const complaints = await Complaint.find();
         res.status(200).json(complaints);
     } catch (error) {
         res.status(500).json({ error: error.message });
