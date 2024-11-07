@@ -452,7 +452,7 @@ export interface Product {
 
 export interface Complaint{
  
-    _id?: string;
+    _id: string;
     title: string;
     body: string;
     date: Date;

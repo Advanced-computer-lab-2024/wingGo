@@ -7,7 +7,7 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Complaint } from '@/interFace/interFace';
-import { fetchComplaints } from '@/api/complaintsApi';
+import { fetchComplaints, updateComplaintStatus  } from '@/api/complaintsApi';
 import { getComplaintsData } from '@/data/complaints-data';
 
 
@@ -19,7 +19,7 @@ const ComplaintsList = () => {
     useEffect(() => {
         const fetchComplaintsData = async () => {
             try {
-                const response = await fetchComplaints();
+                const response = await getComplaintsData();
                 setComplaints(response);
             } catch (error) {
                 console.error("Error fetching complaints:", error);
@@ -40,6 +40,21 @@ const ComplaintsList = () => {
         const dateB = new Date(b.date).getTime();
         return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
+
+        // Function to handle status update
+        const handleStatusToggle = async (id: string, currentState: 'pending' | 'resolved') => {
+            const newState = currentState === 'pending' ? 'resolved' : 'pending';
+            try {
+                const updatedComplaint = await updateComplaintStatus(id, newState);
+                setComplaints(prevComplaints =>
+                    prevComplaints.map(complaint => 
+                        complaint._id === id ? { ...complaint, state: updatedComplaint.state } : complaint
+                    )
+                );
+            } catch (error) {
+                console.error("Error updating complaint status:", error);
+            }
+        };
 
     return (
         <section className="bd-recent-activity section-space-small-bottom">
@@ -110,14 +125,23 @@ const ComplaintsList = () => {
                                                         </div>
                                                     </td>
                                                     <td>
+                                            <button
+                                                onClick={() => handleStatusToggle(complaint._id, complaint.state)}
+                                                className="btn btn-primary"
+                                            >
+                                                {complaint.state === 'pending' ? 'Mark as Resolved' : 'Mark as Pending'}
+                                            </button>
+                                        </td>
+                                                    <td>
                                                         <ul className="recent-activity-list">
-                                                            <li className="trip-title" style={{ float: 'right' }}>Sent On: 
-                                                            <span className="trip-date">
+                                                            <li className="trip-title" style={{ float: 'right', paddingRight: '10px' }}>Sent On: 
+                                                            <span className="trip-date" >
                                                                     {complaint.date ? new Date(complaint.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
                                                                 </span>
                                                             </li>
                                                         </ul>
                                                     </td>
+                                                    
                                                 </tr>
                                             ))}
                                         </tbody>
