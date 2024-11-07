@@ -824,6 +824,7 @@ const viewComplaints = async (req, res) => {
 
     try {
         const complaints = await Complaints.find({ tourist: touristId }).select('title body state date');
+        console.log(complaints);
         res.status(200).json({ complaints });
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving complaints.', error });
