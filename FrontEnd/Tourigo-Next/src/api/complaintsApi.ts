@@ -3,7 +3,7 @@
 import axios from "axios";
 import { Complaint } from "../interFace/interFace";
 
-//const touristId = '67240ed8c40a7f3005a1d01d';
+const touristId = '67240ed8c40a7f3005a1d01d';
 
 export const fetchComplaints = async (): Promise<any> => {
     try {
@@ -15,4 +15,14 @@ export const fetchComplaints = async (): Promise<any> => {
     }
 };
 
-
+// New API function for fetching complaints by tourist ID async (touristId: string): Promise<Complaint[]> => {
+export const fetchTouristComplaints = async (): Promise<Complaint[]> => {
+    const touristId = '67240ed8c40a7f3005a1d01d';
+    try {
+        const response = await axios.get(`http://localhost:8000/tourist/viewmycomplaints/${touristId}`);
+        return response.data.complaints;
+    } catch (error) {
+        console.error("Error fetching tourist complaints:", error);
+        throw error;
+    }
+};

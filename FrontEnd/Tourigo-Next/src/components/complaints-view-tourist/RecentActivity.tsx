@@ -6,32 +6,24 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Complaint } from '@/interFace/interFace';
-import { fetchComplaints } from '@/api/complaintsApi';
-import { getComplaintsData } from '@/data/complaints-data';
+import { fetchTouristComplaints } from '@/api/complaintsApi';
+import { getComplaintsDataTourist } from '@/data/complaints-data';
 
 const ComplaintsList = () => {
     const [complaints, setComplaints] = useState<Complaint[]>([]);
+    
 
     useEffect(() => {
-        const fetchComplaints = async () => {
+        const getComplaints = async () => {
             try {
-                const response = await getComplaintsData();
-                // Check if the complaints have valid date values
-                response.forEach((complaint) => {
-                    if (complaint.date) {
-                        console.log("Complaint date:", complaint.date);
-                    } else {
-                        console.log("Complaint has no date:", complaint);
-                    }
-                });
-
+                const response = await getComplaintsDataTourist();
                 setComplaints(response);
             } catch (error) {
-                console.error("Error fetching complaints:", error);
+                console.error("Error fetching tourist complaints:", error);
             }
         };
 
-        fetchComplaints();
+        getComplaints();
     }, []);
 
     return (
