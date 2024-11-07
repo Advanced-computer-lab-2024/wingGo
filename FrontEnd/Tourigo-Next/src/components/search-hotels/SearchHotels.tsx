@@ -9,6 +9,7 @@ import FlightArea from "../shearedComponents/FlightArea";
 import HotelSearchArea from "../shearedComponents/HotelSearchArea";
 import TourSingleCard from "../common/tourElements/TourSingleCard";
 import { bookHotel, searchHotels } from "@/api/HotelApi";
+import HotelArea from "../shearedComponents/HotelArea";
 
 
 const SearchHotels = () => {
@@ -18,45 +19,10 @@ const SearchHotels = () => {
     const [hotelData, setHotelData] = useState<any[]>([]);
 
 
-    useEffect(() => {
-        const fetchTripData = async () => {
-          try {
-            const response = await searchHotels({
-                cityCode: cityCode,
     
-            });
-            const data = await response;
-            setHotelData(data);
-            console.log('Trip data:', data);
-          } catch (error) {
-            console.error('Error fetching trip data:', error);
-          }
-        };
-    
-        if (searchTriggered && cityCode) {
-            fetchTripData();
-            setSearchTriggered(false);
-        }
-      }, [searchTriggered, cityCode]);
 
     
-      const handleBookHotel = async (hotel: any) => {
-
-        try {
-          console.log('Booking hotel:', hotel);
-          const response = await bookHotel(hotel);
-          console.log('Booking response:', response);
-    
-          if(response.message === "Hotel booked successfully"){
-            alert("Hotel booked successfully");
-          }
-          else{
-            alert("Insufficient balance");
-          }
-        } catch (error) {
-          console.error('Error booking hotel:', error);
-        }
-      }
+     
     
   return (
     <>
@@ -72,19 +38,11 @@ const SearchHotels = () => {
             </div>
             <div className="col-xxl-8 col-xl-8 col-lg-7 order-lg-1 order-0">
               {/*trip area*/}
-              <div className="col-xxl-8 col-xl-8 col-lg-7 order-lg-1 order-0">
-              <div className="row gy-24">
-                {hotelData?.map((item) => (
-                  <TourSingleCard
-                    tour={item}
-                    key={item?.id}
-                    className="col-xxl-4 col-xl-6 col-lg-6 col-md-6"
-                    tourWrapperClass="tour-wrapper style-one"
-                    isparentClass={true}
-                  />
-                ))}
-              </div>
-            </div>
+              <HotelArea 
+                cityCode={cityCode}
+                searchTriggered={searchTriggered}
+                setSearchTriggered={setSearchTriggered}
+                />
                 
               {/*pagination area*/}
               <PaginationWrapperTwo />
