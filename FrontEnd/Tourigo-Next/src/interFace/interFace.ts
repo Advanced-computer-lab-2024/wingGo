@@ -283,7 +283,6 @@ export interface ProductsType {
   labelColor?: string;
   totalCart?: number;
   shiping?: number;
-  
 }
 // menu data type
 // menu-data type

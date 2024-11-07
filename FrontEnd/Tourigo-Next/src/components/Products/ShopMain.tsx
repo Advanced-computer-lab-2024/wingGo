@@ -13,6 +13,7 @@ import { useFilter } from "@/hooks/useFilterproduct";
 const ShopMain = () => {
   const filterData = useFilter(0, 18);
   const searchData = useProductSearch();
+  
   const mapData = searchData?.length ? searchData : filterData;
   return (
     <>
