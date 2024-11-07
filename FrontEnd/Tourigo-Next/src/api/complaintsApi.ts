@@ -26,3 +26,14 @@ export const fetchTouristComplaints = async (): Promise<Complaint[]> => {
         throw error;
     }
 };
+
+
+export const replyToComplaint = async (complaintId: string, reply: string) => {
+    try {
+      const response = await axios.post(`/replytocomplaint/${complaintId}`, { reply });
+      return response.data;
+    } catch (error) {
+      console.error("Error replying to complaint:", error);
+      throw error;
+    }
+  };

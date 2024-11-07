@@ -33,7 +33,7 @@ const ComplaintsList = () => {
                     <div className="col-xxl-12">
                         <div className="recent-activity-wrapper">
                             <div className="section-title-wrapper section-title-space">
-                                <h2 className="section-title">Complaints</h2>
+                                <h2 className="section-title">My Complaints</h2>
                             </div>
                             <div className="recent-activity-content">
                                 <div className="table-responsive">
@@ -59,7 +59,9 @@ const ComplaintsList = () => {
                                                         <div className="recent-activity-title-box d-flex align-items-center gap-10">
                                                             <div>
                                                                 <h5 className="complaint-title fw-5 underline">
-                                                                    <Link href="/complaint-details">{complaint.title}</Link>
+                                                                <Link href={`/complaint-details/${complaint._id}`}>
+                                                                  {complaint.title}
+                                                                </Link>
                                                                 </h5>
                                                                 <p>Status: {complaint.state}</p>
                                                             </div>
@@ -73,7 +75,21 @@ const ComplaintsList = () => {
                                                                 </span>
                                                             </li>
                                                         </ul>
-                                                    </td>
+                                                    </td>    
+
+                                                    {/* <div className="admin-reply">
+  {complaint.reply ? (
+    <>
+      <h4 className="mb-2 text-secondary">Admin's Reply:</h4>
+      <p className="text-muted" style={{ lineHeight: '1.6' }}>
+        {complaint.reply}
+      </p>
+    </>
+  ) : (
+    <p>No reply yet from the admin.</p>
+  )}
+</div> */}
+                                               
                                                 </tr>
                                             ))}
                                         </tbody>

@@ -1,3 +1,4 @@
+//DashboardMain.tsx
 import React from 'react';
 import AlertArea from './AlertArea';
 import CardBoxArea from './CardBoxArea';

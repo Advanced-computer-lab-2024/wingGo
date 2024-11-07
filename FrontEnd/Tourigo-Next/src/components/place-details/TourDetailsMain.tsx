@@ -1,3 +1,4 @@
+//TourDetailsMain.tsx
 import React from "react";
 import TourDetails from "./TourDetails";
 import Breadcrumb from "../common/breadcrumb/BreadCrumb";
