@@ -15,7 +15,8 @@ const Activity = require('../models/Activity');  // Adjust the path based on you
 const PreferenceTag = require('../models/PreferenceTag');
 const Admin = require('../models/Admin');
 const Complaint=require('../models/Complaints');
-const generatePreSignedUrl  = require('../downloadMiddleware');
+const {generatePreSignedUrl}  = require('../downloadMiddleware');
+const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
 
 //Create activity category
 const createCategory= async(req,res)=>{
@@ -199,11 +200,11 @@ const getProductImage = async (req, res) => {
 
         // If the product has an image
         if (product.picture) {
-            const key = certificateUrl.split('/').slice(-1)[0];
+            const key = product.picture.split('/').slice(-1)[0];
         
-            const preSignedUrl = await generatePreSignedUrl(key);
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
 
-            return res.status(200).json({ url: preSignedUrl });
+            return res.redirect( preSignedUrl );
 
         } else {
             // If no image is found, return a placeholder or 404
@@ -234,7 +235,8 @@ const downloadProductImage = async (req, res) => {
         // Generate a pre-signed URL for the picture
         const preSignedUrl = await generatePreSignedUrl(key);
 
-        res.redirect(preSignedUrl);
+      
+        res.status(200).json({ preSignedUrl });
 
     } catch (err) {
         console.error('Error in downloadProductImage:', err);
@@ -506,9 +508,10 @@ const viewPendingUserID = async (req, res) => {
 
         const key = IDdocumentUrl.split('/').slice(-1)[0];
         // Generate a pre-signed URL for the ID document
-        const preSignedUrl = await generatePreSignedUrl(key);
-        
-        res.status(200).json({ url: preSignedUrl });
+        const preSignedUrl = await previewgeneratePreSignedUrl(key);
+
+      
+        res.status(200).json({ preSignedUrl });
 
     } catch (err) {
         console.error('Error in viewPendingUserID:', err);
@@ -569,10 +572,10 @@ const viewPendingUserCertificate = async (req, res) => {
         }
 
         const key = certificateUrl.split('/').slice(-1)[0];
-        
-        const preSignedUrl = await generatePreSignedUrl(key);
-        
-        res.status(200).json({ url: preSignedUrl });
+        const preSignedUrl = await previewgeneratePreSignedUrl(key);
+
+        return res.redirect( preSignedUrl );
+       
 
     } catch (err) {
         console.error('Error in viewPendingUserCertificate:', err);
@@ -601,8 +604,9 @@ const downloadPendingUserCertificate = async (req, res) => {
         const key = certificateUrl.split('/').slice(-1)[0];
         
         const preSignedUrl = await generatePreSignedUrl(key);
-        
-        res.redirect(preSignedUrl);
+
+      
+        res.status(200).json({ preSignedUrl });
 
     } catch (err) {
         console.error('Error in viewPendingUserCertificate:', err);
