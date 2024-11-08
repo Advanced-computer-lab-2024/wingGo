@@ -116,7 +116,7 @@ const ComplaintsList = () => {
                                                         <div className="recent-activity-title-box d-flex align-items-center gap-10">
                                                             <div>
                                                                 <h5 className="complaint-title fw-5 underline">
-                                                                <Link href={`/complaint-details/${complaint._id}`}>
+                                                                <Link href={`/complaint-details-admin/${complaint._id}`}>
                                                                   {complaint.title}
                                                                 </Link>
                                                                 </h5>
@@ -124,14 +124,7 @@ const ComplaintsList = () => {
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td>
-                                            <button
-                                                onClick={() => handleStatusToggle(complaint._id, complaint.state)}
-                                                className="btn btn-primary"
-                                            >
-                                                {complaint.state === 'pending' ? 'Mark as Resolved' : 'Mark as Pending'}
-                                            </button>
-                                        </td>
+                                                    
                                                     <td>
                                                         <ul className="recent-activity-list">
                                                             <li className="trip-title" style={{ float: 'right', paddingRight: '10px' }}>Sent On: 
@@ -141,6 +134,16 @@ const ComplaintsList = () => {
                                                             </li>
                                                         </ul>
                                                     </td>
+
+                                                    <td>
+                                            <button
+                                                onClick={() => handleStatusToggle(complaint._id, complaint.state)}
+                                                className="bd-gradient-btn btn-style radius-60 btn-tertiary"
+                                                style={{ padding: '6px 12px', fontSize: '14px', borderRadius: '20px',  float: 'right', paddingRight: '10px', marginRight: '20px', width: '150px', textAlign: 'center' }} // Adjusted for smaller size and less rounded shape
+                                            >
+                                                {complaint.state === 'pending' ? 'Mark as Resolved' : 'Mark as Pending'}
+                                            </button>
+                                        </td>
                                                     
                                                 </tr>
                                             ))}
