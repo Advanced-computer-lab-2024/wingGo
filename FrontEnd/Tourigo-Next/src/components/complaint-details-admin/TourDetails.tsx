@@ -4,7 +4,7 @@ import { imageLoader } from "@/hooks/image-loader";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import TourDetailTabArea from "@/components/complaint-details/TourDetailTabArea";
+import TourDetailTabArea from "@/components/complaint-details-admin/TourDetailTabArea";
 import { Complaint, idTypeNew } from "@/interFace/interFace";
 import { Itinerary } from "@/interFace/interFace";
 import axios from "axios";
