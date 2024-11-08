@@ -15,6 +15,10 @@ export const productSelectOptionData: TProductSelect[] = [
     id: 4,
     option: "Price (High > Low)",
   },
+  {
+    id: 5,
+    option: "Rating (High > Low)", // New sort option
+  },
 ];
 
 export const showProductNumber: TProductSelect[] = [

@@ -450,6 +450,7 @@ export interface Product {
   archive: boolean;
   createdAt?: string;
   updatedAt?: string;
+  averageRating: number; // Add this line
 }
 
 export interface Complaint{
