@@ -5,6 +5,8 @@ const Activity = require('../models/Activity');
 const getCoordinates = require('../helpers/getCoordinates');
 const Transport = require('../models/Transport');
 const { uploadDocument } = require('../helpers/s3Helper');
+const {generatePreSignedUrl}  = require('../downloadMiddleware');
+const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
 // const Attraction = require('../models/attraction');
 
 const advertiser_hello = (req, res) => {
@@ -453,6 +455,7 @@ const deleteTransport = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 
 module.exports = {

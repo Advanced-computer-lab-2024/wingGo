@@ -20,22 +20,39 @@ const s3 = new S3Client({
 const BUCKET = process.env.AWS_BUCKET_NAME;
 
 
-
-const generatePreSignedUrl = async (key) => {
-    const params = {
+const previewgeneratePreSignedUrl = async (key) => {
+  const params = {
       Bucket: BUCKET,
       Key: key,
-    };
-  
-    const command = new GetObjectCommand(params);
-    try {
-        const url = await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes
-        return url;
-      } catch (error) {
-        console.error('Error generating pre-signed URL:', error);
-        throw new Error('Could not generate pre-signed URL');
-      }
+      ResponseContentDisposition: 'inline', // Inline disposition
+      ResponseContentType: 'image/jpeg' // Set to the correct MIME type of your image
   };
 
+  const command = new GetObjectCommand(params);
+  try {
+      const url = await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes
+      return url;
+  } catch (error) {
+      console.error('Error generating pre-signed URL:', error);
+      throw new Error('Could not generate pre-signed URL');
+  }
+};
 
-  module.exports = generatePreSignedUrl;
+const generatePreSignedUrl = async (key) => {
+  const params = {
+    Bucket: BUCKET,
+    Key: key,
+  };
+
+  const command = new GetObjectCommand(params);
+  try {
+      const url = await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes
+      return url;
+    } catch (error) {
+      console.error('Error generating pre-signed URL:', error);
+      throw new Error('Could not generate pre-signed URL');
+    }
+};
+
+
+module.exports = { generatePreSignedUrl, previewgeneratePreSignedUrl};

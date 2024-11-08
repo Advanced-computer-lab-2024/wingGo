@@ -1,3 +1,4 @@
+//BookingHistory.tsx
 "use client";
 import { imageLoader } from '@/hooks/image-loader';
 import Image from 'next/image';

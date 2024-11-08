@@ -82,4 +82,9 @@ router.get('/:id', touristController.getTouristById);
 router.get('/booked-itineraries/:touristId', touristController.getBookedItineraries);
 router.get('/booked-activities/:touristId', touristController.getBookedActivities);
 
+router.get('/getUsername/:id', touristController.getTouristUsername);
+
+
+router.get('/purchasedProducts/:touristId', touristController.getPurchasedProducts);
+
 module.exports = router;

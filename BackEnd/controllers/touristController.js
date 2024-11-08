@@ -1249,20 +1249,8 @@ const rateProduct = async (req, res) => {
             product.ratings = [];
         }
 
-        // Check if the tourist has already rated this product
-        const existingRatingIndex = product.ratings.findIndex(
-            (review) => review.touristId.toString() === touristId
-        );
-
-        if (existingRatingIndex > -1) {
-            // Update the existing rating if the tourist has already rated the product
-            console.log('Updating existing rating');
-            product.ratings[existingRatingIndex].rating = rating;
-        } else {
-            // Add a new rating if the tourist hasn't rated this product yet
-            console.log('Adding new rating');
-            product.ratings.push({ touristId, rating });
-        }
+        // Push a new rating to the `ratings` array
+        product.ratings.push({ touristId, rating });
 
         // Save the updated product
         await product.save();
@@ -1272,10 +1260,13 @@ const rateProduct = async (req, res) => {
             product
         });
     } catch (error) {
-        console.error('Error processing rating:', error);  // Log the full error for debugging
+        console.error('Error processing rating:', error);
         res.status(500).json({ message: 'Error processing rating', error });
     }
 };
+
+
+
 const getTouristById = async (req, res) => {
     const { id } = req.params;
     try {
@@ -2350,7 +2341,57 @@ console.log("validatedFlightOffer:", validatedFlightOffer);
             res.status(500).json({ error: error.message });
         }
     };
-               
+
+    const getTouristUsername = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const tourist = await Tourist.findById(id).select('username'); // Only select the username field
+    
+            if (!tourist) {
+                return res.status(404).json({ message: "Tourist not found" });
+            }
+    
+            res.json({ username: tourist.username });
+        } catch (error) {
+            res.status(500).json({ message: "Server error", error });
+        }
+    };    const getPurchasedProducts = async (req, res) => {
+        const { touristId } = req.params;
+    
+        try {
+            const tourist = await Tourist.findById(touristId).populate('purchasedProducts.productId');
+            
+            if (!tourist) {
+                return res.status(404).json({ message: 'Tourist not found' });
+            }
+    
+            // Format the purchased products to match the desired output structure
+            const purchasedProductData = tourist.purchasedProducts.map(purchased => ({
+                _id: purchased.productId ? purchased.productId._id : null,
+                name: purchased.productId ? purchased.productId.name : null,
+                picture: purchased.productId
+                    ? `../images/${purchased.productId.picture || 'null'}` // Use a placeholder if picture is null
+                    : null,
+                price: purchased.productId ? purchased.productId.price : null,
+                sales: purchased.productId ? purchased.productId.sales : 0,
+                description: purchased.productId ? purchased.productId.description : null,
+                quantity: purchased.productId ? purchased.productId.quantity : 0,
+                seller: purchased.productId && purchased.productId.seller ? purchased.productId.seller.username : 'Admin', // Handle null seller field
+                sellerID: purchased.productId && purchased.productId.seller ? purchased.productId.seller._id : 'Admin',
+                ratings: purchased.productId ? purchased.productId.ratings : [],
+                reviews: purchased.productId ? purchased.productId.reviews : [],
+                archive: purchased.productId ? purchased.productId.archive : false,
+                purchaseDate: purchased.purchaseDate || null // Include purchase date from purchasedProducts array
+            }));
+    
+            res.status(200).json(purchasedProductData);
+        } catch (error) {
+            console.error("Error fetching purchased products:", error);
+            res.status(500).json({ message: 'Error fetching purchased products', error });
+        }
+    };
+    
+
 
 
 module.exports = {
@@ -2408,5 +2449,7 @@ module.exports = {
     getFlightPrices,
     getTouristById,
     getBookedItineraries,
-    getBookedActivities
+    getBookedActivities,
+    getTouristUsername,
+    getPurchasedProducts
 };
