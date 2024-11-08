@@ -84,7 +84,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                       <TourDetailTabArea itineraryData={data} />
 
                       <div className="tour-details-related-tour mb-35">
-                        <h4 className="mb-20">Related Tours</h4>
+                        {/* <h4 className="mb-20">Related Tours</h4> */}
                         {/* You can replace this with actual related itineraries if available */}
                       </div>
                     </div>

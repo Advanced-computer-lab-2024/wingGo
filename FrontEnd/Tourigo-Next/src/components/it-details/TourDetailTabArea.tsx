@@ -10,6 +10,7 @@ import tourImgTwentyTwo from "../../../public/assets/images/tour/tour-img-22.png
 import { clientReviewData } from "@/data/client-review-data";
 import TourDetailsPostForm from "./TourDetailsPostFrom/TourDetailsPostForm";
 import { Itinerary } from '@/interFace/interFace';
+import GetRatting from "@/hooks/GetRatting";
 
 interface TourDetailTabAreaProps {
   itineraryData: Itinerary;
@@ -45,19 +46,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData }) 
             >
               Overview
             </button>
-            <button
-              className="nav-link"
-              id="nav-gallery-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#nav-gallery"
-              type="button"
-              role="tab"
-              aria-controls="nav-gallery"
-              aria-selected="false"
-              tabIndex={-1}
-            >
-              Gallery
-            </button>
+           
             <button
               className="nav-link"
               id="nav-feedback-tab"
@@ -98,97 +87,49 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData }) 
             </p>
 
             <div className="tour-details-faq mb-35">
-              <h4 className="mb-20">Tour Plan</h4>
-              <div className="accordion-wrapper faq-style-3">
-                <div className="accordion" id="accordionExampleThree">
-                  <div className="accordion-item">
-                    <h6 className="accordion-header" id="headingNine">
-                      <button
-                        className="accordion-button"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseNine"
-                        aria-expanded="true"
-                        aria-controls="collapseNine"
-                      >
-                        <span>Day 01:</span> Arrival and Exploration
-                      </button>
-                    </h6>
-                    <div
-                      id="collapseNine"
-                      className="accordion-collapse collapse show"
-                      aria-labelledby="headingNine"
-                      data-bs-parent="#accordionExampleThree"
-                    >
-                      <div className="accordion-body">
-                        Arrive at your destination and check into your
-                        accommodation. Lorem ipsum dolor sit amet consectetur
-                        adipiscing elit Ut et massa mi. Aliquam hendrerit urna.
-                        Pellentesque sit amet sapien fringilla, mattis ligula
-                        consectetur, ultrices Maecenas.
-                        <div className="accordion-body-list">
-                          <ul>
-                            <li>Morning: Arrival and Check-in</li>
-                            <li>Afternoon: City Tour or Landmarks Visit</li>
-                            <li>Evening: Local Cuisine Experience</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Additional days can be added similarly */}
-                </div>
-              </div>
-            </div>
+  <h4 className="mb-20">Available Activities</h4>
+  <div className="accordion-wrapper faq-style-3">
+    <div className="accordion" id="accordionExampleThree">
+      {itineraryData.activities.split(',').map((activity, index) => (
+        <div className="accordion-item" key={index}>
+          <h6 className="accordion-header" id={`heading${index}`}>
+            <button
+              className="accordion-button"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target={`#collapse${index}`}
+              aria-expanded="true"
+              aria-controls={`collapse${index}`}
+            >
+              <span>Activity {index + 1}:</span> {activity.trim()}
+            </button>
+          </h6>
+          <div
+            id={`collapse${index}`}
+            className="accordion-collapse collapse"
+            aria-labelledby={`heading${index}`}
+            data-bs-parent="#accordionExampleThree"
+          >
+            
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+  <style jsx>{`
+  /* Hide the default Bootstrap accordion arrow */
+  .accordion-button::after {
+    display: none;
+  }
+`}</style>
+
+</div>
+
+
+
           </div>
           {/* Gallery Tab */}
-          <div
-            className="tab-pane fade"
-            id="nav-gallery"
-            role="tabpanel"
-            aria-labelledby="nav-gallery-tab"
-            tabIndex={0}
-          >
-            <div className="tour-details-gallery mb-35">
-              <h4 className="mb-20">Tour Gallery</h4>
-              <div className="row gy-24">
-                <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-6">
-                  <div className="tour-details-gallery-thumb image-hover-effect-two position-relative">
-                    <Image
-                      src={tourImgTwentyOne}
-                      loader={imageLoader}
-                      style={{ width: "100%", height: "auto" }}
-                      alt="image"
-                    />
-                  </div>
-                </div>
-                <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-6">
-                  <div className="row gy-24">
-                    <div className="col-xxl-12">
-                      <div className="tour-details-gallery-thumb image-hover-effect-two position-relative">
-                        <Image
-                          src={tourImgTwentyTwo}
-                          loader={imageLoader}
-                          style={{ width: "100%", height: "auto" }}
-                          alt="image"
-                        />
-                      </div>
-                    </div>
-                    <div className="col-xxl-12">
-                      <div className="tour-details-gallery-thumb image-hover-effect-two position-relative">
-                        <Image
-                          src={tourImgNine}
-                          loader={imageLoader}
-                          style={{ width: "100%", height: "auto" }}
-                          alt="image"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+         
           {/* Feedback Tab */}
           <div
             className="tab-pane fade"
@@ -198,55 +139,75 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData }) 
             tabIndex={0}
           >
             <div className="tour-details-rating-wrapper mb-35">
-              <div className="row gy-24 align-items-center">
-                <div className="col-xl-2 col-lg-3 col-md-4 col-sm-4">
-                  <div className="rating-box">
-                    <div className="inner">
-                      <div className="rating-number">5.0</div>
-                      <div className="rating">
-                        <Link href="#">
-                          <i className="fa fa-star"></i>
-                        </Link>
-                        <Link href="#">
-                          <i className="fa fa-star"></i>
-                        </Link>
-                        <Link href="#">
-                          <i className="fa fa-star"></i>
-                        </Link>
-                        <Link href="#">
-                          <i className="fa fa-star"></i>
-                        </Link>
-                        <Link href="#">
-                          <i className="fa fa-star"></i>
-                        </Link>
-                      </div>
-                      <span className="sub-title">(234 Review)</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-lg-10 col-md-8 col-sm-7">
-                  <div className="review-wrapper">
-                    <div className="single-progress-bar">
-                      <div className="rating-text">5</div>
+  <div className="row gy-24 align-items-center">
+    <div className="col-xl-2 col-lg-3 col-md-4 col-sm-4">
+      <div className="rating-box">
+        <div className="inner">
+          {/* Display the average rating rounded to one decimal place */}
+          <div className="rating-number">
+            {itineraryData.averageRating.toFixed(1)}
+          </div>
+          <div className="rating">      
+        <GetRatting averageRating={itineraryData.averageRating} />
+      </div>
+
+          <span className="sub-title">
+            ({itineraryData.comment.length} {itineraryData.comment.length === 1 ? "Review" : "Reviews"})
+          </span>
+        </div>
+      </div>
+    </div>
+    <div className="col-lg-10 col-md-8 col-sm-7">
+                <div className="review-wrapper">
+                  {[5, 4, 3, 2, 1].map((star) => {
+                    const count = itineraryData.ratings.filter((rating) => rating === star).length;
+                    const percentage = itineraryData.ratings.length
+                      ? ((count / itineraryData.ratings.length) * 100).toFixed(1)
+                      : 0;
+                    return (
+                      <div className="single-progress-bar" key={star}>
+                      <div className="rating-text">{star}</div>
                       <div className="progress">
                         <div
-                          className="progress-bar bg-1"
+                          className={`progress-bar progress-bar-${star}`}
                           role="progressbar"
-                          style={{ width: "82%" }}
-                          aria-valuenow={63}
+                          style={{ width: `${percentage}%` }}
+                          aria-valuenow={Number(percentage)}
                           aria-valuemin={0}
                           aria-valuemax={100}
                         ></div>
                       </div>
-                      <span className="value-text">82%</span>
-                      <span className="number">212</span>
+                      <span className="value-text">{percentage}%</span>
+                      <span className="number">{count}</span>
                     </div>
-                    {/* More progress bars for other ratings */}
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
-            <TourDetailsPostForm />
+            <style jsx>{`
+              .rating-box .fa-star.filled {
+                color: #ffd700; /* Gold color for filled stars */
+              }
+                .progress-bar-5 {
+                  background-color: #4CAF50; /* Green */
+                }
+                .progress-bar-4 {
+                  background-color: #8BC34A; /* Light Green */
+                }
+                .progress-bar-3 {
+                  background-color: #FFC107; /* Amber */
+                }
+                .progress-bar-2 {
+                  background-color: #FF9800; /* Orange */
+                }
+                .progress-bar-1 {
+                  background-color: #F44336; /* Red */
+                }
+            `}</style>
+          </div>
+
+             <TourDetailsPostForm itineraryData={itineraryData} />
           </div>
         </div>
       </div>

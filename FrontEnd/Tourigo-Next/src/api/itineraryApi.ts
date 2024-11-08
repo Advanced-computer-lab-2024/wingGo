@@ -157,3 +157,14 @@ export const cancelItineraryApi = async (touristId: string, itineraryId: string)
         throw error;
     }
 };
+
+// Function to fetch a tourist's username by their ID
+export const fetchTouristUsername = async (touristId: string): Promise<string> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/tourist/getUsername/${touristId}`);
+        return response.data.username; // Extract the username from the response
+    } catch (error) {
+        console.error("Error fetching tourist username:", error);
+        throw error;
+    }
+};

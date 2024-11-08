@@ -2351,7 +2351,20 @@ console.log("validatedFlightOffer:", validatedFlightOffer);
         }
     };
                
-
+    const getTouristUsername = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const tourist = await Tourist.findById(id).select('username'); // Only select the username field
+    
+            if (!tourist) {
+                return res.status(404).json({ message: "Tourist not found" });
+            }
+    
+            res.json({ username: tourist.username });
+        } catch (error) {
+            res.status(500).json({ message: "Server error", error });
+        }
+    };
 
 module.exports = {
     tourist_hello,
@@ -2408,5 +2421,6 @@ module.exports = {
     getFlightPrices,
     getTouristById,
     getBookedItineraries,
-    getBookedActivities
+    getBookedActivities,
+    getTouristUsername
 };
