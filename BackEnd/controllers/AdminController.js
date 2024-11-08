@@ -843,16 +843,16 @@ const getAttractions = async (req, res) => {
     }
 };
 
-const flagActivity = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const activity = await Activity.findByIdAndUpdate(id, { flagged: true }, { new: true });
-      if (!activity) return res.status(404).json({ message: 'Activity not found' });
-      res.status(200).json({ message: 'Activity flagged successfully', activity });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  };
+// const flagActivity = async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const activity = await Activity.findByIdAndUpdate(id, { flagged: true }, { new: true });
+//       if (!activity) return res.status(404).json({ message: 'Activity not found' });
+//       res.status(200).json({ message: 'Activity flagged successfully', activity });
+//     } catch (error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//   };
   
 //   const flagItinerary = async (req, res) => {
 //     try {
@@ -864,6 +864,23 @@ const flagActivity = async (req, res) => {
 //       res.status(500).json({ error: error.message });
 //     }
 //   };
+
+const flagActivity = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { flagged } = req.body;  // Get the flagged status from the request body
+  
+      // Update the itinerary's flagged status based on the provided flagged value
+      const activity = await Activity.findByIdAndUpdate(id, { flagged }, { new: true });
+  
+      if (!activity) return res.status(404).json({ message: 'Activity not found' });
+  
+      const message = flagged ? 'Activity flagged successfully' : 'Activity unflagged successfully';
+      res.status(200).json({ message, activity });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
 
 const flagItinerary = async (req, res) => {
     try {
@@ -1138,6 +1155,14 @@ const getAllItineraries = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+const getAllActivities = async (req, res) => {
+    try {
+        const itineraries = await Activity.find();  // Fetch all itineraries
+        res.status(200).json(itineraries);  // Return the array of itineraries
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
   
 
@@ -1190,5 +1215,6 @@ module.exports = {
     ArchiveUnarchiveProduct,
     sortComplaintsByDate,
     filterComplaintsByStatus,
-    getAllItineraries
+    getAllItineraries,
+    getAllActivities
 };

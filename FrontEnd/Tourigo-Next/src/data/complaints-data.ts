@@ -24,3 +24,12 @@ export const getComplaintsDataTourist=async():Promise<Complaint[]>=>{
     }
 };
 
+//file complaints 
+export const fileComplaint=async(touristId:string,complaintData:Omit<Complaint,"_id"|"tourist"|"state"|"reply">)=>{
+    try{
+        await fileComplaint(touristId,complaintData);
+    }catch(error){
+        console.error("Error filing complaint:",error);
+        throw error;
+    }
+};

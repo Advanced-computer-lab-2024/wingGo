@@ -1367,7 +1367,7 @@ const rateActivity = async (req, res) => {
             return res.status(400).json({ message: 'Activity not attended by this tourist' });
         }
 
-        // Initialize `ratings` array if it doesn't exist
+        // Initialize ratings array if it doesn't exist
         if (!Array.isArray(activity.ratings)) {
             activity.ratings = [];
         }
@@ -1387,11 +1387,19 @@ const rateActivity = async (req, res) => {
             activity.ratings.push({ touristId, rating });
         }
 
+        // Calculate the new average rating
+        const totalRating = activity.ratings.reduce((sum, ratingObj) => sum + ratingObj.rating, 0);
+        const averageRating = totalRating / activity.ratings.length;
+
+        // Update the average rating field in the activity
+        activity.averageRating = averageRating;
+
         // Save the updated activity
         await activity.save();
 
         res.status(200).json({
             message: 'Activity rated successfully',
+            averageRating: activity.averageRating,
             activity
         });
     } catch (error) {
@@ -2292,6 +2300,7 @@ console.log("validatedFlightOffer:", validatedFlightOffer);
         }
     };
 
+           
     const getBookedItineraries = async (req, res) => {
         const { touristId } = req.params;
     
@@ -2316,7 +2325,32 @@ console.log("validatedFlightOffer:", validatedFlightOffer);
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
-    };              
+    };   
+    const getBookedActivities = async (req, res) => {
+        const { touristId } = req.params;
+    
+        try {
+            // Find the tourist by ID and populate the activity details
+            const tourist = await Tourist.findById(touristId).populate({
+                path: 'bookedActivities', // Directly populate the 'bookedActivities' field
+                model: 'Activity'
+            });
+    
+            if (!tourist) {
+                return res.status(404).json({ message: 'Tourist not found' });
+            }
+    
+            // Extract and format the booked activities data
+            const bookedActivities = tourist.bookedActivities.map((activity) => ({
+                activity: activity,  // Activity details
+            }));
+    
+            res.status(200).json(bookedActivities);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };
+               
 
 
 module.exports = {
@@ -2373,5 +2407,6 @@ module.exports = {
     bookTransport,
     getFlightPrices,
     getTouristById,
-    getBookedItineraries
+    getBookedItineraries,
+    getBookedActivities
 };

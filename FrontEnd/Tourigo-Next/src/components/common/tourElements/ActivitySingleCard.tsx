@@ -7,13 +7,16 @@ import useGlobalContext from "@/hooks/use-context";
 import { Activity } from "@/interFace/interFace";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React ,{useState} from "react";
+import { toggleFlagActivity } from '@/api/activityApi';
+import { useRouter } from "next/navigation";
 
 interface ItourPropsType {
   tour: Activity; // Use Itinerary type
   className: string;
   tourWrapperClass: string;
   isparentClass: boolean;
+  isAdmin?: boolean;
 }
 
 const TourSingleCard = ({
@@ -21,9 +24,28 @@ const TourSingleCard = ({
   className,
   tourWrapperClass,
   isparentClass,
+  isAdmin = false,
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
+  const router = useRouter();
   const rating = 1; // Use Itinerary's averageRating, default to 1
+  // Local state to keep track of the flagged and deactivated status
+  const [isFlagged, setIsFlagged] = useState(tour.flagged);
+
+  const handleFlagActivity = async () => {
+    try {
+      // Toggle the flagged state in the backend
+      await toggleFlagActivity(tour._id, !isFlagged);
+      setIsFlagged((prevFlagged) => !prevFlagged);
+    } catch (error) {
+      console.error("Error updating flagged status:", error);
+    }
+  };
+  const handleBookNowClick = () => {
+    // Redirect to the specific page (replace "/booking-page" with the desired path)
+    router.push(`/booking-activity/${tour._id}`);
+  };
+
 
   return (
     <>
@@ -71,6 +93,22 @@ const TourSingleCard = ({
                   {tour.name}
                 </Link>
               </h5>
+              {isAdmin && (
+                  <button
+                    onClick={handleFlagActivity}
+                    className="flag-itinerary-button"
+                    style={{
+                      backgroundColor: isFlagged ? "green" : "red",
+                      color: "white",
+                      padding: "8px 16px",
+                      fontSize: "14px",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {isFlagged ? "Unflag" : "Flag"}
+                  </button>
+                )}
               <span className="tour-price b3">
                 ${tour.price.toLocaleString("en-US")}
               </span>
@@ -83,7 +121,7 @@ const TourSingleCard = ({
                 </div>
                 <div className="tour-btn">
                   <button
-                    onClick={() => setModalData(tour)}
+                    onClick={handleBookNowClick}
                     className="bd-text-btn style-two"
                     type="button"
                     data-bs-toggle="modal"

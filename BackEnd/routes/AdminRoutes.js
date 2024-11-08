@@ -5,6 +5,7 @@ const itineraryController = require('../controllers/TourGuideController');
 const upload = require('../uploadMiddleware');
 
 router.get('/getALLitineraries', adminController.getAllItineraries);
+router.get('/getALLactivities', adminController.getAllActivities);
 
 router.get('/getallproducts', adminController.getAllProducts);
 router.get('/getAttractions', adminController.getAttractions);

@@ -7,6 +7,7 @@ import { selectAgeData } from "@/data/nice-select-data";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { idTypeNew } from "@/interFace/interFace";
 import {
   decrease_adult_quantity,
   decrease_infant_quantity,
@@ -17,7 +18,9 @@ import {
 import ReactDatePicker from "react-datepicker";
 import Link from "next/link";
 
-const BookingSidebar = () => {
+
+const BookingSidebar = ({ id }: idTypeNew) => {
+  
   const [dateRange, setDateRange] = useState([null, null]);
   const [startDate, endDate] = dateRange;
   const [adultQuantity, setAdultQuantity] = useState(3);

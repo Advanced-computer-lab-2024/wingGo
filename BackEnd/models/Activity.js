@@ -69,7 +69,8 @@ flagged: {
   type: Boolean,
   default: false,  // Initially not flagged
 },
-touristIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }]
+touristIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }],
+averageRating: { type: Number, default: 0 }
 });
 
 const Activity = mongoose.model('Activity', activitySchema);
