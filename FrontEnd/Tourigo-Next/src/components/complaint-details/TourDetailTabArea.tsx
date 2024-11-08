@@ -11,25 +11,12 @@ import { clientReviewData } from "@/data/client-review-data";
 import TourDetailsPostForm from "./TourDetailsPostFrom/TourDetailsPostForm";
 import { Complaint } from '@/interFace/interFace';
 
+
 interface TourDetailTabAreaProps {
   ComplaintData: Complaint;
-  onReplyPosted: (reply: string) => void;
 }
 
-
-// Function to format date into readable string
-// Function to format date into a readable string
-const formatDate = (date: string | Date) => {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" };
-  return dateObj.toLocaleDateString(undefined, options);
-};
-
-
-
-
-
-const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ ComplaintData , onReplyPosted }) => {
+const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ ComplaintData }) => {
   return (
     <>
       <div className="tour-details-nav-tabs mb-35">
@@ -63,6 +50,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ ComplaintData , o
           </div>
         </nav>
         <div className="tab-content mt-25" id="nav-tabContent">
+          {/* Overview Tab */}
           <div
             className="tab-pane fade active show"
             id="nav-overview"
@@ -80,7 +68,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ ComplaintData , o
               <strong>State:</strong> {ComplaintData.state}
             </p>
             <p className="mb-15">
-              <strong>Date:</strong> {formatDate(ComplaintData.date)}
+              <strong>Date:</strong> {new Date(ComplaintData.date).toLocaleDateString()}
             </p>
           </div>
           
@@ -92,7 +80,70 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ ComplaintData , o
             aria-labelledby="nav-feedback-tab"
             tabIndex={0}
           >
-            <TourDetailsPostForm complaintId={ComplaintData._id || ''} onReplyPosted={onReplyPosted}/>
+            {/* Admin Replies Section */}
+            <div className="tour-details-rating-wrapper">
+              <div className="review-content">
+                {ComplaintData.reply && ComplaintData.reply.length > 0 ? (
+                  ComplaintData.reply.map((reply, index) => (
+                    <div key={index} className="tour-review-wrapper">
+                      <div className="media">
+                        <div className="thumbnail">
+                          <Link href="#">
+                            <Image
+                              src="/path/to/default-avatar.png" // Replace with a real image if available
+                              loader={imageLoader}
+                              style={{ width: "100%", height: "auto" }}
+                              alt="Admin Avatar"
+                            />
+                          </Link>
+                        </div>
+                        <div className="media-body">
+                          <div className="author-info">
+                            <h5 className="title">
+                              <Link className="hover-flip-item-wrapper" href="#">
+                                Admin
+                              </Link>
+                              <Link href="#">
+                                <i className="fa-solid fa-thumbs-up"></i>
+                              </Link>
+                            </h5>
+                            <ul className="bd-meta">
+                              <li className="has-seperator">
+                                On: <span>{new Date().toLocaleDateString()}</span> {/* You can replace this with the actual date */}
+                              </li>
+                              <li>
+                                <div className="rating">
+                                  <Link href="#">
+                                    <i className="fa fa-star"></i>
+                                  </Link>
+                                  <Link href="#">
+                                    <i className="fa fa-star"></i>
+                                  </Link>
+                                  <Link href="#">
+                                    <i className="fa fa-star"></i>
+                                  </Link>
+                                  <Link href="#">
+                                    <i className="fa fa-star"></i>
+                                  </Link>
+                                  <Link href="#">
+                                    <i className="fa fa-star"></i>
+                                  </Link>
+                                </div>
+                              </li>
+                            </ul>
+                          </div>
+                          <div className="content">
+                            <p className="description">{reply}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No replies yet.</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

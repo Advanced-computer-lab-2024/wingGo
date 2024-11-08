@@ -437,6 +437,8 @@ export interface Product {
   quantity: number;
   sales: number;
   seller?: string | null;
+  sellerID?: string; // Add this line
+  purchaseDate: string; // Add purchaseDate property
   ratings: {
     touristId: string; // Referencing an ObjectId for the tourist
     rating: number;
@@ -448,6 +450,7 @@ export interface Product {
   archive: boolean;
   createdAt?: string;
   updatedAt?: string;
+  averageRating: number; // Add this line
 }
 
 export interface Complaint{

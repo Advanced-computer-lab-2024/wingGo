@@ -1,31 +1,34 @@
-//ProductDetailsSection.tsx
+// Updated ProductDetailsSection.tsx
+
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Thumbs, Controller, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
-import { idTypeNew, Product } from "@/interFace/interFace";
+import { Product } from "@/interFace/interFace";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useDispatch } from "react-redux";
-import {getProductData} from "@/data/prod-data";
-
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import { getProductData } from "@/data/prod-data";
+import "react-toastify/dist/ReactToastify.css"; // Import the CSS for styling
+import { ToastContainer, toast } from "react-toastify";
 import { cart_product, decrease_quantity } from "@/redux/slices/cartSliceproduct";
 import { imageLoader } from "@/hooks/image-loader";
-import Link from "next/link";
 import ReviewComments from "./ReviewComments"; 
 import StarRating from "@/components/Products/StarRating"; 
-import { fetchSellerData } from "@/api/productApi"; // Adjust the import path as necessary
-import { calculateAverageRating } from "@/utils/utils"; // Adjust the import path as necessary
+import { fetchSellerData, purchaseProduct, editProduct } from "@/api/productApi"; 
+import { calculateAverageRating } from "@/utils/utils"; 
 const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string }) => {
-  console.log("userRole:", userRole);
-  
+  const touristId = "672a3a4001589d5085322e88";
+  const hardcodedSellerId = "67158afc7b1ec4bfb0240575"; // Hardcoded sellerId for now unt
   const [products, setProducts] = useState<Product[]>([]);
   const [item, setItem] = useState<Product | null>(null);
   const [sellerName, setSellerName] = useState<string | null>(null);
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [editData, setEditData] = useState<Partial<Product>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -35,13 +38,9 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
         if (product && product.seller) {
           const sellerData = await fetchSellerData(product.seller);
           setSellerName(sellerData.name);
-          console.log("Seller Data:", sellerData);
         } else {
           setSellerName("Admin");
         }
-        console.log("Product:", products);
-
-        // Assuming related tours can be the rest of the activities
         setProducts(products.filter((item) => item._id !== id));
       } catch (err) {
         console.error("Error fetching product or seller data:", err);
@@ -51,131 +50,116 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
   }, [id]);
 
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
-
-  //   =====
-
   const dispatch = useDispatch();
- 
 
-  // const cartProducts = useSelector(
-  //   (state: RootState) => state.cart.cartProducts
-  // );
-  // const quantity = cartProducts.find((itm) => itm?._id === item?._id);
-  // const totalCart = quantity?.totalCart ? quantity?.totalCart : 0;
-
-  const handleAddToCart = (item: Product) => {
-    dispatch(cart_product(item));
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editData.name && !editData.price && !editData.quantity && !editData.description && !imageFile) {
+      toast.error("Please enter at least one field to update.");
+      return;
+    }
+    try {
+      if (item?._id) {
+        await editProduct(item._id, editData, imageFile || undefined);
+        toast.success("Product updated successfully!");
+        setEditModalOpen(false);
+        const updatedProduct = await getProductData();
+        setItem(updatedProduct.find((prod) => prod._id === item._id) || null);
+      }
+    } catch (error) {
+      toast.error("Failed to update product.");
+      console.error("Error updating product:", error);
+    }
   };
-  
 
   const img = item?.image;
-  // ====
-
-  const shopProducts = [
-    {
-      id: 1,
-      imgData: img,
-    },
-    
-  ];
-
+  const shopProducts = [{ id: 1, imgData: img }];
   const averageRating = item ? calculateAverageRating(item.ratings) : 0;
   const numberOfReviews = item ? item.reviews.length : 0;
+
+  const handlePurchase = async () => {
+    if (item?._id) {
+      try {
+        const response = await purchaseProduct(touristId, item._id);
+        toast.success("Product purchased successfully!");
+        dispatch(decrease_quantity(item)); 
+      } catch (error) {
+        toast.error("Failed to purchase item.");
+        console.error("Error during purchase:", error);
+      }
+    }
+  };
+
+  // Adding the `return` statement to return JSX
   return (
     <>
       <div className="row gy-24 justify-content-between">
         <div className="col-xxl-6 col-xl-6 col-lg-6">
           <div className="product-details-thumb-wrap">
             <div className="product-details-thumb-top mb-24">
-              <div className="swiper-container product-details-active p-relative">
-                <div className="swiper-wrapper">
-                  <Swiper
-                    thumbs={{ swiper: thumbsSwiper }}
-                    loop={true}
-                    spaceBetween={0}
-                    slidesPerView={1}
-                    freeMode={false}
-                    watchSlidesProgress={true}
-                    modules={[Navigation, Controller, FreeMode, Thumbs]}
-                    navigation={{
-                      nextEl: ".product-details-button-next",
-                      prevEl: ".product-details-button-prev",
-                    }}
-                  >
-                    {products.map((item, index) => (
-                      <SwiperSlide key={index}>
-                        <div className="swiper-slides">
-                          <div className="product-details-thumb">
-                          <Image
-                        src="/images/default-image.jpg" // Placeholder image
+              <Swiper
+                thumbs={{ swiper: thumbsSwiper }}
+                loop={true}
+                spaceBetween={0}
+                slidesPerView={1}
+                freeMode={false}
+                watchSlidesProgress={true}
+                modules={[Navigation, Controller, FreeMode, Thumbs]}
+                navigation={{
+                  nextEl: ".product-details-button-next",
+                  prevEl: ".product-details-button-prev",
+                }}
+              >
+                {products.map((item, index) => (
+                  <SwiperSlide key={index}>
+                    <div className="swiper-slides">
+                      <Image
+                        src={item?.image || "/images/default-image.jpg"}
                         loader={imageLoader}
                         style={{ width: "100%", height: "auto" }}
                         alt="Product Image"
                       />
-                          </div>
-                        </div>
-                      </SwiperSlide>
-                    ))}
-                  </Swiper>
-                  <div className="product-details-nav-button">
-                    <div className="product-details-button-prev">
-                      <i className="fa-solid fa-arrow-left"></i>
                     </div>
-                    <div className="product-details-button-next">
-                      <i className="fa-solid fa-arrow-right"></i>
-                    </div>
-                  </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+              <div className="product-details-nav-button">
+                <div className="product-details-button-prev">
+                  <i className="fa-solid fa-arrow-left"></i>
                 </div>
-              </div>
-            </div>
-            <div className="product-details-thumb-bottom">
-              <div className="product-details-slider-dot">
-                <div className="swiper product-details-nav">
-                  <div className="swiper-wrapper">
-                    <Swiper
-                      onSwiper={(swiper) => setThumbsSwiper(swiper)}
-                      loop={true}
-                      spaceBetween={0}
-                      slidesPerView={6}
-                      modules={[Controller, FreeMode, Thumbs]}
-                      watchSlidesProgress={false}
-                    >
-                      {shopProducts.map((item, index) => (
-                        <SwiperSlide key={index}>
-                          <button className="custom-button">
-                          <Image
-                        src="/images/default-image.jpg" // Placeholder image
-                        loader={imageLoader}
-                        style={{ width: "100%", height: "auto" }}
-                        alt="Product Image"
-                      />
-                          </button>
-                        </SwiperSlide>
-                      ))}
-                    </Swiper>
-                  </div>
+                <div className="product-details-button-next">
+                  <i className="fa-solid fa-arrow-right"></i>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
         {item?._id && (
           <div className="col-xxl-6 col-xl-6 col-lg-6">
             <div className="product-details-wrapper">
               <h2 className="product-details-title small mb-10">
+              {(userRole === "Admin" || (userRole === "Seller" && item?.sellerID === hardcodedSellerId)) && (
+                  <button
+                    onClick={() => setEditModalOpen(true)}
+                    className="edit-circle-btn"
+                  >
+                    <i className="fa fa-pen" />
+                  </button>
+                )}
                 {item?.name}
               </h2>
               <div className="product-details-rating d-flex align-items-center mb-15">
-              <div className="product-rating">
-              <StarRating rating={averageRating} />
-            </div>
+                <div className="product-rating">
+                  <StarRating rating={averageRating} />
+                </div>
                 <div className="product-details-rating-count ml-10">
-                  <span> {numberOfReviews} {numberOfReviews === 1 ? 'review' : 'reviews'}</span>
+                  <span>{numberOfReviews} {numberOfReviews === 1 ? "review" : "reviews"}</span>
                 </div>
               </div>
               <div className="product-details-info mb-10">
-              <p>Description:</p>
-              <span>{item.description}</span>
+                <p>Description:</p>
+                <span>{item.description}</span>
               </div>
               <div className="product-details-price mb-10">
                 <h4 className="product-details-ammount">${item?.price}</h4>
@@ -184,29 +168,150 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
                 <p>Seller:</p>
                 <span>{item.seller}</span>
               </div>
-           
-          
-
-              <div className="product-details-count-wrap d-flex flex-wrap gap-10 align-items-center">
-             
-                <div className="product-details-action d-flex flex-wrap align-items-center ml-15">
-                  <Link
-                    href="/cart"
-                    className="bd-primary-btn btn-style radius-60"
-                  >
+              {userRole !== "Tourist" && (
+                <div className="product-details-info mb-10">
+                  <p>Available Quantity:</p>
+                  <span>{item.quantity}</span>
+                </div>
+              )}
+              {userRole !== "Tourist" && (
+                <div className="product-details-info mb-10">
+                  <p>Sales:</p>
+                  <span>{item.sales}</span>
+                </div>
+              )}
+              {userRole === "Tourist" && (
+                <div className="product-details-count-wrap d-flex flex-wrap gap-10 align-items-center">
+                  <button className="bd-primary-btn btn-style radius-60" onClick={handlePurchase}>
                     <span className="bd-primary-btn-text">Purchase</span>
                     <span className="bd-primary-btn-circle"></span>
-                  </Link>
+                  </button>
                 </div>
-               
-              </div>
+              )}
             </div>
           </div>
         )}
-       
-       <h2>Reviews</h2>
-       {item && <ReviewComments product={item} />}
+        <h2>Reviews</h2>
+        {item && <ReviewComments product={item} />}
+
+        {isEditModalOpen && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close" onClick={() => setEditModalOpen(false)}>&times;</span>
+              <h2>Edit Product</h2>
+              <form onSubmit={handleEditSubmit}>
+                <div className="form-group">
+                  <label>Name:</label>
+                  <input type="text" onChange={(e) => setEditData((prev) => ({ ...prev, name: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label>Price:</label>
+                  <input type="number" onChange={(e) => setEditData((prev) => ({ ...prev, price: parseFloat(e.target.value) }))} />
+                </div>
+                <div className="form-group">
+                  <label>Quantity:</label>
+                  <input type="number" onChange={(e) => setEditData((prev) => ({ ...prev, quantity: parseInt(e.target.value) }))} />
+                </div>
+                <div className="form-group">
+                  <label>Description:</label>
+                  <input type="text" onChange={(e) => setEditData((prev) => ({ ...prev, description: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label>Image:</label>
+                  <input type="file" onChange={(e) => setImageFile(e.target.files ? e.target.files[0] : null)} />
+                </div>
+                <button type="submit" className="btn btn-primary">Submit</button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
+      <ToastContainer />
+
+      <style jsx>{`
+        .edit-circle-btn {
+          background-color: #007bff;
+          border-radius: 50%;
+          width: 35px;
+          height: 35px;
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+          color: #fff;
+          border: none;
+          cursor: pointer;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          margin-right: 10px;
+        }
+
+        .edit-circle-btn i {
+          font-size: 0.9rem; /* Smaller icon size */
+        }
+
+        .edit-circle-btn:hover {
+          transform: scale(1.15);
+          box-shadow: 0 8px 15px rgba(0, 123, 255, 0.5);
+        }
+
+        .modal {
+          display: flex;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          justify-content: center;
+          align-items: center;
+          z-index: 999;
+        }
+
+        .modal-content {
+          background-color: #fff;
+          padding: 20px;
+          width: 400px;
+          border-radius: 5px;
+          position: relative;
+        }
+
+        .close {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          font-size: 18px;
+          cursor: pointer;
+        }
+
+        .form-group {
+          margin-bottom: 15px;
+        }
+
+        .form-group label {
+          display: block;
+          font-weight: bold;
+          margin-bottom: 5px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="file"] {
+          width: 100%;
+          padding: 8px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+        }
+
+        .btn-primary {
+          background-color: blue;
+          color: white;
+          padding: 10px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          margin-top: 10px;
+          width: 100%;
+        }
+      `}</style>
     </>
   );
 };

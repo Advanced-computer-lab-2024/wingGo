@@ -4,7 +4,7 @@ import axios from "axios";
 import { imageLoader } from "@/hooks/image-loader";
 import Image from "next/image";
 import Link from "next/link";
-import TourDetailTabArea from "@/components/complaint-details/TourDetailTabArea";
+import TourDetailTabArea from "@/components/complaint-details-admin/TourDetailTabArea";
 import { Complaint, idTypeNew } from "@/interFace/interFace";
 import TourSingleCard from "../common/tourElements/TourSingleCardIt";
 import BookingFormModal from "@/elements/modals/BookingFormModal";

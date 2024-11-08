@@ -32,11 +32,6 @@ const ComplaintDetails  = ({ id }: idTypeNew) => {
     fetchComplaintDetails();
   }, [id]);
 
-  const handleReplyPosted = (reply: string) => {
-    if (data) {
-      setData({ ...data, reply: [...(data.reply || []), reply] });
-    }
-  };
 
   if (loading) return <div>Loading...</div>;
   if (!data) return <div>No complaint found.</div>;
@@ -45,9 +40,9 @@ const ComplaintDetails  = ({ id }: idTypeNew) => {
     <section className="complaint-details-area">
       <div className="container">
         <div className="complaint-details-card p-4 rounded shadow-lg bg-white">
-          <h3 className="complaint-title mb-3 text-primary"style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{data.title}</h3>
+          <h3 className="complaint-title mb-3 text-primary"style={{ fontSize: '6rem', fontWeight: 'bold' }}>{data.title}</h3>
           <div className="row mb-3">
-            <div className="col-md-6">
+            <div className="col-md-6"style={{ fontSize: '1.5rem' }}>
               <p><strong><i className="icon-calendar me-2"></i>Date:</strong> {new Date(data.date).toLocaleDateString()}</p>
             </div>
             <div className="col-md-6">
@@ -59,23 +54,11 @@ const ComplaintDetails  = ({ id }: idTypeNew) => {
             <p className="text-muted" style={{ lineHeight: '1.6' }}>{data.body}</p>
           </div>
 
-      {/* Admin Replies Section */}
-      <div className="complaint-replies">
-        <h4 className="mb-2 text-secondary">Admin Replies:</h4>
-        {data.reply && data.reply.length > 0 ? (
-          data.reply.map((reply, index) => (
-            <div key={index} className="reply-item">
-              <p>{reply}</p>
-            </div>
-          ))
-        ) : (
-          <p>No replies yet.</p>
-        )}
-      </div>
+    
 
 
           
-          <TourDetailTabArea ComplaintData={data} onReplyPosted={handleReplyPosted} />
+          <TourDetailTabArea ComplaintData={data}  />
         </div>
       </div>
     </section>

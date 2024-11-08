@@ -7,6 +7,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { File } from "@/interFace/interFace";
 import { fileComplaint } from "@/api/complaintsApi"; 
+import Link from 'next/link';
 
 interface FormData {
   title: string;
@@ -82,13 +83,15 @@ const ComplaintForm = () => {
           </div>
 
           <div className="submit-btn">
-            <button type="submit" className="btn-style radius-4" style={{ backgroundColor: "#4CAF50", transition: "background-color 0.3s" }} 
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#45a049"} 
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#4CAF50"}
-           >
-              Submit Complaint
-            </button>
-          </div>
+  <Link
+    href="#"
+    className="bd-primary-btn btn-style bd-success radius-60"
+    onClick={handleSubmit(onSubmit)} // Call onSubmit when clicked
+  >
+    <span className="bd-primary-btn-text">Submit Complaint</span>
+    <span className="bd-primary-btn-circle"></span>
+  </Link>
+</div>
         </div>
       </form>
     </section>

@@ -17,7 +17,7 @@ router.delete('/pending-users/:id', adminController.deletePendingUserById);
 // Route to delete an account by id
 router.delete('/deleteAccount/:id', adminController.deleteAccount);
 
-router.put('/product/:productId', adminController.editProduct);
+router.put('/product/:productId',upload.single('picture'), adminController.editProduct);
 
 router.post('/addGovernor', adminController.addTourismGovernor);
 //create an activity category

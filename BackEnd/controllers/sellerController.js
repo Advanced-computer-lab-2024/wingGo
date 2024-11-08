@@ -3,8 +3,9 @@ const Seller = require('../models/Seller');
 const LoginCredentials = require('../models/LoginCredentials'); 
 const Product = require('../models/product');
 const { uploadDocument } = require('../helpers/s3Helper');
-const generatePreSignedUrl = require('../downloadMiddleware');
 const { default: mongoose } = require('mongoose');
+const {generatePreSignedUrl}  = require('../downloadMiddleware');
+const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
 
 const seller_hello = (req, res) => {
     console.log('Seller route hit!'); // Add this log
@@ -227,11 +228,11 @@ const getProductImage = async (req, res) => {
 
         // If the product has an image
         if (product.picture) {
-            const key = certificateUrl.split('/').slice(-1)[0];
+            const key = product.picture.split('/').slice(-1)[0];
         
-            const preSignedUrl = await generatePreSignedUrl(key);
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
 
-            return res.status(200).json({ url: preSignedUrl });
+            return res.redirect( preSignedUrl );
 
         } else {
             // If no image is found, return a placeholder or 404
@@ -260,11 +261,12 @@ const downloadProductImage = async (req, res) => {
             return res.status(404).json({ message: 'Picture not found' });
         }
     
+        
         const key = pictureUrl.split('/').slice(-1)[0];
         // Generate a pre-signed URL for the picture
         const preSignedUrl = await generatePreSignedUrl(key);
     
-        res.redirect(preSignedUrl);
+        res.status(200).json({ preSignedUrl });
     
     } catch (err) {
         console.error('Error in downloadProductImage:', err);
@@ -533,20 +535,39 @@ const getAllProductsQuantityAndSales = async (req, res) => {
         res.status(500).json({ message: 'Error fetching product data', error: error.message });
     }
 };
-const ArchiveUnarchiveProduct=async(req,res)=>{
-    const {id}=req.params;
-    const {value}=req.body;
-    try{
+
+
+const ArchiveUnarchiveProduct = async (req, res) => {
+    const { id } = req.params;
+    const { sellerId, value } = req.body; // Retain sellerId and value in the request body, but ignore value for toggling
+
+    try {
+        // Fetch the product by ID
+        const product = await Product.findById(id);
+
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        // Check if the seller ID matches
+        if (product.seller.toString() !== sellerId) {
+            return res.status(403).json({ message: "You're not allowed to archive/unarchive this product" });
+        }
+
+        // Toggle the archive status, ignoring the provided value
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
-            { archive: value }, // Update only the archive field
-            { new: true, runValidators: true } // Options: return the updated document, run validation
-        );    
+            { archive: !product.archive }, // Toggle the archive field
+            { new: true, runValidators: true } // Return the updated document, run validation
+        );
+
         res.status(200).json(updatedProduct);
-    } catch(error){
-        res.status(500).json({error:error.message});
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-}
+};
+
+
 
  module.exports = {
     updateSellerProfile,

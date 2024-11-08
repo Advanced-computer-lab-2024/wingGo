@@ -14,8 +14,14 @@ import { useFilter } from "@/hooks/useFilterproduct";
 const ShopMain = () => {
   const filterData = useFilter(0, 18);
   const searchData = useProductSearch();
-  
-  const mapData = searchData?.length ? searchData : filterData;
+ 
+   // Combine searchData and filterData and filter out archived products
+   const mapData = (searchData?.length ? searchData : filterData).filter(
+    
+    (item) => !item.archive // Only include products where archive is false
+  );
+  console.log("Filtered Data:", mapData); 
+ 
   return (
     <>
       <Breadcrumb titleOne="Shop" titleTwo="Shop" />
@@ -33,6 +39,7 @@ const ShopMain = () => {
                         key={index}
                         item={item}
                         userRole="Seller"
+                      
                       />
                     ))}
                   </div>
