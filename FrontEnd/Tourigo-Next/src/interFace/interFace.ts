@@ -438,6 +438,7 @@ export interface Product {
   sales: number;
   seller?: string | null;
   sellerID?: string; // Add this line
+  purchaseDate: string; // Add purchaseDate property
   ratings: {
     touristId: string; // Referencing an ObjectId for the tourist
     rating: number;

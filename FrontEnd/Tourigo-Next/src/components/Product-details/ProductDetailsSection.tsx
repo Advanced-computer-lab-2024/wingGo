@@ -10,6 +10,8 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useDispatch } from "react-redux";
 import {getProductData} from "@/data/prod-data";
+import "react-toastify/dist/ReactToastify.css"; // Import the CSS for styling
+import { ToastContainer, toast } from "react-toastify";
 
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -18,11 +20,11 @@ import { imageLoader } from "@/hooks/image-loader";
 import Link from "next/link";
 import ReviewComments from "./ReviewComments"; 
 import StarRating from "@/components/Products/StarRating"; 
-import { fetchSellerData } from "@/api/productApi"; // Adjust the import path as necessary
+import { fetchSellerData,purchaseProduct} from "@/api/productApi"; // Adjust the import path as necessary
 import { calculateAverageRating } from "@/utils/utils"; // Adjust the import path as necessary
 const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string }) => {
   console.log("userRole:", userRole);
-  
+  const touristId = "672a3a4001589d5085322e88";
   const [products, setProducts] = useState<Product[]>([]);
   const [item, setItem] = useState<Product | null>(null);
   const [sellerName, setSellerName] = useState<string | null>(null);
@@ -83,6 +85,22 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
   
   const averageRating = item ? calculateAverageRating(item.ratings) : 0;
   const numberOfReviews = item ? item.reviews.length : 0;
+  const handlePurchase = async () => {
+    if (item?._id) {
+      try {
+        const response = await purchaseProduct(touristId, item._id);
+        console.log("Purchase response:", response);
+
+        toast.success("Product purchased successfully!");
+        dispatch(decrease_quantity(item)); 
+
+      } catch (error) {
+        toast.error("Failed to purchase item.");
+        console.error("Error during purchase:", error);
+       
+      }
+    }
+  };
   return (
     <>
       <div className="row gy-24 justify-content-between">
@@ -200,16 +218,16 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
                   <span>{item.sales}</span>
                 </div>
               )}
-              {item && userRole === "Tourist" && (
+             {item && userRole === "Tourist" && (
                 <div className="product-details-count-wrap d-flex flex-wrap gap-10 align-items-center">
                   <div className="product-details-action d-flex flex-wrap align-items-center ml-15">
-                    <Link
-                      href="/cart"
+                    <button
                       className="bd-primary-btn btn-style radius-60"
+                      onClick={handlePurchase} // Call the purchase function
                     >
                       <span className="bd-primary-btn-text">Purchase</span>
                       <span className="bd-primary-btn-circle"></span>
-                    </Link>
+                    </button>
                   </div>
                 </div>
               )}
@@ -220,6 +238,7 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
        <h2>Reviews</h2>
        {item && <ReviewComments product={item} />}
       </div>
+      <ToastContainer />
     </>
   );
 };

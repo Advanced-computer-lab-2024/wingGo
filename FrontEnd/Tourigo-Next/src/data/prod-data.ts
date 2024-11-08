@@ -1,8 +1,8 @@
 import { Product } from '../interFace/interFace';
 
-import { fetchAllProducts} from '@/api/productApi';
+import { fetchAllProducts, fetchPurchasedProducts} from '@/api/productApi';
 
-const API_URL = 'http://localhost:8000/admin';
+// const API_URL = 'http://localhost:8000/admin';
 
 export const getProductData = async (): Promise<Product[]> => {
     try {
@@ -15,18 +15,14 @@ export const getProductData = async (): Promise<Product[]> => {
 };
 
 
-// export const getFilteredItinerariesData = async (filters: {
-//     budget?: number;
-//     date?: string;
-//     preferences?: string;
-//     language?: string;
-//     touristId?: string;
-// }): Promise<Itinerary[]> => {
-//     try {
-//         const itineraries = await fetchFilteredItineraries(filters);
-//         return itineraries;
-//     } catch (error) {
-//         console.error("Error loading filtered itineraries:", error);
-//         return [];
-//     }
-// };
+// Function to get only purchased products for a specific tourist
+export const getPurchasedProducts = async (touristId: string) => {
+    try {
+        const purchasedProducts = await fetchPurchasedProducts(touristId);
+        return purchasedProducts;
+    } catch (error) {
+        console.error('Error fetching purchased products:', error);
+        throw error;
+    }
+};
+
