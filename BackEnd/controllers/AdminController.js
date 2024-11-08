@@ -251,20 +251,25 @@ const downloadProductImage = async (req, res) => {
 const editProduct = async (req, res) => {
     const { productId } = req.params;
     const { name, price, quantity, description } = req.body;
-    const picture = req.file ? req.file.filename : null;
+    const picture = req.file ? req.file.location : null;  // Get picture location if uploaded
+
     try {
-        console.log('Product ID:', productId); // Add this line to log the product ID
+        console.log('Product ID:', productId); // Log the product ID
         const product = await Product.findById(productId);
+        
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        product.name = name || product.name;
-        product.price = price || product.price;
-        product.quantity = quantity || product.quantity;
-        product.description = description || product.description;
+        // Update only the fields provided in the request
+        if (name !== undefined) product.name = name;
+        if (price !== undefined) product.price = price;
+        if (quantity !== undefined) product.quantity = quantity;
+        if (description !== undefined) product.description = description;
+        if (picture) product.picture = picture;  // Update picture only if a new one is uploaded
         
 
+        // Save the updated product
         await product.save();
         res.status(200).json({ message: 'Product updated successfully', product });
     } catch (err) {
@@ -272,6 +277,9 @@ const editProduct = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+
+
 
 const filterProduct = async (req, res) => {
     try {

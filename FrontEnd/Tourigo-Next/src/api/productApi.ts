@@ -95,3 +95,48 @@ export const fetchPurchasedProducts = async (touristId: string) => {
       throw new Error(error.response?.data?.message || 'Error fetching purchased products');
   }
 };
+
+// Function to edit a product
+export const editProduct = async (productId: string, updates: Partial<Product>, pictureFile?: File) => {
+  try {
+    const formData = new FormData();
+
+    // Append fields to formData if they are provided
+    if (updates.name) formData.append('name', updates.name);
+    if (updates.price !== undefined) formData.append('price', updates.price.toString());
+    if (updates.quantity !== undefined) formData.append('quantity', updates.quantity.toString());
+    if (updates.description) formData.append('description', updates.description);
+
+    // Append the picture file if provided
+    if (pictureFile) formData.append('picture', pictureFile);
+
+    const response = await axios.put(`http://localhost:8000/admin/product/${productId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    
+    return response.data;
+  } catch (error: any) {
+    console.error('Error updating product:', error);
+    throw new Error(error.response?.data?.message || 'Error updating product');
+  }
+};
+export const createProduct = async (productData: any): Promise<any> => {
+  try {
+      const response = await axios.post(`http://localhost:8000/admin/add-product`, productData);
+      return response.data;
+  } catch (error) {
+      console.error("Error creating product:", error);
+      throw error;
+  }
+};
+export const createProductsel = async (productData: any): Promise<any> => {
+try {
+    const response = await axios.post(`http://localhost:8000/seller/addProduct`, productData);
+    return response.data;
+} catch (error) {
+    console.error("Error creating product:", error);
+    throw error;
+}
+};
