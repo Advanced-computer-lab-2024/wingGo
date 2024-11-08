@@ -157,3 +157,15 @@ export const cancelItineraryApi = async (touristId: string, itineraryId: string)
         throw error;
     }
 };
+
+
+// Function to create a new itinerary (POST request)
+export const createItinerary = async (itineraryData: any): Promise<any> => {
+    try {
+        const response = await axios.post("http://localhost:8000/tourguide/Createitinerary", itineraryData);
+        return response.data;
+    } catch (error) {
+        console.error("Error creating itinerary:", error);
+        throw error;
+    }
+};
