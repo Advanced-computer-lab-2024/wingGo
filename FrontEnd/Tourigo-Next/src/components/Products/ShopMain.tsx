@@ -1,3 +1,4 @@
+//ShopMain.tsx
 "use client";
 import React from "react";
 import Breadcrumb from "../common/breadcrumb/BreadCrumb";
@@ -13,6 +14,7 @@ import { useFilter } from "@/hooks/useFilterproduct";
 const ShopMain = () => {
   const filterData = useFilter(0, 18);
   const searchData = useProductSearch();
+  
   const mapData = searchData?.length ? searchData : filterData;
   return (
     <>
@@ -30,6 +32,7 @@ const ShopMain = () => {
                         classItem="col-xxl-4 col-xl-4 col-lg4 col-md-4 col-sm-6"
                         key={index}
                         item={item}
+                        userRole="Tourist"
                       />
                     ))}
                   </div>

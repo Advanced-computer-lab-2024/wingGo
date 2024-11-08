@@ -283,7 +283,6 @@ export interface ProductsType {
   labelColor?: string;
   totalCart?: number;
   shiping?: number;
-  
 }
 // menu data type
 // menu-data type
@@ -374,7 +373,7 @@ export interface Itinerary {
 
 export interface BookedItinerary {
   itinerary: Itinerary;
-  bookingDate: string;
+  bookingDate: Date;
 }
 
 export interface Activity {
@@ -450,3 +449,17 @@ export interface Product {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface Complaint{
+ 
+    _id: string;
+    title: string;
+    body: string;
+    date: Date;
+    tourist: string; // ObjectId as a string referencing a Tourist
+    state: 'pending' | 'resolved';
+    reply: string[];
+
+  }
+
+

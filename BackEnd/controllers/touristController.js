@@ -644,6 +644,8 @@ const filterUpcomingActivities = async (req, res) => {
         res.status(400).json({ error: error.message }); 
     }
 };
+
+
 // Search for attractions, activities, itineraries, or places by name, category, or tags
 const searchAllModels = async (req, res) => {
     const { query, touristId  } = req.query;  // Only extract the query term
@@ -824,6 +826,7 @@ const viewComplaints = async (req, res) => {
 
     try {
         const complaints = await Complaints.find({ tourist: touristId }).select('title body state date');
+        console.log(complaints);
         res.status(200).json({ complaints });
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving complaints.', error });
@@ -1273,6 +1276,19 @@ const rateProduct = async (req, res) => {
         res.status(500).json({ message: 'Error processing rating', error });
     }
 };
+const getTouristById = async (req, res) => {
+    const { id } = req.params;
+    try {
+      const tourist = await Tourist.findById(id);
+      if (!tourist) {
+        return res.status(404).json({ message: 'Tourist not found' });
+      }
+      res.status(200).json(tourist);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching tourist data', error });
+    }
+  };
+
 const reviewProduct = async (req, res) => {
     const { touristId, productId } = req.params;
     const { review } = req.body; // Expecting a review text in the body
@@ -1305,37 +1321,27 @@ const reviewProduct = async (req, res) => {
         }
 
         // Initialize `reviews` array if it doesn't exist
-        if (!Array.isArray(product.reviews)) {
+        if (!product.reviews) {
             product.reviews = [];
         }
 
-        // Check if the tourist has already reviewed this product
-        const existingReviewIndex = product.reviews.findIndex(
-            (review) => review.touristId.toString() === touristId
-        );
+        // Append the new review to the `reviews` array
+        product.reviews.push({
+            touristId,
+            review,
+        });
 
-        if (existingReviewIndex > -1) {
-            // Update the existing review if the tourist has already reviewed the product
-            console.log('Updating existing review');
-            product.reviews[existingReviewIndex].review = review;
-        } else {
-            // Add a new review if the tourist hasn't reviewed this product yet
-            console.log('Adding new review');
-            product.reviews.push({ touristId, review });
-        }
-
-        // Save the updated product with the new or updated review
+        // Save the updated product
         await product.save();
 
-        res.status(200).json({
-            message: 'Product reviewed successfully',
-            product
-        });
+        res.status(200).json({ message: 'Review added successfully', product });
     } catch (error) {
-        console.error('Error processing review:', error);  // Log the full error for debugging
-        res.status(500).json({ message: 'Error processing review', error });
+        console.error('Error adding review:', error);
+        res.status(500).json({ message: 'Error adding review', error });
     }
 };
+
+
 const rateActivity = async (req, res) => {
     const { touristId, activityId } = req.params;
     const { rating } = req.body; // Expecting a rating in the body
@@ -2400,6 +2406,7 @@ module.exports = {
     bookHotel,
     bookTransport,
     getFlightPrices,
+    getTouristById,
     getBookedItineraries,
     getBookedActivities
 };

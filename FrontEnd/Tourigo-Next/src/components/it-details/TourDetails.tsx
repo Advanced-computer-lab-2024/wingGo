@@ -61,7 +61,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                           <div className="rating-badge border-badge">
                             <span>
                               <i className="icon-star"></i>
-                              {data.averageRating || 0}
+                              {data.averageRating ? data.averageRating.toFixed(1) : 0}
                             </span>
                           </div>
                           <div className="theme-social">
@@ -81,7 +81,8 @@ const TourDetails = ({ id }: idTypeNew) => {
                         </div>
                       </div>
                       {/* Include more fields as necessary */}
-                      <TourDetailTabArea />
+                      <TourDetailTabArea itineraryData={data} />
+
                       <div className="tour-details-related-tour mb-35">
                         <h4 className="mb-20">Related Tours</h4>
                         {/* You can replace this with actual related itineraries if available */}
