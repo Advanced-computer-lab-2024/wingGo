@@ -533,20 +533,39 @@ const getAllProductsQuantityAndSales = async (req, res) => {
         res.status(500).json({ message: 'Error fetching product data', error: error.message });
     }
 };
-const ArchiveUnarchiveProduct=async(req,res)=>{
-    const {id}=req.params;
-    const {value}=req.body;
-    try{
+
+
+const ArchiveUnarchiveProduct = async (req, res) => {
+    const { id } = req.params;
+    const { sellerId, value } = req.body; // Retain sellerId and value in the request body, but ignore value for toggling
+
+    try {
+        // Fetch the product by ID
+        const product = await Product.findById(id);
+
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        // Check if the seller ID matches
+        if (product.seller.toString() !== sellerId) {
+            return res.status(403).json({ message: "You're not allowed to archive/unarchive this product" });
+        }
+
+        // Toggle the archive status, ignoring the provided value
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
-            { archive: value }, // Update only the archive field
-            { new: true, runValidators: true } // Options: return the updated document, run validation
-        );    
+            { archive: !product.archive }, // Toggle the archive field
+            { new: true, runValidators: true } // Return the updated document, run validation
+        );
+
         res.status(200).json(updatedProduct);
-    } catch(error){
-        res.status(500).json({error:error.message});
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-}
+};
+
+
 
  module.exports = {
     updateSellerProfile,

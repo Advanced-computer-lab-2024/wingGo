@@ -80,5 +80,6 @@ router.put('/bookTransport/:touristId/:transportId', touristController.bookTrans
 router.get('/:id', touristController.getTouristById);
 
 router.get('/booked-itineraries/:touristId', touristController.getBookedItineraries);
+router.get('/booked-activities/:touristId', touristController.getBookedActivities);
 
 module.exports = router;

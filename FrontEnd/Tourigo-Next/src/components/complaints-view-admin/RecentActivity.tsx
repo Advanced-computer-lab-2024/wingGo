@@ -9,12 +9,14 @@ import axios from 'axios';
 import { Complaint } from '@/interFace/interFace';
 import { fetchComplaints, updateComplaintStatus  } from '@/api/complaintsApi';
 import { getComplaintsData } from '@/data/complaints-data';
+import NotificationModal from './NotificationModal';
 
 
 const ComplaintsList = () => {
     const [complaints, setComplaints] = useState<Complaint[]>([]);
     const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'resolved'>('all');
     const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+    const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     useEffect(() => {
         const fetchComplaintsData = async () => {
@@ -42,19 +44,22 @@ const ComplaintsList = () => {
     });
 
         // Function to handle status update
-        const handleStatusToggle = async (id: string, currentState: 'pending' | 'resolved') => {
-            const newState = currentState === 'pending' ? 'resolved' : 'pending';
-            try {
-                const updatedComplaint = await updateComplaintStatus(id, newState);
-                setComplaints(prevComplaints =>
-                    prevComplaints.map(complaint => 
-                        complaint._id === id ? { ...complaint, state: updatedComplaint.state } : complaint
-                    )
-                );
-            } catch (error) {
-                console.error("Error updating complaint status:", error);
-            }
-        };
+        // Function to handle status update
+    const handleStatusToggle = async (id: string, currentState: 'pending' | 'resolved') => {
+        const newState = currentState === 'pending' ? 'resolved' : 'pending';
+        try {
+            const updatedComplaint = await updateComplaintStatus(id, newState);
+            setComplaints(prevComplaints =>
+                prevComplaints.map(complaint => 
+                    complaint._id === id ? { ...complaint, state: updatedComplaint.state } : complaint
+                )
+            );
+            setNotification({ message: `Status updated successfully to ${newState}`, type: 'success' });
+        } catch (error) {
+            setNotification({ message: 'Failed to update status. Please try again.', type: 'error' });
+            console.error("Error updating complaint status:", error);
+        }
+    };
 
     return (
         <section className="bd-recent-activity section-space-small-bottom">
@@ -92,6 +97,14 @@ const ComplaintsList = () => {
                         </select>
                     </div>
                 </div>
+                {/* Notification Modal */}
+                {notification && (
+                    <NotificationModal
+                        message={notification.message}
+                        type={notification.type}
+                        onClose={() => setNotification(null)}
+                    />
+                )}
                             <div className="recent-activity-content">
                                 <div className="table-responsive">
                                     <table className="table mb-0">

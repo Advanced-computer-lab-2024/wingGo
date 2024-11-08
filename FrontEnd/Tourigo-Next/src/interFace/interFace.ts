@@ -379,8 +379,8 @@ export interface BookedItinerary {
 export interface Activity {
   _id: string;
   name: string;
-  // img: StaticImageData;
-  date: Date;
+  img: StaticImageData;
+  date: string;
   time: string;
   location: {
     type: 'Point';
@@ -404,6 +404,7 @@ export interface Activity {
   }[];
   flagged?: boolean;
   touristIDs?: string[]; // Array of tourist ObjectIds
+  averageRating:number;
 }
 
 
@@ -436,6 +437,7 @@ export interface Product {
   quantity: number;
   sales: number;
   seller?: string | null;
+  sellerID?: string; // Add this line
   ratings: {
     touristId: string; // Referencing an ObjectId for the tourist
     rating: number;

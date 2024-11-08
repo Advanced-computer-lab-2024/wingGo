@@ -755,11 +755,14 @@ const getAllProducts = async (req, res) => {
             picture: `../images/${product.picture}`,  // Build image URL dynamically
             // picture: `${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
             price: product.price,
+            sales: product.sales,
             description: product.description,
             quantity: product.quantity,
             seller: product.seller ? product.seller.username : 'Admin',  // Handle null seller field
+            sellerID: product.seller ? product.seller._id : 'Admin',  // Handle null seller field
             ratings: product.ratings,
-            reviews: product.reviews
+            reviews: product.reviews,
+            archive: product.archive
         }));
 
         res.status(200).json(productData);
@@ -843,16 +846,16 @@ const getAttractions = async (req, res) => {
     }
 };
 
-const flagActivity = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const activity = await Activity.findByIdAndUpdate(id, { flagged: true }, { new: true });
-      if (!activity) return res.status(404).json({ message: 'Activity not found' });
-      res.status(200).json({ message: 'Activity flagged successfully', activity });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  };
+// const flagActivity = async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const activity = await Activity.findByIdAndUpdate(id, { flagged: true }, { new: true });
+//       if (!activity) return res.status(404).json({ message: 'Activity not found' });
+//       res.status(200).json({ message: 'Activity flagged successfully', activity });
+//     } catch (error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//   };
   
 //   const flagItinerary = async (req, res) => {
 //     try {
@@ -864,6 +867,23 @@ const flagActivity = async (req, res) => {
 //       res.status(500).json({ error: error.message });
 //     }
 //   };
+
+const flagActivity = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { flagged } = req.body;  // Get the flagged status from the request body
+  
+      // Update the itinerary's flagged status based on the provided flagged value
+      const activity = await Activity.findByIdAndUpdate(id, { flagged }, { new: true });
+  
+      if (!activity) return res.status(404).json({ message: 'Activity not found' });
+  
+      const message = flagged ? 'Activity flagged successfully' : 'Activity unflagged successfully';
+      res.status(200).json({ message, activity });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
 
 const flagItinerary = async (req, res) => {
     try {
@@ -1057,21 +1077,32 @@ const getAllProductsQuantityAndSales = async (req, res) => {
     }
 };
 
-//archive/unarchive a product
-const ArchiveUnarchiveProduct=async(req,res)=>{
-    const {id}=req.params;
-    const {value}=req.body;
-    try{
+// Archive/Unarchive a product by toggling the current archive state
+const ArchiveUnarchiveProduct = async (req, res) => {
+    const { id } = req.params;
+    const { value } = req.body; // Retain value in the request body but don't use it
+
+    try {
+        // Find the product to check the current archive value
+        const product = await Product.findById(id);
+        
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+
+        // Toggle the archive value regardless of the provided value in req.body
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
-            { archive: value }, // Update only the archive field
+            { archive: !product.archive }, // Toggle the archive field
             { new: true, runValidators: true } // Options: return the updated document, run validation
-        );    
+        );
+
         res.status(200).json(updatedProduct);
-    } catch(error){
-        res.status(500).json({error:error.message});
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-}
+};
+
 // Sort complaints by date
 const sortComplaintsByDate = async (req, res) => {
     const { order } = req.query; // Use 'asc' for ascending or 'desc' for descending
@@ -1138,6 +1169,14 @@ const getAllItineraries = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+const getAllActivities = async (req, res) => {
+    try {
+        const itineraries = await Activity.find();  // Fetch all itineraries
+        res.status(200).json(itineraries);  // Return the array of itineraries
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
   
 
@@ -1190,5 +1229,6 @@ module.exports = {
     ArchiveUnarchiveProduct,
     sortComplaintsByDate,
     filterComplaintsByStatus,
-    getAllItineraries
+    getAllItineraries,
+    getAllActivities
 };

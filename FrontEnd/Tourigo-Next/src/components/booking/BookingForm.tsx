@@ -1,8 +1,9 @@
 import BookingComponentForm from "@/forms/BookingComponentForm";
 import Link from "next/link";
 import React from "react";
+import { idTypeNew } from "@/interFace/interFace";
 
-const BookingForm = () => {
+const BookingForm = ({ id }: idTypeNew) => {
   return (
     <>
       <div className="booking-form">
@@ -23,7 +24,7 @@ const BookingForm = () => {
         </div>
 
         {/* booking form */}
-        <BookingComponentForm />
+        <BookingComponentForm id={id}  />
       </div>
     </>
   );

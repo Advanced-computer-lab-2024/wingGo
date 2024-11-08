@@ -31,6 +31,7 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
       try {
         const products = await getProductData();
         const product = products.find((item) => item._id === id);
+        console.log("Productttt:", product);
         setItem(product || null);
         if (product && product.seller) {
           const sellerData = await fetchSellerData(product.seller);
@@ -78,7 +79,8 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
     },
     
   ];
-
+  console.log("my item", item);
+  
   const averageRating = item ? calculateAverageRating(item.ratings) : 0;
   const numberOfReviews = item ? item.reviews.length : 0;
   return (
@@ -184,22 +186,33 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
                 <p>Seller:</p>
                 <span>{item.seller}</span>
               </div>
-           
-          
-
-              <div className="product-details-count-wrap d-flex flex-wrap gap-10 align-items-center">
-             
-                <div className="product-details-action d-flex flex-wrap align-items-center ml-15">
-                  <Link
-                    href="/cart"
-                    className="bd-primary-btn btn-style radius-60"
-                  >
-                    <span className="bd-primary-btn-text">Purchase</span>
-                    <span className="bd-primary-btn-circle"></span>
-                  </Link>
+              {item && (userRole === "Seller" || userRole === "Admin") && (
+                <div className="product-details-info mb-10">
+                  <p>Available Quantity:</p>
+                  <span>{item.quantity}</span>
                 </div>
-               
-              </div>
+              )}
+             
+              {item && (userRole === "Seller" || userRole === "Admin") && (
+                
+                <div className="product-details-info mb-10">
+                  <p>Sales:</p>
+                  <span>{item.sales}</span>
+                </div>
+              )}
+              {item && userRole === "Tourist" && (
+                <div className="product-details-count-wrap d-flex flex-wrap gap-10 align-items-center">
+                  <div className="product-details-action d-flex flex-wrap align-items-center ml-15">
+                    <Link
+                      href="/cart"
+                      className="bd-primary-btn btn-style radius-60"
+                    >
+                      <span className="bd-primary-btn-text">Purchase</span>
+                      <span className="bd-primary-btn-circle"></span>
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

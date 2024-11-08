@@ -4,12 +4,13 @@ import Wrapper from "@/layout/DefaultWrapper";
 import React from "react";
 
 const Booking = () => {
+  const id = '';
   return (
     <>
       <MetaData pageTitle="Booking">
         <Wrapper>
           <main>
-            <BookingMain />
+            <BookingMain id={id}/>
           </main>
         </Wrapper>
       </MetaData>

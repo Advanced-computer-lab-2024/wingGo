@@ -77,7 +77,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                           <div className="rating-badge border-badge">
                             <span>
                               <i className="icon-star"></i>
-                              {data?.ratings[0].rating}
+                              {data?.averageRating}
                             </span>
                           </div>
                           <div className="theme-social">

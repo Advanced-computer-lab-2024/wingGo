@@ -44,7 +44,11 @@ interface NewActivity {
   specialDiscounts: string;
   bookingOpen: boolean;
   advertiser: string;
-  ratings: number;
+  // ratings: {
+  //   touristId: string; // Referencing an ObjectId for the tourist
+  //   rating: number;
+  // }[];
+  averageRating:number;
 }
 
 
@@ -76,7 +80,7 @@ const TourDetailsArea = () => {
     specialDiscounts: '',
     bookingOpen: true,
     advertiser: advertiserId,  // Replace with actual advertiser ID
-    ratings: 0,
+    averageRating:4
 });
   
 
