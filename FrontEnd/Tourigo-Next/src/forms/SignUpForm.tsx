@@ -1,9 +1,14 @@
 "use client";
 import ErrorMessage from "@/elements/error-message/ErrorMessage";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
+import { registerUser } from "@/api/registerApi";
+import NiceSelect from "@/elements/NiceSelect";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUpload } from '@fortawesome/free-solid-svg-icons';
+
 interface FormData {
   name: string;
   userName: string;
@@ -11,9 +16,26 @@ interface FormData {
   phone: string;
   password: string;
   confirmPassword: string;
+  role: string;
+  IDdocument?: File;
+  certificate?: File;
 }
+
+interface Option {
+  id: number;
+  option: string | number;
+}
+
+const roleOptions: Array<Option> = [
+  { id: 1, option: "Tourist" },
+  { id: 2, option: "Advertiser" },
+  { id: 3, option: "Seller" },
+  { id: 4, option: "Tour Guide" },
+];
+
 const SignUpForm = () => {
   const router = useRouter();
+  const [selectedRole, setSelectedRole] = useState<string>("Tourist");
   const {
     register,
     handleSubmit,
@@ -21,48 +43,26 @@ const SignUpForm = () => {
     formState: { errors },
   } = useForm<FormData>();
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
     const toastId = toast.loading("");
-    toast.success("Message Send Successfully", { id: toastId, duration: 1000 });
-    reset();
-    router.push("/home-two");
+    const response = await registerUser(data);
+    if ("error" in response) {
+      toast.error(`Error: ${response.error}`, { id: toastId });
+    } else {
+      toast.success("User registered successfully!", { id: toastId });
+      reset();
+      router.push("/home-two");
+    }
+  };
+
+  const handleRoleChange = (item: Option ) => {
+    setSelectedRole(item.option as string);
   };
 
   return (
     <>
       <form className="sign-up-form-wrapper" onSubmit={handleSubmit(onSubmit)}>
         <div className="row gy-24 align-items-center justify-content-between">
-          <div className="col-12">
-            <div className="from-input-box">
-              <div className="form-input-title">
-                <label htmlFor="name">
-                  Name<span>*</span>
-                </label>
-              </div>
-              <div className="form-input">
-                <input
-                  id="name"
-                  type="text"
-                  placeholder=" Name"
-                  {...register("name", {
-                    required: "Name is required",
-                    minLength: {
-                      value: 2,
-                      message: "Name must be at least 2 characters",
-                    },
-                    maxLength: {
-                      value: 15,
-                      message: "Name cannot exceed 15 characters",
-                    },
-                  })}
-                />
-                {errors.name && (
-                  <ErrorMessage message={errors.name.message as string} />
-                )}
-              </div>
-            </div>
-          </div>
-
           <div className="col-12">
             <div className="from-input-box">
               <div className="form-input-title">
@@ -93,6 +93,7 @@ const SignUpForm = () => {
               </div>
             </div>
           </div>
+
           <div className="col-12">
             <div className="from-input-box">
               <div className="form-input-title">
@@ -150,6 +151,7 @@ const SignUpForm = () => {
               </div>
             </div>
           </div>
+
           <div className="col-12">
             <div className="from-input-box">
               <div className="form-input-title">
@@ -163,14 +165,14 @@ const SignUpForm = () => {
                   type="password"
                   placeholder="Password"
                   {...register("password", {
-                    required: "  Password is required",
+                    required: "Password is required",
                     minLength: {
                       value: 2,
-                      message: "  Password must be at least 2 characters",
+                      message: "Password must be at least 2 characters",
                     },
                     maxLength: {
                       value: 15,
-                      message: "  Password cannot exceed 15 characters",
+                      message: "Password cannot exceed 15 characters",
                     },
                   })}
                 />
@@ -184,35 +186,78 @@ const SignUpForm = () => {
           <div className="col-12">
             <div className="from-input-box">
               <div className="form-input-title">
-                <label htmlFor="confirmPassword">
-                  Confirm Password<span>*</span>
+                <label htmlFor="role">
+                  Role<span>*</span>
                 </label>
               </div>
               <div className="form-input">
-                <input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Confirm Password"
-                  {...register("confirmPassword", {
-                    required: "Confirm Password is required",
-                    minLength: {
-                      value: 2,
-                      message: "Confirm Password must be at least 2 characters",
-                    },
-                    maxLength: {
-                      value: 15,
-                      message: "Confirm Password cannot exceed 15 characters",
-                    },
-                  })}
+                <NiceSelect
+                  options={roleOptions}
+                  defaultCurrent={1}
+                  placeholder="Select Role"
+                  className="full-width"
+                  onChange={handleRoleChange}
+                  name="role"
                 />
-                {errors.confirmPassword && (
-                  <ErrorMessage
-                    message={errors.confirmPassword.message as string}
-                  />
-                )}
               </div>
             </div>
           </div>
+
+          {selectedRole !== "Tourist" && (
+            <>
+              <div className="col-12">
+                <div className="from-input-box">
+                  <div className="form-input-title">
+                    <label htmlFor="IDdocument">
+                      ID Document<span>*</span>
+                    </label>
+                  </div>
+                  <div className="form-input">
+                    <input
+                      id="IDdocument"
+                      type="file"
+                      {...register("IDdocument", {
+                        required: "ID Document is required",
+                      })}
+                      className="custom-file-input"
+                    />
+                    <label htmlFor="IDdocument" className="custom-file-label">
+                      <FontAwesomeIcon icon={faUpload} /> Upload ID Document
+                    </label>
+                    {errors.IDdocument && (
+                      <ErrorMessage message={errors.IDdocument.message as string} />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12">
+                <div className="from-input-box">
+                  <div className="form-input-title">
+                    <label htmlFor="certificate">
+                      Certificate<span>*</span>
+                    </label>
+                  </div>
+                  <div className="form-input">
+                    <input
+                      id="certificate"
+                      type="file"
+                      {...register("certificate", {
+                        required: "Certificate is required",
+                      })}
+                      className="custom-file-input"
+                    />
+                    <label htmlFor="certificate" className="custom-file-label">
+                      <FontAwesomeIcon icon={faUpload} /> Upload Certificate
+                    </label>
+                    {errors.certificate && (
+                      <ErrorMessage message={errors.certificate.message as string} />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}           
         </div>
         <div className="sign-btn mt-20">
           <button

@@ -16,7 +16,7 @@ const RegisterMain = () => {
                   <span className="sign-meta-divider-title">or</span>
                   <div className="sign-meta-divider-line right-line"></div>
                 </div>
-                <div className="sign-up-wrapper mt-30 mb-20">
+                {/* <div className="sign-up-wrapper mt-30 mb-20">
                   <div className="social-menu d-flex justify-content-center text-center">
                     <ul>
                       <li>
@@ -57,7 +57,7 @@ const RegisterMain = () => {
                       </li>
                     </ul>
                   </div>
-                </div>
+                </div> */}
                 <div className="sign-up-label text-center">
                   Already have an account?
                   <Link href="/sign-in" className="sign-link">
