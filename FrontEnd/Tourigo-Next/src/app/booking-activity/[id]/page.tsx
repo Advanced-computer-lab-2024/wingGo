@@ -1,16 +1,17 @@
-import BookingMain from "@/components/booking/BookingMain";
+"use client";
+import BookingMain from "@/components/booking-activity/BookingMain";
 import MetaData from "@/hooks/useMetaData";
 import Wrapper from "@/layout/DefaultWrapper";
 import React from "react";
 
-const Booking = () => {
-  const id = '';
+const page = ({ params }: { params: { id: string } }) => {
+  const id = params.id;
   return (
     <>
       <MetaData pageTitle="Booking">
         <Wrapper>
           <main>
-            <BookingMain id={id}/>
+            <BookingMain id={id} />
           </main>
         </Wrapper>
       </MetaData>
@@ -18,4 +19,4 @@ const Booking = () => {
   );
 };
 
-export default Booking;
+export default page;

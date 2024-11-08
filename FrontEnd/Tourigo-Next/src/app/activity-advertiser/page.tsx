@@ -1,16 +1,15 @@
-import BookingMain from "@/components/booking/BookingMain";
+import TourGridRightMain from "@/components/activity-admin/TourGridRightMain";
 import MetaData from "@/hooks/useMetaData";
 import Wrapper from "@/layout/DefaultWrapper";
 import React from "react";
 
-const Booking = () => {
-  const id = '';
+const TourGridRight = () => {
   return (
     <>
-      <MetaData pageTitle="Booking">
+      <MetaData pageTitle="Tour Grid Right">
         <Wrapper>
           <main>
-            <BookingMain id={id}/>
+            <TourGridRightMain />
           </main>
         </Wrapper>
       </MetaData>
@@ -18,4 +17,4 @@ const Booking = () => {
   );
 };
 
-export default Booking;
+export default TourGridRight;

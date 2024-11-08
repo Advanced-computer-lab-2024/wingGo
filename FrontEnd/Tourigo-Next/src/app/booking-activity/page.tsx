@@ -1,4 +1,4 @@
-import BookingMain from "@/components/booking/BookingMain";
+import BookingMain from "@/components/booking-activity/BookingMain";
 import MetaData from "@/hooks/useMetaData";
 import Wrapper from "@/layout/DefaultWrapper";
 import React from "react";
@@ -10,7 +10,7 @@ const Booking = () => {
       <MetaData pageTitle="Booking">
         <Wrapper>
           <main>
-            <BookingMain id={id}/>
+            <BookingMain id={id} />
           </main>
         </Wrapper>
       </MetaData>

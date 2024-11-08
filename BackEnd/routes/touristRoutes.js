@@ -79,5 +79,6 @@ router.get('/transports', advertiserController.getAllTransports);
 router.put('/bookTransport/:touristId/:transportId', touristController.bookTransport);
 
 router.get('/booked-itineraries/:touristId', touristController.getBookedItineraries);
+router.get('/booked-activities/:touristId', touristController.getBookedActivities);
 
 module.exports = router;

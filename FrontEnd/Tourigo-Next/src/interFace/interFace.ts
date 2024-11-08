@@ -380,8 +380,8 @@ export interface BookedItinerary {
 export interface Activity {
   _id: string;
   name: string;
-  // img: StaticImageData;
-  date: Date;
+  img: StaticImageData;
+  date: string;
   time: string;
   location: {
     type: 'Point';
@@ -405,6 +405,7 @@ export interface Activity {
   }[];
   flagged?: boolean;
   touristIDs?: string[]; // Array of tourist ObjectIds
+  averageRating:number;
 }
 
 
