@@ -437,6 +437,7 @@ export interface Product {
   quantity: number;
   sales: number;
   seller?: string | null;
+  sellerID?: string; // Add this line
   ratings: {
     touristId: string; // Referencing an ObjectId for the tourist
     rating: number;

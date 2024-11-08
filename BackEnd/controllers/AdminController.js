@@ -755,11 +755,14 @@ const getAllProducts = async (req, res) => {
             picture: `../images/${product.picture}`,  // Build image URL dynamically
             // picture: `${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
             price: product.price,
+            sales: product.sales,
             description: product.description,
             quantity: product.quantity,
             seller: product.seller ? product.seller.username : 'Admin',  // Handle null seller field
+            sellerID: product.seller ? product.seller._id : 'Admin',  // Handle null seller field
             ratings: product.ratings,
-            reviews: product.reviews
+            reviews: product.reviews,
+            archive: product.archive
         }));
 
         res.status(200).json(productData);
@@ -1074,21 +1077,32 @@ const getAllProductsQuantityAndSales = async (req, res) => {
     }
 };
 
-//archive/unarchive a product
-const ArchiveUnarchiveProduct=async(req,res)=>{
-    const {id}=req.params;
-    const {value}=req.body;
-    try{
+// Archive/Unarchive a product by toggling the current archive state
+const ArchiveUnarchiveProduct = async (req, res) => {
+    const { id } = req.params;
+    const { value } = req.body; // Retain value in the request body but don't use it
+
+    try {
+        // Find the product to check the current archive value
+        const product = await Product.findById(id);
+        
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+
+        // Toggle the archive value regardless of the provided value in req.body
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
-            { archive: value }, // Update only the archive field
+            { archive: !product.archive }, // Toggle the archive field
             { new: true, runValidators: true } // Options: return the updated document, run validation
-        );    
+        );
+
         res.status(200).json(updatedProduct);
-    } catch(error){
-        res.status(500).json({error:error.message});
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-}
+};
+
 // Sort complaints by date
 const sortComplaintsByDate = async (req, res) => {
     const { order } = req.query; // Use 'asc' for ascending or 'desc' for descending

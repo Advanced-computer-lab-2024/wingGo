@@ -14,11 +14,11 @@ import { useFilter } from "@/hooks/useFilterproduct";
 const ShopMain = () => {
   const filterData = useFilter(0, 18);
   const searchData = useProductSearch();
- 
+  const hardcodedSellerId = "67158afc7b1ec4bfb0240575"; // Hardcoded sellerId for now till the login
    // Combine searchData and filterData and filter out archived products
    const mapData = (searchData?.length ? searchData : filterData).filter(
     
-    (item) => !item.archive // Only include products where archive is false
+    (item) => (item.archive && item.sellerID === hardcodedSellerId)// Only include products where archive is false
   );
   console.log("Filtered Data:", mapData); 
  
@@ -39,7 +39,7 @@ const ShopMain = () => {
                         key={index}
                         item={item}
                         userRole="Seller"
-                      
+                       
                       />
                     ))}
                   </div>

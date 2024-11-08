@@ -29,3 +29,26 @@ export const fetchSellerData = async (sellerId: string) => {
         throw error;
     }
 };
+
+export const ArchiveUnarchiveProduct = async (id: string, sellerId: string, value: boolean) => {
+    try {
+      const response = await axios.put(`http://localhost:8000/seller/changearchive/${id}`, {
+        sellerId,
+        value
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Error archiving/unarchiving product');
+    }
+  };
+
+  export const ArchiveUnarchiveProductAdmin = async (id: string, value: boolean) => {
+    try {
+      const response = await axios.put(`http://localhost:8000/admin/changearchive/${id}`, {
+        value
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Error archiving/unarchiving product');
+    }
+  };
