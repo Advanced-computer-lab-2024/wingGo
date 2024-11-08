@@ -48,3 +48,15 @@ export const replyToComplaint = async (complaintId: string, reply: string) => {
         throw error;
     }
 };
+
+// Function to file a new complaint
+export const fileComplaint = async (touristId: string, complaintData: Omit<Complaint, "_id" | "tourist" | "state" | "reply">) => {
+    try {
+        const touristId = '67240ed8c40a7f3005a1d01d';
+      // Post request to the backend to add a complaint
+      const response = await axios.post(`http://localhost:8000/tourist/complaints/${touristId}`, complaintData);
+      return response.data;
+    } catch (error) {
+      throw new Error("Error filing complaint");
+    }
+  };
