@@ -6,7 +6,7 @@ import { idTypeNew } from "@/interFace/interFace";
 const TourDetailsMain = ({ id }: idTypeNew) => {
   return (
     <>
-      <Breadcrumb titleOne="Tour Details" titleTwo="Tour Details" />
+      <Breadcrumb titleOne="Activity Details" titleTwo="Activity Details" />
       <TourDetails id={id} />
     </>
   );

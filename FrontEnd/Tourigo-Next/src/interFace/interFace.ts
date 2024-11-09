@@ -375,6 +375,11 @@ export interface BookedItinerary {
   itinerary: Itinerary;
   bookingDate: Date;
 }
+export interface BookedActivity {
+  activity: Activity;
+ 
+}
+
 
 export interface Activity {
   _id: string;

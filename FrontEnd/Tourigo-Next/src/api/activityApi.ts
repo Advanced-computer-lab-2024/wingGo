@@ -1,7 +1,7 @@
 // activityApi.ts
 
 import axios from 'axios';
-import { Activity } from '../interFace/interFace';
+import { Activity ,BookedActivity} from '../interFace/interFace';
 const advertiserId ="67077683ab11089b0772dcb6"; 
 const touristId = '67240ed8c40a7f3005a1d01d';
 
@@ -77,5 +77,44 @@ export const bookActivityApi = async ( activityId: string) => {
         throw error;
     }
 };
+export const fetchBookedActivities = async (touristId: string): Promise<BookedActivity[]> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/tourist/booked-activities/${touristId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching booked activities:", error);
+        throw error;
+    }
+};
+export const cancelActivityApi = async (touristId: string, activityId: string) => {
+    try {
+        const response = await axios.delete(`http://localhost:8000/tourist/cancelActivity/${touristId}/${activityId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error canceling activity:", error);
+        throw error;
+    }
+};
+
+export const rateActivityApi = async (touristId : string, activityId : string, rating : Number) => {
+    try {
+        const response = await axios.post(`http://localhost:8000/tourist/rateActivity/${touristId}/${activityId}`, { rating });
+        return response.data;
+    } catch (error) {
+        console.error('Error rating activity:', error);
+        throw error;
+    }
+};
+
+export const commentOnActivityApi = async (touristId : string, activityId : string, comment : string) => {
+    try {
+        const response = await axios.post(`http://localhost:8000/tourist/commentOnActivity/${touristId}/${activityId}`, { comment });
+        return response.data;
+    } catch (error) {
+        console.error('Error commenting on activity:', error);
+        throw error;
+    }
+};
+
 
 

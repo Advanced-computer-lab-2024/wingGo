@@ -8,8 +8,21 @@ import tourImgTwentyOne from "../../../public/assets/images/tour/tour-img-21.png
 import tourImgTwentyTwo from "../../../public/assets/images/tour/tour-img-22.png";
 import { clientReviewData } from "@/data/client-review-data";
 import TourDetailsPostForm from "./TourDetailsPostFrom/TourDetailsPostForm";
+import { Activity } from '@/interFace/interFace';
+import GetRatting from "@/hooks/GetRatting";
 
-const TourDetailTabArea = () => {
+interface TourDetailTabAreaProps {
+  activityData: Activity;
+}
+// Function to format date into a readable string
+const formatDate = (date: string | Date) => {
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" };
+  return dateObj.toLocaleDateString(undefined, options);
+};
+
+
+const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ activityData }) => {
   return (
     <>
       <div className="tour-details-nav-tabs mb-35">
@@ -27,19 +40,7 @@ const TourDetailTabArea = () => {
             >
               Overview
             </button>
-            <button
-              className="nav-link"
-              id="nav-gallery-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#nav-gallery"
-              type="button"
-              role="tab"
-              aria-controls="nav-gallery"
-              aria-selected="false"
-              tabIndex={-1}
-            >
-              Gallery
-            </button>
+           
             <button
               className="nav-link"
               id="nav-feedback-tab"
@@ -63,270 +64,41 @@ const TourDetailTabArea = () => {
             aria-labelledby="nav-overview-tab"
             tabIndex={0}
           >
-            <p className="mb-15">{`Embark on the journey of a lifetime with our "Ultimate Adventure: Exploring Nature's Wonders" tour. This extraordinary expedition is designed for those who crave the thrill of discovery and the serenity of untouched landscapes. Get ready to immerse yourself in the breathtaking beauty and diverse ecosystems of some of the most awe-inspiring natural wonders on Earth.`}</p>
-            <p className="mb-20">{`Join us on the "Ultimate Adventure: Exploring Nature'sWonders" tour and create unforgettable memories as you connect withthe natural world in ways you've never imagined. This tour isperfect for nature enthusiasts, adventure seekers, and anyonelooking to escape the ordinary and embrace the extraordinary. Bookyour spot today and prepare for an adventure of a lifetime!`}</p>
-            <div className="tour-details-list-wrap mb-35">
-              <h4 className="mb-20">Include/ Exclude</h4>
-              <div className="tour-details-list-box">
-                <div className="tour-details-list-include">
-                  <ul>
-                    <li>
-                      <span className="list-icon success">
-                        <i className="fa-solid fa-check"></i>
-                      </span>
-                      Accommodations
-                    </li>
-                    <li>
-                      <span className="list-icon success">
-                        <i className="fa-solid fa-check"></i>
-                      </span>
-                      Meals
-                    </li>
-                    <li>
-                      <span className="list-icon success">
-                        <i className="fa-solid fa-check"></i>
-                      </span>
-                      Transportation
-                    </li>
-                    <li>
-                      <span className="list-icon success">
-                        <i className="fa-solid fa-check"></i>
-                      </span>
-                      Activities
-                    </li>
-                    <li>
-                      <span className="list-icon success">
-                        <i className="fa-solid fa-check"></i>
-                      </span>
-                      Guides
-                    </li>
-                  </ul>
-                </div>
-                <div className="tour-details-list-exclude">
-                  <ul>
-                    <li>
-                      <span className="list-icon danger">
-                        <i className="fa-regular fa-xmark"></i>
-                      </span>
-                      Airfare
-                    </li>
-                    <li>
-                      <span className="list-icon danger">
-                        <i className="fa-regular fa-xmark"></i>
-                      </span>
-                      Additional Meals
-                    </li>
-                    <li>
-                      <span className="list-icon danger">
-                        <i className="fa-regular fa-xmark"></i>
-                      </span>
-                      Optional Activities
-                    </li>
-                    <li>
-                      <span className="list-icon danger">
-                        <i className="fa-regular fa-xmark"></i>
-                      </span>
-                      Travel Insurance
-                    </li>
-                    <li>
-                      <span className="list-icon danger">
-                        <i className="fa-regular fa-xmark"></i>
-                      </span>
-                      Personal Expenses
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+            
+            <p className="mb-15">
+              <strong> Dates:</strong>{" "}
+              {formatDate(activityData.date)}
+            </p>
+            <p className="mb-15">
+              <strong>Time:</strong> {activityData.time}
+            </p>
+            <p className="mb-15">
+              <strong>Category:</strong> {activityData.category}
+            </p>
+            
+
             <div className="tour-details-faq mb-35">
-              <h4 className="mb-20">Tour Plan</h4>
-              <div className="accordion-wrapper faq-style-3">
-                <div className="accordion" id="accordionExampleThree">
-                  <div className="accordion-item">
-                    <h6 className="accordion-header" id="headingNine">
-                      <button
-                        className="accordion-button"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseNine"
-                        aria-expanded="true"
-                        aria-controls="collapseNine"
-                      >
-                        <span>Day 01:</span> Arrival and Exploration
-                      </button>
-                    </h6>
-                    <div
-                      id="collapseNine"
-                      className="accordion-collapse collapse show"
-                      aria-labelledby="headingNine"
-                      data-bs-parent="#accordionExampleThree"
-                    >
-                      <div className="accordion-body">
-                        Arrive at your destination and check into your
-                        accommodation. Lorem ipsum dolor sit amet consectetur
-                        adipiscing elit Ut et massa mi. Aliquam hendrerit urna.
-                        Pellentesque sit amet sapien fringilla, mattis ligula
-                        consectetur, ultrices Maecenas. We are a team of the
-                        dedicated patent professionals.
-                        <div className="accordion-body-list">
-                          <ul>
-                            <li>Morning: Arrival and Check-in</li>
-                            <li>Afternoon: City Tour or Landmarks Visit</li>
-                            <li>Evening: Local Cuisine Experience</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="accordion-item">
-                    <h6 className="accordion-header" id="headingTen">
-                      <button
-                        className="accordion-button collapsed"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseTen"
-                        aria-expanded="false"
-                        aria-controls="collapseTen"
-                      >
-                        <span>Day 02:</span> Adventure and Activities
-                      </button>
-                    </h6>
-                    <div
-                      id="collapseTen"
-                      className="accordion-collapse collapse"
-                      aria-labelledby="headingTen"
-                      data-bs-parent="#accordionExampleThree"
-                    >
-                      <div className="accordion-body">
-                        Arrive at your destination and check into your
-                        accommodation. Lorem ipsum dolor sit amet consectetur
-                        adipiscing elit Ut et massa mi. Aliquam hendrerit urna.
-                        Pellentesque sit amet sapien fringilla, mattis ligula
-                        consectetur, ultrices Maecenas. We are a team of the
-                        dedicated patent professionals.
-                      </div>
-                    </div>
-                  </div>
-                  <div className="accordion-item">
-                    <h6 className="accordion-header" id="headingEleven">
-                      <button
-                        className="accordion-button collapsed"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseEleven"
-                        aria-expanded="false"
-                        aria-controls="collapseEleven"
-                      >
-                        <span>Day 03:</span> Day Trip or Excursion
-                      </button>
-                    </h6>
-                    <div
-                      id="collapseEleven"
-                      className="accordion-collapse collapse"
-                      aria-labelledby="headingEleven"
-                      data-bs-parent="#accordionExampleThree"
-                    >
-                      <div className="accordion-body">
-                        Arrive at your destination and check into your
-                        accommodation. Lorem ipsum dolor sit amet consectetur
-                        adipiscing elit Ut et massa mi. Aliquam hendrerit urna.
-                        Pellentesque sit amet sapien fringilla, mattis ligula
-                        consectetur, ultrices Maecenas. We are a team of the
-                        dedicated patent professionals.
-                      </div>
-                    </div>
-                  </div>
-                  <div className="accordion-item">
-                    <h6 className="accordion-header" id="headingTwelve">
-                      <button
-                        className="accordion-button collapsed"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseTwelve"
-                        aria-expanded="false"
-                        aria-controls="collapseTwelve"
-                      >
-                        <span>Day 04:</span> Culmination and Departure
-                      </button>
-                    </h6>
-                    <div
-                      id="collapseTwelve"
-                      className="accordion-collapse collapse"
-                      aria-labelledby="headingTwelve"
-                      data-bs-parent="#accordionExampleThree"
-                    >
-                      <div className="accordion-body">
-                        Arrive at your destination and check into your
-                        accommodation. Lorem ipsum dolor sit amet consectetur
-                        adipiscing elit Ut et massa mi. Aliquam hendrerit urna.
-                        Pellentesque sit amet sapien fringilla, mattis ligula
-                        consectetur, ultrices Maecenas. We are a team of the
-                        dedicated patent professionals.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+  
+  <div className="accordion-wrapper faq-style-3">
+    <div className="accordion" id="accordionExampleThree">
+      
+    </div>
+  </div>
+  <style jsx>{`
+  /* Hide the default Bootstrap accordion arrow */
+  .accordion-button::after {
+    display: none;
+  }
+`}</style>
+
+</div>
+
+
+
           </div>
-          <div
-            className="tab-pane fade"
-            id="nav-gallery"
-            role="tabpanel"
-            aria-labelledby="nav-gallery-tab"
-            tabIndex={0}
-          >
-            <div className="tour-details-gallery mb-35">
-              <h4 className="mb-20">Tour Galley</h4>
-              <div className="row gy-24">
-                <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-6">
-                  <div className="tour-details-gallery-thumb image-hover-effect-two position-relative">
-                    <Image
-                      src={tourImgTwentyOne}
-                      loader={imageLoader}
-                      style={{ width: "100%", height: "auto" }}
-                      alt="image"
-                    />
-                  </div>
-                </div>
-                <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-6">
-                  <div className="row gy-24">
-                    <div className="col-xxl-12">
-                      <div className="tour-details-gallery-thumb image-hover-effect-two position-relative">
-                        <Image
-                          src={tourImgTwentyTwo}
-                          loader={imageLoader}
-                          style={{ width: "100%", height: "auto" }}
-                          alt="image"
-                        />
-                      </div>
-                    </div>
-                    <div className="col-xxl-12">
-                      <div className="tour-details-gallery-thumb image-hover-effect-two position-relative">
-                        <Image
-                          src={tourImgNine}
-                          loader={imageLoader}
-                          style={{ width: "100%", height: "auto" }}
-                          alt="image"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="tour-details-location mb-35">
-              <h4 className="mb-20">Tour Location</h4>
-              <div className="tour-details-location-map">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d89245.36062680863!2d25.596462799999998!3d45.652478099999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40b35b862aa214f1%3A0x6cf5f2ef54391e0f!2sBra%C8%99ov%2C%20Romania!5e0!3m2!1sen!2sbd!4v1707640089632!5m2!1sen!2sbd"
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
-              </div>
-            </div>
-          </div>
+          {/* Gallery Tab */}
+         
+          {/* Feedback Tab */}
           <div
             className="tab-pane fade"
             id="nav-feedback"
@@ -335,179 +107,75 @@ const TourDetailTabArea = () => {
             tabIndex={0}
           >
             <div className="tour-details-rating-wrapper mb-35">
-              <div className="row gy-24 align-items-center">
-                <div className="col-xl-2 col-lg-3 col-md-4 col-sm-4">
-                  <div className="rating-box">
-                    <div className="inner">
-                      <div className="rating-number">5.0</div>
-                      <div className="rating">
-                        <Link href="#">
-                          <i className="fa fa-star"></i>
-                        </Link>
-                        <Link href="#">
-                          <i className="fa fa-star"></i>
-                        </Link>
-                        <Link href="#">
-                          <i className="fa fa-star"></i>
-                        </Link>
-                        <Link href="#">
-                          <i className="fa fa-star"></i>
-                        </Link>
-                        <Link href="#">
-                          <i className="fa fa-star"></i>
-                        </Link>
-                      </div>
-                      <span className="sub-title">(234 Review)</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-lg-10 col-md-8 col-sm-7">
-                  <div className="review-wrapper">
-                    <div className="single-progress-bar">
-                      <div className="rating-text">5</div>
+  <div className="row gy-24 align-items-center">
+    <div className="col-xl-2 col-lg-3 col-md-4 col-sm-4">
+      <div className="rating-box">
+        <div className="inner">
+          {/* Display the average rating rounded to one decimal place */}
+          <div className="rating-number">
+            {activityData.averageRating.toFixed(1)}
+          </div>
+          <div className="rating">      
+        <GetRatting averageRating={activityData.averageRating} />
+      </div>
 
+          <span className="sub-title">
+            ({activityData.ratings.length} {activityData.comments.length === 1 ? "Review" : "Reviews"})
+          </span>
+        </div>
+      </div>
+    </div>
+    <div className="col-lg-10 col-md-8 col-sm-7">
+                <div className="review-wrapper">
+                  {[5, 4, 3, 2, 1].map((star) => {
+                    const count = activityData.ratings.filter((ratingObj) => ratingObj.rating === star).length;
+                    const percentage = activityData.ratings.length
+                      ? ((count / activityData.ratings.length) * 100).toFixed(1)
+                      : 0;
+                    return (
+                      <div className="single-progress-bar" key={star}>
+                      <div className="rating-text">{star}</div>
                       <div className="progress">
                         <div
-                          className="progress-bar bg-1"
+                          className={`progress-bar progress-bar-${star}`}
                           role="progressbar"
-                          style={{ width: "82%" }}
-                          aria-valuenow={63}
+                          style={{ width: `${percentage}%` }}
+                          aria-valuenow={Number(percentage)}
                           aria-valuemin={0}
                           aria-valuemax={100}
                         ></div>
                       </div>
-                      <span className="value-text">82%</span>
-                      <span className="number">212</span>
+                      <span className="value-text">{percentage}%</span>
+                      <span className="number">{count}</span>
                     </div>
-                    <div className="single-progress-bar">
-                      <div className="rating-text">4</div>
-                      <div className="progress">
-                        <div
-                          className="progress-bar bg-2"
-                          role="progressbar"
-                          style={{ width: "8%" }}
-                          aria-valuenow={29}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        ></div>
-                      </div>
-                      <span className="value-text">8%</span>
-                      <span className="number">09</span>
-                    </div>
-                    <div className="single-progress-bar">
-                      <div className="rating-text">3</div>
-                      <div className="progress">
-                        <div
-                          className="progress-bar bg-3"
-                          role="progressbar"
-                          style={{ width: "3%" }}
-                          aria-valuenow={6}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        ></div>
-                      </div>
-                      <span className="value-text">3%</span>
-                      <span className="number">02</span>
-                    </div>
-                    <div className="single-progress-bar">
-                      <div className="rating-text">2</div>
-                      <div className="progress">
-                        <div
-                          className="progress-bar bg-4"
-                          role="progressbar"
-                          style={{ width: "2%" }}
-                          aria-valuenow={1}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        ></div>
-                      </div>
-                      <span className="value-text">2%</span>
-                      <span className="number">01</span>
-                    </div>
-                    <div className="single-progress-bar">
-                      <div className="rating-text">1</div>
-                      <div className="progress">
-                        <div
-                          className="progress-bar bg-5"
-                          role="progressbar"
-                          style={{ width: "7%" }}
-                          aria-valuenow={1}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        ></div>
-                      </div>
-                      <span className="value-text">7%</span>
-                      <span className="number">10</span>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
-            <div className="tour-details-rating-wrapper">
-              <div className="rewiew-content">
-                {clientReviewData &&
-                  clientReviewData.map((item) => (
-                    <div key={item.id} className="tour-review-wrapper">
-                      <div className="media">
-                        <div className="thumbnail">
-                          <Link href="#">
-                            <Image
-                              src={item.img}
-                              loader={imageLoader}
-                              style={{ width: "100%", height: "auto" }}
-                              alt="Author Images"
-                            />
-                          </Link>
-                        </div>
-                        <div className="media-body">
-                          <div className="author-info">
-                            <h5 className="title">
-                              <Link
-                                className="hover-flip-item-wrapper"
-                                href="#"
-                              >
-                                {item.name}
-                              </Link>
-                              <Link href="#">
-                                <i className="fa-solid fa-thumbs-up"></i>
-                              </Link>
-                            </h5>
-                            <ul className="bd-meta">
-                              <li className="has-seperator">
-                                On: <span>{item.date}</span>
-                              </li>
-                              <li>
-                                <div className="rating">
-                                  <Link href="#">
-                                    <i className="fa fa-star"></i>
-                                  </Link>
-                                  <Link href="#">
-                                    <i className="fa fa-star"></i>
-                                  </Link>
-                                  <Link href="#">
-                                    <i className="fa fa-star"></i>
-                                  </Link>
-                                  <Link href="#">
-                                    <i className="fa fa-star"></i>
-                                  </Link>
-                                  <Link href="#">
-                                    <i className="fa fa-star"></i>
-                                  </Link>
-                                </div>
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="content">
-                            <p className="description">{item.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-            {/*tour details post form */}
-            <TourDetailsPostForm />
+            <style jsx>{`
+              .rating-box .fa-star.filled {
+                color: #ffd700; /* Gold color for filled stars */
+              }
+                .progress-bar-5 {
+                  background-color: #4CAF50; /* Green */
+                }
+                .progress-bar-4 {
+                  background-color: #8BC34A; /* Light Green */
+                }
+                .progress-bar-3 {
+                  background-color: #FFC107; /* Amber */
+                }
+                .progress-bar-2 {
+                  background-color: #FF9800; /* Orange */
+                }
+                .progress-bar-1 {
+                  background-color: #F44336; /* Red */
+                }
+            `}</style>
+          </div>
+
+             <TourDetailsPostForm activityData={activityData} />
           </div>
         </div>
       </div>
