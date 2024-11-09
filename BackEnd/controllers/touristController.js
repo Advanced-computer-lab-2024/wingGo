@@ -832,6 +832,7 @@ const viewComplaints = async (req, res) => {
         res.status(500).json({ message: 'Error retrieving complaints.', error });
     }
 };
+
 const bookItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params; // Extracting touristId and itineraryId from URL parameters
     const { bookingDate } = req.query;

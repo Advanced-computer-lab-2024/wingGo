@@ -10,6 +10,7 @@ import { Itinerary } from "@/interFace/interFace";
 import axios from "axios";
 import TourSingleCard from "../common/tourElements/TourSingleCardIt";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Itinerary | null>(null);
@@ -27,6 +28,12 @@ const TourDetails = ({ id }: idTypeNew) => {
     fetchItinerary();
   }, [id]);
 
+  const router = useRouter(); // Initialize router
+
+  const handleBookNowClick = () => {
+    router.push(`/booking-it/${id}`);
+  };
+
   if (!data) return <div>Loading...</div>;
 
   return (
@@ -39,7 +46,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                 <div className="tour-details-wrapper">
                   <div className="tour-details mb-25">
                     <div className="tour-details-thumb details-slide-full mb-30">
-                      <Image
+                    <Image
                         src="/images/default-image.jpg" // Placeholder image
                         loader={imageLoader}
                         style={{ width: "100%", height: "auto" }}
@@ -56,6 +63,16 @@ const TourDetails = ({ id }: idTypeNew) => {
                             ${data.price}
                             <span>/Per Person</span>
                           </h4>
+                          <br/><br/>
+                          <div className="row gy-24 "  style={{ paddingLeft: '10px'}}   >
+                          <button
+                        onClick={() => handleBookNowClick()}
+                        className="bd-gradient-btn btn-style radius-60 btn-tertiary"
+                        style={{ padding: '6px 12px', fontSize: '14px', borderRadius: '20px',  float: 'right', paddingRight: '10px', marginRight: '20px', width: '150px', textAlign: 'center' }} // Adjusted for smaller size and less rounded shape
+                        >
+                          Book Now
+                        </button>   
+                        </div> 
                         </div>
                         <div className="tour-details-meta-right d-flex flex-wrap gap-10 align-items-center justify-content-between">
                           <div className="rating-badge border-badge">
@@ -64,6 +81,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                               {data.averageRating ? data.averageRating.toFixed(1) : 0}
                             </span>
                           </div>
+                     
                           <div className="theme-social">
                             <Link href="https://www.facebook.com/">
                               <i className="icon-facebook"></i>
@@ -78,6 +96,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                               <i className="icon-youtube"></i>
                             </Link>
                           </div>
+                          
                         </div>
                       </div>
                       {/* Include more fields as necessary */}
