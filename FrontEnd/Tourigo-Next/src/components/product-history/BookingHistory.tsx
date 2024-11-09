@@ -6,10 +6,11 @@ import { getPurchasedProducts } from '@/data/prod-data'; // Change to product da
 import { Product } from '@/interFace/interFace';
 import Link from 'next/link';
 import RateCommentModal from './RateCommentModal';
-
+import { fetchProductImage } from '@/api/productApi';
 
 const BookingHistory = () => {
     const [bookedProducts, setBookedProducts] = useState<Product[]>([]);
+    const [imageUrls, setImageUrls] = useState<{ [key: string]: string | null }>({});
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [activeTab, setActiveTab] = useState('Product'); // Update tab to reflect product history
     const touristId = "672a3a4001589d5085322e88";
@@ -27,8 +28,27 @@ const BookingHistory = () => {
         };
         fetchData();
     }, []);
-    
-    
+
+    useEffect(() => {
+        const loadImages = async () => {
+            const urls: { [key: string]: string | null } = {};
+            for (const product of bookedProducts) {
+                if (product._id && product.picture) { // Check if the product has an image
+                    try {
+                        const url = await fetchProductImage(product._id);
+                        urls[product._id] = url || null; // Store URL or null if no URL is found
+                    } catch (error) {
+                        console.error("Failed to load image for product:", product._id, error);
+                        urls[product._id] = null;
+                    }
+                }
+            }
+            setImageUrls(urls);
+        };
+        if (bookedProducts.length > 0) {
+            loadImages();
+        }
+    }, [bookedProducts]);
 
     const handleRateCommentClick = (product: Product) => {
         setSelectedProduct(product);
@@ -37,21 +57,6 @@ const BookingHistory = () => {
     const closeModal = () => {
         setSelectedProduct(null);
     };
-
-    // const handleCancelProductClick = async (product: Product) => {
-    //     const userConfirmed = window.confirm("Are you sure you want to cancel this product booking?");
-    //     if (!userConfirmed) return;
-    
-    //     try {
-    //         await cancelProductApi(touristId, product._id);
-    //         alert('Booking canceled successfully');
-    //         setBookedProducts((prev) =>
-    //             prev.filter((item) => item._id !== product._id)
-    //         );
-    //     } catch (error: any) {
-    //         alert('Failed to cancel the booking');
-    //     }
-    // };
 
     return (
         <>
@@ -73,12 +78,19 @@ const BookingHistory = () => {
                                                         <td>
                                                             <div className="dashboard-thumb-wrapper p-relative">
                                                                 <div className="dashboard-thumb image-hover-effect-two position-relative">
-                                                                    <Image
-                                                                        src={product.image || "/images/default-image.jpg"}
-                                                                        loader={imageLoader}
-                                                                        style={{ width: '100%', height: "auto" }}
-                                                                        alt="product image" 
-                                                                    />
+                                                                    {product._id && imageUrls[product._id] ? (
+                                                                        <Image
+                                                                            src={imageUrls[product._id]!}
+                                                                            loader={imageLoader}
+                                                                            alt="Product image"
+                                                                            width={80}
+                                                                            height={80}
+                                                                            unoptimized
+                                                                            style={{ objectFit: "cover", borderRadius: "4px" }}
+                                                                        />
+                                                                    ) : (
+                                                                        <p>No Image for this product</p>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         </td>

@@ -17,8 +17,10 @@ import { cart_product, decrease_quantity } from "@/redux/slices/cartSliceproduct
 import { imageLoader } from "@/hooks/image-loader";
 import ReviewComments from "./ReviewComments"; 
 import StarRating from "@/components/Products/StarRating"; 
-import { fetchSellerData, purchaseProduct, editProduct } from "@/api/productApi"; 
+import { fetchSellerData, purchaseProduct, editProduct,fetchProductImage } from "@/api/productApi"; 
 import { calculateAverageRating } from "@/utils/utils"; 
+
+
 const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string }) => {
   const touristId = "672a3a4001589d5085322e88";
   const hardcodedSellerId = "67158afc7b1ec4bfb0240575"; // Hardcoded sellerId for now unt
@@ -28,22 +30,26 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [editData, setEditData] = useState<Partial<Product>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [productImageUrl, setProductImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("Fetching product data...");
         const products = await getProductData();
         const product = products.find((item) => item._id === id);
         setItem(product || null);
-        if (product && product.seller) {
-          const sellerData = await fetchSellerData(product.seller);
-          setSellerName(sellerData.name);
+
+        if (product && product._id) {
+          console.log(`Fetching image for product ID: ${product._id}`);
+          const imageUrl = await fetchProductImage(product._id);
+          console.log("Fetched Image URL:", imageUrl);
+          setProductImageUrl(imageUrl);
         } else {
-          setSellerName("Admin");
+          console.warn("Product not found or missing ID");
         }
-        setProducts(products.filter((item) => item._id !== id));
       } catch (err) {
-        console.error("Error fetching product or seller data:", err);
+        console.error("Error fetching product or image data:", err);
       }
     };
     fetchData();
@@ -93,44 +99,22 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
   // Adding the `return` statement to return JSX
   return (
     <>
-      <div className="row gy-24 justify-content-between">
+       <div className="row gy-24 justify-content-between">
         <div className="col-xxl-6 col-xl-6 col-lg-6">
           <div className="product-details-thumb-wrap">
             <div className="product-details-thumb-top mb-24">
-              <Swiper
-                thumbs={{ swiper: thumbsSwiper }}
-                loop={true}
-                spaceBetween={0}
-                slidesPerView={1}
-                freeMode={false}
-                watchSlidesProgress={true}
-                modules={[Navigation, Controller, FreeMode, Thumbs]}
-                navigation={{
-                  nextEl: ".product-details-button-next",
-                  prevEl: ".product-details-button-prev",
-                }}
-              >
-                {products.map((item, index) => (
-                  <SwiperSlide key={index}>
-                    <div className="swiper-slides">
-                      <Image
-                        src={item?.image || "/images/default-image.jpg"}
-                        loader={imageLoader}
-                        style={{ width: "100%", height: "auto" }}
-                        alt="Product Image"
-                      />
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-              <div className="product-details-nav-button">
-                <div className="product-details-button-prev">
-                  <i className="fa-solid fa-arrow-left"></i>
-                </div>
-                <div className="product-details-button-next">
-                  <i className="fa-solid fa-arrow-right"></i>
-                </div>
-              </div>
+              {productImageUrl ? (
+                <Image
+                  src={productImageUrl}
+                  alt="Product Image"
+                  width={500} // Adjust width as needed
+                  height={500} // Adjust height as needed
+                  unoptimized
+                  style={{ width: "100%", height: "auto", objectFit: "cover" }}
+                />
+              ) : (
+                <p>No image for this product...</p>
+              )}
             </div>
           </div>
         </div>
@@ -245,7 +229,7 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
         }
 
         .edit-circle-btn i {
-          font-size: 0.9rem; /* Smaller icon size */
+          font-size: 0.9rem;
         }
 
         .edit-circle-btn:hover {
