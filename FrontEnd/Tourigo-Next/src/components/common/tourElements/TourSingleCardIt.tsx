@@ -10,6 +10,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import axios from "axios";
 import { toggleFlagItinerary, toggleItineraryActivation } from '@/api/itineraryApi';
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 
 interface ItourPropsType {
   tour: Itinerary; // Use Itinerary type
@@ -30,6 +31,8 @@ const TourSingleCard = ({
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const rating = tour.averageRating || 1; // Use Itinerary's averageRating, default to 1
+
+  const router = useRouter(); // Initialize router
 
   // Local state to keep track of the flagged and deactivated status
   const [isFlagged, setIsFlagged] = useState(tour.flagged);
@@ -52,6 +55,10 @@ const TourSingleCard = ({
     } catch (error) {
       console.error("Error toggling activation status:", error);
     }
+  };
+
+  const handleBookNowClick = () => {
+    router.push(`/booking-it/${tour._id}`);
   };
 
   return (
@@ -145,12 +152,10 @@ const TourSingleCard = ({
                   <span>{tour.duration}</span>
                 </div>
                 <div className="tour-btn">
-                  <button
-                    onClick={() => setModalData(tour)}
+                <button
+                    onClick={handleBookNowClick} // Updated to handle routing
                     className="bd-text-btn style-two"
                     type="button"
-                    data-bs-toggle="modal"
-                    data-bs-target="#popUpBookingForm"
                   >
                     Book Now
                     <span className="icon__box">
