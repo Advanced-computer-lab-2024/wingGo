@@ -4,6 +4,7 @@ import ProfileDetails from './ProfileDetails';
 import LoyaltyProgram from './LoyaltyProgram';
 import { viewTouristProfile } from "@/api/ProfileApi";
 import { set } from "date-fns";
+import Prefrences from "./Prefrences";
 
 
 interface ProfileDetailsProps {
@@ -44,7 +45,7 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
         return <LoyaltyProgram profileData={profileData} id={id} refreshData={refresh} setRefreshData={setRefresh}/>;
       case 'Preferences':
         console.log('Preferences');
-        return <h2>Preferences</h2>;
+        return <Prefrences />;
       default:
         return null;
     }
