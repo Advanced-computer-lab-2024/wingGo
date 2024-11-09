@@ -133,10 +133,11 @@ const changePassword = async (req, res) => {
 
         // 3. Compare the old password with the hashed password in LoginCredentials
         const isMatch = await bcrypt.compare(oldPassword, userCredentials.password); // Compare old password
-        if (!isMatch) {
+        if (oldPassword === newPassword) {
             return res.status(400).json({ message: 'Old password is incorrect' });
         }
-
+        console.log(oldPassword);
+        console.log(newPassword, confirmNewPassword);
         // 4. Check if the new password matches the confirm password
         if (newPassword !== confirmNewPassword) {
             return res.status(400).json({ message: 'New password and confirm password do not match' });
