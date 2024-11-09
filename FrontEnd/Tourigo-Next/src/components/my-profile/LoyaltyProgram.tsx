@@ -6,9 +6,11 @@ import { FaWallet } from "react-icons/fa";
 
 interface Props {
     id: string,
-    profileData: any
+    profileData: any,
+    refreshData: boolean,
+    setRefreshData: any
     }
-const LoyaltyProgram: React.FC<Props> = ({id, profileData}) => {
+const LoyaltyProgram: React.FC<Props> = ({id, profileData, refreshData, setRefreshData}) => {
 
     const [badgeLevel, setBadgeLevel] = useState(profileData?.badge.level);
     const [walletCredit, setWalletCredit] = useState(profileData?.wallet);
@@ -21,6 +23,7 @@ const LoyaltyProgram: React.FC<Props> = ({id, profileData}) => {
             setWalletCredit(response.wallet);
             setLoyalityPoints(response.loyaltyPoints);
             setBadgeLevel(response.badge.level);
+            setRefreshData(true);
           // Handle the response (e.g., update the UI or show a success message)
         } catch (error) {
           console.error('Error redeeming points:', error);

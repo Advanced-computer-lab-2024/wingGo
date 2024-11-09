@@ -3,6 +3,7 @@ import React, {useState, useEffect} from "react";
 import ProfileDetails from './ProfileDetails';
 import LoyaltyProgram from './LoyaltyProgram';
 import { viewTouristProfile } from "@/api/ProfileApi";
+import { set } from "date-fns";
 
 
 interface ProfileDetailsProps {
@@ -15,6 +16,7 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
 
   const [activeTab, setActiveTab] = useState('profile');
   const [profileData, setProfileData] = useState<any>(null);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -28,7 +30,9 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
     };
 
     fetchProfileData();
-  }, [id]);
+    setRefresh(false);
+    console.log('Refresh:', refresh);
+  }, [id, refresh]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -37,7 +41,7 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
         return <ProfileDetails profileData={profileData} id={id}/>;
       case 'loyalty':
         console.log('loyalty');
-        return <LoyaltyProgram profileData={profileData} id={id}/>;
+        return <LoyaltyProgram profileData={profileData} id={id} refreshData={refresh} setRefreshData={setRefresh}/>;
       case 'Preferences':
         console.log('Preferences');
         return <h2>Preferences</h2>;
