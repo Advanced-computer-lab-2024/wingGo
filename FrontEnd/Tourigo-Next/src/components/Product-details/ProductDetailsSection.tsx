@@ -170,7 +170,7 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
                     <span className="bd-primary-btn-text">Purchase</span>
                     <span className="bd-primary-btn-circle"></span>
                   </button>
-                </div>
+                </div>          
               )}
             </div>
           </div>

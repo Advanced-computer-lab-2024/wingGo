@@ -9,6 +9,7 @@ import { idTypeNew } from "@/interFace/interFace";
 import { Activity } from "@/interFace/interFace";
 import TourSingleCard from "../common/tourElements/ActivitySingleCard";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
+import { toast } from "react-toastify";
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Activity | null>(null);
@@ -68,6 +69,18 @@ const TourDetails = ({ id }: idTypeNew) => {
                           ${data.price}
                           <span>/Per Person</span>
                         </h4>
+                        <button
+                              className="bd-primary-btn btn-style radius-60"
+                              onClick={() => {
+                                navigator.clipboard.writeText(window.location.href);
+                                toast.success("Link copied to clipboard!");
+                              }}
+                            >
+                              <span className="bd-primary-btn-text">Share Link</span>
+                              <span className="bd-primary-btn-circle">
+                                <i className="fa fa-share" />
+                              </span>
+                            </button>
                       </div>
                       <div className="tour-details-meta-right d-flex flex-wrap gap-10 align-items-center justify-content-between">
                         <div className="rating-badge border-badge">

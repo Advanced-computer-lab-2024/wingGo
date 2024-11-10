@@ -11,6 +11,7 @@ import { Place } from "@/interFace/interFace";
 import { idTypeNew } from "@/interFace/interFace";
 import TourSingleCard from "../common/tourElements/TourSingleCardPlaces";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
+import { toast } from "react-toastify";
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Place | null>(null);
@@ -81,6 +82,18 @@ const TourDetails = ({ id }: idTypeNew) => {
                             <Link href="https://www.youtube.com/">
                               <i className="icon-youtube"></i>
                             </Link>
+                            <button
+                              className="bd-primary-btn btn-style radius-60"
+                              onClick={() => {
+                                navigator.clipboard.writeText(window.location.href);
+                                toast.success("Link copied to clipboard!");
+                              }}
+                            >
+                              <span className="bd-primary-btn-text">Share Link</span>
+                              <span className="bd-primary-btn-circle">
+                                <i className="fa fa-share" />
+                              </span>
+                            </button>
                           </div>
                         </div>
                       </div>

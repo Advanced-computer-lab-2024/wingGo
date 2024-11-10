@@ -16,10 +16,10 @@ interface ProfileDetailsProps {
 
 const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData}) => {
 
-    console.log('Profile Data:', profileData);
+    
     const filterData = teamData.find((item) => item?.id == 1);
     const tourist = profileData;
-    console.log('Tourist:', tourist);
+    
   
     
     const formatDate = (dateString: string) => {

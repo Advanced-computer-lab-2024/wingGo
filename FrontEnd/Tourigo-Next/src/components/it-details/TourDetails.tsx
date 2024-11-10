@@ -11,6 +11,7 @@ import axios from "axios";
 import TourSingleCard from "../common/tourElements/TourSingleCardIt";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import { toast } from "react-toastify";
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Itinerary | null>(null);
@@ -71,7 +72,19 @@ const TourDetails = ({ id }: idTypeNew) => {
                         style={{ padding: '6px 12px', fontSize: '14px', borderRadius: '20px',  float: 'right', paddingRight: '10px', marginRight: '20px', width: '150px', textAlign: 'center' }} // Adjusted for smaller size and less rounded shape
                         >
                           Book Now
-                        </button>   
+                        </button>
+                        <button
+                              className="bd-primary-btn btn-style radius-60"
+                              onClick={() => {
+                                navigator.clipboard.writeText(window.location.href);
+                                toast.success("Link copied to clipboard!");
+                              }}
+                            >
+                              <span className="bd-primary-btn-text">Share Link</span>
+                              <span className="bd-primary-btn-circle">
+                                <i className="fa fa-share" />
+                              </span>
+                            </button>   
                         </div> 
                         </div>
                         <div className="tour-details-meta-right d-flex flex-wrap gap-10 align-items-center justify-content-between">
