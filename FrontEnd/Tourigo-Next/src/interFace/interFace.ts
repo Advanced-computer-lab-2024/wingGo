@@ -470,5 +470,15 @@ export interface Complaint{
     reply: string[];
 
   }
+  export interface IPendingUser {
+    _id: string;               // MongoDB automatically generates an _id field
+    email: string;
+    username: string;
+    password: string;
+    role: string;
+    IDdocument: string;
+    certificate: string;
+   
+}
 
 

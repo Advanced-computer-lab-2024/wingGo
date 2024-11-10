@@ -1,4 +1,4 @@
-import ProfileTabs from "@/components/adminDashboard/ProfileTabs";
+import ProfileTabs from "@/components/my-profile/ProfileTabs";
 import ProfileTabsMain from "@/components/adminDashboard/ProfileTabsMain";
 import TeamDetailsMain from "@/components/team-details/TeamDetailsMain";
 import MetaData from "@/hooks/useMetaData";
