@@ -133,10 +133,11 @@ const changePassword = async (req, res) => {
 
         // 3. Compare the old password with the hashed password in LoginCredentials
         const isMatch = await bcrypt.compare(oldPassword, userCredentials.password); // Compare old password
-        if (!isMatch) {
+        if (oldPassword === newPassword) {
             return res.status(400).json({ message: 'Old password is incorrect' });
         }
-
+        console.log(oldPassword);
+        console.log(newPassword, confirmNewPassword);
         // 4. Check if the new password matches the confirm password
         if (newPassword !== confirmNewPassword) {
             return res.status(400).json({ message: 'New password and confirm password do not match' });
@@ -1370,29 +1371,19 @@ const rateActivity = async (req, res) => {
     const { rating } = req.body; // Expecting a rating in the body
 
     try {
-        console.log(`Received request: Tourist ID: ${touristId}, Activity ID: ${activityId}, Rating: ${rating}`);
+        // Fetch the completed activities for the tourist
+        const completedActivities = await getCompletedActivities(touristId); // Ensure correct touristId
 
-        // Check if tourist exists
-        const tourist = await Tourist.findById(touristId);
-        if (!tourist) {
-            return res.status(404).json({ message: 'Tourist not found' });
+        // Check if the activity is in the list of completed activities
+        const isCompleted = completedActivities.some(activity => activity._id.toString() === activityId);
+        if (!isCompleted) {
+            return res.status(400).json({ message: 'You can only rate activities that you have completed.' });
         }
 
-        // Check if activity exists
+        // Find the activity
         const activity = await Activity.findById(activityId);
         if (!activity) {
             return res.status(404).json({ message: 'Activity not found' });
-        }
-
-        // Check if the tourist has attended (booked) the activity
-        const attendedActivity = tourist.bookedActivities.includes(activityId);
-        if (!attendedActivity) {
-            return res.status(400).json({ message: 'Activity not attended by this tourist' });
-        }
-
-        // Initialize ratings array if it doesn't exist
-        if (!Array.isArray(activity.ratings)) {
-            activity.ratings = [];
         }
 
         // Check if the tourist has already rated this activity
@@ -1420,65 +1411,20 @@ const rateActivity = async (req, res) => {
         // Save the updated activity
         await activity.save();
 
-        res.status(200).json({
+        // Send a response with the updated information
+        return res.status(200).json({
             message: 'Activity rated successfully',
             averageRating: activity.averageRating,
             activity
         });
+
     } catch (error) {
-        console.error('Error processing rating:', error);  // Log the full error for debugging
-        res.status(500).json({ message: 'Error processing rating', error });
+        console.error('Error processing rating:', error);
+        return res.status(500).json({ message: 'Error processing rating', error });
     }
 };
-const commentOnActivity = async (req, res) => {
-    const { touristId, activityId } = req.params;
-    const { comment } = req.body; // Expecting a comment in the body
 
-    try {
-        console.log(`Received request: Tourist ID: ${touristId}, Activity ID: ${activityId}, Comment: ${comment}`);
 
-        // Check if tourist exists
-        const tourist = await Tourist.findById(touristId);
-        if (!tourist) {
-            console.error('Tourist not found');
-            return res.status(404).json({ message: 'Tourist not found' });
-        }
-
-        // Check if activity exists
-        const activity = await Activity.findById(activityId);
-        if (!activity) {
-            console.error('Activity not found');
-            return res.status(404).json({ message: 'Activity not found' });
-        }
-
-        // Check if the tourist has attended (booked) the activity
-        const attendedActivity = tourist.bookedActivities.includes(activityId);
-        if (!attendedActivity) {
-            console.error('Activity not attended by this tourist');
-            return res.status(400).json({ message: 'Activity not attended by this tourist' });
-        }
-
-        // Initialize `comments` array if it doesn't exist
-        if (!Array.isArray(activity.comments)) {
-            activity.comments = [];
-        }
-
-        // Add the new comment as a separate entry, even if the tourist has commented before
-        activity.comments.push({ touristId, comment });
-        console.log('Adding new comment');
-
-        // Save the updated activity
-        await activity.save();
-
-        res.status(200).json({
-            message: 'Comment added successfully',
-            activity
-        });
-    } catch (error) {
-        console.error('Error processing comment:', error);  // Log the full error for debugging
-        res.status(500).json({ message: 'Error processing comment', error });
-    }
-};
 
 
 const deleteTouristIfEligible = async (req, res) => {
@@ -1548,6 +1494,34 @@ const getCompletedItineraries = async (req, res) => {
         res.status(500).json({ error: 'An error occurred while retrieving completed itineraries' });
     }
 };
+const getCompletedActivities = async (touristId) => {
+    const currentDate = new Date();
+
+    try {
+        // Ensure the touristId is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(touristId)) {
+            throw new Error('Invalid touristId');
+        }
+
+        // Find the tourist and populate the booked activities to get activity details
+        const tourist = await Tourist.findById(touristId).populate('bookedActivities');
+
+        if (!tourist) {
+            throw new Error('Tourist not found');
+        }
+
+        // Filter for completed activities based on the activity date being in the past
+        const completedActivities = tourist.bookedActivities.filter(activity =>
+            activity.date < currentDate // Check if the activity date is in the past
+        );
+
+        return completedActivities;
+    } catch (error) {
+        console.error('Error fetching completed activities:', error);
+        throw new Error('An error occurred while retrieving completed activities');
+    }
+};
+
 //function to rate an itinerary but i want to add a check to ensure that the tourist has actually booked the itinerary before rating it and use the getCompletedItineraries function to check if the itinerary is in the list of completed itineraries
 
 const rateItinerary = async (req, res) => {
@@ -1629,6 +1603,68 @@ const commentOnItinerary = async (req, res) => {
 
     console.log('rate done');
 };
+const commentOnActivity = async (req, res) => {
+    const { touristId, activityId } = req.params; // Retrieve touristId and activityId from the URL
+    const { comment } = req.body;
+
+    // Check if touristId and activityId are provided
+    if (!touristId || !activityId) {
+        return res.status(400).json({ message: 'Missing required parameters: touristId or activityId' });
+    }
+
+    try {
+        // Log the touristId to confirm it is correctly passed
+        console.log(`Received touristId: ${touristId} and activityId: ${activityId}`);
+
+        // Fetch the completed activities for the tourist
+        let completedActivities;
+        try {
+            completedActivities = await getCompletedActivities(touristId); // Pass touristId directly like in rateActivity
+        } catch (err) {
+            console.error('Error fetching completed activities:', err.message);
+            return res.status(500).json({ message: 'Error occurred while retrieving completed activities', error: err.message });
+        }
+
+        // Check if completed activities are retrieved
+        if (!completedActivities || completedActivities.length === 0) {
+            return res.status(404).json({ message: 'No completed activities found for this tourist.' });
+        }
+
+        // Check if the activity is in the list of completed activities
+        const isCompleted = completedActivities.some(activity => activity._id.toString() === activityId);
+
+        if (!isCompleted) {
+            return res.status(400).json({ message: 'You can only comment on activities that you have completed.' });
+        }
+
+        // Find the activity by its ID
+        const activity = await Activity.findById(activityId);
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found' });
+        }
+
+        // Initialize `comments` array if it doesn't exist
+        if (!Array.isArray(activity.comments)) {
+            activity.comments = [];
+        }
+
+        // Add the new comment as a separate entry
+        activity.comments.push({ touristId, comment });
+        console.log('Adding new comment');
+
+        // Save the updated activity
+        await activity.save();
+
+        res.status(200).json({
+            message: 'Comment added successfully',
+            activity
+        });
+    } catch (error) {
+        console.error('Error processing comment:', error);  // Log the full error for debugging
+        res.status(500).json({ message: 'Error processing comment', error: error.message });
+    }
+};
+
 
 
 

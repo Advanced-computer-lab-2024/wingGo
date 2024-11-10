@@ -11,10 +11,17 @@ const menu_data: MenuType[] = [
     hasDropdown: true,
     children: false,
     active: true,
-    title: "Guest",
+    title: "Home",
     pluseIncon: true,
-    link: "/home",
-   
+    link: "#",
+    previewImg: true,
+    submenus: [
+      { title: "Home One", link: "/home", prviewIMg: homeOneImg },
+      { title: "Home Two", link: "/home-two", prviewIMg: homeTowImg },
+      { title: "Home Three", link: "/home-three", prviewIMg: homeThreeImg },
+      { title: "Home Four", link: "/home-four", prviewIMg: homeFourImg },
+      { title: "Home Five", link: "/home-five", prviewIMg: homeFiveImg },
+    ],
   },
   {
     id: 2,
@@ -22,10 +29,10 @@ const menu_data: MenuType[] = [
     active: true,
     megaMenu: true,
     children: true,
-    title: "Tourist",
+    title: "Products",
     pluseIncon: true,
-    link: "/home-two",
-    
+    link: "/Products",
+   
   },
   {
     id: 3,
@@ -33,10 +40,9 @@ const menu_data: MenuType[] = [
     children: true,
     megaMenu: true,
     active: true,
-    title: "Tour Guide",
+    title: "Places",
     pluseIncon: true,
-    link: "/home-three",
-    
+    link: "/place-view",
   },
   {
     id: 4,
@@ -44,10 +50,10 @@ const menu_data: MenuType[] = [
     children: false,
     megaMenu: true,
     active: true,
-    title: "Advertiser",
+    title: "Itineraries",
     pluseIncon: true,
     pageLayout: true,
-    link: "/home-four",
+    link: "/it-view-orig",
   },
   {
     id: 5,
@@ -55,23 +61,10 @@ const menu_data: MenuType[] = [
     children: false,
     megaMenu: true,
     active: true,
-    title: "Seller",
+    title: "Activities",
     pluseIncon: true,
     pageLayout: true,
-    link: "/home-five",
-    
-  },
-  {
-    id: 6,
-    hasDropdown: true,
-    children: true,
-    megaMenu: true,
-    active: true,
-    title: "Admin",
-    pluseIncon: true,
-    lastDropdown: true,
-    link: "/home-six",
-    
+    link: "/activity-org",
   },
   
 ];

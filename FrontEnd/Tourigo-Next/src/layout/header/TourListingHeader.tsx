@@ -72,24 +72,13 @@ const TourListingHeader = () => {
                       </div>
                       <div className="d-flex h-gap-55">
                         <div className="d-xxs-none">
-                          <Link
+                          {/* <Link
                             className="bd-btn btn-style text-btn color-white"
                             href="/contact"
                           >
-                            Help
-                          </Link>
-                          <Link
-                            className="bd-btn btn-style text-btn color-white"
-                            href="/sign-up"
-                          >
-                            Sign up
-                          </Link>
-                          <Link
-                            className="bd-btn btn-style text-btn color-white"
-                            href="/sign-in"
-                          >
-                            Sign in
-                          </Link>
+                            Log out
+                          </Link> */}
+                         
                         </div>
                       </div>
                     </div>
