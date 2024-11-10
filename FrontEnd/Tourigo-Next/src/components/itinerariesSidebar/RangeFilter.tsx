@@ -1,23 +1,26 @@
 // RangeFilter.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Range, getTrackBackground } from "react-range";
 
-const STEP = 0.1;
-const MIN = 0;
-const MAX = 500;
-
 interface RangeFilterProps {
-  onChange: (range: number[]) => void; // Explicitly define the type for onChange
+  min: number;
+  max: number;
+  onChange: (range: number[]) => void;
 }
 
-const RangeFilter: React.FC<RangeFilterProps> = ({ onChange }) => {
-  const [values, setValues] = useState([MIN, 225]);
+const STEP = 0.1;
+
+const RangeFilter: React.FC<RangeFilterProps> = ({ min, max, onChange }) => {
+  const [values, setValues] = useState([min, max]);
+
+  useEffect(() => {
+    setValues([min, max]); // Set initial slider values based on min and max
+  }, [min, max]);
 
   const handleFilterByRange = (updatedValues: number[]) => {
-    const newValues = [MIN, updatedValues[1]]; // Fix the min to 0
-    setValues(newValues);
-    onChange(newValues); // Send the new range to the parent
+    setValues(updatedValues);
+    onChange(updatedValues); // Send updated range to the parent component
   };
 
   return (
@@ -26,32 +29,28 @@ const RangeFilter: React.FC<RangeFilterProps> = ({ onChange }) => {
         <Range
           values={values}
           step={STEP}
-          min={MIN}
-          max={MAX}
-          onChange={(updatedValues) => handleFilterByRange(updatedValues)}
+          min={min}
+          max={max}
+          onChange={handleFilterByRange}
           renderTrack={({ props, children }) => (
             <div
-              className="slider-range-wrap-inner"
               onMouseDown={props.onMouseDown}
               onTouchStart={props.onTouchStart}
+              ref={props.ref}
+              style={{
+                height: "6px",
+                width: "100%",
+                borderRadius: "4px",
+                background: getTrackBackground({
+                  values,
+                  colors: ["#ccc", "#006CE4", "#ccc"],
+                  min,
+                  max,
+                }),
+                alignSelf: "center",
+              }}
             >
-              <div
-                ref={props.ref}
-                style={{
-                  height: "6px",
-                  width: "100%",
-                  borderRadius: "4px",
-                  background: getTrackBackground({
-                    values,
-                    colors: ["#ccc", "#006CE4", "#ccc"],
-                    min: MIN,
-                    max: MAX,
-                  }),
-                  alignSelf: "center",
-                }}
-              >
-                {children}
-              </div>
+              {children}
             </div>
           )}
           renderThumb={({ props }) => (

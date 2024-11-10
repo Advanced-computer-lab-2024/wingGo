@@ -481,6 +481,11 @@ const deleteSellerAccount = async (req, res) => {
         }
 
         console.log("before");
+
+
+        // Delete all products associated with this seller
+        await Product.deleteMany({ seller: id });
+
         // Delete the seller account
         await Seller.findByIdAndDelete(id);
         console.log("after");
