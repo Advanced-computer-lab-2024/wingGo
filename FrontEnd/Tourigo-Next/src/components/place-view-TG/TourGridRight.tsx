@@ -1,7 +1,7 @@
 // TourGridRight.tsx
 "use client";
 import React, { useEffect, useState } from "react";
-import TourSingleCard from "../common/tourElements/TourSingleCardPlaces";
+import TourSingleCard from "../common/tourElements/TourSingleCardPlacesTG";
 import { Place } from "@/interFace/interFace";
 import { getPlacesData } from "@/data/placeData";
 // import ItinerariesContentHeader from "@/elements/itineraries/it-header";

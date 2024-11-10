@@ -9,7 +9,7 @@ import TourDetailTabArea from "./TourDetailTabArea";
 import { tourData } from "@/data/tour-data";
 import { Place } from "@/interFace/interFace";
 import { idTypeNew } from "@/interFace/interFace";
-import TourSingleCard from "../common/tourElements/TourSingleCardPlaces";
+import TourSingleCard from "../common/tourElements/TourSingleCardPlacesTG";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
 
 const TourDetails = ({ id }: idTypeNew) => {
