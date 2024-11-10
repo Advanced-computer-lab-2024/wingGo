@@ -2004,20 +2004,20 @@ console.log("validatedFlightOffer:", validatedFlightOffer);
         }
     };
 
-    const shareViaLink = (req, res) => { // To be done with FrontEnd
-        const { type, id } = req.body;
+    // const shareViaLink = (req, res) => { // To be done with FrontEnd
+    //     const { type, id } = req.body;
 
-        if (!type || !id) {
-            return res.status(400).json({ message: 'Please provide type and id' });
-        }
+    //     if (!type || !id) {
+    //         return res.status(400).json({ message: 'Please provide type and id' });
+    //     }
 
-        try {
-            const link = `${req.protocol}://${req.get('host')}/${type}/${id}`;
-            res.status(200).json({ message: 'Link generated successfully', link });
-        } catch (error) {
-            res.status(500).json({ message: 'Error generating link', error });
-        }
-    };
+    //     try {
+    //         const link = `${req.protocol}://${req.get('host')}/${type}/${id}`;
+    //         res.status(200).json({ message: 'Link generated successfully', link });
+    //     } catch (error) {
+    //         res.status(500).json({ message: 'Error generating link', error });
+    //     }
+    // };
 
     const convertCurrency = async (amount, fromCurrency, toCurrency) => {
         try {
@@ -2506,7 +2506,7 @@ module.exports = {
     rateTourGuide,
     commentOnTourGuide,
     shareViaEmail,
-    shareViaLink,
+    // shareViaLink,
     convertCurrency,
     updateProductPricesToCurrency,
     searchHotelsByCity,
