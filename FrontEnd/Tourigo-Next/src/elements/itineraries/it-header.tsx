@@ -2,20 +2,16 @@
 "use client";
 import React from "react";
 import NiceSelect from "../NiceSelect";
-import { itinerarySelectOptionData, showItineraryNumber } from "@/data/itinerary-select-option-data";
-import useGlobalContext from "@/hooks/use-context";
+import { itinerarySelectOptionDataRating } from "@/data/itinerary-select-option-data";
 
-const ItinerariesContentHeader = () => {
-  const { setFilterRange, setFilterSearch } = useGlobalContext();
+interface ItinerariesContentHeaderProps {
+  itineraryCount: number;
+  onSortChange: (sortOption: string) => void;
+}
 
-  const selectHandler = () => {
-    setFilterRange([]);
-    setFilterSearch("");
-  };
-
-  const selectHandlerTwo = () => {
-    setFilterRange([]);
-    setFilterSearch("");
+const ItinerariesContentHeader: React.FC<ItinerariesContentHeaderProps> = ({ itineraryCount, onSortChange }) => {
+  const handleSortChange = (item: { id: number; option: string | number }, name: string) => {
+    onSortChange(item.option.toString());
   };
 
   return (
@@ -23,30 +19,17 @@ const ItinerariesContentHeader = () => {
       <div className="shop-top-meta d-flex flex-wrap justify-content-between align-items-center mb-24 gap-24">
         <div className="product-item-count">
           <span>
-            <b>45</b> Itineraries Available
+            <b>{itineraryCount}</b> Itineraries Available
           </span>
         </div>
         <div className="shop-selector-wrapper d-flex flex-wrap justify-content-between align-items-center gap-24">
           <div className="shop-selector-item d-flex justify-content-between align-items-center gap-10">
-            <span>Show:</span>
-            <div className="shop-selector">
-              <NiceSelect
-                options={showItineraryNumber}
-                defaultCurrent={0}
-                onChange={selectHandler}
-                name=""
-                className=""
-                placeholder="Item Count"
-              />
-            </div>
-          </div>
-          <div className="shop-selector-item d-flex justify-content-between align-items-center gap-10">
             <span>Sort By:</span>
             <div className="shop-selector-sort">
               <NiceSelect
-                options={itinerarySelectOptionData}
+                options={itinerarySelectOptionDataRating}
                 defaultCurrent={0}
-                onChange={selectHandlerTwo}
+                onChange={handleSortChange}
                 name=""
                 className=""
                 placeholder="Default"

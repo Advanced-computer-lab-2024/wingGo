@@ -822,6 +822,37 @@ const addPreferencesToTourist = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+const removePreferencesFromTourist = async (req, res) => {
+    const { id } = req.params;  // Tourist ID
+    const { preferences } = req.body;  // List of preference IDs to remove
+
+    try {
+        const tourist = await Tourist.findById(id);
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Ensure the preferences field is an array and remove each preference
+        if (Array.isArray(preferences)) {
+            preferences.forEach(preference => {
+                // Pull each preference from the array
+                tourist.preferences.pull(preference);
+            });
+        } else {
+            // In case a single preference ID is provided
+            tourist.preferences.pull(preferences);
+        }
+
+        await tourist.save();
+
+        res.status(200).json({ message: 'Preferences removed successfully', tourist });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 const viewComplaints = async (req, res) => {
     const touristId = req.params.id; // Extracting the tourist ID from the URL parameters
 
@@ -2453,6 +2484,7 @@ module.exports = {
     filterItineraries,
     addComplaint,
     addPreferencesToTourist,
+    removePreferencesFromTourist,
     viewComplaints,
     changePassword,
     bookItinerary,

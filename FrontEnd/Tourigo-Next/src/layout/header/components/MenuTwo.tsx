@@ -1,4 +1,4 @@
-import menu_data from "@/data/menu/menu-data";
+import menu_data from "@/data/menu/menu-dataTourist";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
