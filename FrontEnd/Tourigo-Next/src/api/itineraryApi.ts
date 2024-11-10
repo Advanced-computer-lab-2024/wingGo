@@ -157,3 +157,44 @@ export const cancelItineraryApi = async (touristId: string, itineraryId: string)
         throw error;
     }
 };
+
+// Function to fetch a tourist's username by their ID
+export const fetchTouristUsername = async (touristId: string): Promise<string> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/tourist/getUsername/${touristId}`);
+        return response.data.username; // Extract the username from the response
+    } catch (error) {
+        console.error("Error fetching tourist username:", error);
+        throw error;
+    }
+};
+
+
+// Next will be hardcoded in
+// Function to book an itinerary for a specific tourist
+export const bookItineraryApi = async (touristId: string, itineraryId: string, bookingDate: Date): Promise<void> => {
+    try {
+        const response = await axios.post(
+            `http://localhost:8000/tourist/bookItinerary/${touristId}/${itineraryId}`,
+            null,
+            { params: { bookingDate: bookingDate.toISOString() } } // Send booking date as a query parameter
+        );
+        return response.data; // Return the response data if needed
+    } catch (error) {
+        console.error("Error booking itinerary:", error);
+        throw error;
+    }
+};
+
+
+
+// Function to create a new itinerary (POST request)
+export const createItinerary = async (itineraryData: any): Promise<any> => {
+    try {
+        const response = await axios.post("http://localhost:8000/tourguide/Createitinerary", itineraryData);
+        return response.data;
+    } catch (error) {
+        console.error("Error creating itinerary:", error);
+        throw error;
+    }
+};

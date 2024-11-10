@@ -55,24 +55,19 @@ const HeaderDashboard = () => {
                     </div>
                     <div className="d-flex h-gap-55">
                       <div className="">
-                        <Link
+                        {/* <Link
                           className="bd-btn btn-style text-btn"
                           href="contact"
                         >
-                          Help
-                        </Link>
-                        <Link
-                          className="bd-btn btn-style text-btn"
-                          href="sign-up"
-                        >
-                          Sign up
-                        </Link>
-                        <Link
+                          Log out
+                        </Link> */}
+                       
+                        {/* <Link
                           className="bd-btn btn-style text-btn"
                           href="sign-in"
                         >
-                          Sign in
-                        </Link>
+                         My Profile
+                        </Link> */}
                       </div>
                     </div>
                   </div>

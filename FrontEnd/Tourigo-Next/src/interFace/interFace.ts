@@ -375,6 +375,11 @@ export interface BookedItinerary {
   itinerary: Itinerary;
   bookingDate: Date;
 }
+export interface BookedActivity {
+  activity: Activity;
+ 
+}
+
 
 export interface Activity {
   _id: string;
@@ -450,7 +455,8 @@ export interface Product {
   archive: boolean;
   createdAt?: string;
   updatedAt?: string;
-  averageRating: number; // Add this line
+  averageRating: number; // Add this line,
+  picture: string;
 }
 
 export interface Complaint{
@@ -464,5 +470,15 @@ export interface Complaint{
     reply: string[];
 
   }
+  export interface IPendingUser {
+    _id: string;               // MongoDB automatically generates an _id field
+    email: string;
+    username: string;
+    password: string;
+    role: string;
+    IDdocument: string;
+    certificate: string;
+   
+}
 
 

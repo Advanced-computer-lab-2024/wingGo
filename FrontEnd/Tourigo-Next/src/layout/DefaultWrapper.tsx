@@ -11,6 +11,7 @@ import HeaderArea from "./header/HeaderArea";
 import FooterArea from "./footer/FooterArea";
 import FooterOne from "./footer/FooterOne";
 import HeaderTwo from "./header/HeaderTwo";
+import Headereight from "./header/Headereight";
 import FooterTwo from "./footer/FooterTwo";
 import HeaderThree from "./header/HeaderThree";
 import FooterAreaThree from "./footer/FooterAreaThree";
@@ -21,6 +22,7 @@ import FooterAreaFive from "./footer/FooterAreaFive";
 import TourListingHeader from "./header/TourListingHeader";
 import ShopHeader from "./header/ShopHeader";
 import HeaderSix from "./header/HeaderSix";
+import HeaderSeven from "./header/HeaderSeven";
 import BacktoTop from "@/elements/backToTop/BacktoTop";
 import SidebarMain from "./header/components/Sidebar/SidebarMain";
 import HeaderDashboard from "./HeaderDashboard";
@@ -67,6 +69,8 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
                 return <HeaderFour />;
               case "/home-five":
                 return <HeaderFive />;
+                case "/home-eight":
+                return <Headereight />;
               case "/shop":
                 return <ShopHeader />;
               case "/shop-v2":
@@ -83,6 +87,8 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
                 return <HeaderSix />;
               case "/dashboard":
                 return <HeaderDashboard />;
+              case "/home-six":
+                  return <HeaderSeven />;
               default:
                 return <TourListingHeader />;
             }

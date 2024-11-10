@@ -3,8 +3,9 @@ const Seller = require('../models/Seller');
 const LoginCredentials = require('../models/LoginCredentials'); 
 const Product = require('../models/product');
 const { uploadDocument } = require('../helpers/s3Helper');
-const generatePreSignedUrl = require('../downloadMiddleware');
 const { default: mongoose } = require('mongoose');
+const {generatePreSignedUrl}  = require('../downloadMiddleware');
+const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
 
 const seller_hello = (req, res) => {
     console.log('Seller route hit!'); // Add this log
@@ -227,11 +228,11 @@ const getProductImage = async (req, res) => {
 
         // If the product has an image
         if (product.picture) {
-            const key = certificateUrl.split('/').slice(-1)[0];
+            const key = product.picture.split('/').slice(-1)[0];
         
-            const preSignedUrl = await generatePreSignedUrl(key);
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
 
-            return res.status(200).json({ url: preSignedUrl });
+            return res.redirect( preSignedUrl );
 
         } else {
             // If no image is found, return a placeholder or 404
@@ -260,11 +261,12 @@ const downloadProductImage = async (req, res) => {
             return res.status(404).json({ message: 'Picture not found' });
         }
     
+        
         const key = pictureUrl.split('/').slice(-1)[0];
         // Generate a pre-signed URL for the picture
         const preSignedUrl = await generatePreSignedUrl(key);
     
-        res.redirect(preSignedUrl);
+        res.status(200).json({ preSignedUrl });
     
     } catch (err) {
         console.error('Error in downloadProductImage:', err);
@@ -479,6 +481,11 @@ const deleteSellerAccount = async (req, res) => {
         }
 
         console.log("before");
+
+
+        // Delete all products associated with this seller
+        await Product.deleteMany({ seller: id });
+
         // Delete the seller account
         await Seller.findByIdAndDelete(id);
         console.log("after");

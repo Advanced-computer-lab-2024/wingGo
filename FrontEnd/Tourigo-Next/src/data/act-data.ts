@@ -1,7 +1,7 @@
 
 
-import { fetchActivities,fetchActivitiesAdvertiser,fetchAdminActivities} from '@/api/activityApi';
-import { Activity } from '../interFace/interFace';
+import { fetchActivities,fetchActivitiesAdvertiser,fetchAdminActivities,fetchBookedActivities} from '@/api/activityApi';
+import { Activity, BookedActivity } from '../interFace/interFace';
 const API_URL = 'http://localhost:8000/tourist';
 
 export const getActivitiesData = async (): Promise<Activity[]> => {
@@ -29,6 +29,15 @@ export const getAdminActivitiesData = async (): Promise<Activity[]> => {
         return activities;
     } catch (error) {
         console.error("Error loading admin activities:", error);
+        return [];
+    }
+};
+export const getBookedActivitiesData = async (touristId: string): Promise<BookedActivity[]> => {
+    try {
+        const bookedActivities = await fetchBookedActivities(touristId);
+        return bookedActivities;
+    } catch (error) {
+        console.error("Error loading booked activities:", error);
         return [];
     }
 };

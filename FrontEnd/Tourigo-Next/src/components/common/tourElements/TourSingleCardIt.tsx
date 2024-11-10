@@ -1,7 +1,7 @@
 // TourSingleCardIt.tsx
 
 "use client";
-import GetRatting from "@/hooks/GetRatting";
+import GetRatting from "@/hooks/GetRattingIt";
 import { imageLoader } from "@/hooks/image-loader";
 import useGlobalContext from "@/hooks/use-context";
 import { Itinerary } from "@/interFace/interFace";
@@ -10,6 +10,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import axios from "axios";
 import { toggleFlagItinerary, toggleItineraryActivation } from '@/api/itineraryApi';
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 
 interface ItourPropsType {
   tour: Itinerary; // Use Itinerary type
@@ -30,6 +31,8 @@ const TourSingleCard = ({
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const rating = tour.averageRating || 1; // Use Itinerary's averageRating, default to 1
+
+  const router = useRouter(); // Initialize router
 
   // Local state to keep track of the flagged and deactivated status
   const [isFlagged, setIsFlagged] = useState(tour.flagged);
@@ -52,6 +55,10 @@ const TourSingleCard = ({
     } catch (error) {
       console.error("Error toggling activation status:", error);
     }
+  };
+
+  const handleBookNowClick = () => {
+    router.push(`/booking-it/${tour._id}`);
   };
 
   return (
@@ -87,7 +94,7 @@ const TourSingleCard = ({
             <div className="tour-content">
               <div className="tour-rating d-flex align-items-center gap-10 mb-10">
                 <div className="tour-rating-icon fs-14 d-flex rating-color">
-                  <GetRatting averageRating={rating} />
+                  <GetRatting averageRating={rating} ratingExists={tour.ratings.length>0} />
                 </div>
                 <div className="tour-rating-text">
                   <span>
@@ -145,12 +152,10 @@ const TourSingleCard = ({
                   <span>{tour.duration}</span>
                 </div>
                 <div className="tour-btn">
-                  <button
-                    onClick={() => setModalData(tour)}
+                <button
+                    onClick={handleBookNowClick} // Updated to handle routing
                     className="bd-text-btn style-two"
                     type="button"
-                    data-bs-toggle="modal"
-                    data-bs-target="#popUpBookingForm"
                   >
                     Book Now
                     <span className="icon__box">

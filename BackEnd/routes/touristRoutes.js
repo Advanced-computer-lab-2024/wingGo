@@ -43,6 +43,8 @@ router.get('/viewmycomplaints/:id', touristController.viewComplaints);
 
 router.put('/:id/preferences', touristController.addPreferencesToTourist);
 
+router.delete('/:id/preferences', touristController.removePreferencesFromTourist);
+
 router.put('/changePassword/:id', touristController.changePassword); // Define route for password change
 router.post('/bookItinerary/:touristId/:itineraryId', touristController.bookItinerary);
 router.delete('/cancelItinerary/:touristId/:itineraryId', touristController.cancelItinerary);
@@ -81,6 +83,9 @@ router.get('/:id', touristController.getTouristById);
 
 router.get('/booked-itineraries/:touristId', touristController.getBookedItineraries);
 router.get('/booked-activities/:touristId', touristController.getBookedActivities);
+
+router.get('/getUsername/:id', touristController.getTouristUsername);
+
 
 router.get('/purchasedProducts/:touristId', touristController.getPurchasedProducts);
 

@@ -4,7 +4,7 @@ import DestinationGridRightMain from "@/components/places-view/DestinationGridRi
 import MetaData from "@/hooks/useMetaData";
 import Wrapper from "@/layout/DefaultWrapper";
 import React from "react";
-
+import HomeTwoMain from "@/components/home-two/HomeTwoMain";
 const Places = () => {
   return (
     <>

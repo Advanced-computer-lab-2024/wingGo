@@ -15,7 +15,8 @@ const Activity = require('../models/Activity');  // Adjust the path based on you
 const PreferenceTag = require('../models/PreferenceTag');
 const Admin = require('../models/Admin');
 const Complaint=require('../models/Complaints');
-const generatePreSignedUrl  = require('../downloadMiddleware');
+const {generatePreSignedUrl}  = require('../downloadMiddleware');
+const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
 
 //Create activity category
 const createCategory= async(req,res)=>{
@@ -183,37 +184,30 @@ const changeProductImage = async (req, res) => {
     }
 };
 
-
-//WILL BE MODIFIED COMPLETELY
 const getProductImage = async (req, res) => {
     const productId = req.params.id;
     
     try {
-        // Find the product by its ID
         const product = await Product.findById(productId);
         
-        // Check if the product exists
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        // If the product has an image
         if (product.picture) {
-            const key = certificateUrl.split('/').slice(-1)[0];
-        
-            const preSignedUrl = await generatePreSignedUrl(key);
-
-            return res.status(200).json({ url: preSignedUrl });
-
+            const key = product.picture.split('/').slice(-1)[0];
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
+            
+            // Instead of redirecting, send the pre-signed URL directly
+            return res.json({ imageUrl: preSignedUrl });
         } else {
-            // If no image is found, return a placeholder or 404
             return res.status(404).json({ message: 'Image not found for this product.' });
         }
     } catch (error) {
-        // Handle any errors
         res.status(500).json({ error: error.message });
     }
 };
+
 
 const downloadProductImage = async (req, res) => {
 
@@ -234,7 +228,8 @@ const downloadProductImage = async (req, res) => {
         // Generate a pre-signed URL for the picture
         const preSignedUrl = await generatePreSignedUrl(key);
 
-        res.redirect(preSignedUrl);
+      
+        res.status(200).json({ preSignedUrl });
 
     } catch (err) {
         console.error('Error in downloadProductImage:', err);
@@ -254,7 +249,7 @@ const editProduct = async (req, res) => {
     const picture = req.file ? req.file.location : null;  // Get picture location if uploaded
 
     try {
-        console.log('Product ID:', productId); // Log the product ID
+        // console.log('Product ID:', productId); // Log the product ID
         const product = await Product.findById(productId);
         
         if (!product) {
@@ -307,7 +302,7 @@ const filterProduct = async (req, res) => {
 const deleteAccount = async (req, res) => {
     const { id } = req.params; // Extract the ID from the request parameters
 
-    console.log(id);
+    // console.log(id);
 
     try {
         // Ensure that the provided ID is a valid ObjectId
@@ -506,9 +501,10 @@ const viewPendingUserID = async (req, res) => {
 
         const key = IDdocumentUrl.split('/').slice(-1)[0];
         // Generate a pre-signed URL for the ID document
-        const preSignedUrl = await generatePreSignedUrl(key);
-        
-        res.status(200).json({ url: preSignedUrl });
+        const preSignedUrl = await previewgeneratePreSignedUrl(key);
+
+      
+        res.status(200).json({ preSignedUrl });
 
     } catch (err) {
         console.error('Error in viewPendingUserID:', err);
@@ -569,10 +565,11 @@ const viewPendingUserCertificate = async (req, res) => {
         }
 
         const key = certificateUrl.split('/').slice(-1)[0];
-        
-        const preSignedUrl = await generatePreSignedUrl(key);
-        
-        res.status(200).json({ url: preSignedUrl });
+        const preSignedUrl = await previewgeneratePreSignedUrl(key);
+
+        res.status(200).json({ preSignedUrl });
+
+       
 
     } catch (err) {
         console.error('Error in viewPendingUserCertificate:', err);
@@ -601,8 +598,9 @@ const downloadPendingUserCertificate = async (req, res) => {
         const key = certificateUrl.split('/').slice(-1)[0];
         
         const preSignedUrl = await generatePreSignedUrl(key);
-        
-        res.redirect(preSignedUrl);
+
+      
+        res.status(200).json({ preSignedUrl });
 
     } catch (err) {
         console.error('Error in viewPendingUserCertificate:', err);
@@ -760,7 +758,7 @@ const getAllProducts = async (req, res) => {
         const productData = products.map(product => ({
             _id: product._id,
             name: product.name,
-            picture: `../images/${product.picture}`,  // Build image URL dynamically
+            picture: product.picture, // Build image URL dynamically
             // picture: `${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
             price: product.price,
             sales: product.sales,
