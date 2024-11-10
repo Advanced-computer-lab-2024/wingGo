@@ -1917,7 +1917,7 @@ console.log("validatedFlightOffer:", validatedFlightOffer);
                 service: 'gmail',
                 auth: {
                     user: "winggo567@gmail.com", // Your email address
-                    pass: "Winggo123456"  // Your email password
+                    pass: "smkg eghm yrzv yyir"  // Your email password
                 }
             });
 
