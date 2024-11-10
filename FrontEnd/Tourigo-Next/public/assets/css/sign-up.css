@@ -39,3 +39,9 @@
   .nice-select .list {
     width: 100%;
   }
+
+  .file-name {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #495057;
+  }
