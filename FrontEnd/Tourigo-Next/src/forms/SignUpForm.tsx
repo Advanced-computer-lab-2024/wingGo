@@ -9,7 +9,6 @@ import NiceSelect from "@/elements/NiceSelect";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 
 interface FormData {
   userName: string;
@@ -296,6 +295,8 @@ const SignUpForm = () => {
                       isClearable={true}
                       placeholderText="Select Date"
                       dropdownMode="select"
+                      showMonthDropdown
+                      showYearDropdown
                       locale="en-US"
                       className="form-control w-100"
                       wrapperClassName="w-100"
