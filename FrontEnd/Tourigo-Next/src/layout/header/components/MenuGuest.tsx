@@ -1,9 +1,9 @@
-import menu_data from "@/data/menu/menu-dataTourist";
+import menu_data from "@/data/menu/menu-dataGuest";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { imageLoader } from "@/hooks/image-loader";
-const MenuTwo = () => {
+const Menu = () => {
   return (
     <>
       <ul>
@@ -54,11 +54,7 @@ const MenuTwo = () => {
 
             {/* dropdown menu */}
             {item?.hasDropdown === true && item?.submenus?.length && (
-              <ul
-                className={`submenu ${
-                  item?.lastDropdown === true ? "last-children" : ""
-                }`}
-              >
+              <ul className="submenu">
                 {item?.submenus?.map((dropdownItem, index) => (
                   <li key={index} className="menu-item-has-children has-arrow">
                     <Link href={dropdownItem?.link}>{dropdownItem?.title}</Link>
@@ -116,4 +112,4 @@ const MenuTwo = () => {
   );
 };
 
-export default MenuTwo;
+export default Menu;

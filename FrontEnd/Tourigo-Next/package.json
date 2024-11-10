@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@coreui/react-pro": "^5.8.0",
+    "@fontsource/playfair-display": "^5.1.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@popperjs/core": "^2.11.8",
