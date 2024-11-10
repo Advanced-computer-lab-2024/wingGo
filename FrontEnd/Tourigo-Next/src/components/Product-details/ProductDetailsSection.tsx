@@ -170,18 +170,6 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
                     <span className="bd-primary-btn-text">Purchase</span>
                     <span className="bd-primary-btn-circle"></span>
                   </button>
-                  <button
-                    className="bd-primary-btn btn-style radius-60"
-                    onClick={() => {
-                      navigator.clipboard.writeText(window.location.href);
-                      toast.success("Link copied to clipboard!");
-                    }}
-                  >
-                    <span className="bd-primary-btn-text">Share Link</span>
-                    <span className="bd-primary-btn-circle">
-                      <i className="fa fa-share" />
-                    </span>
-                  </button>
                 </div>          
               )}
             </div>
