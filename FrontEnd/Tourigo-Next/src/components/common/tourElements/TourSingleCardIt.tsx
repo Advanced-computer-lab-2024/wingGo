@@ -1,7 +1,7 @@
 // TourSingleCardIt.tsx
 
 "use client";
-import GetRatting from "@/hooks/GetRatting";
+import GetRatting from "@/hooks/GetRattingIt";
 import { imageLoader } from "@/hooks/image-loader";
 import useGlobalContext from "@/hooks/use-context";
 import { Itinerary } from "@/interFace/interFace";
@@ -94,7 +94,7 @@ const TourSingleCard = ({
             <div className="tour-content">
               <div className="tour-rating d-flex align-items-center gap-10 mb-10">
                 <div className="tour-rating-icon fs-14 d-flex rating-color">
-                  <GetRatting averageRating={rating} />
+                  <GetRatting averageRating={rating} ratingExists={tour.ratings.length>0} />
                 </div>
                 <div className="tour-rating-text">
                   <span>

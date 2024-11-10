@@ -1,22 +1,47 @@
 // ItinerariesSidebarMain.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SidebarCategories from "./SidebarCategories";
 import SidebarTags from "./SidebarTags";
 import SidebarSearchInputBox from "../shearedComponents/SidebarSearchInputBoxIt";
 import RangeFilter from "./RangeFilter";
 
+
 interface ItinerariesSidebarMainProps {
-    applyFilters: (filters: { budget?: number; date?: string; preferences?: string; language?: string }) => void;
+    applyFilters: (filters: { budgetMin?: number; budgetMax?: number; date?: string; preferences?: string; language?: string }) => void;
     applySearch: (query: string) => void;  // New prop for search functionality
   }
 
   const ItinerariesSidebarMain: React.FC<ItinerariesSidebarMainProps> = ({ applyFilters, applySearch }) => {
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const [minPrice, setMinPrice] = useState(0);
+    const [maxPrice, setMaxPrice] = useState(500); // Example max; adjust based on your data
+    const [selectedLanguage, setSelectedLanguage] = useState<string>("");
 
-  const handlePriceChange = (range: number[]) => {
-    // setPriceRange(range);
-    applyFilters({ budget: range[1] }); // Send max price as budget
-  };
+
+    // useEffect(() => {
+    //   // Replace with real data fetching for min and max values
+    //   const fetchPrices = async () => {
+    //     const prices = [0, 500]; // Simulated prices for min and max
+    //     setMinPrice(Math.min(...prices));
+    //     setMaxPrice(Math.max(...prices));
+    //   };
+    //   fetchPrices();
+    // }, []);
+  
+  // ItinerariesSidebarMain.tsx
+
+const handlePriceChange = (range: number[]) => {
+  applyFilters({ budgetMin: range[0], budgetMax: range[1], language: selectedLanguage }); // Send both min and max prices
+};
+
+const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const language = event.target.value;
+  setSelectedLanguage(language);
+  applyFilters({ budgetMin: minPrice, budgetMax: maxPrice, language });
+  console.log("minPrice "+minPrice);
+  console.log("maxPrice "+maxPrice);
+};
+
 
    // Handles search input change and applies search
    const handleSearch = (query: string) => {
@@ -36,8 +61,19 @@ interface ItinerariesSidebarMainProps {
         <div className="sidebar-widget-divider"></div>
         <div className="sidebar-widget widget">
           <h6 className="sidebar-widget-title small mb-15">Price Filter</h6>
-          <RangeFilter onChange={handlePriceChange} /> {/* Pass handlePriceChange */}
+          <RangeFilter min={minPrice} max={maxPrice} onChange={handlePriceChange} />
         </div>
+                {/* Language Filter */}
+                <div className="sidebar-widget widget">
+                    <h6 className="sidebar-widget-title small mb-15">Language Filter</h6>
+                    <select className="sidebar-select" value={selectedLanguage} onChange={handleLanguageChange}>
+                        <option value="">All Languages</option>
+                        <option value="English">English</option>
+                        <option value="Arabic">Arabic</option>
+                        <option value="French">French</option>
+                        {/* Add more languages as needed */}
+                    </select>
+                </div>
         <div className="sidebar-widget-divider"></div>
         <div className="sidebar-widget widget widget_categories">
           <h6 className="sidebar-widget-title small mb-15">Categories</h6>

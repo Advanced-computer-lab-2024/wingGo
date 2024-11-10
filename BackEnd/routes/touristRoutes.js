@@ -43,6 +43,8 @@ router.get('/viewmycomplaints/:id', touristController.viewComplaints);
 
 router.put('/:id/preferences', touristController.addPreferencesToTourist);
 
+router.delete('/:id/preferences', touristController.removePreferencesFromTourist);
+
 router.put('/changePassword/:id', touristController.changePassword); // Define route for password change
 router.post('/bookItinerary/:touristId/:itineraryId', touristController.bookItinerary);
 router.delete('/cancelItinerary/:touristId/:itineraryId', touristController.cancelItinerary);
