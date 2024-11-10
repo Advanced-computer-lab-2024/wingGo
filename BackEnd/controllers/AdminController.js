@@ -567,7 +567,8 @@ const viewPendingUserCertificate = async (req, res) => {
         const key = certificateUrl.split('/').slice(-1)[0];
         const preSignedUrl = await previewgeneratePreSignedUrl(key);
 
-        return res.redirect( preSignedUrl );
+        res.status(200).json({ preSignedUrl });
+
        
 
     } catch (err) {
