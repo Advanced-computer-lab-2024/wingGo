@@ -3,7 +3,7 @@ import Link from "next/link";
 import React from "react";
 import logoBlack from "../../../public/assets/images/logo/logo-black.svg";
 import { imageLoader } from "@/hooks/image-loader";
-import Menu from "./components/Menu";
+import Menu from "./components/MenuFour";
 import useGlobalContext from "@/hooks/use-context";
 
 const HeaderFour = () => {

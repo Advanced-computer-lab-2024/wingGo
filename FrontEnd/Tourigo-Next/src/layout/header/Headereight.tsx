@@ -3,7 +3,7 @@ import React from "react";
 import logoBlack from "../../../public/assets/images/logo/logo-black.svg";
 import { imageLoader } from "@/hooks/image-loader";
 import Link from "next/link";
-import Menu from "./components/MenuThree";
+import Menu from "./components/Menueight";
 import useGlobalContext from "@/hooks/use-context";
 const HeaderThree = () => {
   const { toggleSideMenu, scrollDirection } = useGlobalContext();

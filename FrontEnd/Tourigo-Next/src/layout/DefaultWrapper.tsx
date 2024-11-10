@@ -11,6 +11,7 @@ import HeaderArea from "./header/HeaderArea";
 import FooterArea from "./footer/FooterArea";
 import FooterOne from "./footer/FooterOne";
 import HeaderTwo from "./header/HeaderTwo";
+import Headereight from "./header/Headereight";
 import FooterTwo from "./footer/FooterTwo";
 import HeaderThree from "./header/HeaderThree";
 import FooterAreaThree from "./footer/FooterAreaThree";
@@ -67,6 +68,8 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
                 return <HeaderFour />;
               case "/home-five":
                 return <HeaderFive />;
+                case "/home-eight":
+                return <Headereight />;
               case "/shop":
                 return <ShopHeader />;
               case "/shop-v2":

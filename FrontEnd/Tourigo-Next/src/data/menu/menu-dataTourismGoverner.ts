@@ -11,10 +11,17 @@ const menu_data: MenuType[] = [
     hasDropdown: true,
     children: false,
     active: true,
-    title: "Guest",
+    title: "Home",
     pluseIncon: true,
-    link: "/home",
-   
+    link: "#",
+    previewImg: true,
+    submenus: [
+      { title: "Home One", link: "/home", prviewIMg: homeOneImg },
+      { title: "Home Two", link: "/home-two", prviewIMg: homeTowImg },
+      { title: "Home Three", link: "/home-three", prviewIMg: homeThreeImg },
+      { title: "Home Four", link: "/home-four", prviewIMg: homeFourImg },
+      { title: "Home Five", link: "/home-five", prviewIMg: homeFiveImg },
+    ],
   },
   {
     id: 2,
@@ -22,10 +29,10 @@ const menu_data: MenuType[] = [
     active: true,
     megaMenu: true,
     children: true,
-    title: "Tourist",
+    title: "Places",
     pluseIncon: true,
-    link: "/home-two",
-    
+    link: "/home",
+   
   },
   {
     id: 3,
@@ -33,57 +40,24 @@ const menu_data: MenuType[] = [
     children: true,
     megaMenu: true,
     active: true,
-    title: "Tour Guide",
+    title: "Add Place",
     pluseIncon: true,
-    link: "/home-three",
-    
+    link: "/add-place",
   },
+  
+  
+ 
+ 
   {
-    id: 4,
+    id: 8,
     hasDropdown: true,
     children: false,
     megaMenu: true,
     active: true,
-    title: "Advertiser",
+    title: "My Profile",
     pluseIncon: true,
     pageLayout: true,
-    link: "/home-four",
-  },
-  {
-    id: 5,
-    hasDropdown: true,
-    children: false,
-    megaMenu: true,
-    active: true,
-    title: "Seller",
-    pluseIncon: true,
-    pageLayout: true,
-    link: "/home-five",
-    
-  },
-  {
-    id: 6,
-    hasDropdown: true,
-    children: true,
-    megaMenu: true,
-    active: true,
-    title: "Admin",
-    pluseIncon: true,
-    lastDropdown: true,
-    link: "/home-six",
-    
-  },
-  {
-    id: 7,
-    hasDropdown: true,
-    children: true,
-    megaMenu: true,
-    active: true,
-    title: "Tourism governer",
-    pluseIncon: true,
-    lastDropdown: true,
-    link: "/home-eight",
-    
+    link: "/home",
   },
   
 ];
