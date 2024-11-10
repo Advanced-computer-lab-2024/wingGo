@@ -1957,7 +1957,7 @@ const shareActivityViaEmail = async (req, res) => {
             return res.status(404).json({ message: 'Activity not found' });
         }
 
-        const link = `${req.protocol}://${req.get('host')}/activity/${id}`;
+        const link = `http://localhost:3000/activity-details/${id}`;
 
         let transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -1995,7 +1995,7 @@ const shareItineraryViaEmail = async (req, res) => {
             return res.status(404).json({ message: 'Itinerary not found' });
         }
 
-        const link = `${req.protocol}://${req.get('host')}/itinerary/${id}`;
+        const link = `http://localhost:3000/it-details/${id}`;
 
         let transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -2033,7 +2033,7 @@ const sharePlaceViaEmail = async (req, res) => {
             return res.status(404).json({ message: 'Place not found' });
         }
 
-        const link = `${req.protocol}://${req.get('host')}/place/${id}`;
+        const link = `http://localhost:3000/place-details/${id}`;
 
         let transporter = nodemailer.createTransport({
             service: 'gmail',

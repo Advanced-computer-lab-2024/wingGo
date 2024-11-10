@@ -15,6 +15,30 @@ import { toast } from "react-toastify";
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Itinerary | null>(null);
+  const [isEmailFormOpen, setIsEmailFormOpen] = useState(false);
+  const [email, setEmail] = useState('');
+
+  const handleEmailChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
+    setEmail(e.target.value);
+  };
+
+  const handleSendEmail = async () => {
+    try {
+      if (data) {
+        const response = await axios.post(`http://localhost:8000/tourist/shareItineraryViaEmail/${data._id}`, {
+          email: email
+        });
+        if (response.status === 200) {
+          toast.success('Email sent successfully!');
+          setIsEmailFormOpen(false);
+        }
+      } else {
+        toast.error('Product item is not available.');
+      }
+    } catch (error) {
+      toast.error('Error sending email');
+    }
+  };
 
   useEffect(() => {
     const fetchItinerary = async () => {
@@ -84,7 +108,32 @@ const TourDetails = ({ id }: idTypeNew) => {
                               <span className="bd-primary-btn-circle">
                                 <i className="fa fa-share" />
                               </span>
-                            </button>   
+                            </button>
+                            <button
+                              className="bd-primary-btn btn-style radius-60"
+                              onClick={() => setIsEmailFormOpen(!isEmailFormOpen)}
+                            >
+                              Share Via Email
+                            </button>
+                            {isEmailFormOpen && (
+                              <div className="email-form">
+                                <h3>Share Itenirary Via Email</h3>
+                                <div className="form-group">
+                                  <label htmlFor="email">Email:</label>
+                                  <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value={email}
+                                    onChange={handleEmailChange}
+                                    className="form-control"
+                                  />
+                                </div>
+                                <button onClick={handleSendEmail} className="bd-primary-btn btn-style radius-60">
+                                  Send Email
+                                </button>
+                              </div>
+                            )}   
                         </div> 
                         </div>
                         <div className="tour-details-meta-right d-flex flex-wrap gap-10 align-items-center justify-content-between">
