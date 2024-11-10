@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { IPendingUser } from "@/interFace/interFace";
-import { fetchPendingUsers, approvePendingUserById, deletePendingUserById } from "@/api/adminApi";
+import { fetchPendingUsers, approvePendingUserById, deletePendingUserById,viewPendingUserCertificate } from "@/api/adminApi";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
@@ -11,6 +11,8 @@ const PendingUsers = () => {
   const [pendingUsers, setPendingUsers] = useState<IPendingUser[]>([]);
   const [buttonStates, setButtonStates] = useState<{ [key: string]: "accepted" | "rejected" | "none" }>({});
   const [documentViewed, setDocumentViewed] = useState<{ [key: string]: boolean }>({});
+  
+  const [pdfUrls, setPdfUrls] = useState<{ [key: string]: string }>({});  // To store the URLs of documents
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,9 +26,23 @@ const PendingUsers = () => {
     fetchData();
   }, []);
 
-  const handleViewDocument = (id: string) => {
-    setDocumentViewed((prev) => ({ ...prev, [id]: true }));  // Mark document as viewed for this user
+  const handleViewDocument = async (id: string) => {
+    try {
+      // Call the API to fetch the pre-signed URL for the document
+      const response = await viewPendingUserCertificate(id);
+      if (response && response.preSignedUrl) {
+        // Set the PDF URL and mark the document as viewed
+        setPdfUrls((prev) => ({ ...prev, [id]: response.preSignedUrl }));
+        setDocumentViewed((prev) => ({ ...prev, [id]: true }));
+        // Optionally, you can open the document in a new window
+        window.open(response.preSignedUrl, "_blank");
+      }
+    } catch (error) {
+      console.error("Error fetching document URL:", error);
+      alert("Failed to load document.");
+    }
   };
+
 
   const handleAccept = async (id: string) => {
     const confirmAccept = window.confirm("Are you sure you want to approve this user?");
@@ -90,7 +106,7 @@ const PendingUsers = () => {
                             </div>
                           </td>
                           <td>
-                            <button
+                          <button
                               className="view-document-button"
                               style={{
                                 backgroundColor: "#006CE4",
@@ -165,3 +181,4 @@ const PendingUsers = () => {
 };
 
 export default PendingUsers;
+
