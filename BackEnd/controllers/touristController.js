@@ -2458,6 +2458,87 @@ console.log("validatedFlightOffer:", validatedFlightOffer);
             res.status(500).json({ message: 'Error fetching purchased products', error });
         }
     };
+
+    const getUnbookedItineraries = async (req, res) => {
+        const { touristId } = req.params;
+    
+        try {
+            // Fetch the tourist to get their booked itineraries
+            const tourist = await Tourist.findById(touristId);
+            
+            if (!tourist) {
+                return res.status(404).json({ message: 'Tourist not found' });
+            }
+    
+            // Get list of itinerary IDs that the tourist has already booked
+            const bookedItineraryIds = tourist.bookedItineraries.map(item => item.itineraryId);
+    
+            // Fetch itineraries excluding the ones already booked by the tourist
+            const unbookedItineraries = await Itinerary.find({
+                _id: { $nin: bookedItineraryIds },
+                flagged: false,   // Optionally exclude flagged itineraries
+                availableDates: { $elemMatch: { $gte: new Date() } }, // Only upcoming dates
+                deactivated: false // Exclude deactivated itineraries
+            });
+    
+            if (unbookedItineraries.length === 0) {
+                return res.status(404).json({ message: 'No unbooked itineraries found' });
+            }
+    
+            res.status(200).json(unbookedItineraries);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };
+    
+
+    // Check if a specific itinerary is booked by a tourist
+const isItineraryBooked = async (req, res) => {
+    const { touristId, itineraryId } = req.params;
+  
+    try {
+      // Find the tourist by ID
+      const tourist = await Tourist.findById(touristId);
+  
+      if (!tourist) {
+        return res.status(404).json({ message: "Tourist not found" });
+      }
+  
+      // Check if the itinerary ID exists in the tourist's bookedItineraries array
+      const isBooked = tourist.bookedItineraries.some(
+        (booking) => booking.itineraryId.toString() === itineraryId
+      );
+  
+      res.status(200).json({ isBooked });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+  // Check if a specific activity is booked by a tourist
+const isActivityBooked = async (req, res) => {
+    const { touristId, activityId } = req.params;
+  
+    try {
+        // Find the tourist by ID
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+            return res.status(404).json({ message: "Tourist not found" });
+        }
+
+        // Check if the activity ID exists in the tourist's bookedActivities array
+        const isBooked = tourist.bookedActivities.some(
+            (bookedActivityId) => bookedActivityId.toString() === activityId
+        );
+
+        res.status(200).json({ isBooked });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+  
     
 
 
@@ -2520,5 +2601,8 @@ module.exports = {
     getBookedItineraries,
     getBookedActivities,
     getTouristUsername,
-    getPurchasedProducts
+    getPurchasedProducts,
+    getUnbookedItineraries,
+    isItineraryBooked,
+    isActivityBooked
 };
