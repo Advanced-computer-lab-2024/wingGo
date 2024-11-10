@@ -69,8 +69,11 @@ router.post('/commenttourguide/:touristId/:tourGuideId', touristController.comme
 router.get('/searchFlights', touristController.getFlightPrices);
 router.post('/bookFlight/:touristId', touristController.bookFlight);
 
-router.post('/shareViaEmail/:touristId/:itemId', touristController.shareViaEmail); // To be done with FrontEnd
-router.post('/shareViaLink/:touristId/:itemId', touristController.shareViaLink); // To be done with FrontEnd
+
+router.post('/shareActivityViaEmail/:id', touristController.shareActivityViaEmail);
+router.post('/shareItineraryViaEmail/:id', touristController.shareItineraryViaEmail);
+router.post('/sharePlaceViaEmail/:id', touristController.sharePlaceViaEmail);
+router.post('/shareProductViaEmail/:id', touristController.shareProductViaEmail);
 
 
 router.get('/searchHotelsByCity', touristController.getHotelOffersByCity);

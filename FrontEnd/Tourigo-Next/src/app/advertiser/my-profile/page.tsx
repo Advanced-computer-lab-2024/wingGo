@@ -1,5 +1,5 @@
 import ProfileTabs from "@/components/adminDashboard/ProfileTabs";
-import ProfileTabsMain from "@/components/my-profile/ProfileTabsMain";
+import AdvertiserProfileMain from "@/components/advertiser-profile/AdvertiserProfileMain";
 
 import TeamDetailsMain from "@/components/team-details/TeamDetailsMain";
 import MetaData from "@/hooks/useMetaData";
@@ -13,7 +13,7 @@ const TeamDetails = () => {
       <MetaData pageTitle="Team Details">
         <Wrapper>
           <main>
-            <ProfileTabsMain />
+            <AdvertiserProfileMain />
           </main>
         </Wrapper>
       </MetaData>

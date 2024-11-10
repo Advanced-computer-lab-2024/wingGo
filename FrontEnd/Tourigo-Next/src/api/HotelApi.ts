@@ -25,7 +25,7 @@ export const searchHotels = async (params: HotelSearchParams): Promise<any> => {
   export const bookHotel = async (params: any): Promise<any> => {
     try {
       console.log('booking hotel:', params);
-      const response = await axios.post<any>(`${API_URL}/bookHotel/670032f480b8a5dc77e2a155`, {
+      const response = await axios.post<any>(`${API_URL}/bookHotel/6703fe21af26882204ffaffc`, {
         hotelOffers: params,
       });
       console.log('booking data:', response.data);
