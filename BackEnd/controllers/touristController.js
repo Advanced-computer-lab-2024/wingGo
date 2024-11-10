@@ -1024,16 +1024,28 @@ const redeemPoints = async (req, res) => {
       
         // Calculate the value to be added to the wallet
         const oldPoints = tourist.loyaltyPoints;
-        let newPoints = 0;
-        let newLevel = 1;
-        let newAmount = 0.5;
-        const toBeAdded = (oldPoints / 10000) * 100; // Conversion rate for points to wallet amount
-
+       
+        
+        
+       
         if (oldPoints < 10000) {
             return res.status(400).json({ 
                 message: 'Insufficient loyalty points. You need at least 10,000 points to redeem into your wallet.' 
             });
         }
+        const redeemablePoints = Math.floor(oldPoints / 10000) * 10000;
+        const remainingPoints = oldPoints % 10000;
+
+        // Convert redeemable points to wallet amount
+        const amountToAdd = (redeemablePoints / 10000) * 100; // Conversion rate: 10,000 points = 100 EGP
+
+        // Step 3: Update tourist's wallet and loyalty points
+       
+        tourist.loyaltyPoints = remainingPoints;
+        let newPoints = remainingPoints;
+        let newLevel = 1;
+        let newAmount = 0.5;
+
 
         // Update the tourist document
         const touristUpdate = await Tourist.findByIdAndUpdate(
@@ -1044,7 +1056,7 @@ const redeemPoints = async (req, res) => {
                     'badge.level': newLevel,           // Reset badge level
                     'badge.amount': newAmount          // Reset badge amount
                 },
-                $inc: { wallet: toBeAdded }           // Increment wallet by toBeAdded amount
+                $inc: { wallet: amountToAdd }           // Increment wallet by toBeAdded amount
             }, 
             { new: true }
         );

@@ -1,9 +1,9 @@
 "use client"
 import React, {useState, useEffect} from "react";
 import ProfileDetails from './ProfileDetails';
-import LoyaltyProgram from './LoyaltyProgram';
+
 import PendingUsers from './PendingUsers';
-import { viewTouristProfile } from "@/api/ProfileApi";
+import { fetchUsername } from "@/api/adminApi";
 import { set } from "date-fns";
 import Prefrences from "./Prefrences";
 
@@ -16,14 +16,14 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
 
   
 
-  const [activeTab, setActiveTab] = useState('pending users');
+  const [activeTab, setActiveTab] = useState('profile');
   const [profileData, setProfileData] = useState<any>(null);
   const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const data = await viewTouristProfile(id);
+        const data = await fetchUsername();
         console.log('Profile data:', data);
         setProfileData(data);
       } catch (error) {
@@ -39,14 +39,10 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'pending users':
-       
         return <PendingUsers />;
-      case 'loyalty':
-        console.log('loyalty');
-        return <LoyaltyProgram profileData={profileData} id={id} refreshData={refresh} setRefreshData={setRefresh}/>;
-      case 'Preferences':
-        console.log('Preferences');
-        return <Prefrences />;
+      case 'profile':
+        return <ProfileDetails profileData={profileData} id={id}/>;
+      
       default:
         return null;
     }
@@ -85,45 +81,30 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                         role="tab"
                         aria-controls="nav-general-2"
                         aria-selected="false"
-                        onClick={() => setActiveTab('pending users')}
+                        onClick={() => setActiveTab('profile')}
                       >
                         <span>
                         <i className="icon-profile"></i>
                         </span>
+                        Profile
+                      </button>
+                      <button
+                        className="nav-link"
+                        id="nav-community-2-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#nav-community-2"
+                        type="button"
+                        role="tab"
+                        aria-controls="nav-community-2"
+                        aria-selected="false"
+                        onClick={() => setActiveTab('pending users')}
+                      >
+                        <span>
+                        <i className="icon-doc"></i>
+                        </span>
                         Pending Users
                       </button>
-                      <button
-                        className="nav-link"
-                        id="nav-community-2-tab"
-                        data-bs-toggle="tab"
-                        data-bs-target="#nav-community-2"
-                        type="button"
-                        role="tab"
-                        aria-controls="nav-community-2"
-                        aria-selected="false"
-                        onClick={() => setActiveTab('Preferences')}
-                      >
-                        <span>
-                          <i className="icon-heart"></i>
-                        </span>
-                        Preferences
-                      </button>
-                      <button
-                        className="nav-link"
-                        id="nav-community-2-tab"
-                        data-bs-toggle="tab"
-                        data-bs-target="#nav-community-2"
-                        type="button"
-                        role="tab"
-                        aria-controls="nav-community-2"
-                        aria-selected="false"
-                        onClick={() => setActiveTab('loyalty')}
-                      >
-                        <span>
-                          <i className="icon-dimond"></i>
-                        </span>
-                        Loyalty Program
-                      </button>
+                      
                       
                     </div>
                   </nav>

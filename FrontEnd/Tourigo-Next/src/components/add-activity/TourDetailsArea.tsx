@@ -149,7 +149,7 @@ const TourDetailsArea = () => {
                     <div className="form-input-box mb-15">
                         <div className="form-input-title">
                           <label htmlFor="tourTitle">
-                            Tour Title <span>*</span>
+                            Activity Title <span>*</span>
                           </label>
                         </div>
                         <div className="form-input">
@@ -169,7 +169,7 @@ const TourDetailsArea = () => {
                                 <div className="form-input-box">
                                   <div className="form-input-title">
                                     <label htmlFor="packagePrice">
-                                      Tour Package Price<span>*</span>
+                                      Activity Price<span>*</span>
                                     </label>
                                   </div>
                                   <div className="form-input">
@@ -218,7 +218,7 @@ const TourDetailsArea = () => {
                             <div className="form-input-box">
                               <div className="form-input-title">
                                 <label htmlFor="tourType">
-                                  Tour Category<span>*</span>
+                                  Activity Category<span>*</span>
                                 </label>
                               </div>
                               <div className="form-input">
@@ -245,11 +245,11 @@ const TourDetailsArea = () => {
                         </div>
                       </div>
                       <div className="mb-35">
-                        <h4 className="mb-20">Tour Content</h4>
+                        <h4 className="mb-20">Activity Content</h4>
                         <TourContent />
                       </div>
                       <div className="tour-details-gallery mb-35">
-                        <h4 className="mb-20">Tour Galley</h4>
+                        <h4 className="mb-20">Activity Galley</h4>
 
                         <TourGallery />
                       </div>
@@ -275,15 +275,7 @@ const TourDetailsArea = () => {
                              
                               <div className="col-md-12">
                                 
-                                <div className="input-box-select w-100">
-                                  <NiceSelect
-                                    options={selectLocationData}
-                                    defaultCurrent={0}
-                                    onChange={selectHandler}
-                                    name="country"
-                                    className="country-select"
-                                  />
-                                </div>
+                               
                               </div>
                              
 

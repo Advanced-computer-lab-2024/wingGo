@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { IPendingUser } from "@/interFace/interFace";
-import { fetchPendingUsers, approvePendingUserById, deletePendingUserById,viewPendingUserCertificate } from "@/api/adminApi";
+import { fetchPendingUsers, approvePendingUserById, deletePendingUserById,viewPendingUserCertificate,viewPendingUserID } from "@/api/adminApi";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
@@ -26,7 +26,7 @@ const PendingUsers = () => {
     fetchData();
   }, []);
 
-  const handleViewDocument = async (id: string) => {
+  const handleViewCertificate = async (id: string) => {
     try {
       // Call the API to fetch the pre-signed URL for the document
       const response = await viewPendingUserCertificate(id);
@@ -40,6 +40,17 @@ const PendingUsers = () => {
     } catch (error) {
       console.error("Error fetching document URL:", error);
       alert("Failed to load document.");
+    }
+  };
+  const handleViewId = async (id: string) => {
+    try {
+      const response = await viewPendingUserID(id);
+      if (response && response.preSignedUrl) {
+        window.open(response.preSignedUrl, "_blank");
+      }
+    } catch (error) {
+      console.error("Error fetching ID document:", error);
+      alert("Failed to load ID document.");
     }
   };
 
@@ -117,51 +128,70 @@ const PendingUsers = () => {
                                 cursor: "pointer",
                                 marginBottom: "8px",
                               }}
-                              onClick={() => handleViewDocument(booking._id)}
+                              onClick={() => handleViewCertificate(booking._id)}
                             >
-                              View Document
+                              View Certificate
+                            </button>
+                            <button
+                              className="view-id-button"
+                              style={{
+                                backgroundColor: "#007BFF",
+                                color: "white",
+                                padding: "8px 16px",
+                                fontSize: "14px",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                marginLeft: "10px",
+                                marginBottom: "8px",
+                              }}
+                              onClick={() => handleViewId(booking._id)}
+                            >
+                              View ID
                             </button>
 
                             <button
                               onClick={() => handleAccept(booking._id)}
-                              disabled={!documentViewed[booking._id]}  // Disable if document not viewed
                               style={{
-                                backgroundColor: documentViewed[booking._id]
-                                  ? buttonStates[booking._id] === "accepted"
-                                    ? "green"
-                                    : "lightgray"
-                                  : "lightgray",
+                                backgroundColor: buttonStates[booking._id] === "accepted" ? "green" : "lightgray",
                                 color: buttonStates[booking._id] === "accepted" ? "white" : "black",
                                 fontSize: "20px",
-                                marginLeft: "40px",
-                                cursor: documentViewed[booking._id] ? "pointer" : "not-allowed",
+                                marginLeft: "10px",
+                                cursor: "pointer",
                                 padding: "5px",
                                 border: "none",
                                 borderRadius: "4px",
                                 transition: "background-color 0.3s",
                               }}
+                              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "darkgreen")}
+                              onMouseLeave={(e) =>
+                                (e.currentTarget.style.backgroundColor = buttonStates[booking._id] === "accepted"
+                                  ? "green"
+                                  : "lightgray")
+                              }
                             >
                               <FontAwesomeIcon icon={faCheck} />
                             </button>
 
+
                             <button
                               onClick={() => handleReject(booking._id)}
-                              disabled={!documentViewed[booking._id]}  // Disable if document not viewed
                               style={{
-                                backgroundColor: documentViewed[booking._id]
-                                  ? buttonStates[booking._id] === "rejected"
-                                    ? "red"
-                                    : "lightgray"
-                                  : "lightgray",
+                                backgroundColor: buttonStates[booking._id] === "rejected" ? "red" : "lightgray",
                                 color: buttonStates[booking._id] === "rejected" ? "white" : "black",
                                 fontSize: "20px",
-                                marginLeft: "40px",
-                                cursor: documentViewed[booking._id] ? "pointer" : "not-allowed",
+                                marginLeft: "10px",
+                                cursor: "pointer",
                                 padding: "5px",
                                 border: "none",
                                 borderRadius: "4px",
                                 transition: "background-color 0.3s",
                               }}
+                              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "darkred")}
+                              onMouseLeave={(e) =>
+                                (e.currentTarget.style.backgroundColor = buttonStates[booking._id] === "rejected"
+                                  ? "red"
+                                  : "lightgray")
+                              }
                             >
                               <FontAwesomeIcon icon={faTimes} />
                             </button>

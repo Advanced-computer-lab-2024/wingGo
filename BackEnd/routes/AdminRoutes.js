@@ -102,4 +102,6 @@ router.put('/changearchive/:id',adminController.ArchiveUnarchiveProduct);
 router.get('/filterComplaints', adminController.filterComplaintsByStatus);
 router.get('/sortComplaints', adminController.sortComplaintsByDate);
 
+router.get('/getUsername/:id', adminController.getUsernameById);
+
 module.exports = router;

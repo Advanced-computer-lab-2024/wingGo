@@ -1,5 +1,5 @@
 import ProfileTabs from "@/components/adminDashboard/ProfileTabs";
-import ProfileTabsMain from "@/components/adminDashboard/ProfileTabsMain";
+import ProfileTabsMain from "@/components/my-profile/ProfileTabsMain";
 import TeamDetailsMain from "@/components/team-details/TeamDetailsMain";
 import MetaData from "@/hooks/useMetaData";
 import Wrapper from "@/layout/DefaultWrapper";
