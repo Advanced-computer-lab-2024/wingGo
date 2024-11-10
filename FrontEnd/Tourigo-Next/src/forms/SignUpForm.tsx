@@ -8,7 +8,7 @@ import { registerUser } from "@/api/registerApi";
 import NiceSelect from "@/elements/NiceSelect";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
-import ReactDatePicker from "react-datepicker";
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 interface FormData {
@@ -290,15 +290,16 @@ const SignUpForm = () => {
                     </label>
                   </div>
                   <div className="form-input banner-search-item">
-                    <ReactDatePicker
+                    <DatePicker
                       selected={startDate}
                       onChange={(date: Date) => setStartDate(date)}
                       isClearable={true}
                       placeholderText="Select Date"
+                      dropdownMode="select"
+                      locale="en-US"
+                      className="form-control w-100"
+                      wrapperClassName="w-100"
                     />
-                    {errors.DOB && (
-                      <ErrorMessage message={errors.DOB.message as string} />
-                    )}
                   </div>
                 </div>
               </div>
