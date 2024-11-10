@@ -12,7 +12,7 @@ import TestimonialAreaFive from "./TestimonialAreaFive";
 import BlogAreaFive from "./BlogAreaFive";
 import InstagramArea from "../shearedComponents/InstagramArea";
 
-const HomeFiveMain = () => {
+const HomeSixMain = () => {
   return (
     <>
       <BannerAreaFive />
@@ -31,4 +31,4 @@ const HomeFiveMain = () => {
   );
 };
 
-export default HomeFiveMain;
+export default HomeSixMain;
