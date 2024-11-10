@@ -785,7 +785,7 @@ const filterItineraries = async (req, res) => {
 const addPreferencesToTourist = async (req, res) => {
     const { id } = req.params;  // Tourist ID
     const { preferences } = req.body;  // List of selected preference tag IDs
-
+    console.log(preferences);
     try {
         const tourist = await Tourist.findById(id);
         if (!tourist) {
@@ -812,7 +812,7 @@ const addPreferencesToTourist = async (req, res) => {
         }
 
         const tourist2 = await Tourist.findById(id).populate('preferences');
-        console.log(tourist2.preferences);
+        //console.log(tourist2.preferences);
 
         
         await tourist.save();
