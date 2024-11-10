@@ -160,6 +160,9 @@ const addProduct = async (req, res) => {
         if (!sellerExist) {
             return res.status(404).json({ message: 'Seller not found' });
         }
+        if(!sellerExist.termsAccepted){
+            return res.status(403).json({error: 'Terms and conditions must be accepted to create a product.' });
+        }
 
         // Create a new product, conditionally including the image if available
         const newProduct = new Product({

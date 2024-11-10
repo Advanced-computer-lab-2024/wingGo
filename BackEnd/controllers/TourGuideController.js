@@ -151,6 +151,7 @@ const updateTourGuideProfile = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
 // Create an itinerary
 const createItinerary = async (req, res) => {
     const { tourGuideId, title, activities, locations, timeline, duration, language, price, availableDates, accessibility, pickupLocation, dropoffLocation, bookings , tags} = req.body;
@@ -161,6 +162,10 @@ const createItinerary = async (req, res) => {
         if (!tourGuideExists) {
             return res.status(400).json({ error: 'Invalid tourGuideId. Tour guide not found.' });
         }
+        if (!tourGuideExists.termsAccepted) {
+            return res.status(403).json({ error: 'Terms and conditions must be accepted to create an itinerary.' });
+        }
+
 
         // Create and save the new itinerary without latitude and longitude
         const newItinerary = new Itinerary({

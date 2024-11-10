@@ -118,17 +118,22 @@ const getAdvertiserProfile = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
-
 const createActivity = async (req, res) => {
+    const { name, date, time, location, price, category, tags, specialDiscounts, isBookingOpen, advertiser } = req.body;
 
-    const {name, date, time, location, price, category, tags, specialDiscounts, isBookingOpen, advertiser} = req.body
+    try {
+        // Fetch the advertiser from the database
+        const advertiserRecord = await Advertiser.findById(advertiser);
+        if (!advertiserRecord) {
+            return res.status(404).json({ error: 'Advertiser not found.' });
+        }
 
-    // const {lat, lng} = await getCoordinates(location.address);
+        // Check if terms have been accepted
+        if (!advertiserRecord.termsAccepted) {
+            return res.status(403).json({ error: 'Terms and conditions must be accepted to create an activity.' });
+        }
 
-    // location.lat = lat;
-    // location.lng = lng;
-
-    try{
+        // Proceed to create a new activity
         const newActivity = new Activity({
             name,
             date,
@@ -143,14 +148,12 @@ const createActivity = async (req, res) => {
         });
 
         await newActivity.save();
-        res.status(201).json({message: 'Activity created successfully!', activity: newActivity});
-
+        res.status(201).json({ message: 'Activity created successfully!', activity: newActivity });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
-    catch(error){
-        res.status(400).json({error: error.message});
-    }
+};
 
-}
 
 const updateActivity = async (req, res) => {
     try {
