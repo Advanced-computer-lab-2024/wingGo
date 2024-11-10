@@ -1,29 +1,30 @@
 "use client"
 import React, {useState, useEffect} from "react";
 import ProfileDetails from './ProfileDetails';
-import LoyaltyProgram from './LoyaltyProgram';
 import { viewTouristProfile } from "@/api/ProfileApi";
 import { set } from "date-fns";
-import Prefrences from "./Prefrences";
+import { getAdvertiserLogo, viewAdvertiserProfile } from "@/api/AdvertiserProfileApi";
+
 
 
 interface ProfileDetailsProps {
   id: string;
 }
 
-const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
+const AdvertiserProfile: React.FC<ProfileDetailsProps> = ({ id }) => {
 
   
 
   const [activeTab, setActiveTab] = useState('profile');
   const [profileData, setProfileData] = useState<any>(null);
   const [refresh, setRefresh] = useState(false);
-  const [preferencesRefresh, setPreferencesRefresh] = useState(false);
+  const [logo, setLogo] = useState<any>(null);
+  const [refreshLogo, setRefreshLogo] = useState(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const data = await viewTouristProfile(id);
+        const data = await viewAdvertiserProfile(id);
         
         setProfileData(data);
       } catch (error) {
@@ -31,22 +32,28 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
       }
     };
 
+    const fetchAdvertiserLogo = async () => {
+        try {
+            const data = await getAdvertiserLogo(id);
+            console.log('Logo data:', data);
+            setLogo(data);
+        } catch (error) {
+            console.error('Error fetching logo data:', error);
+        }
+     };
+
     fetchProfileData();
+    fetchAdvertiserLogo();
     setRefresh(false);
-    setPreferencesRefresh(false);
+    setRefreshLogo(false);
     
-  }, [id, refresh, preferencesRefresh]);
+  }, [id, refresh, refreshLogo]);
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <ProfileDetails profileData={profileData} id={id}/>;
-      case 'loyalty':
+        return <ProfileDetails profileData={profileData} id={id} logo={logo} setRefreshLogo={setRefreshLogo}/>;
         
-        return <LoyaltyProgram profileData={profileData} id={id} refreshData={refresh} setRefreshData={setRefresh}/>;
-      case 'Preferences':
-        
-        return <Prefrences profileData={profileData} id={id} setPrefrenceRefresh={setPreferencesRefresh}/>;
       default:
         return null;
     }
@@ -93,38 +100,8 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                         Account Details
                       </button>
                       
-                      <button
-                        className="nav-link"
-                        id="nav-community-2-tab"
-                        data-bs-toggle="tab"
-                        data-bs-target="#nav-community-2"
-                        type="button"
-                        role="tab"
-                        aria-controls="nav-community-2"
-                        aria-selected="false"
-                        onClick={() => setActiveTab('Preferences')}
-                      >
-                        <span>
-                          <i className="icon-heart"></i>
-                        </span>
-                        Preferences
-                      </button>
-                      <button
-                        className="nav-link"
-                        id="nav-community-2-tab"
-                        data-bs-toggle="tab"
-                        data-bs-target="#nav-community-2"
-                        type="button"
-                        role="tab"
-                        aria-controls="nav-community-2"
-                        aria-selected="false"
-                        onClick={() => setActiveTab('loyalty')}
-                      >
-                        <span>
-                          <i className="icon-dimond"></i>
-                        </span>
-                        Loyalty Program
-                      </button>
+                      
+                      
                       
                     </div>
                   </nav>
@@ -141,4 +118,4 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
   );
 };
 
-export default ProfileTabs;
+export default AdvertiserProfile;
