@@ -1,4 +1,4 @@
-import HomeFiveMain from "@/components/home-five/HomeFiveMain";
+import HomeSixMain from "@/components/home-six/HomeSixMain";
 import MetaData from "@/hooks/useMetaData";
 import Wrapper from "@/layout/DefaultWrapper";
 import React from "react";
@@ -6,10 +6,10 @@ import React from "react";
 const HomePageFive = () => {
   return (
     <>
-      <MetaData pageTitle="Home Five">
+      <MetaData pageTitle="Home Six">
         <Wrapper>
           <main>
-            <HomeFiveMain />
+            <HomeSixMain />
           </main>
         </Wrapper>
       </MetaData>
