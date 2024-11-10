@@ -35,4 +35,6 @@ router.put('/updateTransport/:id', advertiserController.updateTransport);
 // Delete Transport
 router.delete('/deleteTransport/:id', advertiserController.deleteTransport);
 
+router.get('/viewLogo/:id', advertiserController.previewLogo);
+
 module.exports = router;

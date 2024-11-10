@@ -243,7 +243,6 @@ const deleteActivity = async (req, res) => {
 const changeLogo = async (req, res) => {
     const { id } = req.params;
     
-
     try {
         const advertiser = await Advertiser.findById(id);
 
@@ -276,7 +275,7 @@ const acceptTerms = async (req, res) => {
 const changePassword = async (req, res) => {
     const { oldPassword, newPassword, confirmNewPassword } = req.body;
     const { id } = req.params; // Extract user ID from the request params
-
+    console.log(id);
     try {
         // 1. Find the user in LoginCredentials
         const userCredentials = await LoginCredentials.findById(id);
@@ -297,6 +296,7 @@ const changePassword = async (req, res) => {
 
         // 3. Compare the old password with the hashed password in TourGuide
         const isMatch = await bcrypt.compare(oldPassword, advertiser.password);
+        //const isMatch2 = oldPassword === advertiser.password;
         console.log('Is password match:', isMatch);
 
         if (!isMatch) {
@@ -310,6 +310,7 @@ const changePassword = async (req, res) => {
 
         // 5. Hash the new password
         const hashedNewPassword = await bcrypt.hash(newPassword, 10); // Hash new password
+        
         
         // 6. Update the password in LoginCredentials
         userCredentials.password = hashedNewPassword;
@@ -459,6 +460,29 @@ const deleteTransport = async (req, res) => {
     }
 };
 
+const previewLogo = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const advertiser = await Advertiser.findById(id);
+        
+        if (!advertiser) {
+            return res.status(404).json({ message: 'Advertiser not found' });
+        }
+
+        if (advertiser.logoUrl) {
+            const key = advertiser.logoUrl.split('/').slice(-1)[0];
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
+            
+            // Instead of redirecting, send the pre-signed URL directly
+            return res.json({ imageUrl: preSignedUrl });
+        } else {
+            return res.status(404).json({ message: 'Image not found for this advertiser.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 
 module.exports = {
@@ -481,5 +505,6 @@ module.exports = {
     updateTransport,
     deleteTransport,
     getAllUnbookedTransports,
-    getUnbookedTransportById
+    getUnbookedTransportById,
+    previewLogo
 };
