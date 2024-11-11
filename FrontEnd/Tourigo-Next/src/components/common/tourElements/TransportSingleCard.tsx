@@ -38,7 +38,7 @@ const TransportSingleCard = ({
 
   const handleBookNowClick = () => {
     // Redirect to the specific page (replace "/booking-page" with the desired path)
-    router.push(`/booking-transport/${transport._id}`);
+    router.push(`/transport-details/${transport._id}`);
   };
 
   return (

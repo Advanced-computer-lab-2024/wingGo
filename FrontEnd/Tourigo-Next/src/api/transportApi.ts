@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Transport} from '../interFace/interFace';
 
-const touristId = '67240ed8c40a7f3005a1d01d';
+const touristId = '673167d3aa67023ecc799397';
 
 export const fetchTransports = async (): Promise<Transport[]> => {
     try {
@@ -15,10 +15,10 @@ export const fetchTransports = async (): Promise<Transport[]> => {
 
 export const bookTransportApi = async ( transportId: string) => {
     try {
-        const response = await axios.post(`http://localhost:8000/tourist/bookTransport/${touristId}/${transportId}`);
+        const response = await axios.put(`http://localhost:8000/tourist/bookTransport/${touristId}/${transportId}`);
         return response.data;
     } catch (error) {
-        console.error('Error booking activity:', error);
+        console.error('Error booking transport:', error);
         throw error;
     }
 };
