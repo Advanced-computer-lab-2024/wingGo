@@ -9,7 +9,7 @@ const AvertiserProfileMain = () => {
         <div className="profile-tabs-main">
             
         <Breadcrumb  titleOne='My Account' titleTwo='My Account' />  
-        <AvertiserProfile id={"67325dcb0b3e54ad8bfe1684"}/>
+        <AvertiserProfile id={"67325dcb0b3e54ad8bfe1684"}/> 
         {/* <AvertiserProfile id={"66fb37dda63c04def29f944e"}/> */}
         
         </div>

@@ -118,9 +118,9 @@ const BookingHistory = () => {
                                                             <div className="recent-activity-title-box d-flex align-items-center gap-10">
                                                                 <div>
                                                                     <h5 className="product-title fw-5 underline">
-                                                                        <Link href={`/Product-details/${product._id}`}>
+                                                                      
                                                                             {product.name || 'No name available'}
-                                                                        </Link>
+                                                                       
                                                                     </h5>
                                                                 </div>
                                                             </div>

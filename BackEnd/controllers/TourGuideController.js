@@ -357,6 +357,7 @@ const deleteTourGuideAccount = async (req, res) => {
         for (let itinerary of itineraries) {
             // Check if any upcoming bookings exist
             for (let booking of itinerary.touristIDs) {
+                console.log('testing '+booking.bookingDate <= new Date());
                 if (booking.bookingDate >= new Date()) { // If there's a future booking date
                     return res.status(400).json({
                         message: 'Cannot delete account: Upcoming itinerary bookings exist.'

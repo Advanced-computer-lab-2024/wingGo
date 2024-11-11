@@ -96,7 +96,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData}) => {
 
                 
               <Link
-                href={`/change-password/${id}`} 
+                href={`/change-password/6732756e45dae024763e08c9`} 
                 className="bd-primary-btn btn-style has-arrow radius-60 ">
                 <span className="bd-primary-btn-arrow arrow-right">
                   <i className="fa-regular fa-arrow-right"></i>
