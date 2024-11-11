@@ -4,31 +4,31 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
-import { registerUser } from "@/api/registerApi";
+import { registerPendingUser, registerTourist, registerUser } from "@/api/registerApi";
 import NiceSelect from "@/elements/NiceSelect";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from "react-datepicker";
 
 interface FormData {
-  userName: string;
+  username: string;
   email: string;
-  phone: string;
+  mobileNumber: string;
   password: string;
   confirmPassword: string;
   role: string;
   nationality?: string;
   jobOrStudent?: string;
-  DOB?: Date;
-  IDdocument?: File;
-  certificate?: File;
+  DOB?: Date | null;
+  IDdocument?: File | null;
+  certificate?: File | null;
 }
 
 interface Option {
   id: number;
   option: string | number;
 }
-
+//needs checking
 const roleOptions: Array<Option> = [
   { id: 1, option: "Tourist" },
   { id: 2, option: "Advertiser" },
@@ -42,22 +42,36 @@ const SignUpForm = () => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [IDdocumentName, setIDdocumentName] = useState<string | null>(null);
   const [certificateName, setCertificateName] = useState<string | null>(null);
+
+  const [IDdocument, setIDdocument] = useState<File | null>(null);
+  const [certificate, setCertificate] = useState<File | null>(null);
+  
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormData>();
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     const toastId = toast.loading("");
-    const response = await registerUser(data);
+    data.DOB = startDate;
+    console.log('Data:', data);
+    let response;
+
+    if (selectedRole === "Tourist") {
+      response = await registerTourist(data);
+    } else {
+      response = await registerPendingUser(data, IDdocument, certificate, selectedRole);
+    }
+    
     if ("error" in response) {
       toast.error(`Error: ${response.error}`, { id: toastId });
     } else {
       toast.success("User registered successfully!", { id: toastId });
       reset();
-      router.push("/home-two");
+      router.push("/");
     }
   };
 
@@ -67,6 +81,31 @@ const SignUpForm = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setFileName: React.Dispatch<React.SetStateAction<string | null>>) => {
     if (e.target.files && e.target.files.length > 0) {
+      setFileName(e.target.files[0].name);
+    } else {
+      setFileName(null);
+    }
+  };
+
+
+  // const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (event.target.files && event.target.files.length > 0) {
+  //     setSelectedFile(event.target.files[0]);
+  //   }
+  // };
+
+  const handleIdFileChange = (e: React.ChangeEvent<HTMLInputElement>, setFileName: React.Dispatch<React.SetStateAction<string | null>>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setIDdocument(e.target.files[0]);
+      setFileName(e.target.files[0].name);
+    } else {
+      setFileName(null);
+    }
+  };
+
+  const handleCertFileChange = (e: React.ChangeEvent<HTMLInputElement>, setFileName: React.Dispatch<React.SetStateAction<string | null>>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setCertificate(e.target.files[0]);
       setFileName(e.target.files[0].name);
     } else {
       setFileName(null);
@@ -86,10 +125,10 @@ const SignUpForm = () => {
               </div>
               <div className="form-input">
                 <input
-                  id="userName"
+                  id="username"
                   type="text"
                   placeholder="User Name"
-                  {...register("userName", {
+                  {...register("username", {
                     required: "User Name is required",
                     minLength: {
                       value: 2,
@@ -101,8 +140,8 @@ const SignUpForm = () => {
                     },
                   })}
                 />
-                {errors.userName && (
-                  <ErrorMessage message={errors.userName.message as string} />
+                {errors.username && (
+                  <ErrorMessage message={errors.username.message as string} />
                 )}
               </div>
             </div>
@@ -147,7 +186,7 @@ const SignUpForm = () => {
                   id="phone"
                   type="text"
                   placeholder="Phone"
-                  {...register("phone", {
+                  {...register("mobileNumber", {
                     required: "Phone is required",
                     minLength: {
                       value: 2,
@@ -159,8 +198,8 @@ const SignUpForm = () => {
                     },
                   })}
                 />
-                {errors.phone && (
-                  <ErrorMessage message={errors.phone.message as string} />
+                {errors.mobileNumber && (
+                  <ErrorMessage message={errors.mobileNumber.message as string} />
                 )}
               </div>
             </div>
@@ -291,13 +330,16 @@ const SignUpForm = () => {
                   <div className="form-input banner-search-item">
                     <DatePicker
                       selected={startDate}
-                      onChange={(date: Date) => setStartDate(date)}
+                      onChange={(date: Date) => {
+                        setStartDate(date);
+                        setValue("DOB", date); // Update the form value for DOB
+                      }}
                       isClearable={true}
                       placeholderText="Select Date"
                       dropdownMode="select"
                       showMonthDropdown
                       showYearDropdown
-                      locale="en-US"
+                      
                       className="form-control w-100"
                       wrapperClassName="w-100"
                     />
@@ -324,7 +366,7 @@ const SignUpForm = () => {
                         required: "ID Document is required",
                       })}
                       className="custom-file-input"
-                      onChange={(e) => handleFileChange(e, setIDdocumentName)}
+                      onChange={(e) => handleIdFileChange(e, setIDdocumentName)}
                     />
                     <label htmlFor="IDdocument" className="custom-file-label">
                       <FontAwesomeIcon icon={faUpload} /> Upload ID Document
@@ -354,7 +396,7 @@ const SignUpForm = () => {
                         required: "Certificate is required",
                       })}
                       className="custom-file-input"
-                      onChange={(e) => handleFileChange(e, setCertificateName)}
+                      onChange={(e) => handleCertFileChange(e, setCertificateName)}
                     />
                     <label htmlFor="certificate" className="custom-file-label">
                       <FontAwesomeIcon icon={faUpload} /> Upload Certificate
