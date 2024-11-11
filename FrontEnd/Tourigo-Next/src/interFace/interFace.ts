@@ -481,4 +481,13 @@ export interface Complaint{
    
 }
 
+export interface Transport{
+  _id: string;
+  type: string;
+  duration: string;
+  price: number;
+  city: string;
+  touristID: string;
+}
+
 

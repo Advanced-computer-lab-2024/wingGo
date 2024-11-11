@@ -80,7 +80,8 @@ router.get('/searchHotelsByCity', touristController.getHotelOffersByCity);
 router.get('/searchHotelsByLocation', touristController.getHotelOffersByLocation);
 router.post('/bookHotel/:touristId', touristController.bookHotel);
 // Read All Transports (for tourists)
-router.get('/transports', advertiserController.getAllTransports);
+// router.get('/transports', advertiserController.getAllTransports);
+router.get('/transports', advertiserController.getAllUnbookedTransports);
 router.put('/bookTransport/:touristId/:transportId', touristController.bookTransport);
 router.get('/:id', touristController.getTouristById);
 

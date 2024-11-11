@@ -368,10 +368,10 @@ const requestAccountDeletion = async (req, res) => {
 };
 
 const createTransport = async (req, res) => {
-    const { type, duration, price } = req.body;
+    const { type, duration, city, price } = req.body;
 
     try {
-        const newTransport = new Transport({ type, duration, price, touristID: null });
+        const newTransport = new Transport({ type, duration, city, price, touristID: null });
         await newTransport.save();
         res.status(201).json(newTransport);
     } catch (error) {
@@ -429,12 +429,12 @@ const getUnbookedTransportById = async (req, res) => {
 
 const updateTransport = async (req, res) => {
     const { id } = req.params;
-    const { type, duration, price, touristID } = req.body;
+    const { type, duration, price, city, touristID } = req.body;
 
     try {
         const updatedTransport = await Transport.findByIdAndUpdate(
             id,
-            { type, duration, price, touristID },
+            { type, duration, price, city, touristID },
             { new: true }
         );
         if (!updatedTransport) {

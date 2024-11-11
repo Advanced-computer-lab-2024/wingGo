@@ -15,6 +15,11 @@ const TransportSchema = new Schema({
         type: Number,
         required: true
     },
+    city:
+    {
+        type: String,
+        required: true
+    },
     touristID: {
         type: Schema.Types.ObjectId,
         ref: 'Tourist',
