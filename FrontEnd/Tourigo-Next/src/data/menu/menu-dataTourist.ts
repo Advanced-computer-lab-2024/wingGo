@@ -6,23 +6,7 @@ import homeFourImg from "../../../public/assets/images/menu/menu-home-4.jpg";
 import homeFiveImg from "../../../public/assets/images/menu/menu-home-5.jpg";
 
 const menu_data: MenuType[] = [
-  {
-    id: 1,
-    hasDropdown: true,
-    children: false,
-    active: true,
-    title: "Home",
-    pluseIncon: true,
-    link: "#",
-    previewImg: true,
-    submenus: [
-      { title: "Home One", link: "/home", prviewIMg: homeOneImg },
-      { title: "Home Two", link: "/home-two", prviewIMg: homeTowImg },
-      { title: "Home Three", link: "/home-three", prviewIMg: homeThreeImg },
-      { title: "Home Four", link: "/home-four", prviewIMg: homeFourImg },
-      { title: "Home Five", link: "/home-five", prviewIMg: homeFiveImg },
-    ],
-  },
+
   {
     id: 2,
     hasDropdown: true,
@@ -97,15 +81,14 @@ const menu_data: MenuType[] = [
     ],
   },
   {
-    id: 8,
+    id: 8, // Unique ID for the currency selector
     hasDropdown: true,
-    children: false,
-    megaMenu: true,
+    children: true,
     active: true,
-    title: "My Profile",
+    title: "Transports", // Label for the selector
     pluseIncon: true,
-    pageLayout: true,
-    link: "/my-profile",
+    link: "/transports", // No link since it’s a selector
+    
   },
   {
     id: 9, // Unique ID for the currency selector
@@ -121,6 +104,18 @@ const menu_data: MenuType[] = [
       { title: "EGP", link: "#", currency: "EGP" },
       // Add more currencies as needed
     ],
+  },
+ 
+  {
+    id: 10,
+    hasDropdown: true,
+    children: false,
+    megaMenu: true,
+    active: true,
+    title: "My Profile",
+    pluseIncon: true,
+    pageLayout: true,
+    link: "/my-profile",
   },
   
 ];

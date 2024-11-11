@@ -52,7 +52,7 @@ const HeaderTwo = () => {
                         </nav>
                       </div>
                     </div>
-                    <div
+                    {/* <div
                       onClick={toggleSideMenu}
                       className="header-hamburger ml-20"
                     >
@@ -63,7 +63,7 @@ const HeaderTwo = () => {
                           <span></span>
                         </Link>
                       </div>
-                    </div>
+                    </div> */}
 
                     <div className="header-hamburger ml-20 d-none">
                       <button
