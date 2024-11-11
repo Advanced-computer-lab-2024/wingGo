@@ -30,7 +30,7 @@ const TourSingleCard = ({
   isTourGuide = false,
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
-  const rating = tour.averageRating || 1; // Use Itinerary's averageRating, default to 1
+  const rating = tour.averageRating ; // Use Itinerary's averageRating, default to 1
 
   const router = useRouter(); // Initialize router
 

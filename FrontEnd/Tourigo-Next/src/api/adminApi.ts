@@ -52,5 +52,33 @@ export const viewPendingUserID = async (id: string): Promise<any> => {
         throw error;
     }
 };
+export const fetchUsername = async (): Promise<any[]> => {
+    try {
+        const response = await axios.get<IPendingUser[]>('http://localhost:8000/admin/getUsername/671596e1650cad1f372063b1');
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching username:", error);
+        throw error;
+    }
+};
+export const changeAdminPassword = async (id: string, oldPassword: string ,password: string, confirmNewPassword: string): Promise<any> => {
+    try {
+        
+      const response = await axios.put<any>(`http://localhost:8000/admin/changePassword/${id}`, 
+        { oldPassword, newPassword: password, confirmNewPassword }
+    );
+        console.log('Change password response:', response.data);
+        return response.data;
+        } catch (error) {
+          console.error('Error changing password:', error);
+          if (axios.isAxiosError(error)) {
+            throw error.response?.data || error.message;
+          } else {
+            throw error;
+          }
+        }
+    };
+
+
 
 

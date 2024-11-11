@@ -5,7 +5,7 @@ import TourDetailsArea from "./TourDetailsArea";
 const TourListingEditMain = () => {
   return (
     <>
-      <Breadcrumb titleOne="Edit Tour Package" titleTwo="Edit Tour Package" />
+      <Breadcrumb titleOne="Add Activity" titleTwo="Add Activity" />
       <TourDetailsArea />
     </>
   );

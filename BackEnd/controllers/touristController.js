@@ -785,7 +785,7 @@ const filterItineraries = async (req, res) => {
 const addPreferencesToTourist = async (req, res) => {
     const { id } = req.params;  // Tourist ID
     const { preferences } = req.body;  // List of selected preference tag IDs
-
+    console.log(preferences);
     try {
         const tourist = await Tourist.findById(id);
         if (!tourist) {
@@ -812,7 +812,7 @@ const addPreferencesToTourist = async (req, res) => {
         }
 
         const tourist2 = await Tourist.findById(id).populate('preferences');
-        console.log(tourist2.preferences);
+        //console.log(tourist2.preferences);
 
         
         await tourist.save();
@@ -1024,16 +1024,28 @@ const redeemPoints = async (req, res) => {
       
         // Calculate the value to be added to the wallet
         const oldPoints = tourist.loyaltyPoints;
-        let newPoints = 0;
-        let newLevel = 1;
-        let newAmount = 0.5;
-        const toBeAdded = (oldPoints / 10000) * 100; // Conversion rate for points to wallet amount
-
+       
+        
+        
+       
         if (oldPoints < 10000) {
             return res.status(400).json({ 
                 message: 'Insufficient loyalty points. You need at least 10,000 points to redeem into your wallet.' 
             });
         }
+        const redeemablePoints = Math.floor(oldPoints / 10000) * 10000;
+        const remainingPoints = oldPoints % 10000;
+
+        // Convert redeemable points to wallet amount
+        const amountToAdd = (redeemablePoints / 10000) * 100; // Conversion rate: 10,000 points = 100 EGP
+
+        // Step 3: Update tourist's wallet and loyalty points
+       
+        tourist.loyaltyPoints = remainingPoints;
+        let newPoints = remainingPoints;
+        let newLevel = 1;
+        let newAmount = 0.5;
+
 
         // Update the tourist document
         const touristUpdate = await Tourist.findByIdAndUpdate(
@@ -1044,7 +1056,7 @@ const redeemPoints = async (req, res) => {
                     'badge.level': newLevel,           // Reset badge level
                     'badge.amount': newAmount          // Reset badge amount
                 },
-                $inc: { wallet: toBeAdded }           // Increment wallet by toBeAdded amount
+                $inc: { wallet: amountToAdd }           // Increment wallet by toBeAdded amount
             }, 
             { new: true }
         );
@@ -1943,81 +1955,172 @@ console.log("validatedFlightOffer:", validatedFlightOffer);
       }
 };
 
-    const shareViaEmail = async (req, res) => { // To be done with FrontEnd
-        const { email, type, id } = req.body;
+const shareActivityViaEmail = async (req, res) => {
+    const { email } = req.body;
+    const { id } = req.params;
 
-        if (!email || !type || !id) {
-            return res.status(400).json({ message: 'Please provide email, type, and id' });
+    if (!email || !id) {
+        return res.status(400).json({ message: 'Please provide email and id' });
+    }
+
+    try {
+        const item = await Activity.findById(id);
+        if (!item) {
+            return res.status(404).json({ message: 'Activity not found' });
         }
 
-        try {
-            let item;
-            let itemType;
+        const link = `http://localhost:3000/activity-details/${id}`;
 
-            switch (type) {
-                case 'activity':
-                    item = await Activity.findById(id);
-                    itemType = 'Activity';
-                    break;
-                case 'itinerary':
-                    item = await Itinerary.findById(id);
-                    itemType = 'Itinerary';
-                    break;
-                case 'place':
-                    item = await Place.findById(id);
-                    itemType = 'Place';
-                    break;
-                default:
-                    return res.status(400).json({ message: 'Invalid type. Use "activity", "itinerary", or "place".' });
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: "winggo567@gmail.com",
+                pass: "smkg eghm yrzv yyir"
             }
+        });
 
-            if (!item) {
-                return res.status(404).json({ message: `${itemType} not found` });
+        await transporter.sendMail({
+            from: "winggo567@gmail.com",
+            to: email,
+            subject: 'Check out this Activity',
+            text: `Here is the link: ${link}`,
+            html: `<p>Here is the link: <a href="${link}">${link}</a></p>`
+        });
+
+        res.status(200).json({ message: 'Activity shared successfully via email', link });
+    } catch (error) {
+        res.status(500).json({ message: 'Error sharing via email', error });
+    }
+};
+
+const shareItineraryViaEmail = async (req, res) => {
+    const { email } = req.body;
+    const { id } = req.params;
+
+    if (!email || !id) {
+        return res.status(400).json({ message: 'Please provide email and id' });
+    }
+
+    try {
+        const item = await Itinerary.findById(id);
+        if (!item) {
+            return res.status(404).json({ message: 'Itinerary not found' });
+        }
+
+        const link = `http://localhost:3000/it-details/${id}`;
+
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: "winggo567@gmail.com",
+                pass: "smkg eghm yrzv yyir"
             }
+        });
 
-            const link = `${req.protocol}://${req.get('host')}/${type}/${id}`;
+        await transporter.sendMail({
+            from: "winggo567@gmail.com",
+            to: email,
+            subject: 'Check out this Itinerary',
+            text: `Here is the link: ${link}`,
+            html: `<p>Here is the link: <a href="${link}">${link}</a></p>`
+        });
 
-            // Send email logic here (using a service like nodemailer)
-            // Example:
-            // await sendEmail(email, `Check out this ${itemType}`, `Here is the link: ${link}`);
-            // Create a transporter object using the default SMTP transport
-            let transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: "winggo567@gmail.com", // Your email address
-                    pass: "Winggo123456"  // Your email password
-                }
-            });
+        res.status(200).json({ message: 'Itinerary shared successfully via email', link });
+    } catch (error) {
+        res.status(500).json({ message: 'Error sharing via email', error });
+    }
+};
 
-            // Send email
-            await transporter.sendMail({
-                from: "winggo567@gmail.com", // Sender address
-                to: email, // List of receivers
-                subject: `Check out this ${itemType}`, // Subject line
-                text: `Here is the link: ${link}`, // Plain text body
-                html: `<p>Here is the link: <a href="${link}">${link}</a></p>` // HTML body
-            });
+const sharePlaceViaEmail = async (req, res) => {
+    const { email } = req.body;
+    const { id } = req.params;
 
-            res.status(200).json({ message: `${itemType} shared successfully via email`, link });
-        } catch (error) {
-            res.status(500).json({ message: 'Error sharing via email', error });
-        }
-    };
+    if (!email || !id) {
+        return res.status(400).json({ message: 'Please provide email and id' });
+    }
 
-    const shareViaLink = (req, res) => { // To be done with FrontEnd
-        const { type, id } = req.body;
-
-        if (!type || !id) {
-            return res.status(400).json({ message: 'Please provide type and id' });
+    try {
+        const item = await Place.findById(id);
+        if (!item) {
+            return res.status(404).json({ message: 'Place not found' });
         }
 
-        try {
-            const link = `${req.protocol}://${req.get('host')}/${type}/${id}`;
-            res.status(200).json({ message: 'Link generated successfully', link });
-        } catch (error) {
-            res.status(500).json({ message: 'Error generating link', error });
+        const link = `http://localhost:3000/place-details/${id}`;
+
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: "winggo567@gmail.com",
+                pass: "smkg eghm yrzv yyir"
+            }
+        });
+
+        await transporter.sendMail({
+            from: "winggo567@gmail.com",
+            to: email,
+            subject: 'Check out this Place',
+            text: `Here is the link: ${link}`,
+            html: `<p>Here is the link: <a href="${link}">${link}</a></p>`
+        });
+
+        res.status(200).json({ message: 'Place shared successfully via email', link });
+    } catch (error) {
+        res.status(500).json({ message: 'Error sharing via email', error });
+    }
+};
+
+const shareProductViaEmail = async (req, res) => {
+    const { email } = req.body;
+    const { id } = req.params;
+
+    if (!email || !id) {
+        return res.status(400).json({ message: 'Please provide email and id' });
+    }
+
+    try {
+        const item = await Product.findById(id);
+        if (!item) {
+            return res.status(404).json({ message: 'Product not found' });
         }
-    };
+
+        const link = `${req.protocol}://${req.get('host')}/product/${id}`;
+
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: "winggo567@gmail.com",
+                pass: "smkg eghm yrzv yyir"
+            }
+        });
+
+        await transporter.sendMail({
+            from: "winggo567@gmail.com",
+            to: email,
+            subject: 'Check out this Product',
+            text: `Here is the link: ${link}`,
+            html: `<p>Here is the link: <a href="${link}">${link}</a></p>`
+        });
+
+        res.status(200).json({ message: 'Product shared successfully via email', link });
+    } catch (error) {
+        res.status(500).json({ message: 'Error sharing via email', error });
+    }
+};
+
+    // const shareViaLink = (req, res) => { // To be done with FrontEnd
+    //     const { type, id } = req.body;
+
+    //     if (!type || !id) {
+    //         return res.status(400).json({ message: 'Please provide type and id' });
+    //     }
+
+    //     try {
+    //         const link = `${req.protocol}://${req.get('host')}/${type}/${id}`;
+    //         res.status(200).json({ message: 'Link generated successfully', link });
+    //     } catch (error) {
+    //         res.status(500).json({ message: 'Error generating link', error });
+    //     }
+    // };
 
     const convertCurrency = async (amount, fromCurrency, toCurrency) => {
         try {
@@ -2586,8 +2689,7 @@ module.exports = {
     commentOnItinerary,
     rateTourGuide,
     commentOnTourGuide,
-    shareViaEmail,
-    shareViaLink,
+    // shareViaLink,
     convertCurrency,
     updateProductPricesToCurrency,
     searchHotelsByCity,
@@ -2604,5 +2706,9 @@ module.exports = {
     getPurchasedProducts,
     getUnbookedItineraries,
     isItineraryBooked,
-    isActivityBooked
+    isActivityBooked,
+    shareActivityViaEmail,
+    shareItineraryViaEmail,
+    sharePlaceViaEmail,
+    shareProductViaEmail
 };

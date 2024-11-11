@@ -18,12 +18,13 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
   const [activeTab, setActiveTab] = useState('profile');
   const [profileData, setProfileData] = useState<any>(null);
   const [refresh, setRefresh] = useState(false);
+  const [preferencesRefresh, setPreferencesRefresh] = useState(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
         const data = await viewTouristProfile(id);
-        console.log('Profile data:', data);
+        
         setProfileData(data);
       } catch (error) {
         console.error('Error fetching profile data:', error);
@@ -32,20 +33,20 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
 
     fetchProfileData();
     setRefresh(false);
-    console.log('Refresh:', refresh);
-  }, [id, refresh]);
+    setPreferencesRefresh(false);
+    
+  }, [id, refresh, preferencesRefresh]);
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
-        console.log('profile');
         return <ProfileDetails profileData={profileData} id={id}/>;
       case 'loyalty':
-        console.log('loyalty');
+        
         return <LoyaltyProgram profileData={profileData} id={id} refreshData={refresh} setRefreshData={setRefresh}/>;
       case 'Preferences':
-        console.log('Preferences');
-        return <Prefrences />;
+        
+        return <Prefrences profileData={profileData} id={id} setPrefrenceRefresh={setPreferencesRefresh}/>;
       default:
         return null;
     }
@@ -91,6 +92,7 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                         </span>
                         Account Details
                       </button>
+                      
                       <button
                         className="nav-link"
                         id="nav-community-2-tab"

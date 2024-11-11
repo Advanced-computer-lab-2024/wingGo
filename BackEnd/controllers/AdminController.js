@@ -1183,6 +1183,21 @@ const getAllActivities = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+const getUsernameById = async  (req, res) => {
+    const {id} = req.params;
+    try {
+        const admin = await Admin.findById(id, 'username'); // Only fetches the username field
+        res.status(200).json(admin);
+        if (admin) {
+            return admin.username;
+        } else {
+            throw new Error('Admin not found');
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
   
 
@@ -1236,5 +1251,6 @@ module.exports = {
     sortComplaintsByDate,
     filterComplaintsByStatus,
     getAllItineraries,
-    getAllActivities
+    getAllActivities,
+    getUsernameById
 };

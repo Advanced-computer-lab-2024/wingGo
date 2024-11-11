@@ -16,10 +16,10 @@ interface ProfileDetailsProps {
 
 const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData}) => {
 
-    console.log('Profile Data:', profileData);
+    
     const filterData = teamData.find((item) => item?.id == 1);
     const tourist = profileData;
-    console.log('Tourist:', tourist);
+    
   
     
     const formatDate = (dateString: string) => {
@@ -44,7 +44,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData}) => {
       <section className="bd-team-details-area section-space position-relative">
         <div className="container">
           <div className="row justify-content-between gy-24">
-            <div className="col-xxl-5 col-xl-5 col-lg-5 col-md-5">
+            <div className="col-xxl-3 col-xl-5 col-lg-5 col-md-5">
               <div className="team-details-thumb sidebar-sticky">
                 <Image
                   src={filterData?.img as StaticImageData}
@@ -54,7 +54,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData}) => {
                 />
               </div>
             </div>
-            <div className="col-xxl-7 col-xl-7 col-lg-7 col-md-7">
+            <div className="col-xxl-9 col-xl-7 col-lg-7 col-md-7">
               <div className="team-single-wrapper">
                 <div className="team-contents mb-30">
                   <div className="team-heading mb-15">
@@ -71,6 +71,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData}) => {
                         <span className="team-label">Phone : </span>
                         {tourist?.mobileNumber}
                       </li>
+
                       <li>
                         <span className="team-label">Nationality : </span>
                         {tourist?.nationality}
@@ -120,13 +121,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData}) => {
                   <i className="fa-regular fa-arrow-right"></i>
                 </span>
               </button>
-            
-
-                
-
-
-
-                  
+               
               </div>
             </div>
           </div>

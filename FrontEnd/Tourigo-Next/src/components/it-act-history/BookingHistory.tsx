@@ -205,9 +205,9 @@ const BookingHistory = () => {
                                                         <tr key={booking.itinerary._id} className="table-custom">
                                                             <td>
                                                                 <div className="dashboard-thumb-wrapper p-relative">
-                                                                    <div className="dashboard-thumb image-hover-effect-two position-relative">
+                                                                    <div className="dashboard-thu   mb image-hover-effect-two position-relative">
                                                                         <Image
-                                                                            src="/images/default-image.jpg"
+                                                                            src=""
                                                                             loader={imageLoader}
                                                                             style={{ width: '100%', height: "auto" }}
                                                                             alt="itinerary image" 
@@ -299,7 +299,7 @@ const BookingHistory = () => {
                                                                 <div className="dashboard-thumb-wrapper p-relative">
                                                                     <div className="dashboard-thumb image-hover-effect-two position-relative">
                                                                         <Image
-                                                                            src="/images/default-image.jpg"
+                                                                            src=""
                                                                             loader={imageLoader}
                                                                             style={{ width: '100%', height: "auto" }}
                                                                             alt="activity image" 

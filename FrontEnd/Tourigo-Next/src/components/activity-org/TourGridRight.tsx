@@ -110,7 +110,7 @@ const TourGridRight = () => {
               applyFilters={applyFilters} 
               applySearch={applySearch} 
             />
-            <SidebarCategories onCategorySelect={(category) => applyFilters({ category })} />
+            {/* <SidebarCategories onCategorySelect={(category) => applyFilters({ category })} /> */}
           </div>
         </div>
         <PaginationWrapper />

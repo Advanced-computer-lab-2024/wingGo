@@ -12,10 +12,35 @@ import TourSingleCard from "../common/tourElements/TourSingleCardIt";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { isItineraryBooked } from "@/api/itineraryApi"; // Import the booking status function
+import { toast } from "react-toastify";
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Itinerary | null>(null);
   const [isBooked, setIsBooked] = useState(false); // State for booking status
+  const [isEmailFormOpen, setIsEmailFormOpen] = useState(false);
+  const [email, setEmail] = useState('');
+
+  const handleEmailChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
+    setEmail(e.target.value);
+  };
+
+  const handleSendEmail = async () => {
+    try {
+      if (data) {
+        const response = await axios.post(`http://localhost:8000/tourist/shareItineraryViaEmail/${data._id}`, {
+          email: email
+        });
+        if (response.status === 200) {
+          toast.success('Email sent successfully!');
+          setIsEmailFormOpen(false);
+        }
+      } else {
+        toast.error('Product item is not available.');
+      }
+    } catch (error) {
+      toast.error('Error sending email');
+    }
+  };
 
   useEffect(() => {
     const fetchItinerary = async () => {
@@ -72,23 +97,49 @@ const TourDetails = ({ id }: idTypeNew) => {
                           <br/><br/>
                           <div className="row gy-24 "  style={{ paddingLeft: '10px'}}   >
                           <button
-                              onClick={isBooked ? undefined : handleBookNowClick} // Disable click if booked
-                              className="bd-gradient-btn btn-style radius-60 btn-tertiary"
-                              style={{
-                                padding: '6px 12px',
-                                fontSize: '14px',
-                                borderRadius: '20px',
-                                float: 'right',
-                                paddingRight: '10px',
-                                marginRight: '20px',
-                                width: '150px',
-                                textAlign: 'center',
-                                opacity: isBooked ? 0.6 : 1, // Dim button if booked
-                                cursor: isBooked ? "not-allowed" : "pointer"
+                        onClick={() => handleBookNowClick()}
+                        className="bd-gradient-btn btn-style radius-60 btn-tertiary"
+                        style={{ padding: '6px 12px', fontSize: '14px', borderRadius: '20px',  float: 'right', paddingRight: '10px', marginRight: '20px', width: '150px', textAlign: 'center' }} // Adjusted for smaller size and less rounded shape
+                        >
+                          Book Now
+                        </button>
+                        <button
+                              className="bd-primary-btn btn-style radius-60"
+                              onClick={() => {
+                                navigator.clipboard.writeText(window.location.href);
+                                toast.success("Link copied to clipboard!");
                               }}
                             >
-                              {isBooked ? "Booked!" : "Book Now"}
-                            </button>  
+                              <span className="bd-primary-btn-text">Share Link</span>
+                              <span className="bd-primary-btn-circle">
+                                <i className="fa fa-share" />
+                              </span>
+                            </button>
+                            <button
+                              className="bd-primary-btn btn-style radius-60"
+                              onClick={() => setIsEmailFormOpen(!isEmailFormOpen)}
+                            >
+                              Share Via Email
+                            </button>
+                            {isEmailFormOpen && (
+                              <div className="email-form">
+                                <h3>Share Itenirary Via Email</h3>
+                                <div className="form-group">
+                                  <label htmlFor="email">Email:</label>
+                                  <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value={email}
+                                    onChange={handleEmailChange}
+                                    className="form-control"
+                                  />
+                                </div>
+                                <button onClick={handleSendEmail} className="bd-primary-btn btn-style radius-60">
+                                  Send Email
+                                </button>
+                              </div>
+                            )}   
                         </div> 
                         </div>
                         <div className="tour-details-meta-right d-flex flex-wrap gap-10 align-items-center justify-content-between">

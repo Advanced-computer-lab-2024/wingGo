@@ -22,3 +22,13 @@ export const createPlace = async (placeData: any): Promise<any> => {
         throw error;
     }
 };
+// Delete a place
+export const deletePlace = async (placeId: string): Promise<void> => {
+    try {
+        await axios.delete(`http://localhost:8000/govornor/deletePlace/${placeId}`);
+        console.log(`Place with ID ${placeId} has been deleted.`);
+    } catch (error) {
+        console.error("Error deleting place:", error);
+        throw error;
+    }
+};

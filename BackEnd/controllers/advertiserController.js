@@ -118,17 +118,22 @@ const getAdvertiserProfile = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
-
 const createActivity = async (req, res) => {
+    const { name, date, time, location, price, category, tags, specialDiscounts, isBookingOpen, advertiser } = req.body;
 
-    const {name, date, time, location, price, category, tags, specialDiscounts, isBookingOpen, advertiser} = req.body
+    try {
+        // Fetch the advertiser from the database
+        const advertiserRecord = await Advertiser.findById(advertiser);
+        if (!advertiserRecord) {
+            return res.status(404).json({ error: 'Advertiser not found.' });
+        }
 
-    // const {lat, lng} = await getCoordinates(location.address);
+        // Check if terms have been accepted
+        if (!advertiserRecord.termsAccepted) {
+            return res.status(403).json({ error: 'Terms and conditions must be accepted to create an activity.' });
+        }
 
-    // location.lat = lat;
-    // location.lng = lng;
-
-    try{
+        // Proceed to create a new activity
         const newActivity = new Activity({
             name,
             date,
@@ -143,14 +148,12 @@ const createActivity = async (req, res) => {
         });
 
         await newActivity.save();
-        res.status(201).json({message: 'Activity created successfully!', activity: newActivity});
-
+        res.status(201).json({ message: 'Activity created successfully!', activity: newActivity });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
-    catch(error){
-        res.status(400).json({error: error.message});
-    }
+};
 
-}
 
 const updateActivity = async (req, res) => {
     try {
@@ -240,7 +243,6 @@ const deleteActivity = async (req, res) => {
 const changeLogo = async (req, res) => {
     const { id } = req.params;
     
-
     try {
         const advertiser = await Advertiser.findById(id);
 
@@ -273,7 +275,7 @@ const acceptTerms = async (req, res) => {
 const changePassword = async (req, res) => {
     const { oldPassword, newPassword, confirmNewPassword } = req.body;
     const { id } = req.params; // Extract user ID from the request params
-
+    console.log(id);
     try {
         // 1. Find the user in LoginCredentials
         const userCredentials = await LoginCredentials.findById(id);
@@ -294,6 +296,7 @@ const changePassword = async (req, res) => {
 
         // 3. Compare the old password with the hashed password in TourGuide
         const isMatch = await bcrypt.compare(oldPassword, advertiser.password);
+        //const isMatch2 = oldPassword === advertiser.password;
         console.log('Is password match:', isMatch);
 
         if (!isMatch) {
@@ -307,6 +310,7 @@ const changePassword = async (req, res) => {
 
         // 5. Hash the new password
         const hashedNewPassword = await bcrypt.hash(newPassword, 10); // Hash new password
+        
         
         // 6. Update the password in LoginCredentials
         userCredentials.password = hashedNewPassword;
@@ -456,6 +460,29 @@ const deleteTransport = async (req, res) => {
     }
 };
 
+const previewLogo = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const advertiser = await Advertiser.findById(id);
+        
+        if (!advertiser) {
+            return res.status(404).json({ message: 'Advertiser not found' });
+        }
+
+        if (advertiser.logoUrl) {
+            const key = advertiser.logoUrl.split('/').slice(-1)[0];
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
+            
+            // Instead of redirecting, send the pre-signed URL directly
+            return res.json({ imageUrl: preSignedUrl });
+        } else {
+            return res.status(404).json({ message: 'Image not found for this advertiser.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 
 module.exports = {
@@ -478,5 +505,6 @@ module.exports = {
     updateTransport,
     deleteTransport,
     getAllUnbookedTransports,
-    getUnbookedTransportById
+    getUnbookedTransportById,
+    previewLogo
 };

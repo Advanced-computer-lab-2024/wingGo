@@ -42,7 +42,7 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
       // Show success message once the API call is successful
       toast.success("Booking Successful!", { id: toastId, duration: 1000 });
     } catch (error) {
-      toast.error("There was an error booking your activity.", { id: toastId });
+      toast.error("You have already booked your activity successfully.", { id: toastId });
       console.error("Error during API call:", error);
     }
   };
@@ -74,7 +74,7 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
             {/* Part 1: Email Verification */}
             <div className="row setup-content" id="step-one">
               <div className="col-md-12">
-                <div className="booking-form-wrapper mb-35">
+                {/* <div className="booking-form-wrapper mb-35">
                   <h4 className="booking-form-title mb-15">Verification</h4>
                   <div className="booking-form-input-box">
                     <div className="booking-form-input-title">
@@ -101,7 +101,7 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
                       )}
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 

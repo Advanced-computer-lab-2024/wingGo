@@ -28,7 +28,7 @@ const TourSingleCard = ({
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const router = useRouter();
-  const rating = 1; // Use Itinerary's averageRating, default to 1
+  const rating = tour.averageRating; // Use Itinerary's averageRating, default to 1
   // Local state to keep track of the flagged and deactivated status
   const [isFlagged, setIsFlagged] = useState(tour.flagged);
 
