@@ -57,7 +57,7 @@ const menu_data: MenuType[] = [
     title: "My Profile",
     pluseIncon: true,
     pageLayout: true,
-    link: "/home",
+    link: "/advertiser/my-profile",
   },
   
 ];
