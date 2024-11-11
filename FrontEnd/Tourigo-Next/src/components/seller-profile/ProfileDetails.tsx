@@ -111,34 +111,24 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData, logo,
               <div className="team-single-wrapper">
                 <div className="team-contents mb-30">
                   <div className="team-heading mb-15">
-                    <h2 className="team-single-title">{advertiser?.companyName}</h2>
+                    <h2 className="team-single-title">{advertiser?.username}</h2>
                     <h6 className="designation theme-text">
-                      Advertiser
+                      Seller
                     </h6>
                   </div>
                   
-                  <div className="team-info mb-20">
+                  <div className="team-info mb-20 w-full">
                     <h4 className="mb-15">Information:</h4>
-                    <ul>
-                    <li>
-                        <span className="team-label">Contact Person : </span>
-                        {advertiser?.contactPerson}
-                      </li>
-                      <li>
-                        <span className="team-label">Hotline : </span>
-                        {advertiser?.hotline}
-                      </li>
+                    <ul className="w-full">
+                    
 
                       
                       <li>
-                        <span className="team-label">Email : </span>
-                        {advertiser?.contactEmail}
+                        <span className="team-label w-full">Email : </span>
+                        {advertiser?.email}
                       </li>
                       
-                        <li>
-                        <span className="team-label">Our Website : </span>
-                        <a href={advertiser?.website}> {advertiser?.website} </a>
-                      </li>
+                        
                     </ul>
                   </div>
                   

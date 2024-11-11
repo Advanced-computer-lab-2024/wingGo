@@ -68,7 +68,7 @@ const menu_data: MenuType[] = [
     title: "My profile",
     pluseIncon: true,
     pageLayout: true,
-    link: "/Products-adminArch",
+    link: "/seller/my-profile",
     
   },
 ];
