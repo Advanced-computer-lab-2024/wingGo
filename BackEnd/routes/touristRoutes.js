@@ -92,4 +92,12 @@ router.get('/getUsername/:id', touristController.getTouristUsername);
 
 router.get('/purchasedProducts/:touristId', touristController.getPurchasedProducts);
 
+// Route to check if an itinerary is booked by a tourist
+router.get('/booked-status/:touristId/booked-status/:itineraryId', touristController.isItineraryBooked);
+
+// Route to check if an activity is booked
+router.get('/booked-status/:touristId/activity-status/:activityId', touristController.isActivityBooked);
+
+
+
 module.exports = router;

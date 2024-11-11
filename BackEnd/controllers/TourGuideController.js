@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const TourGuide = require('../models/TourGuide');
 const LoginCredentials = require('../models/LoginCredentials'); 
+const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
 
 
 const axios = require('axios');
@@ -408,6 +409,31 @@ const activateOrDeactivateItinerary = async (req, res) => {
     }
 };
 
+
+
+const previewPhoto = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const tourguide = await TourGuide.findById(id);
+        
+        if (!tourguide) {
+            return res.status(404).json({ message: 'TourGuide not found' });
+        }
+
+        if (tourguide.photo) {
+            const key = tourguide.photo.split('/').slice(-1)[0];
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
+            
+            // Instead of redirecting, send the pre-signed URL directly
+            return res.json({ imageUrl: preSignedUrl });
+        } else {
+            return res.status(404).json({ message: 'Image not found for this advertiser.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     getTourGuide,
     updateTourGuideProfile,
@@ -415,5 +441,6 @@ module.exports = {
     changeProfilePhoto,
     acceptTerms, changePassword,
     deleteTourGuideAccount,
-    activateOrDeactivateItinerary
+    activateOrDeactivateItinerary,
+    previewPhoto
 };

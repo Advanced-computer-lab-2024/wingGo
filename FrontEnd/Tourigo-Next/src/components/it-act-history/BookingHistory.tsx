@@ -11,6 +11,7 @@ import RateCommentModal from './RateCommentModal';
 import RateCommentModalActivity from './RateCommentModalActivity';
 import { cancelItineraryApi } from '@/api/itineraryApi';
 import { cancelActivityApi } from '@/api/activityApi';
+import CancelConfirmationModal from "./CancelConfirmationModal"; // Import the new modal component
 
 const BookingHistory = () => {
     const [bookedItineraries, setBookedItineraries] = useState<BookedItinerary[]>([]);
@@ -20,6 +21,40 @@ const BookingHistory = () => {
     const [activeTab, setActiveTab] = useState('itinerary'); // New state for tab selection
     const touristId = "67240ed8c40a7f3005a1d01d";
     const currentDate = new Date();
+
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [bookingToCancel, setBookingToCancel] = useState<BookedItinerary | null>(null);
+
+    const handleCancelBookingClick = (booking: BookedItinerary) => {
+        setBookingToCancel(booking);
+        setShowCancelModal(true);
+    };
+
+    const confirmCancellation = async () => {
+        if (!bookingToCancel) return;
+
+        try {
+            await cancelItineraryApi(touristId, bookingToCancel.itinerary._id);
+            setBookedItineraries((prev) =>
+                prev.filter((item) => item.itinerary._id !== bookingToCancel.itinerary._id)
+            );
+            alert('Booking canceled successfully');
+        } catch (error: any) {
+            if (error.response?.data?.message === 'Cannot cancel the itinerary within 48 hours of the booking date.') {
+                alert("Cannot cancel the itinerary within 48 hours of the booking date.");
+            } else {
+                alert('Failed to cancel the booking');
+            }
+        } finally {
+            setShowCancelModal(false);
+            setBookingToCancel(null);
+        }
+    };
+
+    const closeCancelModal = () => {
+        setShowCancelModal(false);
+        setBookingToCancel(null);
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -47,24 +82,24 @@ const BookingHistory = () => {
         return diffInMilliseconds >= 48 * 60 * 60 * 1000;
     };
 
-    const handleCancelBookingClick= async (booking: BookedItinerary) => {
-        const userConfirmed = window.confirm("Are you sure you want to cancel this booking?");
-        if (!userConfirmed) return;
+    // const handleCancelBookingClick= async (booking: BookedItinerary) => {
+    //     const userConfirmed = window.confirm("Are you sure you want to cancel this booking?");
+    //     if (!userConfirmed) return;
     
-        try {
-            await cancelItineraryApi(touristId, booking.itinerary._id);
-            alert('Booking canceled successfully');
-            setBookedItineraries((prev) =>
-                prev.filter((item) => item.itinerary._id !== booking.itinerary._id)
-            );
-        } catch (error: any) {
-            if (error.response?.data?.message === 'Cannot cancel the itinerary within 48 hours of the booking date.') {
-                alert("Cannot cancel the itinerary within 48 hours of the booking date.");
-            } else {
-                alert('Failed to cancel the booking');
-            }
-        }
-    };
+    //     try {
+    //         await cancelItineraryApi(touristId, booking.itinerary._id);
+    //         alert('Booking canceled successfully');
+    //         setBookedItineraries((prev) =>
+    //             prev.filter((item) => item.itinerary._id !== booking.itinerary._id)
+    //         );
+    //     } catch (error: any) {
+    //         if (error.response?.data?.message === 'Cannot cancel the itinerary within 48 hours of the booking date.') {
+    //             alert("Cannot cancel the itinerary within 48 hours of the booking date.");
+    //         } else {
+    //             alert('Failed to cancel the booking');
+    //         }
+    //     }
+    // };
     ////////////////////  Activity Part  /////////////////////////////////
     useEffect(() => {
         const fetchData = async () => {
@@ -194,6 +229,14 @@ const BookingHistory = () => {
                                                                         <p className="">Activities: {booking.itinerary.activities}</p>
                                                                     </div>
                                                                 </div>
+                                                            </td>
+                                                            <td>
+                                                            {showCancelModal && (
+                                                            <CancelConfirmationModal
+                                                                onConfirm={confirmCancellation}
+                                                                onCancel={closeCancelModal}
+                                                            />
+                                                        )}
                                                             </td>
                                                             <td>
                                                                 <div className="recent-activity-price-box">
