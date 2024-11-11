@@ -28,6 +28,9 @@ router.get('/fetch/:id', tourGuideController.getTourGuide);
 router.put('/update/:id', tourGuideController.updateTourGuideProfile);
 
 router.post('/changeProfilePhoto/:id', upload.single('file'),tourGuideController.changeProfilePhoto);
+router.get('/viewProfilePhoto/:id', tourGuideController.previewPhoto);
+
+
 
 router.put('/acceptterms/:id', tourGuideController.acceptTerms);
 router.put('/changePassword/:id', tourGuideController.changePassword); // Define route for password change

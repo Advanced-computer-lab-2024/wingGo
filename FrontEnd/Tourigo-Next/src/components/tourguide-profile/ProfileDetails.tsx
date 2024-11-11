@@ -8,8 +8,9 @@ import { format } from 'date-fns';
 import { deleteTouristProfile } from "@/api/ProfileApi";
 import { useRouter } from "next/router";
 import { TbUpload } from "react-icons/tb";
+import { requestAccountDeletion, uploadTourGuidePhoto } from "@/api/TourGuideProfileApi";
 
-import { requestAccountDeletion, uploadAdvertiserLogo } from "@/api/AdvertiserProfileApi";
+
 
 
 interface ProfileDetailsProps {
@@ -26,7 +27,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData, logo,
     const advertiser = profileData;
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     
-  
+
     
     const formatDate = (dateString: string) => {
         return format(new Date(dateString), 'yyyy-MM-dd');
@@ -62,12 +63,9 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData, logo,
     
         const formData = new FormData();
         formData.append('file', selectedFile);
-
-        //formData.append('IDdocument', selectedFile);
-        //formData.append('certificate', selectedFile2);
     
         try {
-          const response = await uploadAdvertiserLogo(id, formData);
+          const response = await uploadTourGuidePhoto(id, formData);
           console.log('Upload response:', response);
             setRefreshLogo(true);
             setSelectedFile(null);
@@ -110,9 +108,9 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData, logo,
               <div className="team-single-wrapper">
                 <div className="team-contents mb-30">
                   <div className="team-heading mb-15">
-                    <h2 className="team-single-title">{advertiser?.companyName}</h2>
+                    <h2 className="team-single-title">{advertiser?.username}</h2>
                     <h6 className="designation theme-text">
-                      Advertiser
+                      Tour Guide
                     </h6>
                   </div>
                   
@@ -120,23 +118,23 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData, logo,
                     <h4 className="mb-15">Information:</h4>
                     <ul>
                     <li>
-                        <span className="team-label">Contact Person : </span>
-                        {advertiser?.contactPerson}
+                        <span className="team-label">Previous Work : </span>
+                        {advertiser?.previousWork}
                       </li>
                       <li>
-                        <span className="team-label">Hotline : </span>
-                        {advertiser?.hotline}
+                        <span className="team-label">Mobile Number : </span>
+                        {advertiser?.mobileNumber}
                       </li>
 
                       
                       <li>
                         <span className="team-label">Email : </span>
-                        {advertiser?.contactEmail}
+                        {advertiser?.email}
                       </li>
                       
                         <li>
-                        <span className="team-label">Our Website : </span>
-                        <a href={advertiser?.website}> {advertiser?.website} </a>
+                        <span className="team-label">Years of Experience: </span>
+                        <a href={advertiser?.website}> {advertiser?.yearsOfExperience} </a>
                       </li>
                     </ul>
                   </div>
@@ -146,7 +144,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id , profileData, logo,
 
                 
               <Link
-                href={`/advertiser/change-password/${id}`} 
+                href={`/tour-guide/change-password/${id}`} 
                 className="bd-primary-btn btn-style has-arrow radius-60 ">
                 <span className="bd-primary-btn-arrow arrow-right">
                   <i className="fa-regular fa-arrow-right"></i>
