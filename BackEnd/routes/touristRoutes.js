@@ -101,6 +101,11 @@ router.get('/booked-status/:touristId/activity-status/:activityId', touristContr
 
 router.get('/getActivity/:id', touristController.getActivity);
 
+// Search for flights by userId
+router.get('/searchFlights/:userId', touristController.searchFlightsByUserId);
+
+// Search for hotels by userId
+router.get('/searchHotels/:userId', touristController.searchHotelsByUserId);
 
 
 module.exports = router;

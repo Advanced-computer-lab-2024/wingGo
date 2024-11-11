@@ -124,6 +124,7 @@ const changePassword = async (req, res) => {
         if (!userCredentials) {
             return res.status(404).json({ message: 'User credentials not found' });
         }
+        console.log(userCredentials);
 
         // 2. Find the corresponding user in the Tourist collection
         const tourist = await Tourist.findById(userCredentials.userId);
@@ -133,7 +134,7 @@ const changePassword = async (req, res) => {
 
         // 3. Compare the old password with the hashed password in LoginCredentials
         const isMatch = await bcrypt.compare(oldPassword, userCredentials.password); // Compare old password
-        if (oldPassword === newPassword) {
+        if (!isMatch) {
             return res.status(400).json({ message: 'Old password is incorrect' });
         }
         console.log(oldPassword);

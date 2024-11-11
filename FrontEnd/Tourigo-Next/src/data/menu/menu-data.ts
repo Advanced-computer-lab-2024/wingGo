@@ -85,7 +85,18 @@ const menu_data: MenuType[] = [
     link: "/home-eight",
     
   },
-  
+  {
+    id: 8,
+    hasDropdown: true,
+    children: true,
+    megaMenu: true,
+    active: true,
+    title: "Sign Up",
+    pluseIncon: true,
+    lastDropdown: true,
+    link: "/sign-up",
+    
+  },
 ];
 
 export default menu_data;

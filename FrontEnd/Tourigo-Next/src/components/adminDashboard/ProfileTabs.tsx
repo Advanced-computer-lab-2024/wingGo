@@ -26,10 +26,12 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
         const data = await fetchUsername();
         console.log('Profile data:', data);
         setProfileData(data);
+        console.log(data);
       } catch (error) {
         console.error('Error fetching profile data:', error);
       }
     };
+    
 
     fetchProfileData();
     setRefresh(false);

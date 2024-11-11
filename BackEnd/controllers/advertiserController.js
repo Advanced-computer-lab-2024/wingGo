@@ -468,14 +468,18 @@ const previewLogo = async (req, res) => {
         if (!advertiser) {
             return res.status(404).json({ message: 'Advertiser not found' });
         }
+        console.log('tamam 1');
 
         if (advertiser.logoUrl) {
             const key = advertiser.logoUrl.split('/').slice(-1)[0];
             const preSignedUrl = await previewgeneratePreSignedUrl(key);
             
             // Instead of redirecting, send the pre-signed URL directly
+            console.log('tamam before ret');
             return res.json({ imageUrl: preSignedUrl });
+            
         } else {
+            console.log('error');
             return res.status(404).json({ message: 'Image not found for this advertiser.' });
         }
     } catch (error) {

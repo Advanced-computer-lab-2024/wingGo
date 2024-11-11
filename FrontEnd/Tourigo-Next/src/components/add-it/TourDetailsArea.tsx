@@ -33,7 +33,7 @@ interface NewItinerary {
 const TourDetailsArea = () => {
   const [largeImg, setlargeImg] = useState<string>("");
   const initialState: NewItinerary = {
-    tourGuideId: '67244655313a2a345110c1e6',  // Replace with actual ID or dynamic ID
+    tourGuideId: '67325c530b3e54ad8bfe1678',  // Replace with actual ID or dynamic ID
     title: "",
     tags: [],
     activities: "",

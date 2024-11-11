@@ -9,7 +9,8 @@ const SellerProfileMain = () => {
         <div className="profile-tabs-main">
             
         <Breadcrumb  titleOne='My Account' titleTwo='My Account' />  
-        <SellerProfile id={"6707ab8915816ab90e19401d"}/>
+        <SellerProfile id={"67325f590b3e54ad8bfe1690"}/>
+        {/* <SellerProfile id={"6707ab8915816ab90e19401d"}/> */}
         
         </div>
     );

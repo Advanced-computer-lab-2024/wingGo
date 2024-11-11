@@ -14,7 +14,7 @@ interface NewProduct {
 }
 
 const TourDetailsArea = () => {
-  const adminId = "67158afc7b1ec4bfb0240575"; // Replace with actual advertiser ID
+  const adminId = "67325f590b3e54ad8bfe1690"; // Replace with actual advertiser ID
   const [product, setProduct] = useState<NewProduct>({
     name: "",
     price: 0,

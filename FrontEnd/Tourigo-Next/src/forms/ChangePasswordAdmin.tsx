@@ -38,7 +38,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ( {id }) => {
     const toastId = toast.loading("");
     try {
         console.log('Change password:', id, data.oldPassword, data.newPassword, data.confirmNewPassword);
-      const response = await changeAdminPassword(id, data.oldPassword, data.newPassword, data.confirmNewPassword);
+      const response = await changeAdminPassword('67326284e3b86017593a03a2 ', data.oldPassword, data.newPassword, data.confirmNewPassword);
       toast.success("Password changed successfully", { id: toastId, duration: 1000 });
       reset();
      router.push("/adminDashboard");

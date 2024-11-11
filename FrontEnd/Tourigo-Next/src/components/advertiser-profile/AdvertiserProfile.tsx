@@ -14,6 +14,7 @@ interface ProfileDetailsProps {
 
 const AdvertiserProfile: React.FC<ProfileDetailsProps> = ({ id }) => {
 
+  console.log(id);
   
 
   const [activeTab, setActiveTab] = useState('profile');

@@ -9,7 +9,9 @@ const ProfileTabsMain = () => {
         <div className="profile-tabs-main">
             
         <Breadcrumb  titleOne='My Account' titleTwo='My Account' />  
-        <ProfileTabs id={"6703fe21af26882204ffaffc"}/>
+
+        <ProfileTabs id={"6732756e45dae024763e08c9"}/>
+        {/* <ProfileTabs id={"6703fe21af26882204ffaffc"}/> */}
         
         </div>
     );

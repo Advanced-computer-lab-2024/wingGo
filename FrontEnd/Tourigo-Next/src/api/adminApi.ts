@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { IPendingUser} from '../interFace/interFace';
+const adminID = '67326284e3b86017593a03a0'
 
 
 export const fetchPendingUsers = async (): Promise<any[]> => {
@@ -54,7 +55,7 @@ export const viewPendingUserID = async (id: string): Promise<any> => {
 };
 export const fetchUsername = async (): Promise<any[]> => {
     try {
-        const response = await axios.get<IPendingUser[]>('http://localhost:8000/admin/getUsername/671596e1650cad1f372063b1');
+        const response = await axios.get<IPendingUser[]>(`http://localhost:8000/admin/getUsername/${adminID}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching username:", error);
