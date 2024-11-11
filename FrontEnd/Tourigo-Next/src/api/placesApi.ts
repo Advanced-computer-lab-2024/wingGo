@@ -32,3 +32,15 @@ export const deletePlace = async (placeId: string): Promise<void> => {
         throw error;
     }
 };
+export const updatePlace = async (id:string, governorId:string, updatedData:any) => {
+    try {
+        const response = await axios.put(
+            `http://localhost:8000/govornor/updatePlace/${id}?governorId=${governorId}`,
+            updatedData
+        );
+        return response.data; // Contains message and updated place data
+    } catch (error) {
+        console.error('Error updating place:', error);
+        throw error;
+    }
+};
