@@ -110,10 +110,10 @@ const BookingHistory = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const itineraries = await getBookedItinerariesData(touristId);
-                setBookedItineraries(itineraries);
-                const convertedPrices = await convertPrices(itineraries, 'itinerary');
-                setConvertedItineraryPrices(convertedPrices);
+                const Activities = await getBookedActivitiesData(touristId);
+                setBookedActivities(Activities);
+                const convertedPrices = await convertPrices(Activities, 'activity');
+                setConvertedActivityPrices(convertedPrices);
             } catch (error) {
                 console.error("Failed to load booked itineraries:", error);
             }

@@ -56,6 +56,9 @@ const FlightArea: React.FC<FlightAreaProps> = ({
       const response = await bookflight(flight);
       console.log('Booking response:', response);
 
+      alert("Booking in Progress");
+
+
       if(response.message === "Flight booked successfully"){
         alert("Flight booked successfully");
       }
@@ -78,7 +81,7 @@ const FlightArea: React.FC<FlightAreaProps> = ({
     return codes.join('->');
   };
 
-  return (
+  return ( tripData?
     <>
       <div className="row gy-24">
         <div className="col-12">
@@ -134,6 +137,10 @@ const FlightArea: React.FC<FlightAreaProps> = ({
         
       </div>
     </>
+  :
+  <div>
+      <h1>Loading...</h1>
+  </div>
   );
 };
 

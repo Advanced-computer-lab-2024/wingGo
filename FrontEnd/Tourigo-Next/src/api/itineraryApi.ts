@@ -210,3 +210,13 @@ export const createItinerary = async (itineraryData: any): Promise<any> => {
         throw error;
     }
 };
+
+export const fetchTourGuideRatings = async (tourGuideId: string) => {
+    try {
+        const response = await axios.get(`http://localhost:8000/tourguide/fetch/${tourGuideId}`);
+        return response.data; // Assuming the API returns an object with ratings, averageRating, and comments
+    } catch (error) {
+        console.error("Error fetching tour guide ratings:", error);
+        throw error;
+    }
+};

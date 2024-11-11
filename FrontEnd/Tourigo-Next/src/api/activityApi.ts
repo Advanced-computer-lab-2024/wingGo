@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 import { Activity ,BookedActivity} from '../interFace/interFace';
-const advertiserId ="67077683ab11089b0772dcb6"; 
+const advertiserId ="66fb37dda63c04def29f944e"; 
 const touristId = '67240ed8c40a7f3005a1d01d';
 
 export const fetchActivities = async (): Promise<Activity[]> => {

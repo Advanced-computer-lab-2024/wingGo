@@ -9,12 +9,14 @@ import tourImgTwentyOne from "../../../public/assets/images/tour/tour-img-21.png
 import tourImgTwentyTwo from "../../../public/assets/images/tour/tour-img-22.png";
 import { clientReviewData } from "@/data/client-review-data";
 import TourDetailsPostForm from "./TourDetailsPostFrom/TourDetailsPostForm";
-import { Itinerary } from '@/interFace/interFace';
+import { Itinerary, TourGuide } from '@/interFace/interFace';
 import GetRatting from "@/hooks/GetRatting";
 
 interface TourDetailTabAreaProps {
   itineraryData: Itinerary;
+  tourGuideData: TourGuide;
 }
+
 
 
 // Function to format date into readable string
@@ -28,7 +30,7 @@ const formatDate = (date: string | Date) => {
 
 
 
-const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData }) => {
+const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData, tourGuideData }) => {
   return (
     <>
       <div className="tour-details-nav-tabs mb-35">
@@ -85,6 +87,28 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData }) 
             <p className="mb-15">
               <strong>Dropoff Location:</strong> {itineraryData.dropoffLocation}
             </p>
+
+            {/* <p className="mb-15">
+              <strong>Tourguide Rating:</strong> {tourGuideData.averageRating}
+            </p> */}
+            <div className="tour-details-meta">
+        <h4>Tour Guide Rating & Reviews</h4>
+        <div className="rating-badge">
+          <span>
+            <i className="icon-star"></i>
+            {tourGuideData.averageRating} ({tourGuideData.ratings.length} Reviews)
+          </span>
+        </div>
+        <div className="review-wrapper">
+          {tourGuideData.comment.map((comment, index) => (
+            <div key={index} className="single-review">
+              <p>{comment.text}</p>
+              {/* <span>- Tourist ID: {comment.tourist}</span> */}
+            </div>
+          ))}
+        </div>
+      </div>
+            
 
             <div className="tour-details-faq mb-35">
   <h4 className="mb-20">Available Activities</h4>

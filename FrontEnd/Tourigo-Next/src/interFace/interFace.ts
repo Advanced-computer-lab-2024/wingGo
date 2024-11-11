@@ -491,3 +491,27 @@ export interface Transport{
 }
 
 
+// interfaces/TourGuide.ts
+
+export interface TourGuide {
+  _id: string;
+  email: string;
+  username: string;
+  password: string;
+  mobileNumber?: string;
+  yearsOfExperience?: number;
+  previousWork?: string;
+  isCreatedProfile?: number;
+  photo?: string;
+  termsAccepted: boolean;
+  ratings: number[];
+  averageRating: number;
+  comment: { 
+    tourist: string;
+    text: string;
+  }[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+

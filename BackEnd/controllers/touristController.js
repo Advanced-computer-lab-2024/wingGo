@@ -2642,7 +2642,22 @@ const isActivityBooked = async (req, res) => {
 };
 
   
-    
+const getActivity = async (req, res) => {
+    const { id } = req.params;  // Itinerary ID from the URL params
+
+    try {
+        // Find the itinerary by ID and ensure it belongs to the correct tour guide
+        const activity = await Activity.findOne({ _id: id});  
+
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found.' });
+        }
+
+        res.status(200).json(activity);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
 
 
@@ -2710,5 +2725,6 @@ module.exports = {
     shareActivityViaEmail,
     shareItineraryViaEmail,
     sharePlaceViaEmail,
-    shareProductViaEmail
+    shareProductViaEmail,
+    getActivity
 };

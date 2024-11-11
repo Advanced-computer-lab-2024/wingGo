@@ -69,7 +69,7 @@ const TourDetailsArea = () => {
     reset();
   };
 
-  const advertiserId ="67077683ab11089b0772dcb6"; 
+  const advertiserId ="66fb37dda63c04def29f944e"; 
   const [newActivity, setNewActivity] = React.useState<NewActivity>({
     date: '',
     time: '',
@@ -98,7 +98,7 @@ const TourDetailsArea = () => {
 
     } catch (error) {
       console.error('Error adding activity:', error);
-      alert('Failed to add activity.');
+      alert(error);
     }
   };
 

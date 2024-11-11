@@ -99,6 +99,8 @@ router.get('/booked-status/:touristId/booked-status/:itineraryId', touristContro
 // Route to check if an activity is booked
 router.get('/booked-status/:touristId/activity-status/:activityId', touristController.isActivityBooked);
 
+router.get('/getActivity/:id', touristController.getActivity);
+
 
 
 module.exports = router;

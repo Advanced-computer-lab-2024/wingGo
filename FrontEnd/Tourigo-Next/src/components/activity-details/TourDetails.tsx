@@ -11,7 +11,8 @@ import TourSingleCard from "../common/tourElements/ActivitySingleCard";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { isActivityBooked } from "@/api/activityApi"; 
-import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import the CSS for styling
+import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import the currency context
 
@@ -55,12 +56,18 @@ const TourDetails = ({ id }: idTypeNew) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const activities = await getActivitiesData();
-        const activity = activities.find((item) => item._id === id);
-        setData(activity || null);
+        // const activities = await getActivitiesData();
+        // const activity = activities.find((item) => item._id === id);
+        // setData(activity || null);
 
-        // Assuming related tours can be the rest of the activities
-        setActivities(activities.filter((item) => item._id !== id));
+        // // Assuming related tours can be the rest of the activities
+        // setActivities(activities.filter((item) => item._id !== id));
+
+
+        const response = await axios.get(`http://localhost:8000/tourist/getActivity/${id}`);
+        setData(response.data);
+        
+        const activity = response.data;
 
         if (activity) {
           // Check if the activity is booked
@@ -223,6 +230,7 @@ const TourDetails = ({ id }: idTypeNew) => {
       )}
     </section>
     <BookingFormModal />
+    <ToastContainer />
   </>
 );
 };

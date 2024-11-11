@@ -11,7 +11,8 @@ import { Place } from "@/interFace/interFace";
 import { idTypeNew } from "@/interFace/interFace";
 import TourSingleCard from "../common/tourElements/TourSingleCardPlaces";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
-import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import the CSS for styling
+import { ToastContainer, toast } from "react-toastify";
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Place | null>(null);
@@ -235,6 +236,7 @@ const TourDetails = ({ id }: idTypeNew) => {
         )}
       </section>
       <BookingFormModal />
+      <ToastContainer />
     </>
   );
 };
