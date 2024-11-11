@@ -12,6 +12,7 @@ import RateCommentModalActivity from './RateCommentModalActivity';
 import { cancelItineraryApi } from '@/api/itineraryApi';
 import { cancelActivityApi } from '@/api/activityApi';
 import CancelConfirmationModal from "./CancelConfirmationModal"; // Import the new modal component
+import { useCurrency } from "@/contextApi/CurrencyContext"; 
 
 const BookingHistory = () => {
     const [bookedItineraries, setBookedItineraries] = useState<BookedItinerary[]>([]);
@@ -21,6 +22,10 @@ const BookingHistory = () => {
     const [activeTab, setActiveTab] = useState('itinerary'); // New state for tab selection
     const touristId = "67240ed8c40a7f3005a1d01d";
     const currentDate = new Date();
+    const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
+    const [convertedItineraryPrices, setConvertedItineraryPrices] = useState<{ [key: string]: number }>({});
+    const [convertedActivityPrices, setConvertedActivityPrices] = useState<{ [key: string]: number }>({});
+
 
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [bookingToCancel, setBookingToCancel] = useState<BookedItinerary | null>(null);
@@ -55,7 +60,6 @@ const BookingHistory = () => {
         setShowCancelModal(false);
         setBookingToCancel(null);
     };
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -67,6 +71,8 @@ const BookingHistory = () => {
         };
         fetchData();
     }, []);
+
+
 
     const handleRateCommentClick = (booking: BookedItinerary) => {
         setSelectedBooking(booking);
@@ -104,14 +110,32 @@ const BookingHistory = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await getBookedActivitiesData(touristId);
-                setBookedActivities(data);
+                const itineraries = await getBookedItinerariesData(touristId);
+                setBookedItineraries(itineraries);
+                const convertedPrices = await convertPrices(itineraries, 'itinerary');
+                setConvertedItineraryPrices(convertedPrices);
             } catch (error) {
-                console.error("Failed to load booked activities:", error);
+                console.error("Failed to load booked itineraries:", error);
             }
         };
         fetchData();
-    }, []);
+    }, [currency]);
+    const convertPrices = async (
+        bookings: BookedItinerary[] | BookedActivity[],
+        type: 'itinerary' | 'activity'
+      ) => {
+        const convertedPrices: Record<string, number> = {};
+        for (const booking of bookings) {
+          const price = type === 'itinerary' ? (booking as BookedItinerary).itinerary.price : (booking as BookedActivity).activity.price;
+          if (price) {
+            const convertedPrice = await convertAmount(price);
+            const id = type === 'itinerary' ? (booking as BookedItinerary).itinerary._id : (booking as BookedActivity).activity._id;
+            convertedPrices[id] = convertedPrice;
+          }
+        }
+        return convertedPrices;
+      };
+
 
     const handleRateCommentClick_act = (booking: BookedActivity) => {
         setSelectedBooking_act(booking);
@@ -240,7 +264,9 @@ const BookingHistory = () => {
                                                             </td>
                                                             <td>
                                                                 <div className="recent-activity-price-box">
-                                                                    <h5 className="mb-10">${booking.itinerary.price.toLocaleString("en-US")}</h5>
+                                                                <h5 className="mb-10">
+                                                                        {currency} {convertedItineraryPrices[booking.itinerary._id]?.toFixed(2) || booking.itinerary.price.toLocaleString("en-US")}
+                                                                    </h5>
                                                                     <p>Total/Person</p>
                                                                 </div>
                                                             </td>
@@ -324,7 +350,9 @@ const BookingHistory = () => {
                                                             </td>
                                                             <td>
                                                                 <div className="recent-activity-price-box">
-                                                                    <h5 className="mb-10">${booking.activity.price.toLocaleString("en-US")}</h5>
+                                                                <h5 className="mb-10">
+                                                                      {currency} {convertedActivityPrices[booking.activity._id]?.toFixed(2) || booking.activity.price.toFixed(2)}
+                                                                    </h5>
                                                                     <p>Total/Person</p>
                                                                 </div>
                                                             </td>

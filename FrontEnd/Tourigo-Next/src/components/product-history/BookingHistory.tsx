@@ -7,14 +7,20 @@ import { Product } from '@/interFace/interFace';
 import Link from 'next/link';
 import RateCommentModal from './RateCommentModal';
 import { fetchProductImage } from '@/api/productApi';
+import { useCurrency } from '@/contextApi/CurrencyContext'; // Import useCurrency
+
 
 const BookingHistory = () => {
     const [bookedProducts, setBookedProducts] = useState<Product[]>([]);
     const [imageUrls, setImageUrls] = useState<{ [key: string]: string | null }>({});
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [activeTab, setActiveTab] = useState('Product'); // Update tab to reflect product history
+    const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
+    const [convertedPrices, setConvertedPrices] = useState<{ [key: string]: number }>({});
     const touristId = "672a3a4001589d5085322e88";
     const currentDate = new Date();
+
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -49,6 +55,20 @@ const BookingHistory = () => {
             loadImages();
         }
     }, [bookedProducts]);
+
+    useEffect(() => {
+        const convertPrices = async () => {
+            const newConvertedPrices: { [key: string]: number } = {};
+            for (const product of bookedProducts) {
+                if (product.price && product._id) {
+                    const convertedPrice = await convertAmount(product.price);
+                    newConvertedPrices[product._id!] = convertedPrice; // Use non-null assertion
+                }
+            }
+            setConvertedPrices(newConvertedPrices);
+        };
+        convertPrices();
+    }, [currency, bookedProducts, convertAmount]);
 
     const handleRateCommentClick = (product: Product) => {
         setSelectedProduct(product);
@@ -108,7 +128,7 @@ const BookingHistory = () => {
                                                         <td>
                                                             <div className="recent-activity-price-box">
                                                                 <h5 className="mb-10">
-                                                                    ${product.price ? product.price.toLocaleString("en-US") : 'N/A'}
+                                                                {currency} {convertedPrices[product._id!]?.toFixed(2) || 'N/A'}
                                                                 </h5>
                                                                 <p>Total</p>
                                                             </div>

@@ -3,7 +3,15 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { imageLoader } from "@/hooks/image-loader";
+import { useCurrency } from "@/contextApi/CurrencyContext";
+
 const Menu = () => {
+  const { setCurrency, currency } = useCurrency(); // Access setCurrency from CurrencyContext
+
+  const handleCurrencyChange = (newCurrency: "USD" | "EUR" | "EGP") => { 
+    setCurrency(newCurrency); // Update currency context
+  };
+
   return (
     <>
       <ul>
@@ -17,6 +25,28 @@ const Menu = () => {
             } `}
           >
             <Link href={item?.link}>{item?.title}</Link>
+
+            {/* Render dropdown for Currency Selector */}
+            {item.title === "Currency" && (
+              <ul className="submenu">
+                {item?.submenus?.map((currencyOption, index) => (
+                  <li key={index}>
+                    <button
+                      onClick={() => handleCurrencyChange(currencyOption.currency as "USD" | "EUR" | "EGP")}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: currency === currencyOption.currency ? "blue" : "inherit",
+                      }}
+                    >
+                      {currencyOption.title}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
             {/* img menu */}
             {item.previewImg === true && (
               <ul className="mega-menu home-menu-grid">
@@ -52,26 +82,12 @@ const Menu = () => {
               </ul>
             )}
 
-            {/* dropdown menu */}
-            {item?.hasDropdown === true && item?.submenus?.length && (
+            {/* dropdown menu for other items */}
+            {item.hasDropdown && item.submenus && item.title !== "Currency" && (
               <ul className="submenu">
-                {item?.submenus?.map((dropdownItem, index) => (
+                {item.submenus.map((dropdownItem, index) => (
                   <li key={index} className="menu-item-has-children has-arrow">
                     <Link href={dropdownItem?.link}>{dropdownItem?.title}</Link>
-
-                    {dropdownItem?.megaMenu?.length && (
-                      <ul className="submenu">
-                        {dropdownItem?.megaMenu?.map(
-                          (megaDropDownItem: any, megaIndex: number) => (
-                            <li key={megaIndex}>
-                              <Link href={megaDropDownItem?.link}>
-                                {megaDropDownItem?.title}
-                              </Link>
-                            </li>
-                          )
-                        )}
-                      </ul>
-                    )}
                   </li>
                 ))}
               </ul>
@@ -108,6 +124,7 @@ const Menu = () => {
           </li>
         ))}
       </ul>
+      <p>Current selected currency: {currency}</p>
     </>
   );
 };

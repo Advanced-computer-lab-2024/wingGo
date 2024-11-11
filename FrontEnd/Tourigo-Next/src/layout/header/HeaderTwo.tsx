@@ -4,7 +4,7 @@ import React from "react";
 import logoBlack from "../../../public/assets/images/logo/logo-black.svg";
 import { imageLoader } from "@/hooks/image-loader";
 import useGlobalContext from "@/hooks/use-context";
-import MenuTwo from "./components/MenuTwo";
+import MenuTwo from "./components/MenuTourist";
 
 const HeaderTwo = () => {
   const { toggleSideMenu, scrollDirection } = useGlobalContext();

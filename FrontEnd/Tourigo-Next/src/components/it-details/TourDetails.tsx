@@ -13,12 +13,17 @@ import BookingFormModal from "@/elements/modals/BookingFormModal";
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { isItineraryBooked } from "@/api/itineraryApi"; // Import the booking status function
 import { toast } from "react-toastify";
+import { useCurrency } from "@/contextApi/CurrencyContext"; // Import useCurrency
+
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Itinerary | null>(null);
   const [isBooked, setIsBooked] = useState(false); // State for booking status
   const [isEmailFormOpen, setIsEmailFormOpen] = useState(false);
   const [email, setEmail] = useState('');
+  const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
+  const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
+
 
   const handleEmailChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
     setEmail(e.target.value);
@@ -51,13 +56,19 @@ const TourDetails = ({ id }: idTypeNew) => {
         // Check if the itinerary is booked
         const bookedStatus = await isItineraryBooked(id);
         setIsBooked(bookedStatus);
+
+        // Convert the itinerary price
+        if (response.data.price) {
+          const priceInSelectedCurrency = await convertAmount(response.data.price);
+          setConvertedPrice(priceInSelectedCurrency);
+        }
       } catch (error) {
         console.error("Error fetching itinerary data:", error);
       }
     };
 
     fetchItinerary();
-  }, [id]);
+  }, [id, currency, convertAmount]); 
 
   const router = useRouter(); // Initialize router
 
@@ -90,8 +101,11 @@ const TourDetails = ({ id }: idTypeNew) => {
                       </h3>
                       <div className="tour-details-meta d-flex flex-wrap gap-10 align-items-center justify-content-between mb-20">
                         <div className="tour-details-price">
-                          <h4 className="price-title">
-                            ${data.price}
+                        <h4 className="price-title">
+                            {currency}{" "}
+                            {convertedPrice !== null
+                              ? convertedPrice.toFixed(2)
+                              : data.price.toFixed(2)}
                             <span>/Per Person</span>
                           </h4>
                           <br/><br/>

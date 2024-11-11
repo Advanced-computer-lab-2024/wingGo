@@ -10,6 +10,8 @@ import Link from "next/link";
 import React ,{useState, useEffect} from "react";
 import { toggleFlagActivity, isActivityBooked  } from '@/api/activityApi';
 import { useRouter } from "next/navigation";
+import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
+
 
 interface ItourPropsType {
   tour: Activity; // Use Itinerary type
@@ -31,8 +33,10 @@ const TourSingleCard = ({
   const rating = tour.averageRating ; // Use Itinerary's averageRating, default to 1
   // Local state to keep track of the flagged and deactivated status
   const [isFlagged, setIsFlagged] = useState(tour.flagged);
-
+  const { currency, convertAmount } = useCurrency(); 
   const [isBooked, setIsBooked] = useState(false);
+  const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
+
 
    // Fetch booking status when component mounts
    useEffect(() => {
@@ -46,6 +50,15 @@ const TourSingleCard = ({
     };
     checkIfBooked();
   }, [tour._id]);
+  useEffect(() => {
+    const convertTourPrice = async () => {
+      if (tour.price) {
+        const priceInSelectedCurrency = await convertAmount(tour.price);
+        setConvertedPrice(priceInSelectedCurrency);
+      }
+    };
+    convertTourPrice();
+  }, [currency, tour.price, convertAmount]); 
 
   const handleFlagActivity = async () => {
     try {
@@ -125,7 +138,10 @@ const TourSingleCard = ({
                   </button>
                 )}
               <span className="tour-price b3">
-                ${tour.price.toLocaleString("en-US")}
+                {currency}{" "}
+                {convertedPrice !== null
+                  ? convertedPrice.toFixed(2)
+                  : tour.price.toLocaleString("en-US")}
               </span>
               <div className="tour-divider"></div>
 

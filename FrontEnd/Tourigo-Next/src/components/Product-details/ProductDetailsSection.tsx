@@ -19,6 +19,8 @@ import ReviewComments from "./ReviewComments";
 import StarRating from "@/components/Products/StarRating"; 
 import { fetchSellerData, purchaseProduct, editProduct,fetchProductImage } from "@/api/productApi"; 
 import { calculateAverageRating } from "@/utils/utils"; 
+import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
+
 
 
 const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string }) => {
@@ -31,6 +33,9 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
   const [editData, setEditData] = useState<Partial<Product>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [productImageUrl, setProductImageUrl] = useState<string | null>(null);
+  const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
+  const [convertedPrice, setConvertedPrice] = useState<number | null>(null); // State for converted price
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +59,15 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
     };
     fetchData();
   }, [id]);
+  useEffect(() => {
+    const convertProductPrice = async () => {
+      if (item?.price) {
+        const priceInSelectedCurrency = await convertAmount(item.price); // Convert price
+        setConvertedPrice(priceInSelectedCurrency); // Store converted price
+      }
+    };
+    convertProductPrice();
+  }, [currency, item, convertAmount]); // Re-run if currency or item changes
 
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const dispatch = useDispatch();
@@ -146,7 +160,11 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
                 <span>{item.description}</span>
               </div>
               <div className="product-details-price mb-10">
-                <h4 className="product-details-ammount">${item?.price}</h4>
+                <h4 className="product-details-ammount">
+                  {userRole === "Tourist"
+                    ? `${currency} ${convertedPrice !== null ? convertedPrice.toFixed(2) : "Loading..."}`
+                    : `EUR ${item?.price !== undefined ? item.price.toFixed(2) : "Loading..."}`}
+                </h4>
               </div>
               <div className="product-details-info mb-10">
                 <p>Seller:</p>

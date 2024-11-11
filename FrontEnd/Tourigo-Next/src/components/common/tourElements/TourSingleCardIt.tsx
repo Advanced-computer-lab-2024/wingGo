@@ -11,6 +11,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked } from '@/api/itineraryApi';
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
+
 
 interface ItourPropsType {
   tour: Itinerary; // Use Itinerary type
@@ -31,7 +33,8 @@ const TourSingleCard = ({
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const rating = tour.averageRating ; // Use Itinerary's averageRating, default to 1
-
+  const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
+  const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
   const router = useRouter(); // Initialize router
 
   // Local state to keep track of the flagged and deactivated status
@@ -53,6 +56,16 @@ const TourSingleCard = ({
 
     checkBookingStatus();
   }, [tour._id]);
+  useEffect(() => {
+    const convertTourPrice = async () => {
+      if (tour.price) {
+        const priceInSelectedCurrency = await convertAmount(tour.price);
+        setConvertedPrice(priceInSelectedCurrency);
+      }
+    };
+    convertTourPrice();
+  }, [currency, tour.price, convertAmount]); // Re-run if currency or tour.price changes
+
 
   const handleFlagItinerary = async () => {
     try {
@@ -158,7 +171,10 @@ const TourSingleCard = ({
                 )}
               </div>
               <span className="tour-price b3">
-                ${tour.price.toLocaleString("en-US")}
+                {currency}{" "}
+                {convertedPrice !== null
+                  ? convertedPrice.toFixed(2)
+                  : tour.price.toLocaleString("en-US")}
               </span>
               <div className="tour-divider"></div>
 

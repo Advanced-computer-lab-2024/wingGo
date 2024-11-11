@@ -107,6 +107,21 @@ const menu_data: MenuType[] = [
     pageLayout: true,
     link: "/my-profile",
   },
+  {
+    id: 9, // Unique ID for the currency selector
+    hasDropdown: true,
+    children: true,
+    active: true,
+    title: "Currency", // Label for the selector
+    pluseIncon: true,
+    link: "#", // No link since it’s a selector
+    submenus: [
+      { title: "USD", link: "#", currency: "USD" },
+      { title: "EUR", link: "#", currency: "EUR" },
+      { title: "EGP", link: "#", currency: "EGP" },
+      // Add more currencies as needed
+    ],
+  },
   
 ];
 

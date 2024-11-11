@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { isActivityBooked } from "@/api/activityApi"; 
 import { toast } from "react-toastify";
 import axios from "axios";
+import { useCurrency } from "@/contextApi/CurrencyContext"; // Import the currency context
+
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Activity | null>(null);
@@ -24,6 +26,9 @@ const TourDetails = ({ id }: idTypeNew) => {
   const router = useRouter(); // Initialize router
   const [isEmailFormOpen, setIsEmailFormOpen] = useState(false);
   const [email, setEmail] = useState('');
+  const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
+  const [convertedPrice, setConvertedPrice] = useState<number | null>(null); // Converted price state
+
 
   const handleEmailChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
     setEmail(e.target.value);
@@ -47,7 +52,6 @@ const TourDetails = ({ id }: idTypeNew) => {
     }
   };
 
-  // Fetch data on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -62,8 +66,13 @@ const TourDetails = ({ id }: idTypeNew) => {
           // Check if the activity is booked
           const bookedStatus = await isActivityBooked(activity._id);
           setIsBooked(bookedStatus);
-        }
 
+          // Convert the activity price to selected currency
+          if (activity.price) {
+            const priceInSelectedCurrency = await convertAmount(activity.price);
+            setConvertedPrice(priceInSelectedCurrency);
+          }
+        }
       } catch (err) {
         setError("Error loading tour details.");
         console.error("Error fetching activities:", err);
@@ -72,7 +81,8 @@ const TourDetails = ({ id }: idTypeNew) => {
       }
     };
     fetchData();
-  }, [id]);
+  }, [id, currency, convertAmount]); // Add currency and convertAmount to dependency array
+
 
   const handleBookNowClick = () => {
     router.push(`/booking-activity/${id}`);
@@ -106,10 +116,13 @@ const TourDetails = ({ id }: idTypeNew) => {
                     </h3>
                     <div className="tour-details-meta d-flex flex-wrap gap-10 align-items-center justify-content-between mb-20">
                       <div className="tour-details-price">
-                        <h4 className="price-title">
-                          ${data.price}
-                          <span>/Per Person</span>
-                        </h4>
+                      <h4 className="price-title">
+                            {currency}{" "}
+                            {convertedPrice !== null
+                              ? convertedPrice.toFixed(2)
+                              : data.price.toFixed(2)}
+                            <span>/Per Person</span>
+                          </h4>
                         <br/><br/>
                           <div className="row gy-24 "  style={{ paddingLeft: '10px'}}   >
                          <button

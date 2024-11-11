@@ -5,7 +5,8 @@ import useGlobalContext from "@/hooks/use-context";
 import { Place } from "@/interFace/interFace";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useCurrency } from "@/contextApi/CurrencyContext";
 
 interface ItourPropsType {
   tour: Place;
@@ -25,6 +26,17 @@ const TourSingleCard = ({
   isTourGuide = false,
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
+  const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
+  const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
+  useEffect(() => {
+    const convertPrice = async () => {
+      if (tour.ticketPrices.foreigner) {
+        const priceInSelectedCurrency = await convertAmount(tour.ticketPrices.foreigner);
+        setConvertedPrice(priceInSelectedCurrency);
+      }
+    };
+    convertPrice();
+  }, [tour.ticketPrices.foreigner, currency, convertAmount]);
 
   return (
     <>
@@ -64,7 +76,7 @@ const TourSingleCard = ({
               </h5>
               <p>{tour.description}</p>
               <span className="tour-price b3">
-                ${tour.ticketPrices.foreigner.toLocaleString("en-US")} for foreigners
+                {currency} {convertedPrice?.toLocaleString("en-US") || tour.ticketPrices.foreigner.toLocaleString("en-US")} for foreigners
               </span>
               <div className="tour-divider"></div>
 

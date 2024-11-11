@@ -15,7 +15,7 @@ import StarRating from "@/components/Products/StarRating";
 import { calculateAverageRating } from "@/utils/utils"; // Adjust the import path as necessary
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ArchiveUnarchiveProduct, ArchiveUnarchiveProductAdmin, fetchProductImage } from "@/api/productApi";
-
+import { useCurrency } from "@/contextApi/CurrencyContext"; // Import the currency con
 
 
 interface propsType {
@@ -30,6 +30,7 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
   const dispatch = useAppDispatch();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const hardcodedSellerId = "67158afc7b1ec4bfb0240575"; // Hardcoded sellerId for now till the login
+  const { currency } = useCurrency(); // Access the current currency from context
 
   useEffect(() => {
     const loadImage = async () => {
@@ -157,7 +158,15 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
               </Link>
             </h5>
             <div className="product-price">
-              {`$${item.price}.00`}{" "}
+              {userRole === "Tourist" ? (
+                <>
+                 {currency} {item.price ? item.price.toFixed(2) : "Loading..."}
+                </>
+              ) : (
+                <>
+                  EUR {item.price ? item.price.toFixed(2) : "Loading..."}
+                </>
+              )}
             </div>
           </div>
         </div>
