@@ -85,10 +85,14 @@ const menu_data: MenuType[] = [
     hasDropdown: true,
     children: true,
     active: true,
-    title: "Transports", // Label for the selector
+    title: "Booking", // Label for the selector
     pluseIncon: true,
-    link: "/transports", // No link since it’s a selector
-    
+    link: "#", // No link since it’s a selector
+    submenus: [
+      { title: "Transports", link: "/transports" },
+      { title: "Hotel", link: "/search-hotels" },
+      { title: "Flight", link: "/search-flights" },
+    ],
   },
   {
     id: 9, // Unique ID for the currency selector
