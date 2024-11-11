@@ -278,7 +278,7 @@ const changePassword = async (req, res) => {
     console.log(id);
     try {
         // 1. Find the user in LoginCredentials
-        const userCredentials = await LoginCredentials.findById(id);
+        const userCredentials = await LoginCredentials.findOne({ userId: id });
         if (!userCredentials) {
             return res.status(404).json({ message: 'User credentials not found' });
         }

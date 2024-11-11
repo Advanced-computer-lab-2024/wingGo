@@ -90,6 +90,9 @@ const addTourismGovernor = async (req, res) => {
     const { username, password } = req.body;  // Get username and password from request body
 
     try {
+
+        console.log('Username:', username);
+        console.log('Password', password);
         // Hash the password using bcrypt
         const hashedPassword = await bcrypt.hash(password, 10);  // 10 is the salt rounds
 
@@ -107,7 +110,7 @@ const addTourismGovernor = async (req, res) => {
 
         // Save the new Tourism Governor in the database
         await newTG.save();
-
+        console.log('New Tourism Governor:', newTG._id);
         // Create login credentials for the Tourism Governor
         const loginCredentials = new LoginCredentials({
             username: newTG.username,
@@ -117,6 +120,7 @@ const addTourismGovernor = async (req, res) => {
             roleModel: 'TourismGovernor'  // Set the role model to 'TourismGovernor'
         });
 
+        console.log('Login Credentials:', loginCredentials);
         // Save the login credentials in the database
         await loginCredentials.save();
 
