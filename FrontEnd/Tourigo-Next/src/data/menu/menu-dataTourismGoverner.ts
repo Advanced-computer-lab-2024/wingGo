@@ -54,10 +54,10 @@ const menu_data: MenuType[] = [
     children: false,
     megaMenu: true,
     active: true,
-    title: "My Profile",
+    title: "Change Password",
     pluseIncon: true,
     pageLayout: true,
-    link: "/home",
+    link: "tourism-gov/change-password/673212f4d9fd4d61027021e1",
   },
   
 ];
