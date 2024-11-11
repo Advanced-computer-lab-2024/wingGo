@@ -11,15 +11,38 @@ import { Place } from "@/interFace/interFace";
 import { idTypeNew } from "@/interFace/interFace";
 import TourSingleCard from "../common/tourElements/TourSingleCardPlacesTG";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
+import {updatePlace} from '@/api/placesApi';
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Place | null>(null);
+
+  // State for editable fields
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [openingHours, setOpeningHours] = useState("");
+  const [ticketPrices, setTicketPrices] = useState({
+    foreigner: 0,
+    native: 0,
+    student: 0,
+  });
+  const [tagss, setTagss] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchPlace = async () => {
       try {
         const response = await axios.get(`http://localhost:8000/govornor/getPlace/${id}`);
         setData(response.data);
+        const placeData = response.data;
+        setData(placeData);
+
+        // Initialize form fields with fetched data
+        setName(placeData.name);
+        setDescription(placeData.description);
+        setLocation(placeData.location);
+        setOpeningHours(placeData.openingHours);
+        setTicketPrices(placeData.ticketPrices);
+        setTagss(placeData.tagss);
       } catch (error) {
         console.error("Error fetching Place data:", error);
       }
@@ -27,6 +50,24 @@ const TourDetails = ({ id }: idTypeNew) => {
 
     fetchPlace();
   }, [id]);
+  const handleUpdate = async () => {
+    try {
+      const updatedData = {
+        name,
+        description,
+        location,
+        openingHours,
+        ticketPrices,
+        tagss,
+      };
+      const updatedPlace = await updatePlace(id, '671590cc00553989f62a041f',updatedData);
+      setData(updatedPlace); // Update the state with the new data
+      alert("Place updated successfully.");
+    } catch (error) {
+      console.error("Error updating place:", error);
+      alert("Failed to update place.");
+    }
+  };
 
   if (!data) return <div>Loading...</div>;
   return (
@@ -38,6 +79,7 @@ const TourDetails = ({ id }: idTypeNew) => {
               <div className="col-xxl-12 col-xl-12 col-lg-12">
                 <div className="tour-details-wrapper">
                   <div className="tour-details mb-25">
+                    {/* Image */}
                     <div className="tour-details-thumb details-slide-full mb-30">
                       <Image
                         src={data?.pictures[0]}
@@ -47,122 +89,88 @@ const TourDetails = ({ id }: idTypeNew) => {
                       />
                     </div>
                     <div className="tour-details-content">
+                      
+                      {/* Badges */}
                       <div className="tour-details-badge d-flex gap--5 mb-10">
                         <span className="bd-badge warning fw-5">Featured</span>
-                        <span className="bd-badge danger fw-5">15% Off</span>
+                        {data.flagged && <span className="bd-badge danger fw-5">Flagged</span>}
                       </div>
-                      <h3 className="tour-details-title mb-15">
-                        {data?.name}
-                      </h3>
+  
+                      {/* Title and Description */}
+                      <h3 className="tour-details-title mb-15">{data?.name}</h3>
+                      <p className="tour-details-description">{data?.description}</p>
+  
+                      {/* Meta Section */}
                       <div className="tour-details-meta d-flex flex-wrap gap-10 align-items-center justify-content-between mb-20">
-                        {/* <div className="tour-details-price">
-                          <h4 className="price-title">
-                            ${data?.tourPrice}
-                            <span>/Per Person</span>
-                          </h4>
-                        </div> */}
                         <div className="tour-details-meta-right d-flex flex-wrap gap-10 align-items-center justify-content-between">
-                          {/* <div className="rating-badge border-badge">
-                            <span>
-                              <i className="icon-star"></i>
-                              {data?.tourRating}
-                            </span>
-                          </div> */}
                           <div className="theme-social">
-                            <Link href="https://www.facebook.com/">
-                              <i className="icon-facebook"></i>
-                            </Link>
-                            <Link href="https://www.twitter.com/">
-                              <i className="icon-twitter-x"></i>
-                            </Link>
-                            <Link href="https://www.linkedin.com/">
-                              <i className="icon-linkedin"></i>
-                            </Link>
-                            <Link href="https://www.youtube.com/">
-                              <i className="icon-youtube"></i>
-                            </Link>
+                            <Link href="https://www.facebook.com/"><i className="icon-facebook"></i></Link>
+                            <Link href="https://www.twitter.com/"><i className="icon-twitter-x"></i></Link>
+                            <Link href="https://www.linkedin.com/"><i className="icon-linkedin"></i></Link>
+                            <Link href="https://www.youtube.com/"><i className="icon-youtube"></i></Link>
                           </div>
                         </div>
                       </div>
+  
+                      {/* Details Info */}
                       <div className="tour-details-destination-wrapper">
+                        
+                        {/* Opening Hours */}
                         <div className="tour-details-destination-info">
                           <div className="search-icon-bg is-big">
-                            <span>
-                              <i className="fa-light fa-clock"></i>
-                            </span>
+                            <span><i className="fa-light fa-clock"></i></span>
                           </div>
                           <div className="tour-details-destination-info-title">
-                            <p className="tour-details-destination-info-top mb-0">
-                              Opening Hours
-                            </p>
+                            <p className="tour-details-destination-info-top mb-0">Opening Hours</p>
+                            <span className="tour-details-destination-info-bottom small">{data?.openingHours}</span>
+                          </div>
+                        </div>
+  
+                        {/* Location */}
+                        <div className="tour-details-destination-info">
+                          <div className="search-icon-bg is-big">
+                            <span><i className="fa-light fa-location-dot"></i></span>
+                          </div>
+                          <div className="tour-details-destination-info-title">
+                            <p className="tour-details-destination-info-top mb-0">Location</p>
+                            <span className="tour-details-destination-info-bottom">{data?.location}</span>
+                          </div>
+                        </div>
+  
+                        {/* Ticket Prices */}
+                        <div className="tour-details-destination-info">
+                          <div className="search-icon-bg is-big">
+                            <span><i className="fa-light fa-ticket"></i></span>
+                          </div>
+                          <div className="tour-details-destination-info-title">
+                            <p className="tour-details-destination-info-top mb-0">Ticket Prices</p>
                             <span className="tour-details-destination-info-bottom small">
-                              {data?.openingHours}
+                              Foreigner: ${data?.ticketPrices.foreigner}, Native: ${data?.ticketPrices.native}, Student: ${data?.ticketPrices.student}
                             </span>
                           </div>
                         </div>
+  
+                        {/* Tags */}
                         <div className="tour-details-destination-info">
                           <div className="search-icon-bg is-big">
-                            <span>
-                              <i className="icon-hourglass"></i>
-                            </span>
+                            <span><i className="icon-tags"></i></span>
                           </div>
                           <div className="tour-details-destination-info-title">
-                            <p className="tour-details-destination-info-top mb-0">
-                              Min Age
-                            </p>
+                            <p className="tour-details-destination-info-top mb-0">Tags</p>
                             <span className="tour-details-destination-info-bottom small">
-                              10 Years+
-                            </span>
-                          </div>
-                        </div>
-                        <div className="tour-details-destination-info">
-                          <div className="search-icon-bg is-big">
-                            <span>
-                              <i className="fa-sharp fa-light fa-moped"></i>
-                            </span>
-                          </div>
-                          <div className="tour-details-destination-info-title">
-                            <p className="tour-details-destination-info-top mb-0">
-                              Tour Type
-                            </p>
-                            <span className="tour-details-destination-info-bottom small">
-                              Adventure, Foodie
-                            </span>
-                          </div>
-                        </div>
-                        <div className="tour-details-destination-info">
-                          <div className="search-icon-bg is-big">
-                            <span>
-                              <i className="fa-light fa-location-dot"></i>
-                            </span>
-                          </div>
-                          <div className="tour-details-destination-info-title">
-                            <p className="tour-details-destination-info-top mb-0">
-                              Location
-                            </p>
-                            <span className="tour-details-destination-info-bottom">
-                              Brasov, Romania
+                              {data?.tagss.join(", ")}
                             </span>
                           </div>
                         </div>
                       </div>
-                      {/*tab area start*/}
+  
+                      {/* Tab Area */}
                       <TourDetailTabArea id={id} />
-                      {/*tab area end*/}
-                      {/*tour area start*/}
+  
+                      {/* Related Tours */}
                       <div className="tour-details-related-tour mb-35">
                         <h4 className="mb-20">Related Places</h4>
-                        {/* <div className="row gy-24">
-                          {tourDetailsData?.map((item) => (
-                            <TourSingleCard
-                              key={item?.id}
-                              tour={item}
-                              className="col-xxl-4 col-xl-4 col-md-6"
-                              tourWrapperClass="tour-wrapper style-one"
-                              isparentClass={true}
-                            />
-                          ))}
-                        </div> */}
+                        {/* Add related places component here */}
                       </div>
                     </div>
                   </div>
@@ -175,6 +183,7 @@ const TourDetails = ({ id }: idTypeNew) => {
       <BookingFormModal />
     </>
   );
+  
 };
 
 export default TourDetails;
