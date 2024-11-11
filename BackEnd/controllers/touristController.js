@@ -2407,6 +2407,7 @@ const shareProductViaEmail = async (req, res) => {
         name: data.hotelBookings[0].hotel.name,
         address: data.hotelBookings[0].hotel.address,
       },
+      userId: touristId,
     };
 
               const newBooking = new HotelBooking(bookingSummary);
