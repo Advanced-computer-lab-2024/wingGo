@@ -35,3 +35,14 @@ export const searchHotels = async (params: HotelSearchParams): Promise<any> => {
       return error;
     }
   }
+
+  export const searchHotelsByUserId = async (userId: string): Promise<any> => {
+    try {
+      const response = await axios.get<any>(`${API_URL}/searchHotels/6703fe21af26882204ffaffc`);
+      console.log('search hotels data:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error searching hotels:', error);
+      return error;
+    }
+  };

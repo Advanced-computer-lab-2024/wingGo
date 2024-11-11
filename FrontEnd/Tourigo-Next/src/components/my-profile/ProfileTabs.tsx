@@ -2,6 +2,8 @@
 import React, {useState, useEffect} from "react";
 import ProfileDetails from './ProfileDetails';
 import LoyaltyProgram from './LoyaltyProgram';
+import HotelBookings from './HotelBookings';
+import FlightBookings from './FlightBookings';
 import { viewTouristProfile } from "@/api/ProfileApi";
 import { set } from "date-fns";
 import Prefrences from "./Prefrences";
@@ -47,6 +49,10 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
       case 'Preferences':
         
         return <Prefrences profileData={profileData} id={id} setPrefrenceRefresh={setPreferencesRefresh}/>;
+      case 'hotel':        
+          return <HotelBookings id={id} />
+      case 'flight':
+            return <FlightBookings id={id}/>;
       default:
         return null;
     }
@@ -126,6 +132,38 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                         Loyalty Program
                       </button>
                       
+                      <button
+                        className="nav-link"
+                        id="nav-community-2-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#nav-community-2"
+                        type="button"
+                        role="tab"
+                        aria-controls="nav-community-2"
+                        aria-selected="false"
+                        onClick={() => setActiveTab('hotel')}
+                      >
+                        <span>
+                          <i className="icon-hotel"></i>
+                        </span>
+                        Hotel Bookings
+                      </button>
+                      <button
+                        className="nav-link"
+                        id="nav-community-2-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#nav-community-2"
+                        type="button"
+                        role="tab"
+                        aria-controls="nav-community-2"
+                        aria-selected="false"
+                        onClick={() => setActiveTab('flight')}
+                      >
+                        <span>
+                          <i className="icon-travel-plane"></i>
+                        </span>
+                        Flight Bookings
+                      </button>
                     </div>
                   </nav>
                 </div>

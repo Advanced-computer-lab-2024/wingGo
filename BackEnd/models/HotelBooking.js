@@ -51,6 +51,7 @@ const hotelBookingSchema = new mongoose.Schema({
     holderName: String,
   },
   createdAt: { type: Date, default: Date.now },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'tourist', required: true }
 });
 
 const HotelBooking = mongoose.model('HotelBooking', hotelBookingSchema);
