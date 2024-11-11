@@ -7,6 +7,7 @@ const { default: mongoose } = require('mongoose');
 const {generatePreSignedUrl}  = require('../downloadMiddleware');
 const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
 
+
 const seller_hello = (req, res) => {
     console.log('Seller route hit!'); // Add this log
     res.send('<h1>yayy Seller</h1>');
@@ -575,6 +576,29 @@ const ArchiveUnarchiveProduct = async (req, res) => {
     }
 };
 
+const previewLogo = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const seller = await Seller.findById(id);
+        
+        if (!seller) {
+            return res.status(404).json({ message: 'Advertiser not found' });
+        }
+
+        if (seller.logo) {
+            const key = seller.logo.split('/').slice(-1)[0];
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
+            
+            // Instead of redirecting, send the pre-signed URL directly
+            return res.json({ imageUrl: preSignedUrl });
+        } else {
+            return res.status(404).json({ message: 'Image not found for this advertiser.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 
  module.exports = {
@@ -599,5 +623,6 @@ const ArchiveUnarchiveProduct = async (req, res) => {
     getProductQuantityAndSales,
     getAllProductsQuantityAndSales,
     ArchiveUnarchiveProduct,
-    getSellerById
+    getSellerById,
+    previewLogo
 };

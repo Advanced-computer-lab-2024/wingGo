@@ -38,5 +38,7 @@ router.get('/productsQuantityAndSales', sellerController.getAllProductsQuantityA
 
 router.put('/changearchive/:id',sellerController.ArchiveUnarchiveProduct);
 
+router.get('/viewLogo/:id', sellerController.previewLogo);
+
 
 module.exports = router;
