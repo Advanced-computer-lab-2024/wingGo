@@ -16,6 +16,18 @@ export const fetchAllItineraries = async (): Promise<Itinerary[]> => {
     }
 };
 
+// Check if an itinerary is booked for a specific tourist
+export const isItineraryBooked = async ( itineraryId: string): Promise<boolean> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/tourist/booked-status/${touristId}/booked-status/${itineraryId}`);
+        return response.data.isBooked; // Returns true if booked, false otherwise
+    } catch (error) {
+        console.error("Error checking itinerary booked status:", error);
+        throw error;
+    }
+};
+
+
 // Admin-specific fetch
 export const fetchAdminItineraries = async (): Promise<Itinerary[]> => {
     try {

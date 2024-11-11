@@ -117,4 +117,14 @@ export const commentOnActivityApi = async (touristId : string, activityId : stri
 };
 
 
+// Check if an activity is booked for a specific tourist
+export const isActivityBooked = async (activityId: string): Promise<boolean> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/tourist/booked-status/${touristId}/activity-status/${activityId}`);
+        return response.data.isBooked; // Returns true if booked, false otherwise
+    } catch (error) {
+        console.error("Error checking activity booked status:", error);
+        throw error;
+    }
+};
 

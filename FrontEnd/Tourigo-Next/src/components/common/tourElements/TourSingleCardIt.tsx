@@ -7,9 +7,9 @@ import useGlobalContext from "@/hooks/use-context";
 import { Itinerary } from "@/interFace/interFace";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toggleFlagItinerary, toggleItineraryActivation } from '@/api/itineraryApi';
+import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked } from '@/api/itineraryApi';
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 
 interface ItourPropsType {
@@ -37,6 +37,22 @@ const TourSingleCard = ({
   // Local state to keep track of the flagged and deactivated status
   const [isFlagged, setIsFlagged] = useState(tour.flagged);
   const [isDeactivated, setIsDeactivated] = useState(tour.deactivated);
+
+  const [isBooked, setIsBooked] = useState(false);
+
+
+  useEffect(() => {
+    const checkBookingStatus = async () => {
+      try {
+        const bookedStatus = await isItineraryBooked(tour._id); // Fetch booking status
+        setIsBooked(bookedStatus);
+      } catch (error) {
+        console.error("Error checking booking status:", error);
+      }
+    };
+
+    checkBookingStatus();
+  }, [tour._id]);
 
   const handleFlagItinerary = async () => {
     try {
@@ -153,11 +169,16 @@ const TourSingleCard = ({
                 </div>
                 <div className="tour-btn">
                 <button
-                    onClick={handleBookNowClick} // Updated to handle routing
-                    className="bd-text-btn style-two"
+                    onClick={handleBookNowClick}
+                    className={`bd-text-btn style-two ${isBooked ? "disabled" : ""}`}
                     type="button"
+                    style={{
+                      cursor: isBooked ? "not-allowed" : "pointer",
+                      color: isBooked ? "gray" : "inherit",
+                    }}
+                    disabled={isBooked}
                   >
-                    Book Now
+                    {isBooked ? "Booked!" : "Book Now"}
                     <span className="icon__box">
                       <i className="fa-regular fa-arrow-right-long icon__first"></i>
                       <i className="fa-regular fa-arrow-right-long icon__second"></i>

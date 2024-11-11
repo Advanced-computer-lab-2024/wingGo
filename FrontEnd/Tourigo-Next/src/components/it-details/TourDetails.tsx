@@ -11,10 +11,12 @@ import axios from "axios";
 import TourSingleCard from "../common/tourElements/TourSingleCardIt";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import { isItineraryBooked } from "@/api/itineraryApi"; // Import the booking status function
 import { toast } from "react-toastify";
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Itinerary | null>(null);
+  const [isBooked, setIsBooked] = useState(false); // State for booking status
   const [isEmailFormOpen, setIsEmailFormOpen] = useState(false);
   const [email, setEmail] = useState('');
 
@@ -45,6 +47,10 @@ const TourDetails = ({ id }: idTypeNew) => {
       try {
         const response = await axios.get(`http://localhost:8000/tourguide/getitinerary/${id}`);
         setData(response.data);
+
+        // Check if the itinerary is booked
+        const bookedStatus = await isItineraryBooked(id);
+        setIsBooked(bookedStatus);
       } catch (error) {
         console.error("Error fetching itinerary data:", error);
       }
@@ -91,12 +97,23 @@ const TourDetails = ({ id }: idTypeNew) => {
                           <br/><br/>
                           <div className="row gy-24 "  style={{ paddingLeft: '10px'}}   >
                           <button
-                        onClick={() => handleBookNowClick()}
-                        className="bd-gradient-btn btn-style radius-60 btn-tertiary"
-                        style={{ padding: '6px 12px', fontSize: '14px', borderRadius: '20px',  float: 'right', paddingRight: '10px', marginRight: '20px', width: '150px', textAlign: 'center' }} // Adjusted for smaller size and less rounded shape
-                        >
-                          Book Now
-                        </button>
+                              onClick={isBooked ? undefined : handleBookNowClick} // Disable click if booked
+                              className="bd-gradient-btn btn-style radius-60 btn-tertiary"
+                              style={{
+                                padding: '6px 12px',
+                                fontSize: '14px',
+                                borderRadius: '20px',
+                                float: 'right',
+                                paddingRight: '10px',
+                                marginRight: '20px',
+                                width: '150px',
+                                textAlign: 'center',
+                                opacity: isBooked ? 0.6 : 1, // Dim button if booked
+                                cursor: isBooked ? "not-allowed" : "pointer"
+                              }}
+                            >
+                              {isBooked ? "Booked!" : "Book Now"}
+                            </button> 
                         <button
                               className="bd-primary-btn btn-style radius-60"
                               onClick={() => {

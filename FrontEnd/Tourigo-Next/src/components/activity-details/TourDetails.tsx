@@ -9,6 +9,8 @@ import { idTypeNew } from "@/interFace/interFace";
 import { Activity } from "@/interFace/interFace";
 import TourSingleCard from "../common/tourElements/ActivitySingleCard";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import { isActivityBooked } from "@/api/activityApi"; 
 import { toast } from "react-toastify";
 import axios from "axios";
 
@@ -17,6 +19,9 @@ const TourDetails = ({ id }: idTypeNew) => {
   const [activity,setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isBooked, setIsBooked] = useState(false); // State for booking status
+
+  const router = useRouter(); // Initialize router
   const [isEmailFormOpen, setIsEmailFormOpen] = useState(false);
   const [email, setEmail] = useState('');
 
@@ -52,6 +57,13 @@ const TourDetails = ({ id }: idTypeNew) => {
 
         // Assuming related tours can be the rest of the activities
         setActivities(activities.filter((item) => item._id !== id));
+
+        if (activity) {
+          // Check if the activity is booked
+          const bookedStatus = await isActivityBooked(activity._id);
+          setIsBooked(bookedStatus);
+        }
+
       } catch (err) {
         setError("Error loading tour details.");
         console.error("Error fetching activities:", err);
@@ -61,6 +73,10 @@ const TourDetails = ({ id }: idTypeNew) => {
     };
     fetchData();
   }, [id]);
+
+  const handleBookNowClick = () => {
+    router.push(`/booking-activity/${id}`);
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -94,6 +110,29 @@ const TourDetails = ({ id }: idTypeNew) => {
                           ${data.price}
                           <span>/Per Person</span>
                         </h4>
+                        <br/><br/>
+                          <div className="row gy-24 "  style={{ paddingLeft: '10px'}}   >
+                         <button
+                              onClick={isBooked ? undefined : handleBookNowClick} // Disable click if booked
+                              className="bd-gradient-btn btn-style radius-60 btn-tertiary"
+                              style={{
+                                padding: '6px 12px',
+                                fontSize: '14px',
+                                borderRadius: '20px',
+                                float: 'right',
+                                paddingRight: '10px',
+                                marginRight: '20px',
+                                width: '150px',
+                                textAlign: 'center',
+                                opacity: isBooked ? 0.6 : 1, // Dim button if booked
+                                cursor: isBooked ? "not-allowed" : "pointer"
+
+                              }}
+                            >
+                              {isBooked ? "Booked!" : "Book Now"}
+                            </button> 
+                        </div> 
+
                         <button
                               className="bd-primary-btn btn-style radius-60"
                               onClick={() => {

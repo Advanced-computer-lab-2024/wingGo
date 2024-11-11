@@ -6,7 +6,7 @@ import { idTypeNew } from "@/interFace/interFace";
 const BookingMain = ({ id }: idTypeNew) => {
     return (
         <>
-            <Breadcrumb titleOne='Booking Form' titleTwo='Booking)) Form'/>
+            <Breadcrumb titleOne='Booking Form' titleTwo='Activity Booking Form'/>
             <Booking id={id} />
         </>
     );
