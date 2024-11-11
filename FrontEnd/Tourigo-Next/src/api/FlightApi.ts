@@ -39,3 +39,14 @@ export const searchFlights = async (params: FlightSearchParams): Promise<any> =>
       return error;
     }
   }
+
+  export const searchFlightsByUserId = async (userId: string): Promise<any> => {
+    try {
+      const response = await axios.get<any>(`${API_URL}/searchFlights/6703fe21af26882204ffaffc`);
+      console.log('search flights data:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error searching flights:', error);
+      return error;
+    }
+  };

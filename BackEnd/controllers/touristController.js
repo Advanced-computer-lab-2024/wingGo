@@ -2642,6 +2642,39 @@ const isActivityBooked = async (req, res) => {
     }
 };
 
+
+const searchFlightsByUserId = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const flights = await FlightBooking.find({ userId });
+
+        if (!flights.length) {
+            return res.status(404).json({ message: "No flights found for this user" });
+        }
+
+        res.status(200).json(flights);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+const searchHotelsByUserId = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const hotels = await HotelBooking.find({ userId });
+
+        if (!hotels.length) {
+            return res.status(404).json({ message: "No hotels found for this user" });
+        }
+
+        res.status(200).json(hotels);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
   
     
 
@@ -2678,6 +2711,8 @@ module.exports = {
     bookActivity,
     cancelActivity,
     purchaseProduct,
+    searchFlightsByUserId,
+    searchHotelsByUserId,
     rateProduct,
     reviewProduct,
     rateActivity,

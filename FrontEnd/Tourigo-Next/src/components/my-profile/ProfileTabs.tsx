@@ -2,6 +2,8 @@
 import React, {useState, useEffect} from "react";
 import ProfileDetails from './ProfileDetails';
 import LoyaltyProgram from './LoyaltyProgram';
+import HotelBookings from './HotelBookings';
+import FlightBookings from './FlightBookings';
 import { viewTouristProfile } from "@/api/ProfileApi";
 import { set } from "date-fns";
 import Prefrences from "./Prefrences";
@@ -47,12 +49,10 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
       case 'Preferences':
         
         return <Prefrences profileData={profileData} id={id} setPrefrenceRefresh={setPreferencesRefresh}/>;
-      case 'hotel':
-          
-          //return <HotelBookings profileData={profileData} id={id}/>;
+      case 'hotel':        
+          return <HotelBookings id={id} />
       case 'flight':
-            
-           // return <FlightBookings profileData={profileData} id={id}/>;
+            return <FlightBookings id={id}/>;
       default:
         return null;
     }
@@ -144,7 +144,7 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                         onClick={() => setActiveTab('hotel')}
                       >
                         <span>
-                          <i className="icon-dimond"></i>
+                          <i className="icon-hotel"></i>
                         </span>
                         Hotel Bookings
                       </button>
@@ -160,7 +160,7 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                         onClick={() => setActiveTab('flight')}
                       >
                         <span>
-                          <i className="icon-dimond"></i>
+                          <i className="icon-travel-plane"></i>
                         </span>
                         Flight Bookings
                       </button>
