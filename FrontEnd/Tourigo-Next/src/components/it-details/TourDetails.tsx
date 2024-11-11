@@ -97,12 +97,23 @@ const TourDetails = ({ id }: idTypeNew) => {
                           <br/><br/>
                           <div className="row gy-24 "  style={{ paddingLeft: '10px'}}   >
                           <button
-                        onClick={() => handleBookNowClick()}
-                        className="bd-gradient-btn btn-style radius-60 btn-tertiary"
-                        style={{ padding: '6px 12px', fontSize: '14px', borderRadius: '20px',  float: 'right', paddingRight: '10px', marginRight: '20px', width: '150px', textAlign: 'center' }} // Adjusted for smaller size and less rounded shape
-                        >
-                          Book Now
-                        </button>
+                              onClick={isBooked ? undefined : handleBookNowClick} // Disable click if booked
+                              className="bd-gradient-btn btn-style radius-60 btn-tertiary"
+                              style={{
+                                padding: '6px 12px',
+                                fontSize: '14px',
+                                borderRadius: '20px',
+                                float: 'right',
+                                paddingRight: '10px',
+                                marginRight: '20px',
+                                width: '150px',
+                                textAlign: 'center',
+                                opacity: isBooked ? 0.6 : 1, // Dim button if booked
+                                cursor: isBooked ? "not-allowed" : "pointer"
+                              }}
+                            >
+                              {isBooked ? "Booked!" : "Book Now"}
+                            </button> 
                         <button
                               className="bd-primary-btn btn-style radius-60"
                               onClick={() => {
