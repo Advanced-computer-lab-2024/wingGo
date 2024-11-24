@@ -15,6 +15,7 @@ const nodemailer = require('nodemailer');
 const HotelBooking = require('../models/HotelBooking');
 const Transport = require('../models/Transport');
 const Seller = require('../models/Seller');
+const Order = require('../models/order');
 
 
 const tourist_hello = (req, res) => {
@@ -2799,6 +2800,97 @@ const transporter = nodemailer.createTransport({
   };
 
 
+  const payForOrder = async (req, res) => {
+    const { orderId } = req.params;
+  
+    try {
+      // Fetch the order
+      const order = await Order.findById(orderId).populate('products.productId buyer');
+      if (!order) {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+  
+      // Check if the order is already paid
+      if (order.paymentStatus === 'paid') {
+        return res.status(400).json({ message: 'Order has already been paid for' });
+      }
+  
+      const buyer = order.buyer;
+  
+      // Check if buyer has sufficient wallet balance
+      if (buyer.wallet < order.totalPrice) {
+        return res.status(400).json({ message: 'Insufficient wallet balance' });
+      }
+  
+      // Deduct the total price from buyer's wallet
+      buyer.wallet -= order.totalPrice;
+  
+      // Process each product in the order
+      const notifications = []; // To collect notifications for sellers
+      for (const item of order.products) {
+        const product = await Product.findById(item.productId).populate('seller');
+  
+        if (!product) {
+          return res.status(404).json({ message: `Product with ID ${item.productId} not found` });
+        }
+  
+        // Check if enough quantity is available
+        if (product.quantity < item.quantity) {
+          return res.status(400).json({
+            message: `Insufficient stock for product: ${product.name}`,
+          });
+        }
+  
+        // Deduct quantity
+        product.quantity -= item.quantity;
+  
+        // Check if the product is out of stock
+        if (product.quantity === 0) {
+          const seller = product.seller;
+  
+          // Notify the seller in-app
+          notifications.push({
+            sellerId: seller._id,
+            notification: {
+              type: 'stock-alert',
+              message: `Your product '${product.name}' is now out of stock.`,
+              date: new Date(),
+            },
+          });
+  
+          // Send email notification to the seller
+          await transporter.sendMail({
+            from: "winggo567@gmail.com",
+            to: seller.email,
+            subject: 'Out of Stock Alert',
+            html: `<p>Your product <strong>${product.name}</strong> is now out of stock.</p>`,
+          });
+        }
+  
+        // Save updated product
+        await product.save();
+      }
+  
+      // Update buyer's wallet and save
+      await buyer.save();
+  
+      // Mark order as paid
+      order.paymentStatus = 'paid';
+      await order.save();
+  
+      // Push notifications to sellers
+      for (const { sellerId, notification } of notifications) {
+        await Seller.findByIdAndUpdate(sellerId, { $push: { notifications: notification } });
+      }
+  
+      res.status(200).json({ message: 'Order payment successful', wallet: buyer.wallet });
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      res.status(500).json({ message: 'Error processing payment', error });
+    }
+  };
+  
+
 
 module.exports = {
     tourist_hello,
@@ -2869,5 +2961,6 @@ module.exports = {
     shareProductViaEmail,
     getActivity,
     getNotifications,
-    payForProducts
+    payForProducts,
+    payForOrder
 };

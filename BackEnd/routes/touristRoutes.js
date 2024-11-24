@@ -111,8 +111,13 @@ router.get('/searchHotels/:userId', touristController.searchHotelsByUserId);
 // Get Tourist Notifications
 router.get('/notifications/:userId', touristController.getNotifications);
 
-// Pay for products
+// Pay for product dont use in frontend
 router.post('/payForProducts/:touristId/:productId', touristController.payForProducts);
+//
+
+
+// Pay for Order
+router.put('/pay/:orderId', touristController.payForOrder); // Endpoint to pay for an order
 
 
 
