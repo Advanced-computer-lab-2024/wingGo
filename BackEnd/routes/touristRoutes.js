@@ -107,5 +107,9 @@ router.get('/searchFlights/:userId', touristController.searchFlightsByUserId);
 // Search for hotels by userId
 router.get('/searchHotels/:userId', touristController.searchHotelsByUserId);
 
+//add item to wishlist
+router.post('/wishlist/:touristId/:productId', touristController.addWishlist);
+router.get('/viewWishlist/:touristId', touristController.viewWishlist);
+router.delete('/deleteWishlist/:touristId/:productId', touristController.removeWishlistItem);
 
 module.exports = router;

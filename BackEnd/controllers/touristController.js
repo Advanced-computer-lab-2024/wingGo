@@ -14,6 +14,7 @@ const TourGuide = require('../models/TourGuide');
 const nodemailer = require('nodemailer');
 const HotelBooking = require('../models/HotelBooking');
 const Transport = require('../models/Transport');
+const Wishlist = require('../models/WishList');
 
 
 
@@ -2694,6 +2695,95 @@ const getActivity = async (req, res) => {
     }
 };
 
+//add item to wishlist
+const addWishlist = async (req, res) => {
+    const { touristId ,productId} = req.params;
+    
+
+    try {
+        // Find the tourist by ID
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        // Check if the product is already in the wishlist
+        const existingWishlistItem = await Wishlist.findOne({ touristId, productId });
+        if (existingWishlistItem) {
+            return res.status(400).json({ message: 'Product is already in the wishlist' });
+        }
+
+
+        // Add to wishlist
+        const wishlistItem = new Wishlist({ touristId, productId });
+        await wishlistItem.save();
+
+    // Populate product details in the wishlist item
+        const populatedWishlistItem = await Wishlist.findById(wishlistItem._id).populate('productId');
+        res.status(200).json({
+            message: 'Product added to wishlist successfully',
+            wishlistItem: populatedWishlistItem,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// View wishlist
+const viewWishlist = async (req, res) => {
+    const { touristId } = req.params;
+
+    try {
+        // Find the tourist by ID
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Find all the wishlist items for the tourist and populate the product details
+        const wishlistItems = await Wishlist.find({ touristId })
+            .populate('productId') // Populate the productId with product details
+            .exec();
+
+        if (wishlistItems.length === 0) {
+            return res.status(404).json({ message: 'No products in wishlist' });
+        }
+
+        res.status(200).json({ message: 'Wishlist fetched successfully', wishlistItems });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Remove an item from the wishlist
+const removeWishlistItem = async (req, res) => {
+    const { touristId, productId } = req.params;
+
+    try {
+        // Check if the tourist exists
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Find and remove the wishlist item
+        const removedItem = await Wishlist.findOneAndDelete({ touristId, productId });
+
+        if (!removedItem) {
+            return res.status(404).json({ message: 'Product not found in the wishlist' });
+        }
+
+        res.status(200).json({ message: 'Product removed from wishlist successfully', removedItem });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 
 module.exports = {
@@ -2763,5 +2853,8 @@ module.exports = {
     shareItineraryViaEmail,
     sharePlaceViaEmail,
     shareProductViaEmail,
-    getActivity
+    getActivity,
+    addWishlist,
+    viewWishlist,
+    removeWishlistItem
 };
