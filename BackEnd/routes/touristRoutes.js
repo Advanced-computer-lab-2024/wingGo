@@ -106,6 +106,11 @@ router.get('/searchFlights/:userId', touristController.searchFlightsByUserId);
 
 // Search for hotels by userId
 router.get('/searchHotels/:userId', touristController.searchHotelsByUserId);
+router.post('/cart/:touristId/:productId', touristController.addToCart);
+router.delete('/cart/:touristId/:productId',touristController.removeFromCart);
+router.put('/updateAmountInCart/:cartItemId', touristController.updateCartItemAmount);
+router.post('/addDeliveryAddress/:touristId', touristController.addDeliveryAddress);
+router.post('/chooseAddress/:touristId', touristController.chooseAddress);
 
 
 // Get Tourist Notifications
@@ -119,6 +124,12 @@ router.post('/payForProducts/:touristId/:productId', touristController.payForPro
 // Pay for Order
 router.put('/pay/:orderId', touristController.payForOrder); // Endpoint to pay for an order
 
+router.get('/cartItems/:touristId',touristController. getItemsInCart);
 
+
+//add item to wishlist
+router.post('/wishlist/:touristId/:productId', touristController.addWishlist);
+router.get('/viewWishlist/:touristId', touristController.viewWishlist);
+router.delete('/deleteWishlist/:touristId/:productId', touristController.removeWishlistItem);
 
 module.exports = router;

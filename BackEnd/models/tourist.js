@@ -89,8 +89,13 @@ const touristSchema = new Schema({
           metadata: { type: Map, of: String }, // Store additional info like event name
           read: { type: Boolean, default: false }
         }
-      ]
+      ],
       
+    
+    deliveryAddresses: [{type: String, trim: true }],
+    chosenAddress: {
+        type: String,
+    }
 
 
 }, {timestamps: true});
