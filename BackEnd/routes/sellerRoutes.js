@@ -40,5 +40,8 @@ router.put('/changearchive/:id',sellerController.ArchiveUnarchiveProduct);
 
 router.get('/viewLogo/:id', sellerController.previewLogo);
 
+// Get Seller Notifications
+router.get('/notifications/:userId', sellerController.getNotifications);
+
 
 module.exports = router;

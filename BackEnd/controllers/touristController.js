@@ -4,6 +4,7 @@ const Attraction = require('../models/attraction');
 const Activity= require('../models/Activity');
 const Itinerary = require ('../models/Itinerary');
 const Product = require('../models/product');
+const Cart = require('../models/cartItems');
 const LoginCredentials = require('../models/LoginCredentials');
 const Place = require('../models/Places');
 const Complaints = require('../models/Complaints');
@@ -14,7 +15,7 @@ const TourGuide = require('../models/TourGuide');
 const nodemailer = require('nodemailer');
 const HotelBooking = require('../models/HotelBooking');
 const Transport = require('../models/Transport');
-const Wishlist = require('../models/WishList');
+const Seller = require('../models/Seller');const Wishlist = require('../models/WishList');
 
 
 
@@ -951,39 +952,58 @@ const bookItinerary = async (req, res) => {
 };
 
 const cancelItinerary = async (req, res) => {
-    const { touristId, itineraryId } = req.params; // Extracting touristId and itineraryId from URL parameters
+    const { touristId, itineraryId } = req.params;
 
     try {
         // Step 1: Fetch the tourist with the given touristId
         const tourist = await Tourist.findById(touristId);
 
-        // Check if the tourist exists
         if (!tourist) {
             return res.status(404).json({ message: 'Tourist not found.' });
         }
 
         // Step 2: Check if the itinerary exists in the tourist's bookedItineraries array
-        const itinerary = tourist.bookedItineraries.find(
+        const bookedItinerary = tourist.bookedItineraries.find(
             itinerary => itinerary.itineraryId.toString() === itineraryId
         );
 
-        if (!itinerary) {
+        if (!bookedItinerary) {
             return res.status(404).json({ message: 'Itinerary not found for this tourist.' });
+        }
+
+        // Fetch the full itinerary details to get the price
+        const itinerary = await Itinerary.findById(itineraryId);
+
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found.' });
         }
 
         // Step 3: Check if the booking date is more than 48 hours from now
         const now = new Date();
-        const bookingDate = itinerary.bookingDate;
+        const bookingDate = bookedItinerary.bookingDate;
+
+        if (!bookingDate) {
+            return res.status(400).json({ message: 'Booking date is not valid.' });
+        }
+
         const diffInMilliseconds = bookingDate.getTime() - now.getTime();
 
         if (diffInMilliseconds < 48 * 60 * 60 * 1000) {
             return res.status(400).json({ message: 'Cannot cancel the itinerary within 48 hours of the booking date.' });
         }
 
-        // Step 4: Remove the specific itinerary from the bookedItineraries array using $pull
+        // Step 4: Add the itinerary price to the tourist's wallet
+        if (!itinerary.price || isNaN(itinerary.price)) {
+            return res.status(400).json({ message: 'Itinerary price is invalid or missing.' });
+        }
+
+        tourist.wallet = (tourist.wallet || 0) + itinerary.price;
+        await tourist.save();
+
+        // Step 5: Remove the specific itinerary from the bookedItineraries array
         const touristUpdate = await Tourist.findByIdAndUpdate(
             touristId,
-            { $pull: { bookedItineraries: { itineraryId: itineraryId } } }, // Removes the matching object
+            { $pull: { bookedItineraries: { itineraryId: itineraryId } } },
             { new: true }
         );
 
@@ -991,10 +1011,10 @@ const cancelItinerary = async (req, res) => {
             return res.status(404).json({ message: 'Failed to update tourist bookings.' });
         }
 
-        // Step 5: Remove the touristId from the itinerary's touristIDs array
+        // Step 6: Remove the touristId from the itinerary's touristIDs array
         const itineraryUpdate = await Itinerary.findByIdAndUpdate(
             itineraryId,
-            { $pull: { touristIDs: { touristId: touristId } } }, // Pulls the object containing the touristId
+            { $pull: { touristIDs: { touristId: touristId } } },
             { new: true }
         );
 
@@ -1004,14 +1024,17 @@ const cancelItinerary = async (req, res) => {
 
         return res.status(200).json({
             message: 'Itinerary cancelled successfully.',
+            walletBalance: tourist.wallet,
             tourist: touristUpdate,
             itinerary: itineraryUpdate
         });
 
     } catch (error) {
+        console.error('Error cancelling the booking process:', error); // Log the error for debugging
         return res.status(500).json({ message: 'Error cancelling the booking process.', error });
     }
 };
+
 const redeemPoints = async (req, res) => {
     const { touristId } = req.params; // Extracting touristId from URL parameters
 
@@ -1189,6 +1212,11 @@ const cancelActivity = async (req, res) => {
         if (diffInMilliseconds < 48 * 60 * 60 * 1000) {
             return res.status(400).json({ message: 'Cannot cancel the activity within 48 hours of the booking date.' });
         }
+         // Step 4: Add the price of the activity to the tourist's wallet
+         const activityPrice = activity.price; // Ensure the 'price' field exists in the Activity schema
+         tourist.wallet = (tourist.wallet || 0) + activityPrice;
+         // Save the updated tourist document
+        await tourist.save();
 
         // Step 4: Remove the specific activity from the bookedActivities array using $pull
         const touristUpdate = await Tourist.findByIdAndUpdate(
@@ -1213,7 +1241,8 @@ const cancelActivity = async (req, res) => {
         }
 
         return res.status(200).json({
-            message: 'Activity cancelled successfully.',
+            message: 'Activity cancelled successfully. The amount has been added to your wallet.',
+            walletBalance: tourist.wallet,
             tourist: touristUpdate,
             activity: activityUpdate
         });
@@ -2695,6 +2724,352 @@ const getActivity = async (req, res) => {
     }
 };
 
+const addToCart = async (req, res) => {
+    const { productId, touristId } = req.params; // Extract productId and touristId from request parameters
+
+    try {
+        // Step 1: Check if the item already exists in the cart
+        const existingCartItem = await Cart.findOne({ productId, touristId });
+
+        if (existingCartItem) {
+            return res.status(400).json({ message: 'This product is already in the cart for this tourist.' });
+        }
+
+        // Step 2: Fetch the product to get its amount
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found.' });
+        }
+
+        const productAmount = product.quantity; // Assuming the product has a `price` field
+
+        // Step 3: Create a new cart item
+        const cartItem = new Cart({
+            touristId,
+            productId
+        });
+
+        // Step 4: Save the cart item
+        await cartItem.save();
+
+        // Step 5: Return success response with product amount
+        return res.status(201).json({
+            message: `Product added to cart successfully. Product amount: ${productAmount}.`,
+            cartItem
+        });
+    } catch (error) {
+        console.error('Error adding item to cart:', error); // Log error for debugging
+        return res.status(500).json({ message: 'Error adding item to cart.', error });
+    }
+};
+
+
+
+const removeFromCart = async (req, res) => {
+    const { productId, touristId } = req.params; // Extract productId and touristId from request parameters
+
+    try {
+        // Step 1: Find the cart item matching the touristId and productId
+        const cartItem = await Cart.findOneAndDelete({ touristId, productId });
+
+        // Step 2: Check if the cart item exists
+        if (!cartItem) {
+            return res.status(404).json({ message: 'Cart item not found.' });
+        }
+
+        // Step 3: Return success response
+        return res.status(200).json({
+            message: 'Product removed from cart successfully.',
+            cartItem
+        });
+    } catch (error) {
+        console.error('Error removing item from cart:', error); // Log error for debugging
+        return res.status(500).json({ message: 'Error removing item from cart.', error });
+    }
+};
+
+const updateCartItemAmount = async (req, res) => {
+    const { cartItemId } = req.params; // Extract cartItemId from request parameters
+    const { amount } = req.body; // Extract amount from request body
+
+    try {
+        // Validate the amount
+        if (!amount || isNaN(amount)) {
+            return res.status(400).json({ message: 'Invalid amount. It must be a valid number.' });
+        }
+
+        // Step 1: Find the cart item
+        const cartItem = await Cart.findById(cartItemId);
+
+        if (!cartItem) {
+            return res.status(404).json({ message: 'Cart item not found.' });
+        }
+
+        // Step 2: Fetch the related product to check its quantity
+        const product = await Product.findById(cartItem.productId);
+
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found.' });
+        }
+
+        // Step 3: Validate the new amount against the product's quantity
+        if (amount < 1 || amount > product.quantity) {
+            return res.status(400).json({
+                message: `Amount must be between 1 and the available product quantity (${product.quantity}).`
+            });
+        }
+
+        // Step 4: Update the amount
+        cartItem.amount = amount;
+        await cartItem.save();
+
+        // Step 5: Return success response
+        return res.status(200).json({
+            message: 'Cart item amount updated successfully.',
+            cartItem
+        });
+    } catch (error) {
+        console.error('Error updating cart item amount:', error); // Log the error for debugging
+        return res.status(500).json({ message: 'Error updating cart item amount.', error });
+    }
+};
+
+const addDeliveryAddress = async (req, res) => {
+    const { touristId } = req.params; // Extract touristId from request parameters
+    const { addresses } = req.body; // Extract addresses array from the request body
+
+    try {
+        // Validate the addresses array
+        if (!Array.isArray(addresses) || addresses.length === 0) {
+            return res.status(400).json({ message: 'Invalid addresses. Please provide an array of non-empty strings.' });
+        }
+
+        // Validate each address in the array
+        const validAddresses = addresses
+            .filter(address => typeof address === 'string' && address.trim() !== '')
+            .map(address => address.trim());
+
+        if (validAddresses.length === 0) {
+            return res.status(400).json({ message: 'No valid addresses provided.' });
+        }
+
+        // Find the tourist by ID
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found.' });
+        }
+
+        // Add only unique addresses that are not already in the array
+        const uniqueAddresses = validAddresses.filter(address => !tourist.deliveryAddresses.includes(address));
+
+        // Check if there are no new unique addresses to add
+        if (uniqueAddresses.length === 0) {
+            return res.status(200).json({
+                message: 'No new addresses to add. All provided addresses are already stored.',
+                deliveryAddresses: tourist.deliveryAddresses
+            });
+        }
+
+        // Add unique addresses to the deliveryAddresses array
+        tourist.deliveryAddresses.push(...uniqueAddresses);
+
+        // Save the updated tourist document
+        await tourist.save();
+
+        // Return success response
+        return res.status(200).json({
+            message: 'Addresses added successfully.',
+            addedAddresses: uniqueAddresses,
+            deliveryAddresses: tourist.deliveryAddresses
+        });
+    } catch (error) {
+        console.error('Error adding addresses:', error); // Log the error for debugging
+        return res.status(500).json({ message: 'Error adding addresses.', error });
+    }
+};
+
+const chooseAddress = async (req, res) => {
+    const { touristId } = req.params; // Extract touristId from request parameters
+    const { address } = req.body; // Extract the chosen address from the request body
+
+    try {
+        // Validate the address
+        if (!address || typeof address !== 'string' || address.trim() === '') {
+            return res.status(400).json({ message: 'Invalid address. Please provide a valid address.' });
+        }
+
+        // Find the tourist by ID
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found.' });
+        }
+
+        // Check if the address exists in the deliveryAddresses array
+        if (!tourist.deliveryAddresses.includes(address.trim())) {
+            return res.status(400).json({ message: 'Address not found in the deliveryAddresses array.' });
+        }
+
+        // Set the chosenAddress field
+        tourist.chosenAddress = address.trim();
+
+        // Save the updated tourist document
+        await tourist.save();
+
+        // Return success response
+        return res.status(200).json({
+            message: 'Chosen address updated successfully.',
+            chosenAddress: tourist.chosenAddress
+        });
+    } catch (error) {
+        console.error('Error choosing address:', error); // Log the error for debugging
+        return res.status(500).json({ message: 'Error choosing address.', error });
+    }
+};
+// const getNotifications = async (req, res) => {
+//     try {
+//       const tourist = await Tourist.findById(req.user._id)
+//         .select('notifications')
+//         .populate('notifications.eventId notifications.itineraryId'); // Populate event/itinerary data
+  
+//       res.status(200).json({ notifications: tourist.notifications });
+//     } catch (error) {
+//       res.status(500).json({ message: 'Error fetching notifications', error });
+//     }
+//   };
+
+const getNotifications = async (req, res) => {
+    try {
+      // Extract userId from the route parameter
+      const { userId } = req.params;
+  
+      // Fetch the tourist by ID
+      const tourist = await Tourist.findById(userId)
+        .select('notifications')
+        .populate('notifications.eventId notifications.itineraryId'); // Populate event/itinerary data
+  
+      if (!tourist) {
+        return res.status(404).json({ message: 'Tourist not found' });
+      }
+  
+      // Return the notifications
+      res.status(200).json({ notifications: tourist.notifications });
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching notifications', error });
+    }
+  };
+  
+  //// payments
+  // Nodemailer setup
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: "winggo567@gmail.com",
+      pass: "smkg eghm yrzv yyir"
+    }
+  });
+  
+  const payForProducts = async (req, res) => {
+    const { touristId, productId } = req.params;
+  
+    try {
+      // Fetch the tourist and product
+      const tourist = await Tourist.findById(touristId);
+      const product = await Product.findById(productId).populate('seller');
+  
+      if (!tourist) {
+        return res.status(404).json({ message: 'Tourist not found' });
+      }
+      if (!product) {
+        return res.status(404).json({ message: 'product not found' });
+      }
+  
+      // Check if tourist has enough balance
+      if (tourist.wallet < product.price) {
+        return res.status(400).json({ message: 'Insufficient wallet balance' });
+      }
+  
+      // Deduct product price from tourist wallet
+      tourist.wallet -= product.price;
+  
+      // Reduce product quantity
+      product.quantity -= 1;
+  
+      // Check if product is out of stock
+      if (product.quantity === 0) {
+        const seller = product.seller;
+  
+        // Notify the seller in-app
+        await Seller.findByIdAndUpdate(seller._id, {
+          $push: {
+            notifications: {
+              type: 'stock-alert',
+              message: `Your product '${product.name}' is now out of stock.`,
+              date: new Date()
+            }
+          }
+        });
+  
+        // Send email notification
+        await transporter.sendMail({
+          from: "winggo567@gmail.com",
+          to: seller.email,
+          subject: 'Out of Stock Alert',
+          html: `<p>Your product <strong>${product.name}</strong> is now out of stock.</p>`
+        });
+      }
+  
+      // Save updated tourist and product
+      await tourist.save();
+      await product.save();
+  
+      res.status(200).json({ message: 'Payment successful', wallet: tourist.wallet });
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      res.status(500).json({ message: 'Error processing payment', error });
+    }
+  };
+  const getItemsInCart = async (req, res) => {
+    const { touristId } = req.params; // Extract touristId from request parameters
+
+    try {
+        // Find all cart items for the given touristId
+        const cartItems = await Cart.find({ touristId }).populate('productId');
+
+        if (!cartItems || cartItems.length === 0) {
+            return res.status(404).json({ message: 'No items found in the cart for this tourist.' });
+        }
+
+        // Map the cart items to include product details
+        const itemsWithDetails = cartItems.map(item => ({
+            cartItemId: item._id,
+            product: {
+                id: item.productId._id,
+                name: item.productId.name, // Assuming the Product model has a 'name' field
+                price: item.productId.price, // Assuming the Product model has a 'price' field
+                quantity: item.productId.quantity // Assuming the Product model has a 'quantity' field
+            },
+            amount: item.amount // Assuming Cart has an 'amount' field
+        }));
+
+        // Return the items in the cart
+        return res.status(200).json({
+            message: 'Cart items retrieved successfully.',
+            items: itemsWithDetails
+        });
+    } catch (error) {
+        console.error('Error retrieving cart items:', error); // Log the error for debugging
+        return res.status(500).json({ message: 'Error retrieving cart items.', error });
+    }
+};
+
+
+
+
+
+
 //add item to wishlist
 const addWishlist = async (req, res) => {
     const { touristId ,productId} = req.params;
@@ -2856,5 +3231,13 @@ module.exports = {
     getActivity,
     addWishlist,
     viewWishlist,
-    removeWishlistItem
+    removeWishlistItem,
+    getNotifications,
+    payForProducts,
+    addToCart,
+    removeFromCart,
+    updateCartItemAmount,
+    addDeliveryAddress,
+    chooseAddress,
+    getItemsInCart
 };

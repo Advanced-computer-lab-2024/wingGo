@@ -29,7 +29,7 @@ export const searchFlights = async (params: FlightSearchParams): Promise<any> =>
   export const bookflight = async (params: any): Promise<any> => {
     try {
       console.log('booking flight:', params);
-      const response = await axios.post<any>(`${API_URL}/bookFlight/6703fe21af26882204ffaffc`, {
+      const response = await axios.post<any>(`${API_URL}/bookFlight/67240ed8c40a7f3005a1d01d`, {
         flightOffers: params,
       });
       console.log('booking data:', response.data);
@@ -42,7 +42,7 @@ export const searchFlights = async (params: FlightSearchParams): Promise<any> =>
 
   export const searchFlightsByUserId = async (userId: string): Promise<any> => {
     try {
-      const response = await axios.get<any>(`${API_URL}/searchFlights/6703fe21af26882204ffaffc`);
+      const response = await axios.get<any>(`${API_URL}/searchFlights/67240ed8c40a7f3005a1d01d`);
       console.log('search flights data:', response.data);
       return response.data;
     } catch (error) {

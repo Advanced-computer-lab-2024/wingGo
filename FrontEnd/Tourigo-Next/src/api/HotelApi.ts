@@ -25,7 +25,7 @@ export const searchHotels = async (params: HotelSearchParams): Promise<any> => {
   export const bookHotel = async (params: any): Promise<any> => {
     try {
       console.log('booking hotel:', params);
-      const response = await axios.post<any>(`${API_URL}/bookHotel/6703fe21af26882204ffaffc`, {
+      const response = await axios.post<any>(`${API_URL}/bookHotel/67240ed8c40a7f3005a1d01d`, {
         hotelOffers: params,
       });
       console.log('booking data:', response.data);
@@ -38,7 +38,7 @@ export const searchHotels = async (params: HotelSearchParams): Promise<any> => {
 
   export const searchHotelsByUserId = async (userId: string): Promise<any> => {
     try {
-      const response = await axios.get<any>(`${API_URL}/searchHotels/6703fe21af26882204ffaffc`);
+      const response = await axios.get<any>(`${API_URL}/searchHotels/67240ed8c40a7f3005a1d01d`);
       console.log('search hotels data:', response.data);
       return response.data;
     } catch (error) {

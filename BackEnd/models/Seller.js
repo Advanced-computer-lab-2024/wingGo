@@ -32,7 +32,27 @@ const sellerSchema = new Schema({
    termsAccepted: {
     type: Boolean,
     default: false
-}
+},
+notifications: [
+    {
+      type: {
+        type: String, // e.g., "stock-alert"
+        required: true
+      },
+      message: {
+        type: String,
+        required: true
+      },
+      date: {
+        type: Date,
+        default: Date.now
+      },
+      read: {
+        type: Boolean,
+        default: false
+      }
+    }
+  ]
 
 }, { timestamps: true });
 

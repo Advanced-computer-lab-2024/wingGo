@@ -12,11 +12,13 @@ const advertiserRoutes = require('./routes/advertiserRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
 const guestRoutes = require('./routes/guestRoutes');
 const prefreRoutes = require('./routes/preferenceTagRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { S3Client } = require('@aws-sdk/client-s3');
+const notificationScheduler = require('./jobs/notificationScheduler');
 require('dotenv').config();
 
 
@@ -95,6 +97,10 @@ app.delete('/delete/:filename', async (req, res) => {
   res.send("File deleted successfully");
 });
 
+// Start the notification scheduler
+notificationScheduler();
+
+
 /// routes
 // Route to serve the homepage
 app.get("/", (req, res) => {
@@ -162,6 +168,9 @@ app.use('/tourist', touristRoutes);
 app.use('/guest', guestRoutes);
 
 app.use('/prefrences', prefreRoutes);
+
+
+app.use('/order', orderRoutes);
 
 
 // Serve static files from the "images" directory
