@@ -1,14 +1,15 @@
 const Product = require('../models/product');
 const Tourist = require('../models/tourist');
 const Order = require('../models/order');
+const Cart = require('../models/cartItems');
 
 const createOrder = async (req, res) => {
   try {
-    const { buyerId, products } = req.body;
+    const { buyerId } = req.body;
 
     // Validate required fields
-    if (!buyerId || !products || !Array.isArray(products) || products.length === 0) {
-      return res.status(400).json({ message: 'Buyer ID and products are required' });
+    if (!buyerId) {
+      return res.status(400).json({ message: 'Buyer ID is required' });
     }
 
     // Fetch buyer details
@@ -17,22 +18,33 @@ const createOrder = async (req, res) => {
       return res.status(404).json({ message: 'Buyer not found' });
     }
 
+    // Fetch all cart items for the buyer
+    const cartItems = await Cart.find({ touristId: buyerId }).populate('productId');
+    if (!cartItems || cartItems.length === 0) {
+      return res.status(400).json({ message: 'No items in the cart to create an order' });
+    }
+
     // Calculate total price and validate product quantities
     let totalPrice = 0;
-    for (const item of products) {
-      const product = await Product.findById(item.productId);
-      if (!product) {
-        return res.status(404).json({ message: `Product with ID ${item.productId} not found` });
-      }
+    const products = [];
+    for (const item of cartItems) {
+      const product = item.productId;
 
-      // Ensure enough quantity is available
-      if (product.quantity < item.quantity) {
+      // Ensure product exists and has enough stock
+      if (!product || product.quantity < item.amount) {
         return res
           .status(400)
-          .json({ message: `Insufficient stock for product: ${product.name}` });
+          .json({ message: `Insufficient stock for product: ${product?.name || item.productId}` });
       }
 
-      totalPrice += product.price * item.quantity;
+      // Add product to order's products array
+      products.push({
+        productId: product._id,
+        quantity: item.amount,
+      });
+
+      // Calculate total price
+      totalPrice += product.price * item.amount;
     }
 
     // Create the order
@@ -47,7 +59,8 @@ const createOrder = async (req, res) => {
     // Save the order
     const savedOrder = await order.save();
 
-    // Will not Deduct stock for ordered products till payment
+    // Clear the cart for the buyer
+    await Cart.deleteMany({ touristId: buyerId });
 
     res.status(201).json({ message: 'Order created successfully', order: savedOrder });
   } catch (error) {
@@ -55,5 +68,6 @@ const createOrder = async (req, res) => {
     res.status(500).json({ message: 'Internal server error', error });
   }
 };
+
 
 module.exports = { createOrder };
