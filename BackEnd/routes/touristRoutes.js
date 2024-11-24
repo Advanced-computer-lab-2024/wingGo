@@ -108,4 +108,12 @@ router.get('/searchFlights/:userId', touristController.searchFlightsByUserId);
 router.get('/searchHotels/:userId', touristController.searchHotelsByUserId);
 
 
+// Get Tourist Notifications
+router.get('/notifications/:userId', touristController.getNotifications);
+
+// Pay for products
+router.post('/payForProducts/:touristId/:productId', touristController.payForProducts);
+
+
+
 module.exports = router;

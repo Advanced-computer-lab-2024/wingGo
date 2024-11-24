@@ -14,7 +14,7 @@ const TourGuide = require('../models/TourGuide');
 const nodemailer = require('nodemailer');
 const HotelBooking = require('../models/HotelBooking');
 const Transport = require('../models/Transport');
-
+const Seller = require('../models/Seller');
 
 
 const tourist_hello = (req, res) => {
@@ -2694,6 +2694,110 @@ const getActivity = async (req, res) => {
     }
 };
 
+// const getNotifications = async (req, res) => {
+//     try {
+//       const tourist = await Tourist.findById(req.user._id)
+//         .select('notifications')
+//         .populate('notifications.eventId notifications.itineraryId'); // Populate event/itinerary data
+  
+//       res.status(200).json({ notifications: tourist.notifications });
+//     } catch (error) {
+//       res.status(500).json({ message: 'Error fetching notifications', error });
+//     }
+//   };
+
+const getNotifications = async (req, res) => {
+    try {
+      // Extract userId from the route parameter
+      const { userId } = req.params;
+  
+      // Fetch the tourist by ID
+      const tourist = await Tourist.findById(userId)
+        .select('notifications')
+        .populate('notifications.eventId notifications.itineraryId'); // Populate event/itinerary data
+  
+      if (!tourist) {
+        return res.status(404).json({ message: 'Tourist not found' });
+      }
+  
+      // Return the notifications
+      res.status(200).json({ notifications: tourist.notifications });
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching notifications', error });
+    }
+  };
+  
+  //// payments
+  // Nodemailer setup
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: "winggo567@gmail.com",
+      pass: "smkg eghm yrzv yyir"
+    }
+  });
+  
+  const payForProducts = async (req, res) => {
+    const { touristId, productId } = req.params;
+  
+    try {
+      // Fetch the tourist and product
+      const tourist = await Tourist.findById(touristId);
+      const product = await Product.findById(productId).populate('seller');
+  
+      if (!tourist) {
+        return res.status(404).json({ message: 'Tourist not found' });
+      }
+      if (!product) {
+        return res.status(404).json({ message: 'product not found' });
+      }
+  
+      // Check if tourist has enough balance
+      if (tourist.wallet < product.price) {
+        return res.status(400).json({ message: 'Insufficient wallet balance' });
+      }
+  
+      // Deduct product price from tourist wallet
+      tourist.wallet -= product.price;
+  
+      // Reduce product quantity
+      product.quantity -= 1;
+  
+      // Check if product is out of stock
+      if (product.quantity === 0) {
+        const seller = product.seller;
+  
+        // Notify the seller in-app
+        await Seller.findByIdAndUpdate(seller._id, {
+          $push: {
+            notifications: {
+              type: 'stock-alert',
+              message: `Your product '${product.name}' is now out of stock.`,
+              date: new Date()
+            }
+          }
+        });
+  
+        // Send email notification
+        await transporter.sendMail({
+          from: "winggo567@gmail.com",
+          to: seller.email,
+          subject: 'Out of Stock Alert',
+          html: `<p>Your product <strong>${product.name}</strong> is now out of stock.</p>`
+        });
+      }
+  
+      // Save updated tourist and product
+      await tourist.save();
+      await product.save();
+  
+      res.status(200).json({ message: 'Payment successful', wallet: tourist.wallet });
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      res.status(500).json({ message: 'Error processing payment', error });
+    }
+  };
+
 
 
 module.exports = {
@@ -2763,5 +2867,7 @@ module.exports = {
     shareItineraryViaEmail,
     sharePlaceViaEmail,
     shareProductViaEmail,
-    getActivity
+    getActivity,
+    getNotifications,
+    payForProducts
 };

@@ -73,7 +73,24 @@ const touristSchema = new Schema({
     }] ,
     preferences: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PreferenceTag' }],
   
-    bookedActivities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity' }]
+    bookedActivities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity' }],
+
+    notifications: [
+        {
+          type: {
+            type: String,
+            enum: ['reminder', 'eventBooking', 'promoCode'], // Extendable for future types
+            required: true
+          },
+          eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Activity' },
+          itineraryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Itinerary' },
+          message: { type: String, required: true },
+          date: { type: Date, required: true },
+          metadata: { type: Map, of: String }, // Store additional info like event name
+          read: { type: Boolean, default: false }
+        }
+      ]
+      
 
 
 }, {timestamps: true});
