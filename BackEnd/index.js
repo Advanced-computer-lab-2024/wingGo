@@ -20,6 +20,11 @@ const bodyParser = require('body-parser');
 const { S3Client } = require('@aws-sdk/client-s3');
 const notificationScheduler = require('./jobs/notificationScheduler');
 const birthdayPromoScheduler = require('./jobs/birthdayPromoScheduler');
+const jwt = require('jsonwebtoken');
+const LoginCredentials = require('./models/LoginCredentials');
+const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 
@@ -145,6 +150,86 @@ app.get("/getUsersinLogin", (req, res) => {
     PendingUsersController.getUserByUsername(req,res);
 
 });
+
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  const userCredentials = await LoginCredentials.findOne({ username: username });
+  if (!userCredentials) {
+    return res.status(400).json({ error: 'Invalid username or password' });
+  }
+
+  const isMatch = await bcrypt.compare(password, userCredentials.password);
+  if (!isMatch) {
+    return res.status(400).json({ error: 'Invalid username or password' });
+  }
+
+  const token = jwt.sign(
+    { username: username, id: userCredentials.userId, role: userCredentials.roleModel },
+    process.env.TOKEN_SECRET,
+    { expiresIn: '5h' }
+  );
+
+  // Set the JWT in a cookie
+  res.cookie('token', token);
+
+  res.json({ message: 'Login successful' });
+});
+
+app.get("/logout", (req, res) => {
+  res.clearCookie('token');
+  res.json({ message: 'Logged out' });
+});
+
+app.post("/forgotPassword", async (req, res) => { 
+  //need to add email to tourism governer
+  //need to add email in logincredentials
+  //need to add a field 'mustChangePassword' in logincredentials
+
+    const { email } = req.body;
+    
+
+    if (!email ) {
+        return res.status(400).json({ message: 'Please provide email ' });
+    }
+
+    try {
+        const user = await LoginCredentials.findOne({ email: email });
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        console.log(otp);
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: "winggo567@gmail.com",
+                pass: "smkg eghm yrzv yyir"
+            }
+        });
+
+
+        await transporter.sendMail({
+            from: "winggo567@gmail.com",
+            to: email,
+            subject: 'Forgot Password OTP',
+            text: `Your OTP is ${otp}`, 
+        });
+
+        res.status(200).json({ message: 'OTP shared successfully', otp });
+    } catch (error) {
+        res.status(500).json({ message: '', error });
+    }
+
+  });
+
+
+
+  
+  
+
+
 
 
 
