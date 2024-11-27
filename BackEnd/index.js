@@ -19,6 +19,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { S3Client } = require('@aws-sdk/client-s3');
 const notificationScheduler = require('./jobs/notificationScheduler');
+const birthdayPromoScheduler = require('./jobs/birthdayPromoScheduler');
 require('dotenv').config();
 
 
@@ -99,7 +100,7 @@ app.delete('/delete/:filename', async (req, res) => {
 
 // Start the notification scheduler
 notificationScheduler();
-
+// birthdayPromoScheduler();
 
 /// routes
 // Route to serve the homepage

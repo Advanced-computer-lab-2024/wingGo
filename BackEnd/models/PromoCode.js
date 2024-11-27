@@ -27,6 +27,11 @@ const promoCodeSchema = new Schema({
     description: {
         type: String, // Optional description of the promo code
         required: false
+    },
+    touristId: { // Add this field to link to a specific tourist
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'tourist',
+        required: true
     }
 }, { timestamps: true });
 

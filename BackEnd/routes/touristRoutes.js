@@ -133,4 +133,6 @@ router.get('/viewWishlist/:touristId', touristController.viewWishlist);
 router.delete('/deleteWishlist/:touristId/:productId', touristController.removeWishlistItem);
 router.post('/wishlisttoCart/:touristId/:productId', touristController.addWishlistItemToCart);
 
+router.get('/promoCodes/:touristId', touristController.getPromoCodesForTourist);
+
 module.exports = router;

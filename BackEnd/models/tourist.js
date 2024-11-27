@@ -95,7 +95,14 @@ const touristSchema = new Schema({
     deliveryAddresses: [{type: String, trim: true }],
     chosenAddress: {
         type: String,
-    }
+    },
+    
+    promoCodes: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'PromoCode',
+        },
+      ],
 
 
 }, {timestamps: true});

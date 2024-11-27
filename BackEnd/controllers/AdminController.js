@@ -1203,7 +1203,25 @@ const getUsernameById = async  (req, res) => {
     }
 };
 
-
+// Get notifications for an admin
+const getNotifications = async (req, res) => {
+    try {
+      const { adminId } = req.params;
+  
+      // Fetch the admin
+      const admin = await Admin.findById(adminId);
+  
+      if (!admin) {
+        return res.status(404).json({ message: 'Admin not found' });
+      }
+  
+      // Return the notifications
+      res.status(200).json({ notifications: admin.notifications });
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ message: 'Error fetching notifications', error });
+    }
+  };
 // Add a Promo Code
 const createPromoCode = async (req, res) => {
     const { code, discount, startDate, endDate, isActive, description } = req.body;
@@ -1293,5 +1311,6 @@ module.exports = {
     getAllItineraries,
     getAllActivities,
     getUsernameById,
+    getNotifications,
     createPromoCode
 };
