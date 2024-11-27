@@ -15,7 +15,8 @@ const TourGuide = require('../models/TourGuide');
 const nodemailer = require('nodemailer');
 const HotelBooking = require('../models/HotelBooking');
 const Transport = require('../models/Transport');
-const Seller = require('../models/Seller');const Wishlist = require('../models/WishList');
+const Seller = require('../models/Seller');
+const Wishlist = require('../models/WishList');
 
 const Order = require('../models/order');
 
@@ -3253,6 +3254,41 @@ const removeWishlistItem = async (req, res) => {
 };
 
 
+const addWishlistItemToCart = async (req, res) => {
+    const { touristId, productId } = req.params; // Assuming productId is passed in the request body
+
+    try {
+        // 1. Check if the product exists in the wishlist for the given touristId
+        const wishlistItem = await Wishlist.findOne({ touristId, productId });
+
+        if (!wishlistItem) {
+            return res.status(404).json({ message: "Product not found in wishlist" });
+        }
+
+        // 2. Check if the product already exists in the cart
+        const existingCartItem = await Cart.findOne({ touristId, productId });
+
+        if (existingCartItem) {
+            return res.status(400).json({ message: "Product is already in the cart" });
+        }
+
+        // 3. Add the product to the cart
+        const newCartItem = new Cart({
+            touristId,
+            productId,
+            amount: 1 // Default amount to 1
+        });
+
+        await newCartItem.save();
+
+        return res.status(201).json({ message: "Product added to cart", cartItem: newCartItem });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
 module.exports = {
     tourist_hello,
     tourist_register,
@@ -3332,5 +3368,6 @@ module.exports = {
     updateCartItemAmount,
     addDeliveryAddress,
     chooseAddress,
-    getItemsInCart
+    getItemsInCart,
+    addWishlistItemToCart
 };

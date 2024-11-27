@@ -131,5 +131,6 @@ router.get('/cartItems/:touristId',touristController. getItemsInCart);
 router.post('/wishlist/:touristId/:productId', touristController.addWishlist);
 router.get('/viewWishlist/:touristId', touristController.viewWishlist);
 router.delete('/deleteWishlist/:touristId/:productId', touristController.removeWishlistItem);
+router.post('/wishlisttoCart/:touristId/:productId', touristController.addWishlistItemToCart);
 
 module.exports = router;
