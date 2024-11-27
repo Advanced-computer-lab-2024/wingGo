@@ -104,4 +104,7 @@ router.get('/sortComplaints', adminController.sortComplaintsByDate);
 
 router.get('/getUsername/:id', adminController.getUsernameById);
 
+//PromoCode
+router.post('/createPromoCode', adminController.createPromoCode);
+
 module.exports = router;

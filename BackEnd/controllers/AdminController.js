@@ -17,6 +17,7 @@ const Admin = require('../models/Admin');
 const Complaint=require('../models/Complaints');
 const {generatePreSignedUrl}  = require('../downloadMiddleware');
 const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
+const PromoCode = require('../models/PromoCode');
 
 //Create activity category
 const createCategory= async(req,res)=>{
@@ -1203,6 +1204,41 @@ const getUsernameById = async  (req, res) => {
 };
 
 
+// Add a Promo Code
+const createPromoCode = async (req, res) => {
+    const { code, discount, startDate, endDate, isActive, description } = req.body;
+
+    try {
+        // Check if a promo code with the same code already exists
+        const existingPromoCode = await PromoCode.findOne({ code });
+        if (existingPromoCode) {
+            return res.status(400).json({ message: 'Promo code already exists' });
+        }
+
+        // Validate start and end dates
+        if (new Date(startDate) >= new Date(endDate)) {
+            return res.status(400).json({ message: 'Start date must be earlier than end date' });
+        }
+
+        // Create the promo code
+        const promoCode = new PromoCode({
+            code,
+            discount,
+            startDate,
+            endDate,
+            isActive,
+            description,
+        });
+
+        // Save to the database
+        await promoCode.save();
+
+        res.status(201).json({ message: 'Promo code created successfully', promoCode });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
   
 
 module.exports = {
@@ -1256,5 +1292,6 @@ module.exports = {
     filterComplaintsByStatus,
     getAllItineraries,
     getAllActivities,
-    getUsernameById
+    getUsernameById,
+    createPromoCode
 };
