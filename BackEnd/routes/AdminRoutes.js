@@ -104,4 +104,7 @@ router.get('/sortComplaints', adminController.sortComplaintsByDate);
 
 router.get('/getUsername/:id', adminController.getUsernameById);
 
+// Get notifications for an admin
+router.get('/notifications/:adminId', adminController.getNotifications);
+
 module.exports = router;

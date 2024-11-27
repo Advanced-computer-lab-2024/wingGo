@@ -15,8 +15,9 @@ const TourGuide = require('../models/TourGuide');
 const nodemailer = require('nodemailer');
 const HotelBooking = require('../models/HotelBooking');
 const Transport = require('../models/Transport');
-const Seller = require('../models/Seller');const Wishlist = require('../models/WishList');
-
+const Seller = require('../models/Seller');
+const Wishlist = require('../models/WishList');
+const Admin = require("../models/Admin");
 const Order = require('../models/order');
 
 
@@ -3036,6 +3037,7 @@ const transporter = nodemailer.createTransport({
 
   const payForOrder = async (req, res) => {
     const { orderId } = req.params;
+    const { paymentMethod } = req.body; 
   
     try {
       // Fetch the order
@@ -3051,16 +3053,23 @@ const transporter = nodemailer.createTransport({
   
       const buyer = order.buyer;
   
-      // Check if buyer has sufficient wallet balance
-      if (buyer.wallet < order.totalPrice) {
-        return res.status(400).json({ message: 'Insufficient wallet balance' });
+      if (paymentMethod === 'wallet') {
+        // Check if buyer has sufficient wallet balance
+        if (buyer.wallet < order.totalPrice) {
+          return res.status(400).json({ message: 'Insufficient wallet balance' });
+        }
+      
+        // Deduct the total price from buyer's wallet
+        buyer.wallet -= order.totalPrice;
+        await buyer.save(); // Save updated wallet only if using wallet
       }
-  
-      // Deduct the total price from buyer's wallet
-      buyer.wallet -= order.totalPrice;
+      
   
       // Process each product in the order
-      const notifications = []; // To collect notifications for sellers
+      const sellerNotifications = []; // Notifications for sellers
+      const adminNotifications = []; // Notifications for admins
+      const admins = await Admin.find(); // Fetch all admins
+  
       for (const item of order.products) {
         const product = await Product.findById(item.productId).populate('seller');
   
@@ -3080,25 +3089,45 @@ const transporter = nodemailer.createTransport({
   
         // Check if the product is out of stock
         if (product.quantity === 0) {
-          const seller = product.seller;
+          if (product.seller) {
+            // Notify the seller in-app
+            sellerNotifications.push({
+              sellerId: product.seller._id,
+              notification: {
+                type: 'stock-alert',
+                message: `Your product '${product.name}' is now out of stock.`,
+                date: new Date(),
+              },
+            });
   
-          // Notify the seller in-app
-          notifications.push({
-            sellerId: seller._id,
-            notification: {
-              type: 'stock-alert',
-              message: `Your product '${product.name}' is now out of stock.`,
-              date: new Date(),
-            },
-          });
+            // Send email notification to the seller
+            await transporter.sendMail({
+              from: "winggo567@gmail.com",
+              to: product.seller.email,
+              subject: 'Out of Stock Alert',
+              html: `<p>Your product <strong>${product.name}</strong> is now out of stock.</p>`,
+            });
+          } else {
+            // Notify all admins if the product was added by an admin
+            admins.forEach((admin) => {
+              adminNotifications.push({
+                adminId: admin._id,
+                notification: {
+                  type: 'stock-alert',
+                  message: `The product '${product.name}' (added by admin) is now out of stock.`,
+                  date: new Date(),
+                },
+              });
   
-          // Send email notification to the seller
-          await transporter.sendMail({
-            from: "winggo567@gmail.com",
-            to: seller.email,
-            subject: 'Out of Stock Alert',
-            html: `<p>Your product <strong>${product.name}</strong> is now out of stock.</p>`,
-          });
+              // Send email notification to the admin
+              transporter.sendMail({
+                from: "winggo567@gmail.com",
+                to: admin.email,
+                subject: 'Out of Stock Alert',
+                html: `<p>The product <strong>${product.name}</strong> (added by admin) is now out of stock.</p>`,
+              });
+            });
+          }
         }
   
         // Save updated product
@@ -3113,8 +3142,13 @@ const transporter = nodemailer.createTransport({
       await order.save();
   
       // Push notifications to sellers
-      for (const { sellerId, notification } of notifications) {
+      for (const { sellerId, notification } of sellerNotifications) {
         await Seller.findByIdAndUpdate(sellerId, { $push: { notifications: notification } });
+      }
+  
+      // Push notifications to admins
+      for (const { adminId, notification } of adminNotifications) {
+        await Admin.findByIdAndUpdate(adminId, { $push: { notifications: notification } });
       }
   
       res.status(200).json({ message: 'Order payment successful', wallet: buyer.wallet });
@@ -3123,6 +3157,8 @@ const transporter = nodemailer.createTransport({
       res.status(500).json({ message: 'Error processing payment', error });
     }
   };
+
+  
     const getItemsInCart = async (req, res) => {
     const { touristId } = req.params; // Extract touristId from request parameters
 
