@@ -50,7 +50,7 @@ const activitySchema = new mongoose.Schema({
   },
   advertiser: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'advertiser',
+    ref: 'Advertiser',
     required: true
   },
   ratings: [

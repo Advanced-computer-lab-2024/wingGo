@@ -2967,6 +2967,7 @@ const getNotifications = async (req, res) => {
   
   //// payments
   // Nodemailer setup
+  
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {

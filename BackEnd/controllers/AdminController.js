@@ -6,6 +6,7 @@ const Tourist = require('../models/tourist');
 const Seller = require('../models/Seller');
 const TourismGovernor = require('../models/TourismGovernor');
 const ActivityCategory = require('../models/ActivityCategory');
+const nodemailer = require('nodemailer');
 const Advertiser = require('../models/advertiser');
 const Product = require('../models/product');
 const mongoose = require('mongoose');
@@ -882,39 +883,145 @@ const getAttractions = async (req, res) => {
 //     }
 //   };
 
+/*
+
+*/
+
+// const flagActivity = async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const { flagged } = req.body;  // Get the flagged status from the request body
+  
+//       // Update the itinerary's flagged status based on the provided flagged value
+//       const activity = await Activity.findByIdAndUpdate(id, { flagged }, { new: true });
+  
+//       if (!activity) return res.status(404).json({ message: 'Activity not found' });
+
+      
+  
+//       const message = flagged ? 'Activity flagged successfully' : 'Activity unflagged successfully';
+//       res.status(200).json({ message, activity });
+//     } catch (error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//   };
+
+// const flagItinerary = async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const { flagged } = req.body;  // Get the flagged status from the request body
+  
+//       // Update the itinerary's flagged status based on the provided flagged value
+//       const itinerary = await Itinerary.findByIdAndUpdate(id, { flagged }, { new: true });
+  
+//       if (!itinerary) return res.status(404).json({ message: 'Itinerary not found' });
+  
+//       const message = flagged ? 'Itinerary flagged successfully' : 'Itinerary unflagged successfully';
+//       res.status(200).json({ message, itinerary });
+//     } catch (error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//   };
 const flagActivity = async (req, res) => {
     try {
-      const { id } = req.params;
-      const { flagged } = req.body;  // Get the flagged status from the request body
-  
-      // Update the itinerary's flagged status based on the provided flagged value
-      const activity = await Activity.findByIdAndUpdate(id, { flagged }, { new: true });
-  
-      if (!activity) return res.status(404).json({ message: 'Activity not found' });
-  
-      const message = flagged ? 'Activity flagged successfully' : 'Activity unflagged successfully';
-      res.status(200).json({ message, activity });
+        const { id } = req.params;
+        const { flagged } = req.body; // Get the flagged status from the request body
+
+        // Update the activity's flagged status
+        const activity = await Activity.findByIdAndUpdate(id, { flagged }, { new: true }).populate('advertiser');
+
+        if (!activity) return res.status(404).json({ message: 'Activity not found' });
+
+        // Notify the advertiser in-app
+        const advertiser = activity.advertiser;
+        if (advertiser) {
+            await Advertiser.findByIdAndUpdate(advertiser._id, {
+                $push: {
+                    notifications: {
+                        type: 'event-flagged',
+                        eventId: activity._id,
+                        message: `Your activity "${activity.name}" has been flagged by the admin.`,
+                        date: new Date(),
+                    }
+                }
+            });
+
+            // Send email notification
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'winggo567@gmail.com',
+                    pass: 'smkg eghm yrzv yyir', // Ensure this is secure
+                }
+            });
+
+            await transporter.sendMail({
+                from: 'winggo567@gmail.com',
+                to: advertiser.email,
+                subject: 'Activity Flagged Notification',
+                html: `<p>Your activity <strong>${activity.name}</strong> has been flagged as inappropriate by the admin. Please review it.</p>`
+            });
+        }
+
+        const message = flagged ? 'Activity flagged successfully' : 'Activity unflagged successfully';
+        res.status(200).json({ message, activity });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
-  };
+};
 
 const flagItinerary = async (req, res) => {
     try {
-      const { id } = req.params;
-      const { flagged } = req.body;  // Get the flagged status from the request body
-  
-      // Update the itinerary's flagged status based on the provided flagged value
-      const itinerary = await Itinerary.findByIdAndUpdate(id, { flagged }, { new: true });
-  
-      if (!itinerary) return res.status(404).json({ message: 'Itinerary not found' });
-  
-      const message = flagged ? 'Itinerary flagged successfully' : 'Itinerary unflagged successfully';
-      res.status(200).json({ message, itinerary });
+        const { id } = req.params;
+        const { flagged } = req.body;
+
+        // Update the itinerary's flagged status
+        const itinerary = await Itinerary.findByIdAndUpdate(
+            id,
+            { flagged },
+            { new: true }
+        ).populate('tourGuideId'); // Populate the tourGuideId field
+
+        if (!itinerary) return res.status(404).json({ message: 'Itinerary not found' });
+
+        // Notify the tour guide in-app
+        const tourGuide = itinerary.tourGuideId;
+        if (tourGuide) {
+            await TourGuide.findByIdAndUpdate(tourGuide._id, {
+                $push: {
+                    notifications: {
+                        type: 'itinerary-flagged',
+                        itineraryId: itinerary._id,
+                        message: `Your itinerary "${itinerary.title}" has been flagged by the admin.`,
+                        date: new Date()
+                    }
+                }
+            });
+
+            // Send email notification
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'winggo567@gmail.com',
+                    pass: 'smkg eghm yrzv yyir'
+                }
+            });
+
+            await transporter.sendMail({
+                from: 'winggo567@gmail.com',
+                to: tourGuide.email,
+                subject: 'Itinerary Flagged Notification',
+                html: `<p>Your itinerary <strong>${itinerary.title}</strong> has been flagged as inappropriate by the admin. Please review it.</p>`
+            });
+        }
+
+        const message = flagged ? 'Itinerary flagged successfully' : 'Itinerary unflagged successfully';
+        res.status(200).json({ message, itinerary });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
-  };
+};
+
   
   
   const flagPlace = async (req, res) => {

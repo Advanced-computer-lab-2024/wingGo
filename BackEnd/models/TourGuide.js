@@ -42,6 +42,20 @@ const tourGuideSchema = new Schema({
             text: { type: String, required: true },
         }
     ],
+    notifications: [
+        {
+          type: {
+            type: String,
+            enum: ['reminder', 'eventBooking', 'promoCode'], // Extendable for future types
+            required: true
+          },
+          itineraryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Itinerary' },
+          message: { type: String, required: true },
+          date: { type: Date, required: true },
+          metadata: { type: Map, of: String }, // Store additional info like event name
+          read: { type: Boolean, default: false }
+        }
+      ]
     
 }, { timestamps: true });
 
