@@ -88,7 +88,7 @@ const getCategory=async(req,res)=>{
 }
 //add TourismGovernor to DB by username and password
 const addTourismGovernor = async (req, res) => {
-    const { username, password } = req.body;  // Get username and password from request body
+    const { username, password, email } = req.body;  // Get username and password from request body
 
     try {
 
@@ -107,6 +107,7 @@ const addTourismGovernor = async (req, res) => {
         const newTG = new TourismGovernor({
             username,
             password: hashedPassword,
+            email
         });
 
         // Save the new Tourism Governor in the database
@@ -116,6 +117,7 @@ const addTourismGovernor = async (req, res) => {
         const loginCredentials = new LoginCredentials({
             username: newTG.username,
             password: newTG.password,  // Use the hashed password
+            email: newTG.email,
             role: 'tourism governor',
             userId: newTG._id,  // Reference to the newly created Tourism Governor
             roleModel: 'TourismGovernor'  // Set the role model to 'TourismGovernor'
@@ -472,6 +474,7 @@ const approvePendingUserById = async (req, res) => {
         const loginCredentials = new LoginCredentials({
             username: pendingUser.username,
             password: userDocument.password,  // Hashed password
+            email: pendingUser.email,
             role: pendingUser.role,
             userId: pendingUser._id,  // Reference to the created user document
             roleModel: userDocument.constructor.modelName  // Dynamically set the role model

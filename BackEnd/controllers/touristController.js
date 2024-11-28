@@ -84,6 +84,7 @@ const tourist_register = async (req, res) => {
         const loginCredentials = new LoginCredentials({
             username,
             password: hashedPassword,
+            email: email,
             role: 'tourist',
             userId: user._id,  // Reference to the created tourist
             roleModel: 'Tourist'  // Set the role model as 'Tourist'
