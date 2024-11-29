@@ -487,8 +487,87 @@ const previewLogo = async (req, res) => {
     }
 };
 
+const getSalesReport = async (req, res) => {
+    const { advertiserId } = req.params; // Extract Advertiser ID from URL parameters
 
+    try {
+        // 1. Fetch activities created by the specific advertiser
+        const activities = await Activity.find({ advertiser: advertiserId, sales: { $gt: 0 } }); // Only include activities with sales > 0
+        const activityDetails = activities.map(activity => ({
+            name: activity.name,
+            sales: activity.sales,
+            revenue: activity.sales * activity.price, // Total revenue for the activity
+        }));
+        const totalActivitySales = activityDetails.reduce((sum, activity) => sum + activity.sales, 0);
+        const totalActivityRevenue = activityDetails.reduce((sum, activity) => sum + activity.revenue, 0);
 
+        // 2. Grand Total Revenue (if needed)
+        const grandTotalSales = totalActivitySales;
+        const grandTotalRevenue = totalActivityRevenue;
+
+        // 3. Response
+        res.status(200).json({
+            success: true,
+            data: {
+                activities: {
+                    details: activityDetails,
+                    totalSales: totalActivitySales,
+                    totalRevenue: totalActivityRevenue,
+                },
+                totals: {
+                    totalSales: grandTotalSales,
+                    totalRevenue: grandTotalRevenue,
+                },
+            },
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to generate sales report for advertiser.',
+            error: error.message,
+        });
+    }
+};
+const getTouristReport = async (req, res) => {
+    const { advertiserId } = req.params; // Extract Advertiser ID from URL parameters
+
+    try {
+        // 1. Fetch activities created by the advertiser
+        const activities = await Activity.find({ advertiser: advertiserId });
+
+        // 2. Filter activities whose date has already passed
+        const activityDetails = activities
+            .filter(activity => new Date(activity.date) < new Date()) // Only include past activities
+            .map(activity => {
+                return {
+                    name: activity.name,
+                    totalTourists: activity.touristIDs.length, // Count tourists
+                    details: activity.touristIDs.map(touristId => ({ touristId })), // Return tourist IDs
+                };
+            })
+            .filter(activity => activity.totalTourists > 0); // Exclude activities with 0 tourists
+
+        // 3. Calculate the total number of tourists across all activities
+        const totalTourists = activityDetails.reduce((sum, activity) => sum + activity.totalTourists, 0);
+
+        // 4. Response
+        res.status(200).json({
+            success: true,
+            data: {
+                activities: {
+                    details: activityDetails,
+                    totalTourists: totalTourists,
+                },
+            },
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to generate tourist report for advertiser.',
+            error: error.message,
+        });
+    }
+};
 module.exports = {
     advertiser_hello,
     createAdvertiserProfile, //done
@@ -510,5 +589,7 @@ module.exports = {
     deleteTransport,
     getAllUnbookedTransports,
     getUnbookedTransportById,
-    previewLogo
+    previewLogo,
+    getSalesReport,
+    getTouristReport
 };

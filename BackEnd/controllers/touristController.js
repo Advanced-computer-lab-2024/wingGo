@@ -908,6 +908,8 @@ const bookItinerary = async (req, res) => {
         if (!itineraryUpdate) {
             return res.status(404).json({ message: 'Itinerary not found or update failed' });
         }
+        itineraryUpdate.sales += 1; // Increment sales by 1
+        await itineraryUpdate.save(); // Save the updated itinerary with incremented sales
 
         // Calculate new points and badge details
         const itineraryPrice = itineraryUpdate.price;
@@ -917,7 +919,7 @@ const bookItinerary = async (req, res) => {
         
         let newLevel = reqTourist.badge.level;
         let newAmount = oldAmount;
-        
+       
         if (newPoints > 100000) {
             newLevel = 2;
             newAmount = 1;
@@ -1105,7 +1107,7 @@ const redeemPoints = async (req, res) => {
 };
 const bookActivity = async (req, res) => {
     const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
-
+    const { numberOfPeople } = req.body; 
     try {
         // Retrieve tourist details and check if the activityId is already booked
         const reqTourist = await Tourist.findById(touristId);
@@ -1132,7 +1134,8 @@ const bookActivity = async (req, res) => {
         if (!activityUpdate) {
             return res.status(404).json({ message: 'Activity not found or update failed' });
         }
-
+        activityUpdate.sales += 1 * numberOfPeople; // Increment sales
+        await activityUpdate.save();
         // Calculate new points and badge details based on the activity's price
         const activityPrice = activityUpdate.price;
         const oldAmount = reqTourist.badge.amount;

@@ -1366,7 +1366,84 @@ const createPromoCode = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+const getSalesReport = async (req, res) => {
+    try {
+        // 1. Activities
+        const activities = await Activity.find();
+        const filteredActivities = activities.filter(activity => activity.sales > 0); // Filter for sales > 0
+        const activityDetails = filteredActivities.map(activity => ({
+            name: activity.name,
+            sales: activity.sales,
+            revenue: activity.sales * activity.price, // Total revenue
+            appRevenue: (activity.sales * activity.price) * 0.10, // 10% of total revenue
+        }));
+        const totalActivitySales = activityDetails.reduce((sum, activity) => sum + activity.sales, 0);
+        const totalActivityRevenue = activityDetails.reduce((sum, activity) => sum + activity.revenue, 0);
+        const totalActivityAppRevenue = activityDetails.reduce((sum, activity) => sum + activity.appRevenue, 0);
 
+        // 2. Itineraries
+        const itineraries = await Itinerary.find();
+        const filteredItineraries = itineraries.filter(itinerary => itinerary.sales > 0); // Filter for sales > 0
+        const itineraryDetails = filteredItineraries.map(itinerary => ({
+            name: itinerary.title,
+            sales: itinerary.sales,
+            revenue: itinerary.sales * itinerary.price, // Total revenue
+            appRevenue: (itinerary.sales * itinerary.price) * 0.10, // 10% of total revenue
+        }));
+        const totalItinerarySales = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.sales, 0);
+        const totalItineraryRevenue = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.revenue, 0);
+        const totalItineraryAppRevenue = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.appRevenue, 0);
+
+        // 3. Products
+        const products = await Product.find();
+        const filteredProducts = products.filter(product => product.sales > 0); // Filter for sales > 0
+        const productDetails = filteredProducts.map(product => ({
+            name: product.name,
+            sales: product.sales,
+            revenue: product.sales * product.price, // Total revenue
+            appRevenue: (product.sales * product.price) * 0.10, // 10% of total revenue
+        }));
+        const totalProductSales = productDetails.reduce((sum, product) => sum + product.sales, 0);
+        const totalProductRevenue = productDetails.reduce((sum, product) => sum + product.revenue, 0);
+       
+        // 4. Grand Total
+        const grandTotalSales = totalActivitySales + totalItinerarySales + totalProductSales;
+        const grandTotalRevenue = totalActivityRevenue + totalItineraryRevenue + totalProductRevenue;
+        const grandTotalAppRevenue = totalActivityAppRevenue + totalItineraryAppRevenue ;
+
+        // 5. Response
+        res.status(200).json({
+            success: true,
+            data: {
+                activities: {
+                    details: activityDetails,
+                    totalSales: totalActivitySales,
+                    totalRevenue: totalActivityRevenue,
+                    totalAppRevenue: totalActivityAppRevenue, // App revenue for activities
+                },
+                itineraries: {
+                    details: itineraryDetails,
+                    totalSales: totalItinerarySales,
+                    totalRevenue: totalItineraryRevenue,
+                    totalAppRevenue: totalItineraryAppRevenue, // App revenue for itineraries
+                },
+                products: {
+                    details: productDetails,
+                    totalSales: totalProductSales,
+                    totalRevenue: totalProductRevenue,
+                   
+                },
+                totals: {
+                    totalSales: grandTotalSales,
+                    totalRevenue: grandTotalRevenue,
+                    totalAppRevenue: grandTotalAppRevenue, // Grand total app revenue
+                },
+            },
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to generate sales report.', error: error.message });
+    }
+};
   
 
 module.exports = {
@@ -1422,5 +1499,6 @@ module.exports = {
     getAllActivities,
     getUsernameById,
     getNotifications,
-    createPromoCode
+    createPromoCode,
+    getSalesReport
 };

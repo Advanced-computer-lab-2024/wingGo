@@ -39,5 +39,7 @@ router.delete('/deleteAccount/:id', tourGuideController.deleteTourGuideAccount);
 
 router.put('/activateOrDeactivateItinerary/:id', tourGuideController.activateOrDeactivateItinerary);
 
+router.get('/sales-report/:tourGuideId', tourGuideController.getSalesReport);
+router.get('/tourist-report/:tourGuideId', tourGuideController.getTouristReport);
 
 module.exports = router;
