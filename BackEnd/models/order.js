@@ -24,7 +24,7 @@ const orderSchema = new Schema(
     },
     orderStatus: {
       type: String,
-      enum: ['confirmed', 'preparing', 'delivering', 'delivered'],
+      enum: ['cancelled','confirmed', 'preparing', 'delivering', 'delivered'],
       default: 'confirmed',
     },
     buyer: {

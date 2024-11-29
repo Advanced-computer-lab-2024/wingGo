@@ -156,29 +156,34 @@ app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   const userCredentials = await LoginCredentials.findOne({ username: username });
+
   if (!userCredentials) {
     return res.status(400).json({ error: 'Invalid username or password' });
   }
 
   const isMatch = await bcrypt.compare(password, userCredentials.password);
+  
+  console.log(isMatch);
   if (!isMatch) {
     return res.status(400).json({ error: 'Invalid username or password' });
   }
 
   const mustChangePassword = userCredentials.mustChangePassword;
 
-  if (mustChangePassword) {
-    return res.status(400).json({ message: 'Please change your password' });
-  }
+  
 
   const token = jwt.sign(
-    { username: username, id: userCredentials.userId, role: userCredentials.roleModel },
+    { username: username, id: userCredentials.userId, role: userCredentials.roleModel, mustChangePassword: mustChangePassword},
     process.env.TOKEN_SECRET,
     { expiresIn: '5h' }
   );
 
   // Set the JWT in a cookie
   res.cookie('token', token);
+
+  if (mustChangePassword) {
+    return res.status(200).json({ message: 'Please change your password' });
+  }
 
   res.json({ message: 'Login successful' });
 });
@@ -203,7 +208,7 @@ app.post("/sendOtp", async (req, res) => {
             return res.status(400).json({ message: 'User not found' });
         }
 
-        const otp = Math.floor(100000 + Math.random() * 900000);
+        const otp = Math.floor(1000 + Math.random() * 9000);
 
         const userOtp = await Otp.findOne({ email: email });
         if (userOtp) {
@@ -303,6 +308,16 @@ app.put("/changePasswordAfterOtp", async (req, res) => {
 
         await user.save();
 
+        //modify the cookie
+        const token = jwt.sign(
+            { username: user.username, id: user.userId, role: user.roleModel, mustChangePassword: false},
+            process.env.TOKEN_SECRET,
+            { expiresIn: '5h' }
+        );
+
+        // Set the JWT in a cookie
+        res.cookie('token', token);
+
         res.status(200).json({ message: 'Password changed successfully' });
 
     } catch (error) {
@@ -310,11 +325,6 @@ app.put("/changePasswordAfterOtp", async (req, res) => {
     }
 }
 );
-
-
-
-  
-  
 
 
 

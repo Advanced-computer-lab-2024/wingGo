@@ -109,15 +109,11 @@ const updateTourGuideProfile = async (req, res) => {
             return res.status(404).json({ message: 'Tour guide not found' });
         }
 
-        // Check if the password is being updated
-        if (req.body.password) {
-            // Hash the new password before saving it
-            req.body.password = await bcrypt.hash(req.body.password, 10);
-        }
+        
 
         // Now update the login credentials as well
         const loginUpdateFields = {};
-        if (req.body.username) {
+        if (req.body.username && req.body.username !== tourGuide.username) {
             const existingUsername = await LoginCredentials.findOne({ username: req.body.username });
 
             if (existingUsername) {
@@ -126,9 +122,19 @@ const updateTourGuideProfile = async (req, res) => {
 
             loginUpdateFields.username = req.body.username;  // Username update
         }
-        if (req.body.password) {
-            loginUpdateFields.password = req.body.password;  // Use the hashed password
+
+        if (req.body.email && req.body.email !== tourGuide.email) {
+            const existingEmail = await LoginCredentials.findOne
+            ({ email: req.body.email });
+
+            if (existingEmail) {
+                return res.status(400).json({ message: 'Email is already taken' });
+            }
+
+            loginUpdateFields.email = req.body.email;  // Email update
         }
+        
+        
 
         if (Object.keys(loginUpdateFields).length > 0) {
             // Find login credentials by userId and roleModel (TourGuide)
