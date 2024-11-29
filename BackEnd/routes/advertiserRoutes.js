@@ -36,5 +36,6 @@ router.put('/updateTransport/:id', advertiserController.updateTransport);
 router.delete('/deleteTransport/:id', advertiserController.deleteTransport);
 
 router.get('/viewLogo/:id', advertiserController.previewLogo);
-
+router.get('/sales-report/:advertiserId', advertiserController.getSalesReport);
+router.get('/tourist-report/:advertiserId', advertiserController.getTouristReport);
 module.exports = router;

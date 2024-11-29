@@ -35,6 +35,10 @@ const itinerarySchema = new Schema({
             text: { type: String, required: true },
         }
     ],
+    sales: {
+        type: Number,
+        default: 0, // Tracks the total number of sales for this itinerary
+      },
     flagged: {
         type: Boolean,
         default: false,  // Initially not flagged

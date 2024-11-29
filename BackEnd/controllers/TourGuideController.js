@@ -434,7 +434,93 @@ const previewPhoto = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+const getSalesReport = async (req, res) => {
+    const { tourGuideId } = req.params; // Extract Tour Guide ID from URL parameters
 
+    try {
+        // 1. Fetch itineraries for the specific tour guide with sales > 0
+        const itineraries = await Itinerary.find({ tourGuideId, sales: { $gt: 0 } }); // Exclude itineraries with sales = 0
+        const itineraryDetails = itineraries.map(itinerary => ({
+            name: itinerary.title,
+            sales: itinerary.sales,
+            revenue: itinerary.sales * itinerary.price, // Total revenue for the itinerary
+        }));
+        const totalItinerarySales = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.sales, 0);
+        const totalItineraryRevenue = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.revenue, 0);
+
+        // 2. Grand Total Revenue (if needed)
+        const grandTotalSales = totalItinerarySales;
+        const grandTotalRevenue = totalItineraryRevenue;
+
+        // 3. Response
+        res.status(200).json({
+            success: true,
+            data: {
+                itineraries: {
+                    details: itineraryDetails,
+                    totalSales: totalItinerarySales,
+                    totalRevenue: totalItineraryRevenue,
+                },
+                totals: {
+                    totalSales: grandTotalSales,
+                    totalRevenue: grandTotalRevenue,
+                },
+            },
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to generate sales report for tour guide.',
+            error: error.message,
+        });
+    }
+};
+const getTouristReport = async (req, res) => {
+    const { tourGuideId } = req.params; // Extract Tour Guide ID from URL parameters
+
+    try {
+        // 1. Fetch itineraries for the specific tour guide
+        const itineraries = await Itinerary.find({ tourGuideId });
+
+        // 2. Calculate the total number of tourists per itinerary (whose dates have passed)
+        const itineraryDetails = itineraries
+            .map(itinerary => {
+                const pastTourists = itinerary.touristIDs.filter(tourist => {
+                    return new Date(tourist.bookingDate) < new Date(); // Check if the booking date has passed
+                });
+
+                return {
+                    name: itinerary.title,
+                    totalTourists: pastTourists.length, // Count only tourists with passed dates
+                    details: pastTourists.map(tourist => ({
+                        touristId: tourist.touristId,
+                        bookingDate: tourist.bookingDate,
+                    })),
+                };
+            })
+            .filter(itinerary => itinerary.totalTourists > 0); // Exclude itineraries with 0 tourists
+
+        // 3. Calculate the total number of tourists across all itineraries
+        const totalTourists = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.totalTourists, 0);
+
+        // 4. Response
+        res.status(200).json({
+            success: true,
+            data: {
+                itineraries: {
+                    details: itineraryDetails,
+                    totalTourists: totalTourists,
+                },
+            },
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to generate tourist report for tour guide.',
+            error: error.message,
+        });
+    }
+};
 module.exports = {
     getTourGuide,
     updateTourGuideProfile,
@@ -443,5 +529,7 @@ module.exports = {
     acceptTerms, changePassword,
     deleteTourGuideAccount,
     activateOrDeactivateItinerary,
-    previewPhoto
+    previewPhoto,
+    getSalesReport,
+    getTouristReport
 };
