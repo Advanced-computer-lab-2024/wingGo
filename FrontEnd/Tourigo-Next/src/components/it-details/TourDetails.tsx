@@ -15,8 +15,8 @@ import { isItineraryBooked, fetchTourGuideRatings } from "@/api/itineraryApi"; /
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for styling
 import { ToastContainer, toast } from "react-toastify";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import useCurrency
-
-
+import { FaShareAlt, FaEnvelope } from "react-icons/fa"; // Import icons from react-icons
+import Modal from "react-modal"; // Import Modal from react-modal
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Itinerary | null>(null);
@@ -26,8 +26,6 @@ const TourDetails = ({ id }: idTypeNew) => {
   const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
   const [tourGuide, setTourGuide] = useState<TourGuide | null>(null);
-
-
 
   const handleEmailChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
     setEmail(e.target.value);
@@ -56,7 +54,6 @@ const TourDetails = ({ id }: idTypeNew) => {
       try {
         const response = await axios.get(`http://localhost:8000/tourguide/getitinerary/${id}`);
         setData(response.data);
-        
 
         // Fetch the tour guide ratings and comments if tourGuideId is available
         if (response.data.tourGuideId) {
@@ -80,7 +77,7 @@ const TourDetails = ({ id }: idTypeNew) => {
     };
 
     fetchItinerary();
-  }, [id, currency, convertAmount]); 
+  }, [id, currency, convertAmount]);
 
   const router = useRouter(); // Initialize router
 
@@ -100,7 +97,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                 <div className="tour-details-wrapper">
                   <div className="tour-details mb-25">
                     <div className="tour-details-thumb details-slide-full mb-30">
-                    <Image
+                      <Image
                         src="/images/default-image.jpg" // Placeholder image
                         loader={imageLoader}
                         style={{ width: "100%", height: "auto" }}
@@ -113,71 +110,46 @@ const TourDetails = ({ id }: idTypeNew) => {
                       </h3>
                       <div className="tour-details-meta d-flex flex-wrap gap-10 align-items-center justify-content-between mb-20">
                         <div className="tour-details-price">
-                        <h4 className="price-title">
+                          <h4 className="price-title">
                             {currency}{" "}
                             {convertedPrice !== null
                               ? convertedPrice.toFixed(2)
                               : data.price.toFixed(2)}
                             <span>/Per Person</span>
                           </h4>
-                          <br/><br/>
-                          <div className="row gy-24 "  style={{ paddingLeft: '10px'}}   >
-                          <button
-                              onClick={isBooked ? undefined : handleBookNowClick} // Disable click if booked
-                              className="bd-gradient-btn btn-style radius-60 btn-tertiary"
+                          <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                            <button
                               style={{
-                                padding: '6px 12px',
+                                padding: '5px 10px',
                                 fontSize: '14px',
-                                borderRadius: '20px',
-                                float: 'right',
-                                paddingRight: '10px',
-                                marginRight: '20px',
-                                width: '150px',
-                                textAlign: 'center',
-                                opacity: isBooked ? 0.6 : 1, // Dim button if booked
-                                cursor: isBooked ? "not-allowed" : "pointer"
+                                borderRadius: '60px',
+                                backgroundColor: '#007bff',
+                                color: 'white',
+                                border: 'none',
+                                cursor: 'pointer'
                               }}
-                            >
-                              {isBooked ? "Booked!" : "Book Now"}
-                            </button> 
-                        <button
-                              className="bd-primary-btn btn-style radius-60"
                               onClick={() => {
                                 navigator.clipboard.writeText(window.location.href);
                                 toast.success("Link copied to clipboard!");
                               }}
                             >
-                              <span className="bd-primary-btn-text">Share Link</span>
-                              <span className="bd-primary-btn-circle">
-                                <i className="fa fa-share" />
-                              </span>
+                              <FaShareAlt />
                             </button>
                             <button
-                              className="bd-primary-btn btn-style radius-60"
-                              onClick={() => setIsEmailFormOpen(!isEmailFormOpen)}
+                              style={{
+                                padding: '5px 10px',
+                                fontSize: '14px',
+                                borderRadius: '60px',
+                                backgroundColor: '#007bff',
+                                color: 'white',
+                                border: 'none',
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => setIsEmailFormOpen(true)}
                             >
-                              Share Via Email
+                              <FaEnvelope />
                             </button>
-                            {isEmailFormOpen && (
-                              <div className="email-form">
-                                <h3>Share Itenirary Via Email</h3>
-                                <div className="form-group">
-                                  <label htmlFor="email">Email:</label>
-                                  <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={email}
-                                    onChange={handleEmailChange}
-                                    className="form-control"
-                                  />
-                                </div>
-                                <button onClick={handleSendEmail} className="bd-primary-btn btn-style radius-60">
-                                  Send Email
-                                </button>
-                              </div>
-                            )}   
-                        </div> 
+                          </div>
                         </div>
                         <div className="tour-details-meta-right d-flex flex-wrap gap-10 align-items-center justify-content-between">
                           <div className="rating-badge border-badge">
@@ -186,7 +158,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                               {data.averageRating ? data.averageRating.toFixed(1) : 0}
                             </span>
                           </div>
-                     
+
                           <div className="theme-social">
                             <Link href="https://www.facebook.com/">
                               <i className="icon-facebook"></i>
@@ -201,15 +173,21 @@ const TourDetails = ({ id }: idTypeNew) => {
                               <i className="icon-youtube"></i>
                             </Link>
                           </div>
-                          
+
                         </div>
                       </div>
-                      {/* Include more fields as necessary */}
-                      <TourDetailTabArea itineraryData={data} tourGuideData={tourGuide}/>
+                      <button
+                        onClick={isBooked ? undefined : handleBookNowClick} // Disable click if booked
+                        className="bd-primary-btn btn-style radius-60 mb-10"
+                        style={{
+                          cursor: isBooked ? "not-allowed" : "pointer"
+                        }}
+                      >
+                        {isBooked ? "Booked!" : "Book Now"}
+                      </button>
+                      <TourDetailTabArea itineraryData={data} tourGuideData={tourGuide} />
 
                       <div className="tour-details-related-tour mb-35">
-                        {/* <h4 className="mb-20">Related Tours</h4> */}
-                        {/* You can replace this with actual related itineraries if available */}
                       </div>
                     </div>
                   </div>
@@ -221,6 +199,63 @@ const TourDetails = ({ id }: idTypeNew) => {
       </section>
       <BookingFormModal />
       <ToastContainer />
+      <Modal
+        isOpen={isEmailFormOpen}
+        onRequestClose={() => setIsEmailFormOpen(false)}
+        contentLabel="Share Via Email"
+        style={{
+          content: {
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            width: '400px',
+            boxShadow: '0 5px 15px rgba(0, 0, 0, 0.3)'
+          },
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.75)'
+          }
+        }}
+      >
+        <h3>Share Via Email</h3>
+        <div style={{ marginBottom: '15px' }}>
+          <label htmlFor="email" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Email:</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={email}
+            onChange={handleEmailChange}
+            style={{
+              width: '100%',
+              padding: '10px',
+              border: '1px solid #ced4da',
+              borderRadius: '0.25rem',
+              fontSize: '1rem',
+              color: '#495057'
+            }}
+          />
+        </div>
+        <button
+          onClick={handleSendEmail}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '60px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          Send Email
+        </button>
+      </Modal>
     </>
   );
 };

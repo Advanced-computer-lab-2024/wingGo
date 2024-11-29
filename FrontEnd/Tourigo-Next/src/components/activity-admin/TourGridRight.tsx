@@ -2,9 +2,9 @@
 
 "use client";
 import React, { useEffect, useState } from "react";
-import SidebarSearchArea from "../shearedComponents/SidebarSearchArea";
+import SidebarSearchArea from "../shearedComponents/SideBarSearchAreaAdmin";
 import PaginationWrapper from "../shearedComponents/PaginationWrapper";
-import TourSingleCard from "../common/tourElements/ActivitySingleCard";
+import TourSingleCard from "../common/tourElements/ActivitySingleCardAdmin";
 import { Activity } from "@/interFace/interFace";
 import { getAdminActivitiesData } from "@/data/act-data";
 import BookingFormModal from "@/elements/modals/BookingFormModal";

@@ -1,5 +1,3 @@
-
-
 "use client";
 import GetRatting from "@/hooks/GetRatting";
 import { imageLoader } from "@/hooks/image-loader";
@@ -7,11 +5,11 @@ import useGlobalContext from "@/hooks/use-context";
 import { Activity } from "@/interFace/interFace";
 import Image from "next/image";
 import Link from "next/link";
-import React ,{useState, useEffect} from "react";
-import { toggleFlagActivity, isActivityBooked  } from '@/api/activityApi';
+import React, { useState, useEffect } from "react";
+import { toggleFlagActivity } from '@/api/activityApi';
 import { useRouter } from "next/navigation";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
-
+import Modal from "react-modal"; // Import Modal from react-modal
 
 interface ItourPropsType {
   tour: Activity; // Use Itinerary type
@@ -30,26 +28,13 @@ const TourSingleCard = ({
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const router = useRouter();
-  const rating = tour.averageRating ; // Use Itinerary's averageRating, default to 1
+  const rating = tour.averageRating; // Use Itinerary's averageRating, default to 1
   // Local state to keep track of the flagged and deactivated status
   const [isFlagged, setIsFlagged] = useState(tour.flagged);
-  const { currency, convertAmount } = useCurrency(); 
-  const [isBooked, setIsBooked] = useState(false);
+  const { currency, convertAmount } = useCurrency();
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-
-   // Fetch booking status when component mounts
-   useEffect(() => {
-    const checkIfBooked = async () => {
-      try {
-        const bookedStatus = await isActivityBooked(tour._id);
-        setIsBooked(bookedStatus);
-      } catch (error) {
-        console.error("Error checking booked status:", error);
-      }
-    };
-    checkIfBooked();
-  }, [tour._id]);
   useEffect(() => {
     const convertTourPrice = async () => {
       if (tour.price) {
@@ -58,22 +43,22 @@ const TourSingleCard = ({
       }
     };
     convertTourPrice();
-  }, [currency, tour.price, convertAmount]); 
+  }, [currency, tour.price, convertAmount]);
 
   const handleFlagActivity = async () => {
+    setIsModalOpen(true);
+  };
+
+  const confirmFlagActivity = async () => {
     try {
       // Toggle the flagged state in the backend
       await toggleFlagActivity(tour._id, !isFlagged);
       setIsFlagged((prevFlagged) => !prevFlagged);
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error updating flagged status:", error);
     }
   };
-  const handleBookNowClick = () => {
-    // Redirect to the specific page (replace "/booking-page" with the desired path)
-    router.push(`/booking-activity/${tour._id}`);
-  };
-
 
   return (
     <>
@@ -123,22 +108,6 @@ const TourSingleCard = ({
                   {tour.name}
                 </Link>
               </h5>
-              {isAdmin && (
-                  <button
-                    onClick={handleFlagActivity}
-                    className="flag-itinerary-button"
-                    style={{
-                      backgroundColor: isFlagged ? "green" : "red",
-                      color: "white",
-                      padding: "8px 16px",
-                      fontSize: "14px",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {isFlagged ? "Unflag" : "Flag"}
-                  </button>
-                )}
               <span className="tour-price b3">
                 {currency}{" "}
                 {convertedPrice !== null
@@ -153,17 +122,16 @@ const TourSingleCard = ({
                   <span>{tour.time}</span>
                 </div>
                 <div className="tour-btn">
-                <button
-                    onClick={isBooked ? undefined : handleBookNowClick} // Disable click if already booked
+                  <button
+                    onClick={handleFlagActivity}
                     className="bd-text-btn style-two"
                     type="button"
                     style={{
-                      cursor: isBooked ? "not-allowed" : "pointer",
-                      color: isBooked ? "gray" : "inherit",
+                      cursor: "pointer",
+                      color: isFlagged ? "blue" : "red",
                     }}
-                    disabled={isBooked}
                   >
-                    {isBooked ? "Booked!" : "Book Now"}
+                    {isFlagged ? "Unflag" : "Flag"}
                     <span className="icon__box">
                       <i className="fa-regular fa-arrow-right-long icon__first"></i>
                       <i className="fa-regular fa-arrow-right-long icon__second"></i>
@@ -180,6 +148,52 @@ const TourSingleCard = ({
           {/* Non-parent layout logic can go here if needed */}
         </div>
       )}
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        contentLabel="Confirm Flag Activity"
+        style={{
+          content: {
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            width: '500px',
+            boxShadow: '0 5px 15px rgba(0, 0, 0, 0.3)'
+          },
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.75)'
+          }
+        }}
+      >
+        <h3>Confirm Flag Activity</h3>
+        <p>Are you sure you want to toggle the flag status?</p>
+        <div style={{ display: 'flex', marginTop: '20px' }}>
+          <button
+            onClick={confirmFlagActivity}
+            className="bd-primary-btn btn-style radius-60"
+            style={
+                {
+                    marginRight: '10px'
+            }
+        }
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className="bd-primary-btn btn-style radius-60"
+          >
+            No
+          </button>
+        </div>
+      </Modal>
     </>
   );
 };
