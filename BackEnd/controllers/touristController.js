@@ -15,8 +15,10 @@ const TourGuide = require('../models/TourGuide');
 const nodemailer = require('nodemailer');
 const HotelBooking = require('../models/HotelBooking');
 const Transport = require('../models/Transport');
-const Seller = require('../models/Seller');const Wishlist = require('../models/WishList');
+const Seller = require('../models/Seller');
 
+const Wishlist = require('../models/WishList');
+const Admin = require("../models/Admin");
 const Order = require('../models/order');
 
 
@@ -82,6 +84,7 @@ const tourist_register = async (req, res) => {
         const loginCredentials = new LoginCredentials({
             username,
             password: hashedPassword,
+            email: email,
             role: 'tourist',
             userId: user._id,  // Reference to the created tourist
             roleModel: 'Tourist'  // Set the role model as 'Tourist'
@@ -2967,6 +2970,7 @@ const getNotifications = async (req, res) => {
   
   //// payments
   // Nodemailer setup
+  
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -3039,6 +3043,7 @@ const transporter = nodemailer.createTransport({
 
   const payForOrder = async (req, res) => {
     const { orderId } = req.params;
+    const { paymentMethod } = req.body; 
   
     try {
       // Fetch the order
@@ -3054,16 +3059,23 @@ const transporter = nodemailer.createTransport({
   
       const buyer = order.buyer;
   
-      // Check if buyer has sufficient wallet balance
-      if (buyer.wallet < order.totalPrice) {
-        return res.status(400).json({ message: 'Insufficient wallet balance' });
+      if (paymentMethod === 'wallet') {
+        // Check if buyer has sufficient wallet balance
+        if (buyer.wallet < order.totalPrice) {
+          return res.status(400).json({ message: 'Insufficient wallet balance' });
+        }
+      
+        // Deduct the total price from buyer's wallet
+        buyer.wallet -= order.totalPrice;
+        await buyer.save(); // Save updated wallet only if using wallet
       }
-  
-      // Deduct the total price from buyer's wallet
-      buyer.wallet -= order.totalPrice;
+      
   
       // Process each product in the order
-      const notifications = []; // To collect notifications for sellers
+      const sellerNotifications = []; // Notifications for sellers
+      const adminNotifications = []; // Notifications for admins
+      const admins = await Admin.find(); // Fetch all admins
+  
       for (const item of order.products) {
         const product = await Product.findById(item.productId).populate('seller');
   
@@ -3083,25 +3095,45 @@ const transporter = nodemailer.createTransport({
   
         // Check if the product is out of stock
         if (product.quantity === 0) {
-          const seller = product.seller;
+          if (product.seller) {
+            // Notify the seller in-app
+            sellerNotifications.push({
+              sellerId: product.seller._id,
+              notification: {
+                type: 'stock-alert',
+                message: `Your product '${product.name}' is now out of stock.`,
+                date: new Date(),
+              },
+            });
   
-          // Notify the seller in-app
-          notifications.push({
-            sellerId: seller._id,
-            notification: {
-              type: 'stock-alert',
-              message: `Your product '${product.name}' is now out of stock.`,
-              date: new Date(),
-            },
-          });
+            // Send email notification to the seller
+            await transporter.sendMail({
+              from: "winggo567@gmail.com",
+              to: product.seller.email,
+              subject: 'Out of Stock Alert',
+              html: `<p>Your product <strong>${product.name}</strong> is now out of stock.</p>`,
+            });
+          } else {
+            // Notify all admins if the product was added by an admin
+            admins.forEach((admin) => {
+              adminNotifications.push({
+                adminId: admin._id,
+                notification: {
+                  type: 'stock-alert',
+                  message: `The product '${product.name}' (added by admin) is now out of stock.`,
+                  date: new Date(),
+                },
+              });
   
-          // Send email notification to the seller
-          await transporter.sendMail({
-            from: "winggo567@gmail.com",
-            to: seller.email,
-            subject: 'Out of Stock Alert',
-            html: `<p>Your product <strong>${product.name}</strong> is now out of stock.</p>`,
-          });
+              // Send email notification to the admin
+              transporter.sendMail({
+                from: "winggo567@gmail.com",
+                to: admin.email,
+                subject: 'Out of Stock Alert',
+                html: `<p>The product <strong>${product.name}</strong> (added by admin) is now out of stock.</p>`,
+              });
+            });
+          }
         }
   
         // Save updated product
@@ -3116,8 +3148,13 @@ const transporter = nodemailer.createTransport({
       await order.save();
   
       // Push notifications to sellers
-      for (const { sellerId, notification } of notifications) {
+      for (const { sellerId, notification } of sellerNotifications) {
         await Seller.findByIdAndUpdate(sellerId, { $push: { notifications: notification } });
+      }
+  
+      // Push notifications to admins
+      for (const { adminId, notification } of adminNotifications) {
+        await Admin.findByIdAndUpdate(adminId, { $push: { notifications: notification } });
       }
   
       res.status(200).json({ message: 'Order payment successful', wallet: buyer.wallet });
@@ -3126,6 +3163,8 @@ const transporter = nodemailer.createTransport({
       res.status(500).json({ message: 'Error processing payment', error });
     }
   };
+
+  
     const getItemsInCart = async (req, res) => {
     const { touristId } = req.params; // Extract touristId from request parameters
 
@@ -3256,6 +3295,58 @@ const removeWishlistItem = async (req, res) => {
 };
 
 
+const getPromoCodesForTourist = async (req, res) => {
+    const { touristId } = req.params;
+  
+    try {
+      const tourist = await Tourist.findById(touristId).populate('promoCodes');
+      if (!tourist) {
+        return res.status(404).json({ message: 'Tourist not found' });
+      }
+  
+      res.status(200).json({ promoCodes: tourist.promoCodes });
+    } catch (error) {
+      console.error('Error fetching promo codes:', error);
+      res.status(500).json({ message: 'Error fetching promo codes', error });
+    }
+  };
+  
+
+const addWishlistItemToCart = async (req, res) => {
+    const { touristId, productId } = req.params; // Assuming productId is passed in the request body
+
+    try {
+        // 1. Check if the product exists in the wishlist for the given touristId
+        const wishlistItem = await Wishlist.findOne({ touristId, productId });
+
+        if (!wishlistItem) {
+            return res.status(404).json({ message: "Product not found in wishlist" });
+        }
+
+        // 2. Check if the product already exists in the cart
+        const existingCartItem = await Cart.findOne({ touristId, productId });
+
+        if (existingCartItem) {
+            return res.status(400).json({ message: "Product is already in the cart" });
+        }
+
+        // 3. Add the product to the cart
+        const newCartItem = new Cart({
+            touristId,
+            productId,
+            amount: 1 // Default amount to 1
+        });
+
+        await newCartItem.save();
+
+        return res.status(201).json({ message: "Product added to cart", cartItem: newCartItem });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
 module.exports = {
     tourist_hello,
     tourist_register,
@@ -3335,5 +3426,7 @@ module.exports = {
     updateCartItemAmount,
     addDeliveryAddress,
     chooseAddress,
-    getItemsInCart
+    getItemsInCart,
+    getPromoCodesForTourist,
+    addWishlistItemToCart
 };

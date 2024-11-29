@@ -19,6 +19,13 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { S3Client } = require('@aws-sdk/client-s3');
 const notificationScheduler = require('./jobs/notificationScheduler');
+const birthdayPromoScheduler = require('./jobs/birthdayPromoScheduler');
+const jwt = require('jsonwebtoken');
+const LoginCredentials = require('./models/LoginCredentials');
+const Otp = require('./models/Otp');
+const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 
@@ -99,7 +106,7 @@ app.delete('/delete/:filename', async (req, res) => {
 
 // Start the notification scheduler
 notificationScheduler();
-
+// birthdayPromoScheduler();
 
 /// routes
 // Route to serve the homepage
@@ -144,6 +151,172 @@ app.get("/getUsersinLogin", (req, res) => {
     PendingUsersController.getUserByUsername(req,res);
 
 });
+
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  const userCredentials = await LoginCredentials.findOne({ username: username });
+  if (!userCredentials) {
+    return res.status(400).json({ error: 'Invalid username or password' });
+  }
+
+  const isMatch = await bcrypt.compare(password, userCredentials.password);
+  if (!isMatch) {
+    return res.status(400).json({ error: 'Invalid username or password' });
+  }
+
+  const mustChangePassword = userCredentials.mustChangePassword;
+
+  if (mustChangePassword) {
+    return res.status(400).json({ message: 'Please change your password' });
+  }
+
+  const token = jwt.sign(
+    { username: username, id: userCredentials.userId, role: userCredentials.roleModel },
+    process.env.TOKEN_SECRET,
+    { expiresIn: '5h' }
+  );
+
+  // Set the JWT in a cookie
+  res.cookie('token', token);
+
+  res.json({ message: 'Login successful' });
+});
+
+app.get("/logout", (req, res) => {
+  res.clearCookie('token');
+  res.json({ message: 'Logged out' });
+});
+
+app.post("/sendOtp", async (req, res) => { 
+
+    const { email } = req.body;
+    
+
+    if (!email ) {
+        return res.status(400).json({ message: 'Please provide email ' });
+    }
+
+    try {
+        const user = await LoginCredentials.findOne({ email: email });
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000);
+
+        const userOtp = await Otp.findOne({ email: email });
+        if (userOtp) {
+            await Otp.findOneAndDelete({ email: email });
+        }
+
+        const expiry = new Date();
+        expiry.setMinutes(expiry.getMinutes() + 5);
+
+        await Otp.create({ email, otp, expiry });
+
+        
+        console.log(otp);
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: "winggo567@gmail.com",
+                pass: "smkg eghm yrzv yyir"
+            }
+        });
+
+
+        await transporter.sendMail({
+            from: "winggo567@gmail.com",
+            to: email,
+            subject: 'Forgot Password OTP',
+            text: `Your OTP is ${otp}`, 
+        });
+
+        res.status(200).json({ message: 'OTP shared successfully', otp });
+    } catch (error) {
+        res.status(500).json({ message: '', error });
+    }
+
+  });
+
+app.delete("/verifyOtp", async (req, res) => {
+
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        return res.status(400).json({ message: 'Please provide OTP' });
+    }
+
+    try {
+        const userOtp = await Otp.findOne({ email: email });
+
+        if (!userOtp) {
+            return res.status(400).json({ message: 'OTP not found' });
+        }
+
+        if (userOtp.otp !== otp) {
+            return res.status(400).json({ message: 'Invalid OTP' });
+        }
+
+        const currentTime = new Date();
+
+        if (currentTime > userOtp.expiry) {
+
+            await Otp.findOneAndDelete({ email: email });
+
+            return res.status(400).json({ message: 'OTP expired' });
+        }
+
+        const user = await LoginCredentials.findOne({ email: email });
+
+        user.mustChangePassword = true;
+
+        await user.save();
+
+        await Otp.findOneAndDelete({email: email});
+
+        res.status(200).json({ message: 'OTP verified successfully' });
+    } catch (error) {
+        res.status(500).json({ message: '', error });
+    }
+}
+);
+
+app.put("/changePasswordAfterOtp", async (req, res) => {
+
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Please provide email and password' });
+    }
+
+    try {
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const user = await LoginCredentials.findOne({ email: email});
+
+        user.password = hashedPassword;
+        user.mustChangePassword = false;
+
+        await user.save();
+
+        res.status(200).json({ message: 'Password changed successfully' });
+
+    } catch (error) {
+        res.status(500).json({ message: '', error });
+    }
+}
+);
+
+
+
+  
+  
+
+
 
 
 

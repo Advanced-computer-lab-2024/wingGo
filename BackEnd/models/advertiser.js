@@ -61,7 +61,21 @@ const advertiserSchema = new Schema({
     termsAccepted: {
         type: Boolean,
         default: false
-    }
+    },
+    notifications: [
+        {
+          type: {
+            type: String,
+            enum: ['reminder', 'eventBooking', 'promoCode'], // Extendable for future types
+            required: true
+          },
+          eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Activity' },
+          message: { type: String, required: true },
+          date: { type: Date, required: true },
+          metadata: { type: Map, of: String }, // Store additional info like event name
+          read: { type: Boolean, default: false }
+        }
+      ]
 
 }, { timestamps: true });
 

@@ -103,5 +103,11 @@ router.get('/filterComplaints', adminController.filterComplaintsByStatus);
 router.get('/sortComplaints', adminController.sortComplaintsByDate);
 
 router.get('/getUsername/:id', adminController.getUsernameById);
+
+// Get notifications for an admin
+router.get('/notifications/:adminId', adminController.getNotifications);
+
+//PromoCode
+router.post('/createPromoCode', adminController.createPromoCode);
 router.get('/sales-report', adminController.getSalesReport);
 module.exports = router;

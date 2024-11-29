@@ -5,7 +5,13 @@ const Schema = mongoose.Schema;
 const loginCredentialsSchema = new Schema({
     username: {
         type: String,
-        required: true
+        required: true,
+        unique: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -35,6 +41,10 @@ const loginCredentialsSchema = new Schema({
                 'admin': 'Admin'
             }[this.role];  // Dynamically set the role model based on the role
         }
+    },
+    mustChangePassword: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

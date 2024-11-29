@@ -6,6 +6,7 @@ const Tourist = require('../models/tourist');
 const Seller = require('../models/Seller');
 const TourismGovernor = require('../models/TourismGovernor');
 const ActivityCategory = require('../models/ActivityCategory');
+const nodemailer = require('nodemailer');
 const Advertiser = require('../models/advertiser');
 const Product = require('../models/product');
 const mongoose = require('mongoose');
@@ -17,6 +18,7 @@ const Admin = require('../models/Admin');
 const Complaint=require('../models/Complaints');
 const {generatePreSignedUrl}  = require('../downloadMiddleware');
 const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
+const PromoCode = require('../models/PromoCode');
 
 //Create activity category
 const createCategory= async(req,res)=>{
@@ -87,7 +89,7 @@ const getCategory=async(req,res)=>{
 }
 //add TourismGovernor to DB by username and password
 const addTourismGovernor = async (req, res) => {
-    const { username, password } = req.body;  // Get username and password from request body
+    const { username, password, email } = req.body;  // Get username and password from request body
 
     try {
 
@@ -106,6 +108,7 @@ const addTourismGovernor = async (req, res) => {
         const newTG = new TourismGovernor({
             username,
             password: hashedPassword,
+            email
         });
 
         // Save the new Tourism Governor in the database
@@ -115,6 +118,7 @@ const addTourismGovernor = async (req, res) => {
         const loginCredentials = new LoginCredentials({
             username: newTG.username,
             password: newTG.password,  // Use the hashed password
+            email: newTG.email,
             role: 'tourism governor',
             userId: newTG._id,  // Reference to the newly created Tourism Governor
             roleModel: 'TourismGovernor'  // Set the role model to 'TourismGovernor'
@@ -471,6 +475,7 @@ const approvePendingUserById = async (req, res) => {
         const loginCredentials = new LoginCredentials({
             username: pendingUser.username,
             password: userDocument.password,  // Hashed password
+            email: pendingUser.email,
             role: pendingUser.role,
             userId: pendingUser._id,  // Reference to the created user document
             roleModel: userDocument.constructor.modelName  // Dynamically set the role model
@@ -878,39 +883,145 @@ const getAttractions = async (req, res) => {
 //     }
 //   };
 
+/*
+
+*/
+
+// const flagActivity = async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const { flagged } = req.body;  // Get the flagged status from the request body
+  
+//       // Update the itinerary's flagged status based on the provided flagged value
+//       const activity = await Activity.findByIdAndUpdate(id, { flagged }, { new: true });
+  
+//       if (!activity) return res.status(404).json({ message: 'Activity not found' });
+
+      
+  
+//       const message = flagged ? 'Activity flagged successfully' : 'Activity unflagged successfully';
+//       res.status(200).json({ message, activity });
+//     } catch (error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//   };
+
+// const flagItinerary = async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const { flagged } = req.body;  // Get the flagged status from the request body
+  
+//       // Update the itinerary's flagged status based on the provided flagged value
+//       const itinerary = await Itinerary.findByIdAndUpdate(id, { flagged }, { new: true });
+  
+//       if (!itinerary) return res.status(404).json({ message: 'Itinerary not found' });
+  
+//       const message = flagged ? 'Itinerary flagged successfully' : 'Itinerary unflagged successfully';
+//       res.status(200).json({ message, itinerary });
+//     } catch (error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//   };
 const flagActivity = async (req, res) => {
     try {
-      const { id } = req.params;
-      const { flagged } = req.body;  // Get the flagged status from the request body
-  
-      // Update the itinerary's flagged status based on the provided flagged value
-      const activity = await Activity.findByIdAndUpdate(id, { flagged }, { new: true });
-  
-      if (!activity) return res.status(404).json({ message: 'Activity not found' });
-  
-      const message = flagged ? 'Activity flagged successfully' : 'Activity unflagged successfully';
-      res.status(200).json({ message, activity });
+        const { id } = req.params;
+        const { flagged } = req.body; // Get the flagged status from the request body
+
+        // Update the activity's flagged status
+        const activity = await Activity.findByIdAndUpdate(id, { flagged }, { new: true }).populate('advertiser');
+
+        if (!activity) return res.status(404).json({ message: 'Activity not found' });
+
+        // Notify the advertiser in-app
+        const advertiser = activity.advertiser;
+        if (advertiser) {
+            await Advertiser.findByIdAndUpdate(advertiser._id, {
+                $push: {
+                    notifications: {
+                        type: 'event-flagged',
+                        eventId: activity._id,
+                        message: `Your activity "${activity.name}" has been flagged by the admin.`,
+                        date: new Date(),
+                    }
+                }
+            });
+
+            // Send email notification
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'winggo567@gmail.com',
+                    pass: 'smkg eghm yrzv yyir', // Ensure this is secure
+                }
+            });
+
+            await transporter.sendMail({
+                from: 'winggo567@gmail.com',
+                to: advertiser.email,
+                subject: 'Activity Flagged Notification',
+                html: `<p>Your activity <strong>${activity.name}</strong> has been flagged as inappropriate by the admin. Please review it.</p>`
+            });
+        }
+
+        const message = flagged ? 'Activity flagged successfully' : 'Activity unflagged successfully';
+        res.status(200).json({ message, activity });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
-  };
+};
 
 const flagItinerary = async (req, res) => {
     try {
-      const { id } = req.params;
-      const { flagged } = req.body;  // Get the flagged status from the request body
-  
-      // Update the itinerary's flagged status based on the provided flagged value
-      const itinerary = await Itinerary.findByIdAndUpdate(id, { flagged }, { new: true });
-  
-      if (!itinerary) return res.status(404).json({ message: 'Itinerary not found' });
-  
-      const message = flagged ? 'Itinerary flagged successfully' : 'Itinerary unflagged successfully';
-      res.status(200).json({ message, itinerary });
+        const { id } = req.params;
+        const { flagged } = req.body;
+
+        // Update the itinerary's flagged status
+        const itinerary = await Itinerary.findByIdAndUpdate(
+            id,
+            { flagged },
+            { new: true }
+        ).populate('tourGuideId'); // Populate the tourGuideId field
+
+        if (!itinerary) return res.status(404).json({ message: 'Itinerary not found' });
+
+        // Notify the tour guide in-app
+        const tourGuide = itinerary.tourGuideId;
+        if (tourGuide) {
+            await TourGuide.findByIdAndUpdate(tourGuide._id, {
+                $push: {
+                    notifications: {
+                        type: 'itinerary-flagged',
+                        itineraryId: itinerary._id,
+                        message: `Your itinerary "${itinerary.title}" has been flagged by the admin.`,
+                        date: new Date()
+                    }
+                }
+            });
+
+            // Send email notification
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'winggo567@gmail.com',
+                    pass: 'smkg eghm yrzv yyir'
+                }
+            });
+
+            await transporter.sendMail({
+                from: 'winggo567@gmail.com',
+                to: tourGuide.email,
+                subject: 'Itinerary Flagged Notification',
+                html: `<p>Your itinerary <strong>${itinerary.title}</strong> has been flagged as inappropriate by the admin. Please review it.</p>`
+            });
+        }
+
+        const message = flagged ? 'Itinerary flagged successfully' : 'Itinerary unflagged successfully';
+        res.status(200).json({ message, itinerary });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
-  };
+};
+
   
   
   const flagPlace = async (req, res) => {
@@ -1202,6 +1313,59 @@ const getUsernameById = async  (req, res) => {
     }
 };
 
+// Get notifications for an admin
+const getNotifications = async (req, res) => {
+    try {
+      const { adminId } = req.params;
+  
+      // Fetch the admin
+      const admin = await Admin.findById(adminId);
+  
+      if (!admin) {
+        return res.status(404).json({ message: 'Admin not found' });
+      }
+  
+      // Return the notifications
+      res.status(200).json({ notifications: admin.notifications });
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ message: 'Error fetching notifications', error });
+    }
+  };
+// Add a Promo Code
+const createPromoCode = async (req, res) => {
+    const { code, discount, startDate, endDate, isActive, description } = req.body;
+
+    try {
+        // Check if a promo code with the same code already exists
+        const existingPromoCode = await PromoCode.findOne({ code });
+        if (existingPromoCode) {
+            return res.status(400).json({ message: 'Promo code already exists' });
+        }
+
+        // Validate start and end dates
+        if (new Date(startDate) >= new Date(endDate)) {
+            return res.status(400).json({ message: 'Start date must be earlier than end date' });
+        }
+
+        // Create the promo code
+        const promoCode = new PromoCode({
+            code,
+            discount,
+            startDate,
+            endDate,
+            isActive,
+            description,
+        });
+
+        // Save to the database
+        await promoCode.save();
+
+        res.status(201).json({ message: 'Promo code created successfully', promoCode });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 const getSalesReport = async (req, res) => {
     try {
         // 1. Activities
@@ -1334,5 +1498,7 @@ module.exports = {
     getAllItineraries,
     getAllActivities,
     getUsernameById,
+    getNotifications,
+    createPromoCode,
     getSalesReport
 };

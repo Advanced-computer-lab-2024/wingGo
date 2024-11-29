@@ -52,14 +52,25 @@ const sendEmailNotification = async (toEmail, notifications) => {
   }
 };
 
+
 // Main scheduler function
 const sendReminders = async () => {
   try {
     const currentDate = new Date();
-    const upcomingDate = new Date();
-    upcomingDate.setDate(currentDate.getDate() + 5); // Look for events up to 5 days ahead
+    const targetStart = new Date(currentDate);
+    targetStart.setHours(0, 0, 0, 0); // Start of the day (midnight)
+    targetStart.setDate(targetStart.getDate() + 2); // Exactly 48 hours ahead
 
-    const upcomingActivities = await Activity.find({ date: { $gte: currentDate, $lt: upcomingDate } });
+    const targetEnd = new Date(targetStart);
+    targetEnd.setHours(23, 59, 59, 999); // End of the target day
+
+    console.log(`Checking for events starting between ${targetStart} and ${targetEnd}`);
+
+    // Find activities and itineraries starting exactly 48 hours ahead
+    const upcomingActivities = await Activity.find({
+      date: { $gte: targetStart, $lte: targetEnd },
+    });
+
     const upcomingItineraries = await Itinerary.find();
 
     const tourists = await Tourist.find().populate('bookedActivities bookedItineraries');
@@ -68,7 +79,7 @@ const sendReminders = async () => {
       const appNotifications = [];
       const emailNotifications = [];
 
-      // Check for booked activities that are upcoming
+      // Check for booked activities starting exactly 48 hours ahead
       tourist.bookedActivities.forEach((activityId) => {
         const activityIdToCompare = activityId._id ? activityId._id.toString() : activityId.toString();
         const activity = upcomingActivities.find(a => a._id.toString() === activityIdToCompare);
@@ -80,7 +91,7 @@ const sendReminders = async () => {
           appNotifications.push({
             type: 'reminder',
             eventId: activity._id,
-            message: `Reminder: Your upcoming activity '${activity.name}' is in about ${timeLeft}!`,
+            message: `Reminder: Your upcoming activity '${activity.name}' is in less than 48 hours!`,
             date: new Date(),
             metadata: { eventName: activity.name, date: activity.date.toISOString() }
           });
@@ -88,16 +99,16 @@ const sendReminders = async () => {
           // Email notification
           emailNotifications.push({
             type: 'reminder',
-            message: `Your upcoming activity '${activity.name}' is in about ${timeLeft}.`
+            message: `Your upcoming activity '${activity.name}' is in less than 48 hours!`
           });
         }
       });
 
-      // Check for booked itineraries that are upcoming
+      // Check for booked itineraries starting exactly 48 hours ahead
       tourist.bookedItineraries.forEach((itineraryBooking) => {
         const bookingDate = new Date(itineraryBooking.bookingDate);
 
-        if (bookingDate >= currentDate && bookingDate < upcomingDate) {
+        if (bookingDate >= targetStart && bookingDate <= targetEnd) {
           const itinerary = upcomingItineraries.find(i => i._id.equals(itineraryBooking.itineraryId));
 
           if (itinerary) {
@@ -107,7 +118,7 @@ const sendReminders = async () => {
             appNotifications.push({
               type: 'reminder',
               itineraryId: itinerary._id,
-              message: `Reminder: Your itinerary '${itinerary.title}' is in about ${timeLeft}!`,
+              message: `Reminder: Your itinerary '${itinerary.title}' is in less than 48 hours!`,
               date: new Date(),
               metadata: { itineraryTitle: itinerary.title, date: bookingDate.toISOString() }
             });
@@ -115,7 +126,7 @@ const sendReminders = async () => {
             // Email notification
             emailNotifications.push({
               type: 'reminder',
-              message: `Your itinerary '${itinerary.title}' is in about ${timeLeft}.`
+              message: `Your itinerary '${itinerary.title}' is in less than 48 hours!`
             });
           }
         }
@@ -136,10 +147,12 @@ const sendReminders = async () => {
   }
 };
 
+
 // Schedule the task to run every minute for testing
 const startScheduler = () => {
-//   schedule.scheduleJob('*/2 * * * *', sendReminders); // Run every minute for testing
-schedule.scheduleJob('0 0 * * *', sendReminders); // Runs daily at midnight
+  // schedule.scheduleJob('*/1 * * * *', sendReminders); // Run every minute for testing
+// schedule.scheduleJob('0 0 * * *', sendReminders); // Runs daily at midnight
+schedule.scheduleJob('42 18 * * *', sendReminders); // Runs daily at 6:42 PM
 };
 
 module.exports = startScheduler;
