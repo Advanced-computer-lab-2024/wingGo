@@ -2249,7 +2249,7 @@ const shareProductViaEmail = async (req, res) => {
     //     }
     // };
 
-    const convertCurrency = async (amount, fromCurrency, toCurrency) => {
+const convertCurrency = async (amount, fromCurrency, toCurrency) => {
         try {
             const response = await axios.get('https://api.exchangerate-api.com/v4/latest/' + fromCurrency);
             const rate = response.data.rates[toCurrency];
@@ -2258,9 +2258,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error('Error converting currency:', error.message);
             throw new Error('Failed to convert currency');
         }
-    };
+};
 
-    const updateProductPricesToCurrency = async (req, res) => {
+const updateProductPricesToCurrency = async (req, res) => {
         const { currency = 'USD' } = req.query;  // Default currency is USD
     
         try {
@@ -2277,11 +2277,11 @@ const shareProductViaEmail = async (req, res) => {
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
-    };
+};
 
 
   
-    const searchHotelsByCity = async (cityCode) => {
+const searchHotelsByCity = async (cityCode) => {
 
         
 
@@ -2310,9 +2310,9 @@ const shareProductViaEmail = async (req, res) => {
             return { message: 'Error fetching token', error: error.response?.data || error.message };
         }
 
-    };
+};
 
-    const searchHotelsByGeoLocation = async (latitude,longitude) => {
+const searchHotelsByGeoLocation = async (latitude,longitude) => {
         
     
         if (!latitude || !longitude) {
@@ -2338,9 +2338,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error("Error fetching token:", error.response?.data || error.message);
             return { message: 'Error fetching token', error: error.response?.data || error.message };
         }
-    }
+};
 
-    const getHotelOffersByCity = async (req, res) => {
+const getHotelOffersByCity = async (req, res) => {
 
         const { cityCode } = req.query;
 
@@ -2380,9 +2380,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error("Error fetching token:", error.response?.data || error.message);
             res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
         }
-    }
+};
 
-    const getHotelOffersByLocation = async (req, res) => {
+const getHotelOffersByLocation = async (req, res) => {
 
         const { latitude, longitude } = req.query;
 
@@ -2423,9 +2423,9 @@ const shareProductViaEmail = async (req, res) => {
             res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
         }
 
-    };
+};
 
-    const bookHotel = async (req, res) => {
+const bookHotel = async (req, res) => {
 
         const { hotelOffers } = req.body;
         const { touristId } = req.params;
@@ -2546,9 +2546,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error('Error booking hotel:', error.response?.data || error.message);
             res.status(500).json({ message: 'Error booking hotel', error: error.response?.data || error.message });
         }
-    }
+};
 
-    const bookTransport = async (req, res) => {
+const bookTransport = async (req, res) => {
         const { touristId, transportId } = req.params;
     
         try {
@@ -2588,10 +2588,10 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ message: 'Error booking transport', error: error.message });
         }
-    };
+};
 
            
-    const getBookedItineraries = async (req, res) => {
+const getBookedItineraries = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2615,8 +2615,9 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
-    };   
-    const getBookedActivities = async (req, res) => {
+};  
+
+const getBookedActivities = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2639,9 +2640,9 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
-    };
+};
 
-    const getTouristUsername = async (req, res) => {
+const getTouristUsername = async (req, res) => {
         try {
             const { id } = req.params;
             const tourist = await Tourist.findById(id).select('username'); // Only select the username field
@@ -2654,7 +2655,8 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ message: "Server error", error });
         }
-    };    const getPurchasedProducts = async (req, res) => {
+};    
+const getPurchasedProducts = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2688,9 +2690,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error("Error fetching purchased products:", error);
             res.status(500).json({ message: 'Error fetching purchased products', error });
         }
-    };
+};
 
-    const getUnbookedItineraries = async (req, res) => {
+const getUnbookedItineraries = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2720,7 +2722,7 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
-    };
+};
     
 
     // Check if a specific itinerary is booked by a tourist
@@ -3289,10 +3291,6 @@ const getNotifications = async (req, res) => {
 };
 
 
-
-
-
-
 //add item to wishlist
 const addWishlist = async (req, res) => {
     const { touristId ,productId} = req.params;
@@ -3436,8 +3434,42 @@ const addWishlistItemToCart = async (req, res) => {
     }
 };
 
+//View order details & status
+const orderDetails=async(req,res)=>{
+    const { id } = req.params;
+    try{
+        const details=await Order.findById(id);
+        res.status(200).json(details);
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+};
+//view past and current orders
+const viewAllorders = async (req, res) => {
+    const { touristId } = req.params; 
+  
+    try {
+      const orders = await Order.find({ buyer: touristId })
+        .sort({ createdAt: -1 }); 
+  
+      if (!orders || orders.length === 0) {
+        return res.status(404).json({ message: 'No orders found for this tourist' });
+      }
+  
+      res.status(200).json(orders); 
+    } catch (error) {
+      res.status(500).json({
+        message: 'Error fetching orders',
+        error: error.message,
+      });
+    }
+  };
+  
+
 module.exports = {
     tourist_hello,
+    orderDetails,
+    viewAllorders,
     tourist_register,
     getTourist,
     updateTouristProfile,

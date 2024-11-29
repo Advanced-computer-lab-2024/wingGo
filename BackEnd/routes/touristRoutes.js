@@ -89,6 +89,8 @@ router.get('/booked-itineraries/:touristId', touristController.getBookedItinerar
 router.get('/booked-activities/:touristId', touristController.getBookedActivities);
 
 router.get('/getUsername/:id', touristController.getTouristUsername);
+router.get('/orderDetails/:id', touristController.orderDetails);
+router.get('/pastandcurrentorders/:touristId',touristController.viewAllorders);
 
 
 router.get('/purchasedProducts/:touristId', touristController.getPurchasedProducts);
