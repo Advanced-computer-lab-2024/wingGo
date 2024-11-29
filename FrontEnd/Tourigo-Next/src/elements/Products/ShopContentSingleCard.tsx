@@ -157,7 +157,7 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
                 {item.name}
               </Link>
             </h5>
-            <div className="product-price">
+            <div className="product-price text-black">
               {userRole === "Tourist" ? (
                 <>
                  {currency} {item.price ? item.price.toFixed(2) : "Loading..."}
