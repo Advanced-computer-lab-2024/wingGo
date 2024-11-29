@@ -3360,7 +3360,7 @@ const viewAllorders = async (req, res) => {
     const { touristId } = req.params; 
   
     try {
-      const orders = await Order.find({ buyer: touristId })
+      const orders = await Order.find({ buyer: touristId, paymentStatus:'paid' })
         .sort({ createdAt: -1 }); 
   
       if (!orders || orders.length === 0) {
@@ -3374,7 +3374,51 @@ const viewAllorders = async (req, res) => {
         error: error.message,
       });
     }
-  };
+};
+
+//cancel an order
+const cancelOrder = async (req, res) => {
+    const { touristId, orderId } = req.params; 
+  
+    try {
+      const order = await Order.findById( orderId );
+
+    //   if (!order) {
+    //     return res.status(404).json({ message: 'Order not found' });
+    //   }
+  
+    //   if (order.buyer.toString() !== touristId) {
+    //     return res.status(403).json({ message: 'You are not authorized to cancel this order' });
+    //   }
+  
+      if (order.orderStatus === 'cancelled') {
+        return res.status(400).json({ message: 'Order already cancelled' });
+      }
+
+      if (order.paymentStatus === 'paid') {
+        const tourist = await Tourist.findById(touristId);
+  
+        if (!tourist) {
+          return res.status(404).json({ message: 'Tourist not found' });
+        }
+  
+        tourist.wallet += order.totalPrice;
+        order.paymentStatus='notPaid';
+        await tourist.save();
+      }
+  
+      order.orderStatus = 'cancelled';
+
+      await order.save(); 
+  
+      res.status(200).json({ message: 'Order has been cancelled successfully', order });
+    } catch (error) {
+      res.status(500).json({
+        message: 'Error cancelling the order',
+        error: error.message,
+      });
+    }
+};
   
 
 module.exports = {
@@ -3383,6 +3427,7 @@ module.exports = {
     viewAllorders,
     tourist_register,
     getTourist,
+    cancelOrder,
     updateTouristProfile,
     sortProductsByRatings,
     getAllProducts,
