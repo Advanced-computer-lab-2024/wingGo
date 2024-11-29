@@ -27,6 +27,8 @@ const tourist_hello = (req, res) => {
     console.log('yay');
 };
 
+
+
 const tourist_register = async (req, res) => {
     // Destructure fields from the request body
     const { username, email, password, mobileNumber, nationality, DOB, jobOrStudent } = req.body;
@@ -874,7 +876,7 @@ const viewComplaints = async (req, res) => {
 
 const bookItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params; // Extracting touristId and itineraryId from URL parameters
-    const { bookingDate } = req.query;
+    const { bookingDate, paymentmethod } = req.query;
 
     try {
        
@@ -919,6 +921,14 @@ const bookItinerary = async (req, res) => {
         
         let newLevel = reqTourist.badge.level;
         let newAmount = oldAmount;
+
+        if(paymentmethod === 'wallet'){
+            if(reqTourist.wallet < itineraryPrice){
+                return res.status(400).json({ message: 'Insufficient funds in wallet' });
+            }
+            reqTourist.wallet -= itineraryPrice;
+            await reqTourist.save();
+        }
        
         if (newPoints > 100000) {
             newLevel = 2;
@@ -947,8 +957,33 @@ const bookItinerary = async (req, res) => {
             return res.status(404).json({ message: 'Tourist update failed' });
         }
 
+        const receiptHtml = `
+            <h2>Payment Receipt</h2>
+            <p>Thank you for booking with us!</p>
+            <p><strong>Itinerary:</strong> ${itineraryUpdate.title}</p>
+            <p><strong>Date:</strong> ${parsedDate.toDateString()}</p>
+            <p><strong>Amount Paid:</strong> $${itineraryPrice}</p>
+            <p>We hope you have a great experience!</p>
+        `;
+
+        // Send payment receipt via email
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'winggo567@gmail.com',
+                pass: 'smkg eghm yrzv yyir' // Ensure this is secure
+            }
+        });
+
+        await transporter.sendMail({
+            from: 'winggo567@gmail.com',
+            to: reqTourist.email,
+            subject: 'Payment Receipt for Your Itinerary Booking',
+            html: receiptHtml
+        });
+
         return res.status(200).json({
-            message: 'Booking successful',
+            message: 'Booking successful, receipt emailed',
             itinerary: itineraryUpdate,
             tourist: touristUpdate
         });
@@ -1107,7 +1142,8 @@ const redeemPoints = async (req, res) => {
 };
 const bookActivity = async (req, res) => {
     const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
-    const { numberOfPeople } = req.body; 
+    const { numberOfPeople, paymentmethod } = req.body;
+
     try {
         // Retrieve tourist details and check if the activityId is already booked
         const reqTourist = await Tourist.findById(touristId);
@@ -1119,14 +1155,13 @@ const bookActivity = async (req, res) => {
         const isAlreadyBooked = reqTourist.bookedActivities.some(
             (booking) => booking.toString() === activityId
         );
-
         if (isAlreadyBooked) {
             return res.status(400).json({ message: 'Activity already booked by this tourist' });
         }
 
         // Add the tourist to the activity's touristIDs array
         const activityUpdate = await Activity.findByIdAndUpdate(
-            activityId, 
+            activityId,
             { $addToSet: { touristIDs: touristId } }, // Use $addToSet to avoid duplicates
             { new: true }
         );
@@ -1134,17 +1169,28 @@ const bookActivity = async (req, res) => {
         if (!activityUpdate) {
             return res.status(404).json({ message: 'Activity not found or update failed' });
         }
+
         activityUpdate.sales += 1 * numberOfPeople; // Increment sales
         await activityUpdate.save();
+
         // Calculate new points and badge details based on the activity's price
         const activityPrice = activityUpdate.price;
         const oldAmount = reqTourist.badge.amount;
         const oldPoints = reqTourist.loyaltyPoints;
-        const newPoints = (activityPrice * oldAmount) + oldPoints;
+        const newPoints = activityPrice * oldAmount + oldPoints;
 
         // Determine new badge level and amount based on newPoints
         let newLevel = reqTourist.badge.level;
         let newAmount = oldAmount;
+
+        // Wallet payment handling
+        if (paymentmethod === 'wallet') {
+            if (reqTourist.wallet < activityPrice) {
+                return res.status(400).json({ message: 'Insufficient funds in wallet' });
+            }
+            reqTourist.wallet -= activityPrice;
+            await reqTourist.save();
+        }
 
         if (newPoints > 100000) {
             newLevel = 2;
@@ -1157,15 +1203,15 @@ const bookActivity = async (req, res) => {
 
         // Update the tourist's booked activities and other details
         const touristUpdate = await Tourist.findByIdAndUpdate(
-            touristId, 
-            { 
+            touristId,
+            {
                 $addToSet: { bookedActivities: activityId }, // Add the activity to bookedActivities
-                $set: { 
-                    loyaltyPoints: newPoints,          // Update loyalty points
-                    'badge.level': newLevel,           // Update badge level
-                    'badge.amount': newAmount          // Update badge amount
-                }
-            }, 
+                $set: {
+                    loyaltyPoints: newPoints, // Update loyalty points
+                    'badge.level': newLevel, // Update badge level
+                    'badge.amount': newAmount, // Update badge amount
+                },
+            },
             { new: true }
         );
 
@@ -1173,15 +1219,58 @@ const bookActivity = async (req, res) => {
             return res.status(404).json({ message: 'Tourist update failed' });
         }
 
+        // Create receipt HTML
+        const receiptHtml = `
+            <h2>Payment Receipt</h2>
+            <p><strong>Activity:</strong> ${activityUpdate.name}</p>
+            <p><strong>Date:</strong> ${activityUpdate.date.toDateString()}</p>
+            <p><strong>Amount Paid:</strong> $${activityPrice}</p>
+            <p>Thank you for booking with us!</p>
+            <p>We hope you have a great experience!</p>
+        `;
+
+        // Send payment receipt via email
+        try {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'winggo567@gmail.com',
+                    pass: 'smkg eghm yrzv yyir', // Ensure this is secure
+                },
+            });
+
+            await transporter.sendMail({
+                from: 'winggo567@gmail.com',
+                to: reqTourist.email,
+                subject: 'Payment Receipt for Your Activity Booking',
+                html: receiptHtml,
+            });
+        } catch (emailError) {
+            console.error('Error sending email:', emailError);
+            return res.status(500).json({
+                message: 'Booking successful, but failed to send receipt email.',
+                error: emailError.message,
+            });
+        }
+
+        // Success response
         return res.status(200).json({
-            message: 'Activity booking successful',
+            message: 'Booking successful, receipt emailed',
             activity: activityUpdate,
-            tourist: touristUpdate
+            tourist: touristUpdate,
         });
     } catch (error) {
-        return res.status(500).json({ message: 'Error during the activity booking process.', error });
+        // Detailed error handling
+        console.error('Error during booking process:', error);
+
+        // Check for specific error fields like `message` or fallback to generic error object
+        return res.status(500).json({
+            message: 'Error during the activity booking process.',
+            error: error.message || error.toString() || 'An unknown error occurred',
+        });
     }
 };
+
 const cancelActivity = async (req, res) => {
     const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
 
@@ -2160,7 +2249,7 @@ const shareProductViaEmail = async (req, res) => {
     //     }
     // };
 
-    const convertCurrency = async (amount, fromCurrency, toCurrency) => {
+const convertCurrency = async (amount, fromCurrency, toCurrency) => {
         try {
             const response = await axios.get('https://api.exchangerate-api.com/v4/latest/' + fromCurrency);
             const rate = response.data.rates[toCurrency];
@@ -2169,9 +2258,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error('Error converting currency:', error.message);
             throw new Error('Failed to convert currency');
         }
-    };
+};
 
-    const updateProductPricesToCurrency = async (req, res) => {
+const updateProductPricesToCurrency = async (req, res) => {
         const { currency = 'USD' } = req.query;  // Default currency is USD
     
         try {
@@ -2188,11 +2277,11 @@ const shareProductViaEmail = async (req, res) => {
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
-    };
+};
 
 
   
-    const searchHotelsByCity = async (cityCode) => {
+const searchHotelsByCity = async (cityCode) => {
 
         
 
@@ -2221,9 +2310,9 @@ const shareProductViaEmail = async (req, res) => {
             return { message: 'Error fetching token', error: error.response?.data || error.message };
         }
 
-    };
+};
 
-    const searchHotelsByGeoLocation = async (latitude,longitude) => {
+const searchHotelsByGeoLocation = async (latitude,longitude) => {
         
     
         if (!latitude || !longitude) {
@@ -2249,9 +2338,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error("Error fetching token:", error.response?.data || error.message);
             return { message: 'Error fetching token', error: error.response?.data || error.message };
         }
-    }
+};
 
-    const getHotelOffersByCity = async (req, res) => {
+const getHotelOffersByCity = async (req, res) => {
 
         const { cityCode } = req.query;
 
@@ -2291,9 +2380,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error("Error fetching token:", error.response?.data || error.message);
             res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
         }
-    }
+};
 
-    const getHotelOffersByLocation = async (req, res) => {
+const getHotelOffersByLocation = async (req, res) => {
 
         const { latitude, longitude } = req.query;
 
@@ -2334,9 +2423,9 @@ const shareProductViaEmail = async (req, res) => {
             res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
         }
 
-    };
+};
 
-    const bookHotel = async (req, res) => {
+const bookHotel = async (req, res) => {
 
         const { hotelOffers } = req.body;
         const { touristId } = req.params;
@@ -2457,9 +2546,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error('Error booking hotel:', error.response?.data || error.message);
             res.status(500).json({ message: 'Error booking hotel', error: error.response?.data || error.message });
         }
-    }
+};
 
-    const bookTransport = async (req, res) => {
+const bookTransport = async (req, res) => {
         const { touristId, transportId } = req.params;
     
         try {
@@ -2499,10 +2588,10 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ message: 'Error booking transport', error: error.message });
         }
-    };
+};
 
            
-    const getBookedItineraries = async (req, res) => {
+const getBookedItineraries = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2526,8 +2615,9 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
-    };   
-    const getBookedActivities = async (req, res) => {
+};  
+
+const getBookedActivities = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2550,9 +2640,9 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
-    };
+};
 
-    const getTouristUsername = async (req, res) => {
+const getTouristUsername = async (req, res) => {
         try {
             const { id } = req.params;
             const tourist = await Tourist.findById(id).select('username'); // Only select the username field
@@ -2565,7 +2655,8 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ message: "Server error", error });
         }
-    };    const getPurchasedProducts = async (req, res) => {
+};    
+const getPurchasedProducts = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2599,9 +2690,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error("Error fetching purchased products:", error);
             res.status(500).json({ message: 'Error fetching purchased products', error });
         }
-    };
+};
 
-    const getUnbookedItineraries = async (req, res) => {
+const getUnbookedItineraries = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2631,7 +2722,7 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
-    };
+};
     
 
     // Check if a specific itinerary is booked by a tourist
@@ -2970,14 +3061,14 @@ const getNotifications = async (req, res) => {
   
   //// payments
   // Nodemailer setup
-  
-const transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: "winggo567@gmail.com",
       pass: "smkg eghm yrzv yyir"
     }
   });
+
   
   const payForProducts = async (req, res) => {
     const { touristId, productId } = req.params;
@@ -3200,10 +3291,6 @@ const transporter = nodemailer.createTransport({
 };
 
 
-
-
-
-
 //add item to wishlist
 const addWishlist = async (req, res) => {
     const { touristId ,productId} = req.params;
@@ -3347,8 +3434,42 @@ const addWishlistItemToCart = async (req, res) => {
     }
 };
 
+//View order details & status
+const orderDetails=async(req,res)=>{
+    const { id } = req.params;
+    try{
+        const details=await Order.findById(id);
+        res.status(200).json(details);
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+};
+//view past and current orders
+const viewAllorders = async (req, res) => {
+    const { touristId } = req.params; 
+  
+    try {
+      const orders = await Order.find({ buyer: touristId })
+        .sort({ createdAt: -1 }); 
+  
+      if (!orders || orders.length === 0) {
+        return res.status(404).json({ message: 'No orders found for this tourist' });
+      }
+  
+      res.status(200).json(orders); 
+    } catch (error) {
+      res.status(500).json({
+        message: 'Error fetching orders',
+        error: error.message,
+      });
+    }
+  };
+  
+
 module.exports = {
     tourist_hello,
+    orderDetails,
+    viewAllorders,
     tourist_register,
     getTourist,
     updateTouristProfile,
