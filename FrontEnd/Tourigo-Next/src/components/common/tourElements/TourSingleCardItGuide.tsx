@@ -74,22 +74,16 @@ const TourSingleCard = ({
 
   const confirmFlagActivity = async () => {
     try {
-      // Toggle the flagged state in the backend
-      await toggleFlagItinerary(tour._id, !isFlagged);
-      setIsFlagged((prevFlagged) => !prevFlagged);
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error updating flagged status:", error);
-    }
+        await toggleItineraryActivation(tour._id, !isDeactivated);
+        setIsDeactivated((prevDeactivated) => !prevDeactivated);
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error("Error toggling activation status:", error);
+      }
   };
 
   const handleToggleActivation = async () => {
-    try {
-      await toggleItineraryActivation(tour._id, !isDeactivated);
-      setIsDeactivated((prevDeactivated) => !prevDeactivated);
-    } catch (error) {
-      console.error("Error toggling activation status:", error);
-    }
+    setIsModalOpen(true);
   };
 
   const handleBookNowClick = () => {
@@ -145,22 +139,6 @@ const TourSingleCard = ({
                     {tour.title}
                   </Link>
                 </h5>
-                {isTourGuide && (
-                  <button
-                    onClick={handleToggleActivation}
-                    className="activate-itinerary-button"
-                    style={{
-                      backgroundColor: isDeactivated ? "orange" : "blue",
-                      color: "white",
-                      padding: "8px 16px",
-                      fontSize: "14px",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {isDeactivated ? "Activate" : "Deactivate"}
-                  </button>
-                )}
               </div>
               <span className="tour-price b3">
                 {currency}{" "}
@@ -177,15 +155,15 @@ const TourSingleCard = ({
                 </div>
                 <div className="tour-btn">
                 <button
-                    onClick={handleFlagItinerary}
+                    onClick={handleToggleActivation}
                     className="bd-text-btn style-two"
                     type="button"
                     style={{
                       cursor: "pointer",
-                      color: isFlagged ? "blue" : "red",
+                      color: isDeactivated ? "red" : "blue",
                     }}
                   >
-                    {isFlagged ? "Unflag" : "Flag"}
+                    {isDeactivated ?  "Activate" : "Deactivate"}
                     <span className="icon__box">
                       <i className="fa-regular fa-arrow-right-long icon__first"></i>
                       <i className="fa-regular fa-arrow-right-long icon__second"></i>
@@ -224,7 +202,7 @@ const TourSingleCard = ({
         }}
       >
         <h3>Confirm Flag Itinerary</h3>
-        <p>Are you sure you want to toggle the flag status?</p>
+        <p>Are you sure you want to toggle the Activation status?</p>
         <div style={{ display: 'flex', marginTop: '20px' }}>
           <button
             onClick={confirmFlagActivity}
