@@ -43,5 +43,5 @@ router.get('/viewLogo/:id', sellerController.previewLogo);
 // Get Seller Notifications
 router.get('/notifications/:userId', sellerController.getNotifications);
 
-
+router.get('/sales-report/:sellerId', sellerController.getSalesReport);
 module.exports = router;

@@ -14,6 +14,10 @@ const activitySchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  description: {
+    type: String,
+    required: false
+  },
   location: {
     type: {
       type: String,
@@ -65,6 +69,14 @@ const activitySchema = new mongoose.Schema({
       comment: { type: String, required: true }
     }
   ],
+  sales: {
+    type: Number,
+    default: 0, // Tracks the total number of sales for this activity
+  },
+  numberOfPeople: {
+    type: Number,
+    default: 1, // Default to 1 person
+  },
 flagged: {
   type: Boolean,
   default: false,  // Initially not flagged

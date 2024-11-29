@@ -621,7 +621,47 @@ const getNotifications = async (req, res) => {
   }
 };
 
+const getSalesReport = async (req, res) => {
+    const { sellerId } = req.params; // Extract Seller ID from URL parameters
 
+    try {
+        // 1. Fetch products associated with the seller
+        const products = await Product.find({ seller: sellerId, sales: { $gt: 0 } }); // Only include products with sales > 0
+        const productDetails = products.map(product => ({
+            name: product.name,
+            sales: product.sales,
+            revenue: product.sales * product.price, // Total revenue for the product
+        }));
+        const totalProductSales = productDetails.reduce((sum, product) => sum + product.sales, 0);
+        const totalProductRevenue = productDetails.reduce((sum, product) => sum + product.revenue, 0);
+
+        // 2. Grand Total Revenue (if needed)
+        const grandTotalSales = totalProductSales;
+        const grandTotalRevenue = totalProductRevenue;
+
+        // 3. Response
+        res.status(200).json({
+            success: true,
+            data: {
+                products: {
+                    details: productDetails,
+                    totalSales: totalProductSales,
+                    totalRevenue: totalProductRevenue,
+                },
+                totals: {
+                    totalSales: grandTotalSales,
+                    totalRevenue: grandTotalRevenue,
+                },
+            },
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to generate sales report for seller.',
+            error: error.message,
+        });
+    }
+};
 
  module.exports = {
     updateSellerProfile,
@@ -647,5 +687,6 @@ const getNotifications = async (req, res) => {
     ArchiveUnarchiveProduct,
     getSellerById,
     previewLogo,
-    getNotifications
+    getNotifications,
+    getSalesReport
 };

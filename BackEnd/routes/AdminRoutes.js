@@ -103,5 +103,5 @@ router.get('/filterComplaints', adminController.filterComplaintsByStatus);
 router.get('/sortComplaints', adminController.sortComplaintsByDate);
 
 router.get('/getUsername/:id', adminController.getUsernameById);
-
+router.get('/sales-report', adminController.getSalesReport);
 module.exports = router;
