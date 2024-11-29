@@ -37,7 +37,7 @@ const updateSellerProfile = async (req, res) => {
             new: true,  // Return the updated document
         });
         const loginUpdateFields = {};
-        if (req.body.username) {
+        if (req.body.username && req.body.username !== sellerExist.username) {
             const existingUsername = await LoginCredentials.findOne({ username: req.body.username });
 
             if (existingUsername) {
@@ -46,6 +46,19 @@ const updateSellerProfile = async (req, res) => {
 
             loginUpdateFields.username = req.body.username;  // Username update
         }
+
+        if(req.body.email && req.body.email !== sellerExist.email){
+            const existingEmail = await LoginCredentials.findOne
+            ({ email: req.body.email });
+
+            if (existingEmail) {
+                return res.status(400).json({ message: 'Email is already taken' });
+
+            }
+            loginUpdateFields.email = req.body.email;  // Email update
+        }
+        
+
         if (req.body.password) {
             loginUpdateFields.password =  updateData.password;  // Use the hashed password
         }
