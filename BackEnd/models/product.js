@@ -25,7 +25,7 @@ const productSchema = new Schema({
     sales: { 
         type: Number, 
         default: 0, 
-        required: true
+        required: false
     }, 
     seller: {
         type: mongoose.Schema.Types.ObjectId,
@@ -43,6 +43,13 @@ const productSchema = new Schema({
         {
             touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
             review: { type: String, required: true }
+        }
+    ],
+    discountedPrices: [
+        {
+            promoCodeId: { type: mongoose.Schema.Types.ObjectId, ref: 'PromoCode' }, // Applied promo code
+            totalDiscountedPrice: { type: Number, required: true }, // Discounted price
+            quantity: { type: Number, required: true } // Quantity purchased under this discount
         }
     ],
     archive:{

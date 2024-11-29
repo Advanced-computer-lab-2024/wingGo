@@ -20,6 +20,7 @@ const Seller = require('../models/Seller');
 const Wishlist = require('../models/WishList');
 const Admin = require("../models/Admin");
 const Order = require('../models/order');
+const PromoCode = require('../models/PromoCode');
 
 
 const tourist_hello = (req, res) => {
@@ -3041,128 +3042,162 @@ const transporter = nodemailer.createTransport({
   };
 
 
-  const payForOrder = async (req, res) => {
+
+
+const payForOrder = async (req, res) => {
     const { orderId } = req.params;
-    const { paymentMethod } = req.body; 
-  
+    const { paymentMethod, promoCode } = req.body;
+
     try {
-      // Fetch the order
-      const order = await Order.findById(orderId).populate('products.productId buyer');
-      if (!order) {
-        return res.status(404).json({ message: 'Order not found' });
-      }
-  
-      // Check if the order is already paid
-      if (order.paymentStatus === 'paid') {
-        return res.status(400).json({ message: 'Order has already been paid for' });
-      }
-  
-      const buyer = order.buyer;
-  
-      if (paymentMethod === 'wallet') {
-        // Check if buyer has sufficient wallet balance
-        if (buyer.wallet < order.totalPrice) {
-          return res.status(400).json({ message: 'Insufficient wallet balance' });
+        // Fetch the order
+        const order = await Order.findById(orderId).populate('products.productId buyer');
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
         }
-      
-        // Deduct the total price from buyer's wallet
-        buyer.wallet -= order.totalPrice;
-        await buyer.save(); // Save updated wallet only if using wallet
-      }
-      
-  
-      // Process each product in the order
-      const sellerNotifications = []; // Notifications for sellers
-      const adminNotifications = []; // Notifications for admins
-      const admins = await Admin.find(); // Fetch all admins
-  
-      for (const item of order.products) {
-        const product = await Product.findById(item.productId).populate('seller');
-  
-        if (!product) {
-          return res.status(404).json({ message: `Product with ID ${item.productId} not found` });
+
+        // Check if the order is already paid
+        if (order.paymentStatus === 'paid') {
+            return res.status(400).json({ message: 'Order has already been paid for' });
         }
-  
-        // Check if enough quantity is available
-        if (product.quantity < item.quantity) {
-          return res.status(400).json({
-            message: `Insufficient stock for product: ${product.name}`,
-          });
+
+        const buyer = order.buyer;
+        let totalPrice = order.totalPrice;
+        let promoCodeDetails = null;
+
+        // Validate promo code
+        if (promoCode) {
+            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date() ||
+                !buyer.promoCodes.includes(promoCodeDetails._id)
+            ) {
+                return res.status(400).json({ message: 'Invalid, expired, or unauthorized promo code' });
+            }
+            // Calculate discount
+            const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+            totalPrice -= discountAmount;
         }
-  
-        // Deduct quantity
-        product.quantity -= item.quantity;
-  
-        // Check if the product is out of stock
-        if (product.quantity === 0) {
-          if (product.seller) {
-            // Notify the seller in-app
-            sellerNotifications.push({
-              sellerId: product.seller._id,
-              notification: {
-                type: 'stock-alert',
-                message: `Your product '${product.name}' is now out of stock.`,
-                date: new Date(),
-              },
-            });
-  
-            // Send email notification to the seller
-            await transporter.sendMail({
-              from: "winggo567@gmail.com",
-              to: product.seller.email,
-              subject: 'Out of Stock Alert',
-              html: `<p>Your product <strong>${product.name}</strong> is now out of stock.</p>`,
-            });
-          } else {
-            // Notify all admins if the product was added by an admin
-            admins.forEach((admin) => {
-              adminNotifications.push({
-                adminId: admin._id,
-                notification: {
-                  type: 'stock-alert',
-                  message: `The product '${product.name}' (added by admin) is now out of stock.`,
-                  date: new Date(),
-                },
-              });
-  
-              // Send email notification to the admin
-              transporter.sendMail({
-                from: "winggo567@gmail.com",
-                to: admin.email,
-                subject: 'Out of Stock Alert',
-                html: `<p>The product <strong>${product.name}</strong> (added by admin) is now out of stock.</p>`,
-              });
-            });
-          }
+
+        // Check wallet balance if payment method is wallet
+        if (paymentMethod === 'wallet' && buyer.wallet < totalPrice) {
+            return res.status(400).json({ message: 'Insufficient wallet balance' });
         }
-  
-        // Save updated product
-        await product.save();
-      }
-  
-      // Update buyer's wallet and save
-      await buyer.save();
-  
-      // Mark order as paid
-      order.paymentStatus = 'paid';
-      await order.save();
-  
-      // Push notifications to sellers
-      for (const { sellerId, notification } of sellerNotifications) {
-        await Seller.findByIdAndUpdate(sellerId, { $push: { notifications: notification } });
-      }
-  
-      // Push notifications to admins
-      for (const { adminId, notification } of adminNotifications) {
-        await Admin.findByIdAndUpdate(adminId, { $push: { notifications: notification } });
-      }
-  
-      res.status(200).json({ message: 'Order payment successful', wallet: buyer.wallet });
+
+        // Validate product quantities
+        for (const item of order.products) {
+            const product = await Product.findById(item.productId);
+            if (!product) {
+                return res.status(404).json({ message: `Product with ID ${item.productId} not found` });
+            }
+            if (product.quantity < item.quantity) {
+                return res.status(400).json({ message: `Insufficient stock for product: ${product.name}` });
+            }
+        }
+
+        // Validation passed, proceed with updates
+        const sellerNotifications = []; // Notifications for sellers
+        const adminNotifications = []; // Notifications for admins
+        const admins = await Admin.find(); // Fetch all admins
+
+        for (const item of order.products) {
+            const product = await Product.findById(item.productId).populate('seller');
+
+            // Deduct quantity
+            product.quantity -= item.quantity;
+
+            // Update discounted prices or sales
+            if (promoCodeDetails) {
+                product.discountedPrices.push({
+                    promoCodeId: promoCodeDetails._id,
+                    totalDiscountedPrice: (product.price - ((promoCodeDetails.discount / 100) * product.price)) * item.quantity,
+                    quantity: item.quantity,
+                });
+            } else {
+                product.sales += item.quantity;
+            }
+
+            // Check if the product is out of stock
+            if (product.quantity === 0) {
+                if (product.seller) {
+                    // Notify the seller in-app
+                    sellerNotifications.push({
+                        sellerId: product.seller._id,
+                        notification: {
+                            type: 'stock-alert',
+                            message: `Your product '${product.name}' is now out of stock.`,
+                            date: new Date(),
+                        },
+                    });
+
+                    // Send email notification to the seller
+                    await transporter.sendMail({
+                        from: "winggo567@gmail.com",
+                        to: product.seller.email,
+                        subject: 'Out of Stock Alert',
+                        html: `<p>Your product <strong>${product.name}</strong> is now out of stock.</p>`,
+                    });
+                } else {
+                    // Notify all admins if the product was added by an admin
+                    admins.forEach((admin) => {
+                        adminNotifications.push({
+                            adminId: admin._id,
+                            notification: {
+                                type: 'stock-alert',
+                                message: `The product '${product.name}' (added by admin) is now out of stock.`,
+                                date: new Date(),
+                            },
+                        });
+
+                        // Send email notification to the admin
+                        transporter.sendMail({
+                            from: "winggo567@gmail.com",
+                            to: admin.email,
+                            subject: 'Out of Stock Alert',
+                            html: `<p>The product <strong>${product.name}</strong> (added by admin) is now out of stock.</p>`,
+                        });
+                    });
+                }
+            }
+
+            // Save updated product
+            await product.save();
+        }
+
+        // Deduct wallet balance if applicable
+        if (paymentMethod === 'wallet') {
+            buyer.wallet -= totalPrice;
+            await buyer.save();
+        }
+
+        // Mark promo code as used
+        if (promoCodeDetails) {
+            promoCodeDetails.isActive = false;
+            await promoCodeDetails.save();
+        }
+
+        // Mark order as paid
+        order.paymentStatus = 'paid';
+        await order.save();
+
+        // Push notifications to sellers
+        for (const { sellerId, notification } of sellerNotifications) {
+            await Seller.findByIdAndUpdate(sellerId, { $push: { notifications: notification } });
+        }
+
+        // Push notifications to admins
+        for (const { adminId, notification } of adminNotifications) {
+            await Admin.findByIdAndUpdate(adminId, { $push: { notifications: notification } });
+        }
+
+        res.status(200).json({ message: 'Order payment successful', wallet: buyer.wallet });
     } catch (error) {
-      console.error('Error processing payment:', error);
-      res.status(500).json({ message: 'Error processing payment', error });
+        console.error('Error processing payment:', error);
+        res.status(500).json({ message: 'Error processing payment', error });
     }
-  };
+};
+
 
   
     const getItemsInCart = async (req, res) => {
