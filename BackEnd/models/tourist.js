@@ -103,6 +103,18 @@ const touristSchema = new Schema({
           ref: 'PromoCode',
         },
       ],
+    savedActivities: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Activity' // Reference the Activity model
+        }
+    ],
+    savedItineraries: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Itinerary' // Reference the Itinerary model
+        }
+    ]
 
 
 }, {timestamps: true});
