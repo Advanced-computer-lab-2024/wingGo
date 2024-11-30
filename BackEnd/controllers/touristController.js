@@ -3347,6 +3347,95 @@ const addWishlistItemToCart = async (req, res) => {
     }
 };
 
+// Method to save an activity
+const saveActivity = async (req, res) => {
+    const { touristId, activityId } = req.params;
+
+    try {
+        // Validate if the activity exists
+        const activity = await Activity.findById(activityId);
+        if (!activity) {
+            return res.status(404).json({ message: "Activity not found" });
+        }
+
+        // Add the activity to the savedActivities array if not already added
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            return res.status(404).json({ message: "Tourist not found" });
+        }
+
+        if (!tourist.savedActivities.includes(activityId)) {
+            tourist.savedActivities.push(activityId);
+            await tourist.save();
+            return res.status(200).json({ message: "Activity saved successfully", savedActivities: tourist.savedActivities });
+        }
+
+        return res.status(400).json({ message: "Activity already saved" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "An error occurred", error });
+    }
+};
+
+// Method to save an itinerary
+const saveItinerary = async (req, res) => {
+    const { touristId, itineraryId } = req.params;
+
+    try {
+        // Validate if the itinerary exists
+        const itinerary = await Itinerary.findById(itineraryId);
+        if (!itinerary) {
+            return res.status(404).json({ message: "Itinerary not found" });
+        }
+
+        // Add the itinerary to the savedItineraries array if not already added
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            return res.status(404).json({ message: "Tourist not found" });
+        }
+
+        if (!tourist.savedItineraries.includes(itineraryId)) {
+            tourist.savedItineraries.push(itineraryId);
+            await tourist.save();
+            return res.status(200).json({ message: "Itinerary saved successfully", savedItineraries: tourist.savedItineraries });
+        }
+
+        return res.status(400).json({ message: "Itinerary already saved" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "An error occurred", error });
+    }
+};
+
+const viewAllSavedEvents = async (req, res) => {
+    const { touristId } = req.params;
+
+    try {
+        // Fetch the tourist's saved activities and itineraries with all fields
+        const tourist = await Tourist.findById(touristId)
+            .populate('savedActivities') // Fetch all fields from Activity schema
+            .populate('savedItineraries'); // Fetch all fields from Itinerary schema
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        const savedActivities = tourist.savedActivities;
+        const savedItineraries = tourist.savedItineraries;
+
+        return res.status(200).json({
+            message: 'Saved events retrieved successfully',
+            savedActivities,
+            savedItineraries
+        });
+
+    } catch (error) {
+        console.error('Error fetching saved events:', error);
+        return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+
 module.exports = {
     tourist_hello,
     tourist_register,
@@ -3428,5 +3517,8 @@ module.exports = {
     chooseAddress,
     getItemsInCart,
     getPromoCodesForTourist,
-    addWishlistItemToCart
+    addWishlistItemToCart,
+    saveActivity,
+    saveItinerary,
+    viewAllSavedEvents
 };

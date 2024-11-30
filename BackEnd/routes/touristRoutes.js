@@ -135,4 +135,9 @@ router.post('/wishlisttoCart/:touristId/:productId', touristController.addWishli
 
 router.get('/promoCodes/:touristId', touristController.getPromoCodesForTourist);
 
+
+//saveActivity and saveItinerary and viewAll
+router.post('/saveActivity/:touristId/:activityId', touristController.saveActivity);
+router.post('/saveItinerary/:touristId/:itineraryId', touristController.saveItinerary);
+router.get('/viewAllSavedEvents/:touristId', touristController.viewAllSavedEvents);
 module.exports = router;
