@@ -16,6 +16,23 @@ export const fetchAllItineraries = async (): Promise<Itinerary[]> => {
     }
 };
 
+export const filterItineraries = async (filters: {  ////done with frontend
+    budget?: number;
+    date?: string;
+    preferences?:string;
+    language?:string;
+    touristId?:string
+    
+}): Promise<any[]> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/tourist/filterItineraries`, { params: filters });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching filtered itineraries:", error);
+        throw error;
+    }
+};
+
 // Check if an itinerary is booked for a specific tourist
 export const isItineraryBooked = async ( itineraryId: string): Promise<boolean> => {
     try {

@@ -20,12 +20,15 @@ const Seller = require('../models/Seller');
 const Wishlist = require('../models/WishList');
 const Admin = require("../models/Admin");
 const Order = require('../models/order');
+const PromoCode = require('../models/PromoCode');
 
 
 const tourist_hello = (req, res) => {
     res.send('<h1>yayy</h1>');
     console.log('yay');
 };
+
+
 
 const tourist_register = async (req, res) => {
     // Destructure fields from the request body
@@ -613,7 +616,7 @@ const getAllUpcomingPlaces = async (req, res) => {
 
 
 const filterUpcomingActivities = async (req, res) => {
-    const { budget, date, category, ratings } = req.query; 
+    const { budget, date, category, averageRating } = req.query; 
     // let filter = {}; // Initialize an empty filter object
     let filter = { date: { $gte: new Date() }
     // ,flagged: false
@@ -624,13 +627,17 @@ const filterUpcomingActivities = async (req, res) => {
         filter.price = { $lte: budget }; // Price less than or equal to the specified budget
     }
 
-    // Apply exact date filter (if provided)
-    if (date) {
-        const startOfDay = new Date(date);
-        const endOfDay = new Date(date);
-        endOfDay.setHours(23, 59, 59, 999); // Set to the end of the day
+     // Apply exact date filter
+     if (date) {
+        // Parse the incoming date in local time
+        const localDate = new Date(`${date}T00:00:00`); // YYYY-MM-DDT00:00:00 in local time
 
-        filter.date = { $gte: startOfDay, $lte: endOfDay }; // Activities on the exact specified date
+        // Convert to UTC start and end of day
+        const startOfDay = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000); // UTC start
+        const endOfDay = new Date(startOfDay);
+        endOfDay.setUTCHours(23, 59, 59, 999); // UTC end of day
+
+        filter.date = { $gte: startOfDay, $lte: endOfDay };
     }
 
     // Apply category filter (if provided)
@@ -638,9 +645,9 @@ const filterUpcomingActivities = async (req, res) => {
         filter.category = category; // Exact match for category
     }
 
-    // Apply ratings filter (if provided)
-    if (ratings) {
-        filter.ratings = ratings; // Ratings greater than or equal to the provided rating
+    // Apply averageRating filter (if provided)
+    if (averageRating) {
+        filter.averageRating = { $gte: parseFloat(averageRating) }; // Ensure the value is a float and filter activities
     }
 
     try {
@@ -756,20 +763,36 @@ const filterItineraries = async (req, res) => {
         filter.price = { $lte: budget }; // Price should be less than or equal to the specified budget
     }
 
-    // Apply preferences filter (e.g., historic areas, beaches)
-    if (preferences) {
-        const preferenceArray = preferences.split(','); // Assuming preferences are provided as a comma-separated string
-        filter.tags = { $in: preferenceArray }; // Match itineraries that have at least one of the specified tags
-    }
+    
 
     // Apply language filter
     if (language) {
+        
         filter.language = language; // Exact match for language
     }
-
+     
     try {
-        // Fetch the tourist to get their booked itineraries
-        const tourist = await Tourist.findById(touristId);
+        let tourist = null;
+     
+        // Fetch the tourist if touristId is provided
+        if (touristId) {
+            // Populate the preferences array to access the `name` field from the referenced model
+            tourist = await Tourist.findById(touristId).populate('preferences');
+
+            if (!tourist) {
+                return res.status(404).json({ error: "Tourist not found" });
+            }
+
+            // If preferences is true, apply preferences filter
+            if (preferences === "true" && tourist.preferences?.length > 0) {
+                // Extract the `name` field from each preference
+                const preferenceNames = tourist.preferences.map(pref => pref.name);
+
+                // Ensure tags array contains at least one value from the extracted preference names
+                filter["tags"] = { $in: preferenceNames };
+            }
+        }
+
 
         // Get list of itinerary IDs that the tourist has booked
         const bookedItineraryIds = tourist ? tourist.bookedItineraries.map(item => item.itineraryId) : [];
@@ -874,7 +897,7 @@ const viewComplaints = async (req, res) => {
 
 const bookItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params; // Extracting touristId and itineraryId from URL parameters
-    const { bookingDate } = req.query;
+    const { bookingDate, paymentmethod } = req.query;
 
     try {
        
@@ -919,6 +942,14 @@ const bookItinerary = async (req, res) => {
         
         let newLevel = reqTourist.badge.level;
         let newAmount = oldAmount;
+
+        if(paymentmethod === 'wallet'){
+            if(reqTourist.wallet < itineraryPrice){
+                return res.status(400).json({ message: 'Insufficient funds in wallet' });
+            }
+            reqTourist.wallet -= itineraryPrice;
+            await reqTourist.save();
+        }
        
         if (newPoints > 100000) {
             newLevel = 2;
@@ -947,8 +978,33 @@ const bookItinerary = async (req, res) => {
             return res.status(404).json({ message: 'Tourist update failed' });
         }
 
+        const receiptHtml = `
+            <h2>Payment Receipt</h2>
+            <p>Thank you for booking with us!</p>
+            <p><strong>Itinerary:</strong> ${itineraryUpdate.title}</p>
+            <p><strong>Date:</strong> ${parsedDate.toDateString()}</p>
+            <p><strong>Amount Paid:</strong> $${itineraryPrice}</p>
+            <p>We hope you have a great experience!</p>
+        `;
+
+        // Send payment receipt via email
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'winggo567@gmail.com',
+                pass: 'smkg eghm yrzv yyir' // Ensure this is secure
+            }
+        });
+
+        await transporter.sendMail({
+            from: 'winggo567@gmail.com',
+            to: reqTourist.email,
+            subject: 'Payment Receipt for Your Itinerary Booking',
+            html: receiptHtml
+        });
+
         return res.status(200).json({
-            message: 'Booking successful',
+            message: 'Booking successful, receipt emailed',
             itinerary: itineraryUpdate,
             tourist: touristUpdate
         });
@@ -1107,7 +1163,8 @@ const redeemPoints = async (req, res) => {
 };
 const bookActivity = async (req, res) => {
     const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
-    const { numberOfPeople } = req.body; 
+    const { numberOfPeople, paymentmethod } = req.body;
+
     try {
         // Retrieve tourist details and check if the activityId is already booked
         const reqTourist = await Tourist.findById(touristId);
@@ -1119,14 +1176,13 @@ const bookActivity = async (req, res) => {
         const isAlreadyBooked = reqTourist.bookedActivities.some(
             (booking) => booking.toString() === activityId
         );
-
         if (isAlreadyBooked) {
             return res.status(400).json({ message: 'Activity already booked by this tourist' });
         }
 
         // Add the tourist to the activity's touristIDs array
         const activityUpdate = await Activity.findByIdAndUpdate(
-            activityId, 
+            activityId,
             { $addToSet: { touristIDs: touristId } }, // Use $addToSet to avoid duplicates
             { new: true }
         );
@@ -1134,17 +1190,28 @@ const bookActivity = async (req, res) => {
         if (!activityUpdate) {
             return res.status(404).json({ message: 'Activity not found or update failed' });
         }
+
         activityUpdate.sales += 1 * numberOfPeople; // Increment sales
         await activityUpdate.save();
+
         // Calculate new points and badge details based on the activity's price
         const activityPrice = activityUpdate.price;
         const oldAmount = reqTourist.badge.amount;
         const oldPoints = reqTourist.loyaltyPoints;
-        const newPoints = (activityPrice * oldAmount) + oldPoints;
+        const newPoints = activityPrice * oldAmount + oldPoints;
 
         // Determine new badge level and amount based on newPoints
         let newLevel = reqTourist.badge.level;
         let newAmount = oldAmount;
+
+        // Wallet payment handling
+        if (paymentmethod === 'wallet') {
+            if (reqTourist.wallet < activityPrice) {
+                return res.status(400).json({ message: 'Insufficient funds in wallet' });
+            }
+            reqTourist.wallet -= activityPrice;
+            await reqTourist.save();
+        }
 
         if (newPoints > 100000) {
             newLevel = 2;
@@ -1157,15 +1224,15 @@ const bookActivity = async (req, res) => {
 
         // Update the tourist's booked activities and other details
         const touristUpdate = await Tourist.findByIdAndUpdate(
-            touristId, 
-            { 
+            touristId,
+            {
                 $addToSet: { bookedActivities: activityId }, // Add the activity to bookedActivities
-                $set: { 
-                    loyaltyPoints: newPoints,          // Update loyalty points
-                    'badge.level': newLevel,           // Update badge level
-                    'badge.amount': newAmount          // Update badge amount
-                }
-            }, 
+                $set: {
+                    loyaltyPoints: newPoints, // Update loyalty points
+                    'badge.level': newLevel, // Update badge level
+                    'badge.amount': newAmount, // Update badge amount
+                },
+            },
             { new: true }
         );
 
@@ -1173,15 +1240,58 @@ const bookActivity = async (req, res) => {
             return res.status(404).json({ message: 'Tourist update failed' });
         }
 
+        // Create receipt HTML
+        const receiptHtml = `
+            <h2>Payment Receipt</h2>
+            <p><strong>Activity:</strong> ${activityUpdate.name}</p>
+            <p><strong>Date:</strong> ${activityUpdate.date.toDateString()}</p>
+            <p><strong>Amount Paid:</strong> $${activityPrice}</p>
+            <p>Thank you for booking with us!</p>
+            <p>We hope you have a great experience!</p>
+        `;
+
+        // Send payment receipt via email
+        try {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'winggo567@gmail.com',
+                    pass: 'smkg eghm yrzv yyir', // Ensure this is secure
+                },
+            });
+
+            await transporter.sendMail({
+                from: 'winggo567@gmail.com',
+                to: reqTourist.email,
+                subject: 'Payment Receipt for Your Activity Booking',
+                html: receiptHtml,
+            });
+        } catch (emailError) {
+            console.error('Error sending email:', emailError);
+            return res.status(500).json({
+                message: 'Booking successful, but failed to send receipt email.',
+                error: emailError.message,
+            });
+        }
+
+        // Success response
         return res.status(200).json({
-            message: 'Activity booking successful',
+            message: 'Booking successful, receipt emailed',
             activity: activityUpdate,
-            tourist: touristUpdate
+            tourist: touristUpdate,
         });
     } catch (error) {
-        return res.status(500).json({ message: 'Error during the activity booking process.', error });
+        // Detailed error handling
+        console.error('Error during booking process:', error);
+
+        // Check for specific error fields like `message` or fallback to generic error object
+        return res.status(500).json({
+            message: 'Error during the activity booking process.',
+            error: error.message || error.toString() || 'An unknown error occurred',
+        });
     }
 };
+
 const cancelActivity = async (req, res) => {
     const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
 
@@ -2160,7 +2270,7 @@ const shareProductViaEmail = async (req, res) => {
     //     }
     // };
 
-    const convertCurrency = async (amount, fromCurrency, toCurrency) => {
+const convertCurrency = async (amount, fromCurrency, toCurrency) => {
         try {
             const response = await axios.get('https://api.exchangerate-api.com/v4/latest/' + fromCurrency);
             const rate = response.data.rates[toCurrency];
@@ -2169,9 +2279,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error('Error converting currency:', error.message);
             throw new Error('Failed to convert currency');
         }
-    };
+};
 
-    const updateProductPricesToCurrency = async (req, res) => {
+const updateProductPricesToCurrency = async (req, res) => {
         const { currency = 'USD' } = req.query;  // Default currency is USD
     
         try {
@@ -2188,11 +2298,11 @@ const shareProductViaEmail = async (req, res) => {
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
-    };
+};
 
 
   
-    const searchHotelsByCity = async (cityCode) => {
+const searchHotelsByCity = async (cityCode) => {
 
         
 
@@ -2221,9 +2331,9 @@ const shareProductViaEmail = async (req, res) => {
             return { message: 'Error fetching token', error: error.response?.data || error.message };
         }
 
-    };
+};
 
-    const searchHotelsByGeoLocation = async (latitude,longitude) => {
+const searchHotelsByGeoLocation = async (latitude,longitude) => {
         
     
         if (!latitude || !longitude) {
@@ -2249,9 +2359,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error("Error fetching token:", error.response?.data || error.message);
             return { message: 'Error fetching token', error: error.response?.data || error.message };
         }
-    }
+};
 
-    const getHotelOffersByCity = async (req, res) => {
+const getHotelOffersByCity = async (req, res) => {
 
         const { cityCode } = req.query;
 
@@ -2291,9 +2401,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error("Error fetching token:", error.response?.data || error.message);
             res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
         }
-    }
+};
 
-    const getHotelOffersByLocation = async (req, res) => {
+const getHotelOffersByLocation = async (req, res) => {
 
         const { latitude, longitude } = req.query;
 
@@ -2334,9 +2444,9 @@ const shareProductViaEmail = async (req, res) => {
             res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
         }
 
-    };
+};
 
-    const bookHotel = async (req, res) => {
+const bookHotel = async (req, res) => {
 
         const { hotelOffers } = req.body;
         const { touristId } = req.params;
@@ -2457,9 +2567,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error('Error booking hotel:', error.response?.data || error.message);
             res.status(500).json({ message: 'Error booking hotel', error: error.response?.data || error.message });
         }
-    }
+};
 
-    const bookTransport = async (req, res) => {
+const bookTransport = async (req, res) => {
         const { touristId, transportId } = req.params;
     
         try {
@@ -2499,10 +2609,10 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ message: 'Error booking transport', error: error.message });
         }
-    };
+};
 
            
-    const getBookedItineraries = async (req, res) => {
+const getBookedItineraries = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2526,8 +2636,9 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
-    };   
-    const getBookedActivities = async (req, res) => {
+};  
+
+const getBookedActivities = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2550,9 +2661,9 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
-    };
+};
 
-    const getTouristUsername = async (req, res) => {
+const getTouristUsername = async (req, res) => {
         try {
             const { id } = req.params;
             const tourist = await Tourist.findById(id).select('username'); // Only select the username field
@@ -2565,7 +2676,8 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ message: "Server error", error });
         }
-    };    const getPurchasedProducts = async (req, res) => {
+};    
+const getPurchasedProducts = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2599,9 +2711,9 @@ const shareProductViaEmail = async (req, res) => {
             console.error("Error fetching purchased products:", error);
             res.status(500).json({ message: 'Error fetching purchased products', error });
         }
-    };
+};
 
-    const getUnbookedItineraries = async (req, res) => {
+const getUnbookedItineraries = async (req, res) => {
         const { touristId } = req.params;
     
         try {
@@ -2631,7 +2743,7 @@ const shareProductViaEmail = async (req, res) => {
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
-    };
+};
     
 
     // Check if a specific itinerary is booked by a tourist
@@ -2970,14 +3082,14 @@ const getNotifications = async (req, res) => {
   
   //// payments
   // Nodemailer setup
-  
-const transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: "winggo567@gmail.com",
       pass: "smkg eghm yrzv yyir"
     }
   });
+
   
   const payForProducts = async (req, res) => {
     const { touristId, productId } = req.params;
@@ -3041,128 +3153,162 @@ const transporter = nodemailer.createTransport({
   };
 
 
-  const payForOrder = async (req, res) => {
+
+
+const payForOrder = async (req, res) => {
     const { orderId } = req.params;
-    const { paymentMethod } = req.body; 
-  
+    const { paymentMethod, promoCode } = req.body;
+
     try {
-      // Fetch the order
-      const order = await Order.findById(orderId).populate('products.productId buyer');
-      if (!order) {
-        return res.status(404).json({ message: 'Order not found' });
-      }
-  
-      // Check if the order is already paid
-      if (order.paymentStatus === 'paid') {
-        return res.status(400).json({ message: 'Order has already been paid for' });
-      }
-  
-      const buyer = order.buyer;
-  
-      if (paymentMethod === 'wallet') {
-        // Check if buyer has sufficient wallet balance
-        if (buyer.wallet < order.totalPrice) {
-          return res.status(400).json({ message: 'Insufficient wallet balance' });
+        // Fetch the order
+        const order = await Order.findById(orderId).populate('products.productId buyer');
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
         }
-      
-        // Deduct the total price from buyer's wallet
-        buyer.wallet -= order.totalPrice;
-        await buyer.save(); // Save updated wallet only if using wallet
-      }
-      
-  
-      // Process each product in the order
-      const sellerNotifications = []; // Notifications for sellers
-      const adminNotifications = []; // Notifications for admins
-      const admins = await Admin.find(); // Fetch all admins
-  
-      for (const item of order.products) {
-        const product = await Product.findById(item.productId).populate('seller');
-  
-        if (!product) {
-          return res.status(404).json({ message: `Product with ID ${item.productId} not found` });
+
+        // Check if the order is already paid
+        if (order.paymentStatus === 'paid') {
+            return res.status(400).json({ message: 'Order has already been paid for' });
         }
-  
-        // Check if enough quantity is available
-        if (product.quantity < item.quantity) {
-          return res.status(400).json({
-            message: `Insufficient stock for product: ${product.name}`,
-          });
+
+        const buyer = order.buyer;
+        let totalPrice = order.totalPrice;
+        let promoCodeDetails = null;
+
+        // Validate promo code
+        if (promoCode) {
+            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date() ||
+                !buyer.promoCodes.includes(promoCodeDetails._id)
+            ) {
+                return res.status(400).json({ message: 'Invalid, expired, or unauthorized promo code' });
+            }
+            // Calculate discount
+            const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+            totalPrice -= discountAmount;
         }
-  
-        // Deduct quantity
-        product.quantity -= item.quantity;
-  
-        // Check if the product is out of stock
-        if (product.quantity === 0) {
-          if (product.seller) {
-            // Notify the seller in-app
-            sellerNotifications.push({
-              sellerId: product.seller._id,
-              notification: {
-                type: 'stock-alert',
-                message: `Your product '${product.name}' is now out of stock.`,
-                date: new Date(),
-              },
-            });
-  
-            // Send email notification to the seller
-            await transporter.sendMail({
-              from: "winggo567@gmail.com",
-              to: product.seller.email,
-              subject: 'Out of Stock Alert',
-              html: `<p>Your product <strong>${product.name}</strong> is now out of stock.</p>`,
-            });
-          } else {
-            // Notify all admins if the product was added by an admin
-            admins.forEach((admin) => {
-              adminNotifications.push({
-                adminId: admin._id,
-                notification: {
-                  type: 'stock-alert',
-                  message: `The product '${product.name}' (added by admin) is now out of stock.`,
-                  date: new Date(),
-                },
-              });
-  
-              // Send email notification to the admin
-              transporter.sendMail({
-                from: "winggo567@gmail.com",
-                to: admin.email,
-                subject: 'Out of Stock Alert',
-                html: `<p>The product <strong>${product.name}</strong> (added by admin) is now out of stock.</p>`,
-              });
-            });
-          }
+
+        // Check wallet balance if payment method is wallet
+        if (paymentMethod === 'wallet' && buyer.wallet < totalPrice) {
+            return res.status(400).json({ message: 'Insufficient wallet balance' });
         }
-  
-        // Save updated product
-        await product.save();
-      }
-  
-      // Update buyer's wallet and save
-      await buyer.save();
-  
-      // Mark order as paid
-      order.paymentStatus = 'paid';
-      await order.save();
-  
-      // Push notifications to sellers
-      for (const { sellerId, notification } of sellerNotifications) {
-        await Seller.findByIdAndUpdate(sellerId, { $push: { notifications: notification } });
-      }
-  
-      // Push notifications to admins
-      for (const { adminId, notification } of adminNotifications) {
-        await Admin.findByIdAndUpdate(adminId, { $push: { notifications: notification } });
-      }
-  
-      res.status(200).json({ message: 'Order payment successful', wallet: buyer.wallet });
+
+        // Validate product quantities
+        for (const item of order.products) {
+            const product = await Product.findById(item.productId);
+            if (!product) {
+                return res.status(404).json({ message: `Product with ID ${item.productId} not found` });
+            }
+            if (product.quantity < item.quantity) {
+                return res.status(400).json({ message: `Insufficient stock for product: ${product.name}` });
+            }
+        }
+
+        // Validation passed, proceed with updates
+        const sellerNotifications = []; // Notifications for sellers
+        const adminNotifications = []; // Notifications for admins
+        const admins = await Admin.find(); // Fetch all admins
+
+        for (const item of order.products) {
+            const product = await Product.findById(item.productId).populate('seller');
+
+            // Deduct quantity
+            product.quantity -= item.quantity;
+
+            // Update discounted prices or sales
+            if (promoCodeDetails) {
+                product.discountedPrices.push({
+                    promoCodeId: promoCodeDetails._id,
+                    totalDiscountedPrice: (product.price - ((promoCodeDetails.discount / 100) * product.price)) * item.quantity,
+                    quantity: item.quantity,
+                });
+            } else {
+                product.sales += item.quantity;
+            }
+
+            // Check if the product is out of stock
+            if (product.quantity === 0) {
+                if (product.seller) {
+                    // Notify the seller in-app
+                    sellerNotifications.push({
+                        sellerId: product.seller._id,
+                        notification: {
+                            type: 'stock-alert',
+                            message: `Your product '${product.name}' is now out of stock.`,
+                            date: new Date(),
+                        },
+                    });
+
+                    // Send email notification to the seller
+                    await transporter.sendMail({
+                        from: "winggo567@gmail.com",
+                        to: product.seller.email,
+                        subject: 'Out of Stock Alert',
+                        html: `<p>Your product <strong>${product.name}</strong> is now out of stock.</p>`,
+                    });
+                } else {
+                    // Notify all admins if the product was added by an admin
+                    admins.forEach((admin) => {
+                        adminNotifications.push({
+                            adminId: admin._id,
+                            notification: {
+                                type: 'stock-alert',
+                                message: `The product '${product.name}' (added by admin) is now out of stock.`,
+                                date: new Date(),
+                            },
+                        });
+
+                        // Send email notification to the admin
+                        transporter.sendMail({
+                            from: "winggo567@gmail.com",
+                            to: admin.email,
+                            subject: 'Out of Stock Alert',
+                            html: `<p>The product <strong>${product.name}</strong> (added by admin) is now out of stock.</p>`,
+                        });
+                    });
+                }
+            }
+
+            // Save updated product
+            await product.save();
+        }
+
+        // Deduct wallet balance if applicable
+        if (paymentMethod === 'wallet') {
+            buyer.wallet -= totalPrice;
+            await buyer.save();
+        }
+
+        // Mark promo code as used
+        if (promoCodeDetails) {
+            promoCodeDetails.isActive = false;
+            await promoCodeDetails.save();
+        }
+
+        // Mark order as paid
+        order.paymentStatus = 'paid';
+        await order.save();
+
+        // Push notifications to sellers
+        for (const { sellerId, notification } of sellerNotifications) {
+            await Seller.findByIdAndUpdate(sellerId, { $push: { notifications: notification } });
+        }
+
+        // Push notifications to admins
+        for (const { adminId, notification } of adminNotifications) {
+            await Admin.findByIdAndUpdate(adminId, { $push: { notifications: notification } });
+        }
+
+        res.status(200).json({ message: 'Order payment successful', wallet: buyer.wallet });
     } catch (error) {
-      console.error('Error processing payment:', error);
-      res.status(500).json({ message: 'Error processing payment', error });
+        console.error('Error processing payment:', error);
+        res.status(500).json({ message: 'Error processing payment', error });
     }
-  };
+};
+
 
   
     const getItemsInCart = async (req, res) => {
@@ -3198,10 +3344,6 @@ const transporter = nodemailer.createTransport({
         return res.status(500).json({ message: 'Error retrieving cart items.', error });
     }
 };
-
-
-
-
 
 
 //add item to wishlist
@@ -3347,99 +3489,89 @@ const addWishlistItemToCart = async (req, res) => {
     }
 };
 
-// Method to save an activity
-const saveActivity = async (req, res) => {
-    const { touristId, activityId } = req.params;
-
+//View order details & status
+const orderDetails=async(req,res)=>{
+    const { id } = req.params;
+    try{
+        const details=await Order.findById(id);
+        res.status(200).json(details);
+    } catch(error){
+        res.status(500).json({error:error.message});
+    }
+};
+//view past and current orders
+const viewAllorders = async (req, res) => {
+    const { touristId } = req.params; 
+  
     try {
-        // Validate if the activity exists
-        const activity = await Activity.findById(activityId);
-        if (!activity) {
-            return res.status(404).json({ message: "Activity not found" });
-        }
+      const orders = await Order.find({ buyer: touristId, paymentStatus:'paid' })
+        .sort({ createdAt: -1 }); 
+  
+      if (!orders || orders.length === 0) {
+        return res.status(404).json({ message: 'No orders found for this tourist' });
+      }
+  
+      res.status(200).json(orders); 
+    } catch (error) {
+      res.status(500).json({
+        message: 'Error fetching orders',
+        error: error.message,
+      });
+    }
+};
 
-        // Add the activity to the savedActivities array if not already added
+//cancel an order
+const cancelOrder = async (req, res) => {
+    const { touristId, orderId } = req.params; 
+  
+    try {
+      const order = await Order.findById( orderId );
+
+    //   if (!order) {
+    //     return res.status(404).json({ message: 'Order not found' });
+    //   }
+  
+    //   if (order.buyer.toString() !== touristId) {
+    //     return res.status(403).json({ message: 'You are not authorized to cancel this order' });
+    //   }
+  
+      if (order.orderStatus === 'cancelled') {
+        return res.status(400).json({ message: 'Order already cancelled' });
+      }
+
+      if (order.paymentStatus === 'paid') {
         const tourist = await Tourist.findById(touristId);
+  
         if (!tourist) {
-            return res.status(404).json({ message: "Tourist not found" });
+          return res.status(404).json({ message: 'Tourist not found' });
         }
+  
+        tourist.wallet += order.totalPrice;
+        order.paymentStatus='notPaid';
+        await tourist.save();
+      }
+  
+      order.orderStatus = 'cancelled';
 
-        if (!tourist.savedActivities.includes(activityId)) {
-            tourist.savedActivities.push(activityId);
-            await tourist.save();
-            return res.status(200).json({ message: "Activity saved successfully", savedActivities: tourist.savedActivities });
-        }
-
-        return res.status(400).json({ message: "Activity already saved" });
+      await order.save(); 
+  
+      res.status(200).json({ message: 'Order has been cancelled successfully', order });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "An error occurred", error });
+      res.status(500).json({
+        message: 'Error cancelling the order',
+        error: error.message,
+      });
     }
 };
-
-// Method to save an itinerary
-const saveItinerary = async (req, res) => {
-    const { touristId, itineraryId } = req.params;
-
-    try {
-        // Validate if the itinerary exists
-        const itinerary = await Itinerary.findById(itineraryId);
-        if (!itinerary) {
-            return res.status(404).json({ message: "Itinerary not found" });
-        }
-
-        // Add the itinerary to the savedItineraries array if not already added
-        const tourist = await Tourist.findById(touristId);
-        if (!tourist) {
-            return res.status(404).json({ message: "Tourist not found" });
-        }
-
-        if (!tourist.savedItineraries.includes(itineraryId)) {
-            tourist.savedItineraries.push(itineraryId);
-            await tourist.save();
-            return res.status(200).json({ message: "Itinerary saved successfully", savedItineraries: tourist.savedItineraries });
-        }
-
-        return res.status(400).json({ message: "Itinerary already saved" });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "An error occurred", error });
-    }
-};
-
-const viewAllSavedEvents = async (req, res) => {
-    const { touristId } = req.params;
-
-    try {
-        // Fetch the tourist's saved activities and itineraries with all fields
-        const tourist = await Tourist.findById(touristId)
-            .populate('savedActivities') // Fetch all fields from Activity schema
-            .populate('savedItineraries'); // Fetch all fields from Itinerary schema
-
-        if (!tourist) {
-            return res.status(404).json({ message: 'Tourist not found' });
-        }
-
-        const savedActivities = tourist.savedActivities;
-        const savedItineraries = tourist.savedItineraries;
-
-        return res.status(200).json({
-            message: 'Saved events retrieved successfully',
-            savedActivities,
-            savedItineraries
-        });
-
-    } catch (error) {
-        console.error('Error fetching saved events:', error);
-        return res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-
+  
 
 module.exports = {
     tourist_hello,
+    orderDetails,
+    viewAllorders,
     tourist_register,
     getTourist,
+    cancelOrder,
     updateTouristProfile,
     sortProductsByRatings,
     getAllProducts,

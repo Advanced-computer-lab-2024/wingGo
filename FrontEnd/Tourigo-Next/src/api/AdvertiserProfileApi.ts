@@ -17,6 +17,24 @@ export const viewAdvertiserProfile = async (id: string): Promise<any> => {
   }
 };
 
+
+export const updateAdvertiserProfile = async (id: string, updatedData: any): Promise<any> => {
+
+  try {
+    const response = await axios.put<any>(`${ADVERTISER_API_URL}/updateProfile/${id}`, updatedData);
+    console.log('Update response:', response);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || error.message;
+    } else {
+      throw error;
+    }
+  }
+}
+
+
 export const requestAccountDeletion = async (id: string): Promise<any> => {
   try {
     const response = await axios.delete<any>(`${ADVERTISER_API_URL}/requestAccountDeletion/${id}`);

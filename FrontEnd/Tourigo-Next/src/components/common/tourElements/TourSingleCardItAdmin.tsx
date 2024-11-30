@@ -12,7 +12,7 @@ import axios from "axios";
 import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked } from '@/api/itineraryApi';
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
-
+import Modal from "react-modal"; // Import Modal from react-modal
 
 interface ItourPropsType {
   tour: Itinerary; // Use Itinerary type
@@ -42,6 +42,7 @@ const TourSingleCard = ({
   const [isDeactivated, setIsDeactivated] = useState(tour.deactivated);
 
   const [isBooked, setIsBooked] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
 
   useEffect(() => {
@@ -68,10 +69,15 @@ const TourSingleCard = ({
 
 
   const handleFlagItinerary = async () => {
+    setIsModalOpen(true);
+  };
+
+  const confirmFlagActivity = async () => {
     try {
       // Toggle the flagged state in the backend
       await toggleFlagItinerary(tour._id, !isFlagged);
       setIsFlagged((prevFlagged) => !prevFlagged);
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error updating flagged status:", error);
     }
@@ -139,22 +145,6 @@ const TourSingleCard = ({
                     {tour.title}
                   </Link>
                 </h5>
-                {isAdmin && (
-                  <button
-                    onClick={handleFlagItinerary}
-                    className="flag-itinerary-button"
-                    style={{
-                      backgroundColor: isFlagged ? "green" : "red",
-                      color: "white",
-                      padding: "8px 16px",
-                      fontSize: "14px",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {isFlagged ? "Unflag" : "Flag"}
-                  </button>
-                )}
                 {isTourGuide && (
                   <button
                     onClick={handleToggleActivation}
@@ -187,16 +177,15 @@ const TourSingleCard = ({
                 </div>
                 <div className="tour-btn">
                 <button
-                    onClick={handleBookNowClick}
-                    className={`bd-text-btn style-two ${isBooked ? "disabled" : ""}`}
+                    onClick={handleFlagItinerary}
+                    className="bd-text-btn style-two"
                     type="button"
                     style={{
-                      cursor: isBooked ? "not-allowed" : "pointer",
-                      color: isBooked ? "gray" : "inherit",
+                      cursor: "pointer",
+                      color: isFlagged ? "blue" : "red",
                     }}
-                    disabled={isBooked}
                   >
-                    {isBooked ? "Booked!" : "Book Now"}
+                    {isFlagged ? "Unflag" : "Flag"}
                     <span className="icon__box">
                       <i className="fa-regular fa-arrow-right-long icon__first"></i>
                       <i className="fa-regular fa-arrow-right-long icon__second"></i>
@@ -210,6 +199,52 @@ const TourSingleCard = ({
       ) : (
         <div className={tourWrapperClass}></div>
       )}
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        contentLabel="Confirm Flag Activity"
+        style={{
+          content: {
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            width: '500px',
+            boxShadow: '0 5px 15px rgba(0, 0, 0, 0.3)'
+          },
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.75)'
+          }
+        }}
+      >
+        <h3>Confirm Flag Itinerary</h3>
+        <p>Are you sure you want to toggle the flag status?</p>
+        <div style={{ display: 'flex', marginTop: '20px' }}>
+          <button
+            onClick={confirmFlagActivity}
+            className="bd-primary-btn btn-style radius-60"
+            style={
+                {
+                    marginRight: '10px'
+            }
+        }
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className="bd-primary-btn btn-style radius-60"
+          >
+            No
+          </button>
+        </div>
+      </Modal>
     </>
   );
 };

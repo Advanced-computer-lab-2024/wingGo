@@ -1,7 +1,7 @@
 // TourGridRightTourGuide.tsx
 "use client";
 import React, { useEffect, useState } from "react";
-import TourSingleCard from "../common/tourElements/TourSingleCardIt";
+import TourSingleCard from "../common/tourElements/TourSingleCardItGuide";
 import { Itinerary } from "@/interFace/interFace";
 import { getTourGuideItinerariesData } from "@/data/it-data";
 import ItinerariesContentHeader from "@/elements/itineraries/it-header";

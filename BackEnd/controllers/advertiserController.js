@@ -45,11 +45,7 @@ const updateAdvertiserProfile = async (req, res) => {
             return res.status(404).json({ message: 'Advertiser not found' });
         }
 
-        // Check if the password is being updated
-        if (req.body.password) {
-            // Hash the new password before saving it
-            req.body.password = await bcrypt.hash(req.body.password, 10);
-        }
+        
 
         // Now update the login credentials as well
         const loginUpdateFields = {};
@@ -62,9 +58,18 @@ const updateAdvertiserProfile = async (req, res) => {
 
             loginUpdateFields.username = req.body.username;  // Username update
         }
-        if (req.body.password) {
-            loginUpdateFields.password = req.body.password;  // Use the hashed password
+
+        if (req.body.email && req.body.email !== advertiser.email) {
+            const existingEmail = await LoginCredentials.findOne
+            ({ email: req.body.email });
+
+            if (existingEmail) {
+                return res.status(400).json({ message: 'Email is already taken' });
+            }
+
+            loginUpdateFields.email = req.body.email;  // Email update
         }
+        
 
         // Update LoginCredentials if necessary
         if (Object.keys(loginUpdateFields).length > 0) {

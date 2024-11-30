@@ -42,7 +42,7 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <ProfileDetails profileData={profileData} id={id}/>;
+        return <ProfileDetails profileData={profileData} id={id} setRefreshData={setRefresh}/>;
       case 'loyalty':
         
         return <LoyaltyProgram profileData={profileData} id={id} refreshData={refresh} setRefreshData={setRefresh}/>;

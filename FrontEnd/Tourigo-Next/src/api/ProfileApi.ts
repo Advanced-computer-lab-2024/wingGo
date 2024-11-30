@@ -17,6 +17,21 @@ export const viewTouristProfile = async (id: string): Promise<any> => {
   }
 };
 
+export const updateTouristProfile = async (id: string, updatedData: any): Promise<any> => {
+  try {
+    const response = await axios.put<any>(`${TOURIST_API_URL}/update/${id}`, updatedData);
+    console.log('Update response:', response);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || error.message;
+    } else {
+      throw error;
+    }
+  }
+};
+
 export const deleteTouristProfile = async (id: string): Promise<any> => {
     try {
       const response = await axios.delete<any>(`${TOURIST_API_URL}/delete/${id}`);
