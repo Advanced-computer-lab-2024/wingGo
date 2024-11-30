@@ -81,7 +81,17 @@ flagged: {
   type: Boolean,
   default: false,  // Initially not flagged
 },
-touristIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }],
+// touristIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }],
+
+touristIDs: [
+  {
+    touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
+    paidPrice: { type: Number },
+    numberOfPeople: { type: Number, default: 1 },
+  },
+],
+
+
 averageRating: { type: Number, default: 0 }
 });
 

@@ -877,7 +877,7 @@ const viewComplaints = async (req, res) => {
 
 const bookItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params; // Extracting touristId and itineraryId from URL parameters
-    const { bookingDate, paymentmethod } = req.query;
+    const { numberOfPeople, paymentMethod, promoCode, bookingDate } = req.query;
 
     try {
        
@@ -904,7 +904,7 @@ const bookItinerary = async (req, res) => {
         }
         const itineraryUpdate = await Itinerary.findByIdAndUpdate(
             itineraryId, 
-            { $addToSet: { touristIDs: { touristId: touristId, bookingDate: parsedDate } } }, // Add the object with both touristId and bookingDate
+            // { $addToSet: { touristIDs: { touristId: touristId, bookingDate: parsedDate } } }, // Add the object with both touristId and bookingDate
             { new: true }
         );
         
@@ -913,23 +913,69 @@ const bookItinerary = async (req, res) => {
         }
         itineraryUpdate.sales += 1; // Increment sales by 1
         await itineraryUpdate.save(); // Save the updated itinerary with incremented sales
+      
 
-        // Calculate new points and badge details
-        const itineraryPrice = itineraryUpdate.price;
-        const oldAmount = reqTourist.badge.amount;
-        const oldPoints = reqTourist.loyaltyPoints;
-        const newPoints = (itineraryPrice * oldAmount) + oldPoints;
-        
-        let newLevel = reqTourist.badge.level;
-        let newAmount = oldAmount;
-
-        if(paymentmethod === 'wallet'){
-            if(reqTourist.wallet < itineraryPrice){
-                return res.status(400).json({ message: 'Insufficient funds in wallet' });
+            // Fetch itinerary details
+            const itinerary = await Itinerary.findById(itineraryId);
+            if (!itinerary) {
+                return res.status(404).json({ message: 'Itinerary not found' });
             }
-            reqTourist.wallet -= itineraryPrice;
+
+        let totalPrice = itinerary.price * numberOfPeople;
+        let promoCodeDetails = null;
+
+        // Validate and apply promo code
+        if (promoCode) {
+            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date() ||
+                !reqTourist.promoCodes.includes(promoCodeDetails._id)
+            ) {
+                return res.status(400).json({ message: 'Invalid, expired, or unauthorized promo code' });
+            }
+
+            const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+            totalPrice -= discountAmount;
+
+            // Mark promo code as used
+            promoCodeDetails.isActive = false;
+            await promoCodeDetails.save();
+        }
+
+        // Wallet payment handling
+        if (paymentMethod === 'wallet' && reqTourist.wallet < totalPrice) {
+            return res.status(400).json({ message: 'Insufficient funds in wallet' });
+        }
+
+        if (paymentMethod === 'wallet') {
+            reqTourist.wallet -= totalPrice;
             await reqTourist.save();
         }
+
+        // Update itinerary's touristIDs
+        itinerary.touristIDs.push({
+            touristId,
+            bookingDate: parsedDate,
+            paidPrice: totalPrice,
+            numberOfPeople,
+        });
+
+        // Update itinerary sales
+        if (!promoCodeDetails) {
+            itinerary.sales += numberOfPeople;
+        }
+        await itinerary.save();
+
+         // Calculate new points and badge details
+         const itineraryPrice = totalPrice;
+         const oldAmount = reqTourist.badge.amount;
+         const oldPoints = reqTourist.loyaltyPoints;
+         const newPoints = (itineraryPrice * oldAmount) + oldPoints;
+         
+         let newLevel = reqTourist.badge.level;
+         let newAmount = oldAmount;
        
         if (newPoints > 100000) {
             newLevel = 2;
@@ -1035,11 +1081,23 @@ const cancelItinerary = async (req, res) => {
         }
 
         // Step 4: Add the itinerary price to the tourist's wallet
-        if (!itinerary.price || isNaN(itinerary.price)) {
-            return res.status(400).json({ message: 'Itinerary price is invalid or missing.' });
+        // if (!itinerary.price || isNaN(itinerary.price)) {
+        //     return res.status(400).json({ message: 'Itinerary price is invalid or missing.' });
+        // }
+
+        // tourist.wallet = (tourist.wallet || 0) + itinerary.price;
+        // await tourist.save();
+
+        const touristEntry = itinerary.touristIDs.find(
+            entry => entry.touristId.toString() === touristId
+        );
+
+        if (!touristEntry) {
+            return res.status(404).json({ message: 'Booking not found for this tourist.' });
         }
 
-        tourist.wallet = (tourist.wallet || 0) + itinerary.price;
+        const paidPrice = touristEntry.paidPrice; // Retrieve the paid price
+        tourist.wallet = (tourist.wallet || 0) + paidPrice; // Refund the paid price
         await tourist.save();
 
         // Step 5: Remove the specific itinerary from the bookedItineraries array
@@ -1056,13 +1114,26 @@ const cancelItinerary = async (req, res) => {
         // Step 6: Remove the touristId from the itinerary's touristIDs array
         const itineraryUpdate = await Itinerary.findByIdAndUpdate(
             itineraryId,
-            { $pull: { touristIDs: { touristId: touristId } } },
+            { $pull: { touristIDs: { touristId: touristId } } }, // Match and remove the tourist entry
             { new: true }
         );
 
         if (!itineraryUpdate) {
             return res.status(404).json({ message: 'Itinerary not found or failed to update.' });
         }
+
+        await itineraryUpdate.save();
+
+        // itinerary.touristIDs = itinerary.touristIDs.filter(
+        //     entry => entry.touristId.toString() !== touristId
+        // );
+
+        // Update sales if no promo code was used (optional, based on previous logic)
+        if (!touristEntry.promoCodeId) {
+            itinerary.sales -= touristEntry.numberOfPeople;
+        }
+
+        await itinerary.save();
 
         return res.status(200).json({
             message: 'Itinerary cancelled successfully.',
@@ -1143,7 +1214,7 @@ const redeemPoints = async (req, res) => {
 };
 const bookActivity = async (req, res) => {
     const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
-    const { numberOfPeople, paymentmethod } = req.body;
+    const { numberOfPeople, paymentMethod, promoCode  } = req.body;
 
     try {
         // Retrieve tourist details and check if the activityId is already booked
@@ -1163,7 +1234,7 @@ const bookActivity = async (req, res) => {
         // Add the tourist to the activity's touristIDs array
         const activityUpdate = await Activity.findByIdAndUpdate(
             activityId,
-            { $addToSet: { touristIDs: touristId } }, // Use $addToSet to avoid duplicates
+            // { $addToSet: { touristIDs: touristId } }, // Use $addToSet to avoid duplicates
             { new: true }
         );
 
@@ -1171,27 +1242,77 @@ const bookActivity = async (req, res) => {
             return res.status(404).json({ message: 'Activity not found or update failed' });
         }
 
-        activityUpdate.sales += 1 * numberOfPeople; // Increment sales
-        await activityUpdate.save();
+        // activityUpdate.sales += 1 * numberOfPeople; // Increment sales
+        // await activityUpdate.save();
 
-        // Calculate new points and badge details based on the activity's price
-        const activityPrice = activityUpdate.price;
-        const oldAmount = reqTourist.badge.amount;
-        const oldPoints = reqTourist.loyaltyPoints;
-        const newPoints = activityPrice * oldAmount + oldPoints;
+          // Fetch activity details
+        const activity = await Activity.findById(activityId);
+        if (!activity || !activity.bookingOpen) {
+        return res.status(404).json({ message: 'Activity not found or booking closed' });
+        }
 
-        // Determine new badge level and amount based on newPoints
-        let newLevel = reqTourist.badge.level;
-        let newAmount = oldAmount;
+        let totalPrice = activity.price * numberOfPeople;
+        let promoCodeDetails = null;
+    
+        // Validate and apply promo code
+        if (promoCode) {
+          promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+          if (
+            !promoCodeDetails ||
+            !promoCodeDetails.isActive ||
+            promoCodeDetails.endDate < new Date() ||
+            !reqTourist.promoCodes.includes(promoCodeDetails._id)
+          ) {
+            return res.status(400).json({ message: 'Invalid, expired, or unauthorized promo code' });
+          }
+    
+          const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+          totalPrice -= discountAmount;
+    
+          // Mark promo code as used
+          promoCodeDetails.isActive = false;
+          await promoCodeDetails.save();
+        }
 
         // Wallet payment handling
-        if (paymentmethod === 'wallet') {
-            if (reqTourist.wallet < activityPrice) {
-                return res.status(400).json({ message: 'Insufficient funds in wallet' });
-            }
-            reqTourist.wallet -= activityPrice;
-            await reqTourist.save();
+        // Check payment method and wallet balance
+    if (paymentMethod === 'wallet' && reqTourist.wallet < totalPrice) {
+        return res.status(400).json({ message: 'Insufficient funds in wallet' });
+      }
+  
+      // Deduct wallet balance if applicable
+      if (paymentMethod === 'wallet') {
+        reqTourist.wallet -= totalPrice;
+        await reqTourist.save();
+      }
+
+              // Calculate new points and badge details based on the activity's price
+              const activityPrice = totalPrice;
+              const oldAmount = reqTourist.badge.amount;
+              const oldPoints = reqTourist.loyaltyPoints;
+              const newPoints = activityPrice * oldAmount + oldPoints;
+      
+              // Determine new badge level and amount based on newPoints
+              let newLevel = reqTourist.badge.level;
+              let newAmount = oldAmount;
+
+      // Update activity's touristIDs
+        activity.touristIDs.push({
+            touristId,
+            paidPrice: totalPrice,
+            numberOfPeople,
+        });
+    
+        // Update activity sales or bookings
+        if (!promoCodeDetails) {
+            activity.sales += numberOfPeople;
         }
+        // activity.numberOfPeople -= numberOfPeople; // Deduct spots booked
+        await activity.save();
+    
+        // Update tourist's booked activities
+        // reqTourist.bookedActivities.push(activityId);
+        await reqTourist.save();
 
         if (newPoints > 100000) {
             newLevel = 2;
@@ -1277,22 +1398,30 @@ const cancelActivity = async (req, res) => {
 
     try {
         // Step 1: Fetch the tourist with the given touristId and populate bookedActivities
-        const tourist = await Tourist.findById(touristId).populate('bookedActivities');
+        // const tourist = await Tourist.findById(touristId).populate('bookedActivities');
 
-        // Check if the tourist exists
-        if (!tourist) {
-            return res.status(404).json({ message: 'Tourist not found.' });
-        }
+        // // Check if the tourist exists
+        // if (!tourist) {
+        //     return res.status(404).json({ message: 'Tourist not found.' });
+        // }
 
         // Step 2: Check if the activity exists in the tourist's bookedActivities array
-        const activity = tourist.bookedActivities.find(
-            activity => activity._id.toString() === activityId
-        );
+        const activity = await Activity.findById(activityId);
+
+        // Check if the activity exists
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found.' });
+        }
 
         // console.log('Retrieved Activity:', activity); // Debugging line
 
-        if (!activity) {
-            return res.status(404).json({ message: 'Activity not found for this tourist.' });
+         // Step 2: Find the tourist entry in the activity's touristIDs array
+         const touristEntry = activity.touristIDs.find(
+            entry => entry.touristId.toString() === touristId
+        );
+
+        if (!touristEntry) {
+            return res.status(404).json({ message: 'Booking not found for this tourist.' });
         }
 
         // Step 3: Check if the booking date is more than 48 hours from now
@@ -1310,10 +1439,23 @@ const cancelActivity = async (req, res) => {
             return res.status(400).json({ message: 'Cannot cancel the activity within 48 hours of the booking date.' });
         }
          // Step 4: Add the price of the activity to the tourist's wallet
-         const activityPrice = activity.price; // Ensure the 'price' field exists in the Activity schema
-         tourist.wallet = (tourist.wallet || 0) + activityPrice;
+
+         const paidPrice = touristEntry.paidPrice; // Retrieve the paid price from the touristIDs array
+         const tourist = await Tourist.findById(touristId);
+ 
+         if (!tourist) {
+             return res.status(404).json({ message: 'Tourist not found.' });
+         }
+ 
+         tourist.wallet = (tourist.wallet || 0) + paidPrice;
+ 
          // Save the updated tourist document
-        await tourist.save();
+         await tourist.save();
+
+        //  const activityPrice = activity.price; // Ensure the 'price' field exists in the Activity schema
+        //  tourist.wallet = (tourist.wallet || 0) + activityPrice;
+        //  // Save the updated tourist document
+        // await tourist.save();
 
         // Step 4: Remove the specific activity from the bookedActivities array using $pull
         const touristUpdate = await Tourist.findByIdAndUpdate(
@@ -1329,9 +1471,20 @@ const cancelActivity = async (req, res) => {
         // Step 5: Remove the touristId from the activity's touristIDs array
         const activityUpdate = await Activity.findByIdAndUpdate(
             activityId,
-            { $pull: { touristIDs: touristId } },
+            { $pull: { touristIDs: { touristId: touristId } } },
             { new: true }
         );
+        await activityUpdate.save();
+
+         // Step 5: Remove the specific tourist entry from the activity's touristIDs array
+        //  activity.touristIDs = activity.touristIDs.filter(
+        //     entry => entry.touristId.toString() !== touristId
+        // );
+
+        // Update sales if no promo code was used (optional, based on previous logic)
+        if (!touristEntry.promoCodeId) {
+            activity.sales -= touristEntry.numberOfPeople;
+        }
 
         if (!activityUpdate) {
             return res.status(404).json({ message: 'Activity not found or failed to update.' });
@@ -1978,7 +2131,7 @@ const searchFlights = async (origin, destination, departureDate, accessToken) =>
 
 
 const bookFlight = async (req, res) => {
-    const { flightOffers } = req.body;
+    const { flightOffers, paymentMethod, promoCode } = req.body;
     const { touristId } = req.params;
 
     
@@ -2010,9 +2163,38 @@ const bookFlight = async (req, res) => {
     
   
       const validatedFlightOffer = priceValidationResponse;
-console.log("validatedFlightOffer:", validatedFlightOffer);
-      if(validatedFlightOffer.price.total > wallet){
-        return res.status(400).json({ message: 'Insufficient funds in wallet' });
+      console.log("validatedFlightOffer:", validatedFlightOffer);
+      
+      // Initialize and adjust total price based on promo code
+      let totalPrice = parseFloat(validatedFlightOffer.price.total); // Initialize total price
+      let promoCodeDetails = null;
+
+      if (promoCode) { // Validate and apply promo code
+          promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+          if (
+              !promoCodeDetails ||
+              !promoCodeDetails.isActive ||
+              promoCodeDetails.endDate < new Date() ||
+              !tourist.promoCodes.includes(promoCodeDetails._id)
+          ) {
+              return res.status(400).json({ message: 'Invalid, expired, or unauthorized promo code' });
+          }
+
+          const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+          totalPrice -= discountAmount;
+
+          // Mark promo code as used
+          promoCodeDetails.isActive = false;
+          await promoCodeDetails.save();
+      }
+
+      // This part is to be added or edited: Wallet payment handling
+        if (paymentMethod === 'wallet') {
+            if (wallet < totalPrice) { // Check if wallet has sufficient balance
+                return res.status(400).json({ message: 'Insufficient funds in wallet' });
+            }
+            wallet -= totalPrice; // Deduct the adjusted total price from the wallet
+            await Tourist.findByIdAndUpdate(touristId, { wallet });
         }
        
         // Step 2: Use the access token to create a booking with Amadeus
@@ -2064,9 +2246,9 @@ console.log("validatedFlightOffer:", validatedFlightOffer);
           arrivalDate: flightOffer.itineraries[0].segments.slice(-1)[0].arrival.at,
           duration: flightOffer.itineraries[0].duration,
           price: {
-            currency: flightOffer.price.currency,
-            total: flightOffer.price.total,
-          },
+                currency: flightOffer.price.currency,
+                total: totalPrice.toFixed(2), // Use the adjusted total price
+            },
           airline: flightOffer.validatingAirlineCodes[0],
           flightNumber: flightOffer.itineraries[0].segments[0].number,
           createdAt: new Date(),
@@ -2430,6 +2612,7 @@ const bookHotel = async (req, res) => {
 
         const { hotelOffers } = req.body;
         const { touristId } = req.params;
+        const { promoCode, paymentMethod } = req.body;
 
         try {
             const type = "hotel-order";
@@ -2456,14 +2639,42 @@ const bookHotel = async (req, res) => {
              const checkOutDate = hotelOffers.offers[0].checkOutDate;  // Check-out date
              const roomType = hotelOffers.offers[0].room.type;  // Room type
              const rateCode = hotelOffers.offers[0].rateCode;  // Rate code
-             const totalPrice = hotelOffers.offers[0].price.total;  // Total price for the offer
+             let totalPrice = hotelOffers.offers[0].price.total;  // Total price for the offer
              console.log("Total Price: ", totalPrice);
              const currency = hotelOffers.offers[0].price.currency;  // Currency of the offer
 
-            if(wallet < totalPrice){
+
+             // ///////////////////////////// Promo Code Validation and Application Start /////////////////////////////
+        if (promoCode) {
+            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date() ||
+                !tourist.promoCodes.includes(promoCodeDetails._id)
+            ) {
+                return res.status(400).json({ message: 'Invalid, expired, or unauthorized promo code' });
+            }
+
+            const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+            totalPrice -= discountAmount;
+            promoCodeDetails.isActive = false; // Mark promo code as used
+            await promoCodeDetails.save();
+        }
+        // ///////////////////////////// Promo Code Validation and Application End /////////////////////////////
+
+            
+           // ///////////////////////////// Wallet Payment Handling Start /////////////////////////////
+        if (paymentMethod === 'wallet') {
+            if (wallet < totalPrice) {
                 return res.status(400).json({ message: 'Insufficient funds in wallet' });
             }
+
             const newWallet = wallet - totalPrice;
+            await Tourist.findByIdAndUpdate(touristId, { wallet: newWallet });
+        }
+        // ///////////////////////////// Wallet Payment Handling End /////////////////////////////
+
 
             const bookingResponse = await axios.post(
                 'https://test.api.amadeus.com/v2/booking/hotel-orders',
@@ -2551,6 +2762,7 @@ const bookHotel = async (req, res) => {
 
 const bookTransport = async (req, res) => {
         const { touristId, transportId } = req.params;
+        const { paymentMethod, promoCode } = req.body; 
     
         try {
             // Find the tourist by ID
@@ -2565,13 +2777,46 @@ const bookTransport = async (req, res) => {
                 return res.status(404).json({ message: 'Transport not found' });
             }
     
-            // Check if the tourist has enough funds in their wallet
-            if (tourist.wallet < transport.price) {
+            // // Check if the tourist has enough funds in their wallet
+            // if (tourist.wallet < transport.price) {
+            //     return res.status(400).json({ message: 'Insufficient funds in wallet' });
+            // }
+    
+            // // Subtract the price of the transport from the tourist's wallet
+            // tourist.wallet -= transport.price;
+
+        let totalPrice = transport.price; // // This part will be added to initialize total price
+        let promoCodeDetails = null;
+
+        // // This part will be added: Validate and apply promo code
+        if (promoCode) {
+            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date() ||
+                !tourist.promoCodes.includes(promoCodeDetails._id)
+            ) {
+                return res.status(400).json({ message: 'Invalid, expired, or unauthorized promo code' });
+            }
+
+            const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+            totalPrice -= discountAmount;
+
+            // Mark promo code as used
+            promoCodeDetails.isActive = false;
+            await promoCodeDetails.save();
+        }
+
+        // // This part will be edited: Wallet payment handling
+        if (paymentMethod === 'wallet') {
+            if (tourist.wallet < totalPrice) {
                 return res.status(400).json({ message: 'Insufficient funds in wallet' });
             }
-    
-            // Subtract the price of the transport from the tourist's wallet
-            tourist.wallet -= transport.price;
+
+            // Deduct from wallet
+            tourist.wallet -= totalPrice;
+        }
     
             // Add the tourist ID to the transport's touristID field
             transport.touristID = touristId;
@@ -2583,6 +2828,7 @@ const bookTransport = async (req, res) => {
     
             res.status(200).json({
                 message: 'Transport booked successfully',
+                totalPrice,
                 transport,
                 tourist
             });
@@ -3169,6 +3415,10 @@ const payForOrder = async (req, res) => {
             // Calculate discount
             const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
             totalPrice -= discountAmount;
+
+            // Update the order's total price with the discounted price
+            order.totalPrice = totalPrice;
+            await order.save();
         }
 
         // Check wallet balance if payment method is wallet

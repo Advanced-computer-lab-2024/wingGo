@@ -47,10 +47,17 @@ const itinerarySchema = new Schema({
         type: Boolean,
         default: false,  // Initially not deactivated
       },
-  touristIDs: [{
+//   touristIDs: [{
+//     touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
+//     bookingDate: { type: Date} // Default to the current date
+// }]
+touristIDs: [{
     touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
-    bookingDate: { type: Date} // Default to the current date
+    bookingDate: { type: Date }, // Booking date logic remains
+    paidPrice: { type: Number }, // Price paid for this booking
+    numberOfPeople: { type: Number, default: 1 } // Default 1 person
 }]
+
 }, { timestamps: true });
 
 
