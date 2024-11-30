@@ -616,7 +616,7 @@ const getAllUpcomingPlaces = async (req, res) => {
 
 
 const filterUpcomingActivities = async (req, res) => {
-    const { budget, date, category, ratings } = req.query; 
+    const { budget, date, category, averageRating } = req.query; 
     // let filter = {}; // Initialize an empty filter object
     let filter = { date: { $gte: new Date() }
     // ,flagged: false
@@ -627,13 +627,17 @@ const filterUpcomingActivities = async (req, res) => {
         filter.price = { $lte: budget }; // Price less than or equal to the specified budget
     }
 
-    // Apply exact date filter (if provided)
-    if (date) {
-        const startOfDay = new Date(date);
-        const endOfDay = new Date(date);
-        endOfDay.setHours(23, 59, 59, 999); // Set to the end of the day
+     // Apply exact date filter
+     if (date) {
+        // Parse the incoming date in local time
+        const localDate = new Date(`${date}T00:00:00`); // YYYY-MM-DDT00:00:00 in local time
 
-        filter.date = { $gte: startOfDay, $lte: endOfDay }; // Activities on the exact specified date
+        // Convert to UTC start and end of day
+        const startOfDay = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000); // UTC start
+        const endOfDay = new Date(startOfDay);
+        endOfDay.setUTCHours(23, 59, 59, 999); // UTC end of day
+
+        filter.date = { $gte: startOfDay, $lte: endOfDay };
     }
 
     // Apply category filter (if provided)
@@ -641,9 +645,9 @@ const filterUpcomingActivities = async (req, res) => {
         filter.category = category; // Exact match for category
     }
 
-    // Apply ratings filter (if provided)
-    if (ratings) {
-        filter.ratings = ratings; // Ratings greater than or equal to the provided rating
+    // Apply averageRating filter (if provided)
+    if (averageRating) {
+        filter.averageRating = { $gte: parseFloat(averageRating) }; // Ensure the value is a float and filter activities
     }
 
     try {
@@ -759,20 +763,36 @@ const filterItineraries = async (req, res) => {
         filter.price = { $lte: budget }; // Price should be less than or equal to the specified budget
     }
 
-    // Apply preferences filter (e.g., historic areas, beaches)
-    if (preferences) {
-        const preferenceArray = preferences.split(','); // Assuming preferences are provided as a comma-separated string
-        filter.tags = { $in: preferenceArray }; // Match itineraries that have at least one of the specified tags
-    }
+    
 
     // Apply language filter
     if (language) {
+        
         filter.language = language; // Exact match for language
     }
-
+     
     try {
-        // Fetch the tourist to get their booked itineraries
-        const tourist = await Tourist.findById(touristId);
+        let tourist = null;
+     
+        // Fetch the tourist if touristId is provided
+        if (touristId) {
+            // Populate the preferences array to access the `name` field from the referenced model
+            tourist = await Tourist.findById(touristId).populate('preferences');
+
+            if (!tourist) {
+                return res.status(404).json({ error: "Tourist not found" });
+            }
+
+            // If preferences is true, apply preferences filter
+            if (preferences === "true" && tourist.preferences?.length > 0) {
+                // Extract the `name` field from each preference
+                const preferenceNames = tourist.preferences.map(pref => pref.name);
+
+                // Ensure tags array contains at least one value from the extracted preference names
+                filter["tags"] = { $in: preferenceNames };
+            }
+        }
+
 
         // Get list of itinerary IDs that the tourist has booked
         const bookedItineraryIds = tourist ? tourist.bookedItineraries.map(item => item.itineraryId) : [];

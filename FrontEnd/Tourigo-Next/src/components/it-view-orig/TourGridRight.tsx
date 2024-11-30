@@ -6,35 +6,61 @@ import { Itinerary } from "@/interFace/interFace";
 import { getItinerariesData, getFilteredItinerariesData } from "@/data/it-data";
 import ItinerariesContentHeader from "@/elements/itineraries/it-header";
 import ItinerariesSidebarMain from "../itinerariesSidebar/ItinerariesSidebarMain";
+import { filterItineraries } from "@/api/itineraryApi";
 
 interface FilterOptions {
-  budgetMin?: number;
-  budgetMax?: number;
+  budget?: number;
   date?: string;
   preferences?: string;
   language?: string;
-  touristId?: string;
+  touristId?: string
+
 }
 
 const TourGridRight = () => {
-  const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [filteredItineraries, setFilteredItineraries] = useState<Itinerary[]>([]);
   const [filters, setFilters] = useState<FilterOptions>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sortOption, setSortOption] = useState<string>("Default"); // Track the last sort option
+  const [sortOption, setSortOption] = useState<string>("Default");
 
-  // Load initial data
+  // Fetch filtered activities from the API
+  const loadFilteredItineraries = async () => {
+    try {
+      const apiFilters: FilterOptions = {
+        budget: filters.budget,
+        preferences: filters.preferences,
+        date: filters.date,
+        language: filters.language,
+        touristId:'67240ed8c40a7f3005a1d01d'
+      };
+
+      const data = await filterItineraries(apiFilters);
+
+      // Apply local search filtering if searchQuery is provided
+      const finalFilteredData = searchQuery
+        ? data.filter(
+            (itinerary) =>
+              itinerary.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              itinerary.category?.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : data;
+
+      // Apply sorting after fetching and filtering
+      const sortedData = sortData(finalFilteredData, sortOption);
+      setFilteredItineraries(sortedData);
+    } catch (error) {
+      console.error("Failed to fetch filtered itineraries:", error);
+    }
+  };
+
+  // Load filtered activities whenever filters, searchQuery, or sortOption change
   useEffect(() => {
-    const loadInitialData = async () => {
-      const data = await getItinerariesData();
-      setItineraries(data);
-      setFilteredItineraries(data); // Initialize with full data
-    };
-    loadInitialData();
-  }, []);
+    loadFilteredItineraries();
+  }, [filters, searchQuery, sortOption]);
 
-  const sortData = (data: Itinerary[], option: string) => {
-    let sortedData = [...data];
+  const sortData = (data: Itinerary[], option: string): Itinerary[] => {
+    let sortedData = [...data]; // Copy the array to avoid mutating the original data
+
     switch (option) {
       case "Rating: High to Low":
         sortedData.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
@@ -50,53 +76,27 @@ const TourGridRight = () => {
         break;
       case "Default":
       default:
-        sortedData = itineraries; // Reset to the original order if Default
+        // No sorting; return data as is
         break;
     }
+
     return sortedData;
   };
-  
 
   const applyFilters = (newFilters: FilterOptions) => {
-    setFilters(newFilters);
-  
-    let filteredData = itineraries.filter((itinerary) => {
-      let matches = true;
-  
-      // Check if both min and max price filters are defined
-      if (newFilters.budgetMin !== undefined) matches = matches && itinerary.price >= newFilters.budgetMin;
-      if (newFilters.budgetMax !== undefined) matches = matches && itinerary.price <= newFilters.budgetMax;
-  
-      // Additional filters (e.g., language)
-      if (newFilters.language) matches = matches && itinerary.language === newFilters.language;
-      
-      return matches;
-    });
-  
-    // Reapply sorting after filtering
-    filteredData = sortData(filteredData, sortOption);
-    setFilteredItineraries(filteredData);
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      ...newFilters, // Update filters with new values
+    }));
   };
 
   const applySearch = (query: string) => {
     setSearchQuery(query);
-    if (query) {
-      const searchedData = filteredItineraries.filter(itinerary =>
-        itinerary.title.toLowerCase().includes(query.toLowerCase()) ||
-        itinerary.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
-      );
-      setFilteredItineraries(searchedData);
-    } else {
-      // Reset to filtered data if query is cleared
-      applyFilters(filters);
-    }
   };
 
-const handleSortChange = (selectedOption: string) => {
-  setSortOption(selectedOption);
-  const sortedData = sortData(filteredItineraries, selectedOption);
-  setFilteredItineraries(sortedData);
-};
+  const handleSortChange = (selectedOption: string) => {
+    setSortOption(selectedOption); // Update the current sorting option
+  };
 
 
   return (

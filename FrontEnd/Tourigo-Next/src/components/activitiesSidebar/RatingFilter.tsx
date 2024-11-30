@@ -1,25 +1,21 @@
-// RangeFilter.tsx
+// RatingFilter.tsx
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Range, getTrackBackground } from "react-range";
 
-const STEP = 0.1;
-const MIN = 0;
-const MAX = 500;
+const STEP = 1; // Increment by whole numbers (0, 1, 2, 3, 4, 5)
+const MIN = 0; // Minimum value for ratings
+const MAX = 5; // Maximum value for ratings
 
-interface RangeFilterProps {
+interface RatingFilterProps {
   onChange: (range: number[]) => void; // Explicitly define the type for onChange
 }
 
-interface RangeFilterProps {
-  onChange: (range: number[]) => void; // Explicitly define the type for onChange
-}
+const RatingFilter: React.FC<RatingFilterProps> = ({ onChange }) => {
+  const [values, setValues] = useState([MIN]); // Start with the minimum value
 
-const RangeFilter: React.FC<RangeFilterProps> = ({ onChange }) => {
-  const [values, setValues] = useState([MIN, 225]);
-
-  const handleFilterByRange = (updatedValues: number[]) => {
-    const newValues = [MIN, updatedValues[1]]; // Fix the min to 0
+  const handleFilterByRating = (updatedValues: number[]) => {
+    const newValues = [updatedValues[0], MAX]; // Fix the max to 5
     setValues(newValues);
     onChange(newValues); // Send the new range to the parent
   };
@@ -32,7 +28,7 @@ const RangeFilter: React.FC<RangeFilterProps> = ({ onChange }) => {
           step={STEP}
           min={MIN}
           max={MAX}
-          onChange={(updatedValues) => handleFilterByRange(updatedValues)}
+          onChange={(updatedValues) => handleFilterByRating(updatedValues)}
           renderTrack={({ props, children }) => (
             <div
               className="slider-range-wrap-inner"
@@ -46,7 +42,7 @@ const RangeFilter: React.FC<RangeFilterProps> = ({ onChange }) => {
                   width: "100%",
                   borderRadius: "4px",
                   background: getTrackBackground({
-                    values,
+                    values: [values[0], MAX],
                     colors: ["#ccc", "#006CE4", "#ccc"],
                     min: MIN,
                     max: MAX,
@@ -67,7 +63,7 @@ const RangeFilter: React.FC<RangeFilterProps> = ({ onChange }) => {
         <label htmlFor="amount">
           <input
             type="text"
-            value={`$${values[0].toFixed(1)} - $${values[1].toFixed(1)}`}
+            value={`${values[0]} - ${MAX} stars`}
             readOnly
             id="amount"
           />
@@ -77,4 +73,5 @@ const RangeFilter: React.FC<RangeFilterProps> = ({ onChange }) => {
   );
 };
 
-export default RangeFilter;
+export default RatingFilter;
+
