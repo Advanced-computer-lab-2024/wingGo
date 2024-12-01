@@ -112,4 +112,9 @@ router.post('/createPromoCode', adminController.createPromoCode);
 router.get('/sales-report', adminController.getSalesReport);
 router.get('/getAllUsers', adminController.getAllUsers);
 router.get('/searchUser', adminController.searchForUserByUsername);
+
+
+router.get('/admin/user-statistics', adminController.getUserStatistics);
+
+
 module.exports = router;

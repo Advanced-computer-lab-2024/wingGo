@@ -1533,7 +1533,34 @@ const searchForUserByUsername = async (req, res) => {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  };
+  }
+  const getUserStatistics = async (req, res) => {
+    try {
+        // Fetch the total number of users
+        const totalUsers = await LoginCredentials.countDocuments();
+
+        // Aggregate new users per month
+        const newUsersByMonth = await LoginCredentials.aggregate([
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+                    newUsers: { $sum: 1 },
+                },
+            },
+            { $sort: { _id: 1 } }, // Sort by date ascending
+        ]);
+
+        // Format the response
+        res.status(200).json({
+            totalUsers,
+            newUsersByMonth,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+  ;
 
   
 
@@ -1593,5 +1620,6 @@ module.exports = {
     createPromoCode,
     getSalesReport,
     getAllUsers,
-    searchForUserByUsername
+    searchForUserByUsername,
+    getUserStatistics
 };
