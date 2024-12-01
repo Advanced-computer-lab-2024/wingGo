@@ -1366,50 +1366,112 @@ const createPromoCode = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 const getSalesReport = async (req, res) => {
     try {
-        // 1. Activities
-        const activities = await Activity.find();
-        const filteredActivities = activities.filter(activity => activity.sales > 0); // Filter for sales > 0
-        const activityDetails = filteredActivities.map(activity => ({
-            name: activity.name,
-            sales: activity.sales,
-            revenue: activity.sales * activity.price, // Total revenue
-            appRevenue: (activity.sales * activity.price) * 0.10, // 10% of total revenue
-        }));
-        const totalActivitySales = activityDetails.reduce((sum, activity) => sum + activity.sales, 0);
-        const totalActivityRevenue = activityDetails.reduce((sum, activity) => sum + activity.revenue, 0);
-        const totalActivityAppRevenue = activityDetails.reduce((sum, activity) => sum + activity.appRevenue, 0);
+         // 1. Activities
+         const activities = await Activity.find();
+         const activityDetails = activities.map(activity => {
+             // Calculate total sales (number of people) dynamically
+             const sales = activity.touristIDs.reduce(
+                 (sum, entry) => sum + entry.numberOfPeople,
+                 0
+             ); // Sum up numberOfPeople from touristIDs
+ 
+             // Calculate total revenue from the paidPrice field
+             const revenue = activity.touristIDs.reduce(
+                 (sum, entry) => sum + entry.paidPrice,
+                 0
+             );
+ 
+             return {
+                 name: activity.name,
+                 sales, // Total number of people who booked
+                 revenue, // Total revenue from all bookings
+                 appRevenue: revenue * 0.10, // 10% of total revenue
+             };
+         });
+ 
+         const totalActivitySales = activityDetails.reduce((sum, activity) => sum + activity.sales, 0);
+         const totalActivityRevenue = activityDetails.reduce((sum, activity) => sum + activity.revenue, 0);
+         const totalActivityAppRevenue = activityDetails.reduce((sum, activity) => sum + activity.appRevenue, 0);
+ 
+        
 
-        // 2. Itineraries
-        const itineraries = await Itinerary.find();
-        const filteredItineraries = itineraries.filter(itinerary => itinerary.sales > 0); // Filter for sales > 0
-        const itineraryDetails = filteredItineraries.map(itinerary => ({
-            name: itinerary.title,
-            sales: itinerary.sales,
-            revenue: itinerary.sales * itinerary.price, // Total revenue
-            appRevenue: (itinerary.sales * itinerary.price) * 0.10, // 10% of total revenue
-        }));
-        const totalItinerarySales = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.sales, 0);
-        const totalItineraryRevenue = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.revenue, 0);
-        const totalItineraryAppRevenue = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.appRevenue, 0);
+         // 2. Itineraries
+         const itineraries = await Itinerary.find();
+         const itineraryDetails = itineraries.map(itinerary => {
+             // Calculate total sales (number of people) dynamically
+             const sales = itinerary.touristIDs.reduce(
+                 (sum, entry) => sum + entry.numberOfPeople,
+                 0
+             );
+ 
+             // Calculate total revenue from the paidPrice field
+             const revenue = itinerary.touristIDs.reduce(
+                 (sum, entry) => sum + entry.paidPrice,
+                 0
+             );
+ 
+             return {
+                 name: itinerary.title,
+                 sales, // Total number of people who booked
+                 revenue, // Total revenue from all bookings
+                 appRevenue: revenue * 0.10, // 10% of total revenue
+             };
+         });
+ 
+         const totalItinerarySales = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.sales, 0);
+         const totalItineraryRevenue = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.revenue, 0);
+         const totalItineraryAppRevenue = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.appRevenue, 0);
+ 
 
         // 3. Products
         const products = await Product.find();
-        const filteredProducts = products.filter(product => product.sales > 0); // Filter for sales > 0
-        const productDetails = filteredProducts.map(product => ({
-            name: product.name,
-            sales: product.sales,
-            revenue: product.sales * product.price, // Total revenue
-            appRevenue: (product.sales * product.price) * 0.10, // 10% of total revenue
-        }));
+
+        // Map over the products to calculate sales and revenue dynamically
+        const productDetails = products.map(product => {
+            // Calculate the total quantity from the discountedPrices array
+            const discountedQuantities = product.discountedPrices.reduce(
+                (sum, entry) => sum + entry.quantity,
+                0
+            );
+
+            // Calculate the total discounted revenue from the discountedPrices array
+            const discountedRevenue = product.discountedPrices.reduce(
+                (sum, entry) => sum + entry.totalDiscountedPrice,
+                0
+            );
+
+            // Combine sales from the sales field and quantities from the discountedPrices array
+            const totalSales = product.sales + discountedQuantities;
+
+            // Combine revenue from sales (non-discounted) and discountedRevenue
+            const revenue = product.sales * product.price + discountedRevenue;
+
+            // Determine app revenue based on whether the seller ID is null
+            const appRevenue = product.seller
+            ? revenue * 0.10 // 10% of total revenue for seller-added products
+            : revenue; // Full revenue for admin-added products
+
+            return {
+                name: product.name,
+                sales: totalSales, // Total sales combining sales field and discounted quantities
+                revenue, // Total revenue combining both non-discounted and discounted sales
+                appRevenue, // 10% of total revenue
+            };
+        });
+
+        // Calculate totals for products
         const totalProductSales = productDetails.reduce((sum, product) => sum + product.sales, 0);
         const totalProductRevenue = productDetails.reduce((sum, product) => sum + product.revenue, 0);
+        const totalProductAppRevenue = productDetails.reduce((sum, product) => sum + product.appRevenue, 0);
+
        
         // 4. Grand Total
         const grandTotalSales = totalActivitySales + totalItinerarySales + totalProductSales;
         const grandTotalRevenue = totalActivityRevenue + totalItineraryRevenue + totalProductRevenue;
-        const grandTotalAppRevenue = totalActivityAppRevenue + totalItineraryAppRevenue ;
+        const grandTotalAppRevenue = totalActivityAppRevenue + totalItineraryAppRevenue + totalProductAppRevenue ;
 
         // 5. Response
         res.status(200).json({

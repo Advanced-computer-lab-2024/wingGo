@@ -42,4 +42,7 @@ router.put('/activateOrDeactivateItinerary/:id', tourGuideController.activateOrD
 router.get('/sales-report/:tourGuideId', tourGuideController.getSalesReport);
 router.get('/tourist-report/:tourGuideId', tourGuideController.getTouristReport);
 
+router.put('/openBooking/:id', tourGuideController.openBooking);
+
+
 module.exports = router;

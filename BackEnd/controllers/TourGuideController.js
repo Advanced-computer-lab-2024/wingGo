@@ -2,12 +2,20 @@ const bcrypt = require('bcrypt');
 const TourGuide = require('../models/TourGuide');
 const LoginCredentials = require('../models/LoginCredentials'); 
 const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
-
-
+const nodemailer = require('nodemailer');
 const axios = require('axios');
 const Itinerary = require('../models/Itinerary');
 const getCoordinates = require('../helpers/getCoordinates');
+const Tourist = require('../models/tourist');
 
+  // Nodemailer setup
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: "winggo567@gmail.com",
+      pass: "smkg eghm yrzv yyir"
+    }
+  });
 
 // Get a tour guide by id
 const getTourGuide = async (req, res) => {
@@ -440,36 +448,51 @@ const previewPhoto = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 const getSalesReport = async (req, res) => {
     const { tourGuideId } = req.params; // Extract Tour Guide ID from URL parameters
 
     try {
-        // 1. Fetch itineraries for the specific tour guide with sales > 0
-        const itineraries = await Itinerary.find({ tourGuideId, sales: { $gt: 0 } }); // Exclude itineraries with sales = 0
-        const itineraryDetails = itineraries.map(itinerary => ({
-            name: itinerary.title,
-            sales: itinerary.sales,
-            revenue: itinerary.sales * itinerary.price, // Total revenue for the itinerary
-        }));
+        // 1. Fetch itineraries for the specific tour guide
+        const itineraries = await Itinerary.find({ tourGuideId }); // Fetch all itineraries for this tour guide
+        const itineraryDetails = itineraries.map(itinerary => {
+            // Calculate total sales (number of people) dynamically
+            const sales = itinerary.touristIDs.reduce(
+                (sum, entry) => sum + entry.numberOfPeople,
+                0
+            );
+
+            // Calculate total revenue from the paidPrice field
+            const revenue = itinerary.touristIDs.reduce(
+                (sum, entry) => sum + entry.paidPrice,
+                0
+            );
+
+            return {
+                name: itinerary.title,
+                sales, // Total number of people who booked
+                revenue, // Total revenue from all bookings
+            };
+        });
+
+        // Calculate totals
         const totalItinerarySales = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.sales, 0);
         const totalItineraryRevenue = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.revenue, 0);
 
-        // 2. Grand Total Revenue (if needed)
-        const grandTotalSales = totalItinerarySales;
-        const grandTotalRevenue = totalItineraryRevenue;
+        const netItineraryRevenue = totalItineraryRevenue - (totalItineraryRevenue * 0.10);
 
-        // 3. Response
+        // Response
         res.status(200).json({
             success: true,
             data: {
                 itineraries: {
                     details: itineraryDetails,
                     totalSales: totalItinerarySales,
-                    totalRevenue: totalItineraryRevenue,
+                    totalRevenue: netItineraryRevenue,
                 },
                 totals: {
-                    totalSales: grandTotalSales,
-                    totalRevenue: grandTotalRevenue,
+                    totalSales: totalItinerarySales,
+                    totalRevenue: netItineraryRevenue,
                 },
             },
         });
@@ -481,6 +504,7 @@ const getSalesReport = async (req, res) => {
         });
     }
 };
+
 const getTouristReport = async (req, res) => {
     const { tourGuideId } = req.params; // Extract Tour Guide ID from URL parameters
 
@@ -495,12 +519,19 @@ const getTouristReport = async (req, res) => {
                     return new Date(tourist.bookingDate) < new Date(); // Check if the booking date has passed
                 });
 
+                // Sum up the total number of people from pastTourists
+                const totalTourists = pastTourists.reduce(
+                    (sum, entry) => sum + entry.numberOfPeople,
+                    0
+                );
+
                 return {
                     name: itinerary.title,
-                    totalTourists: pastTourists.length, // Count only tourists with passed dates
+                    totalTourists, // Count only tourists with passed dates
                     details: pastTourists.map(tourist => ({
                         touristId: tourist.touristId,
                         bookingDate: tourist.bookingDate,
+                        numberOfPeople: tourist.numberOfPeople,
                     })),
                 };
             })
@@ -508,6 +539,7 @@ const getTouristReport = async (req, res) => {
 
         // 3. Calculate the total number of tourists across all itineraries
         const totalTourists = itineraryDetails.reduce((sum, itinerary) => sum + itinerary.totalTourists, 0);
+
 
         // 4. Response
         res.status(200).json({
@@ -527,6 +559,78 @@ const getTouristReport = async (req, res) => {
         });
     }
 };
+
+const openBooking = async (req, res) => {
+    const { id } = req.params;  // Itinerary ID from URL parameters
+    const { bookingOpen } = req.body;  // Boolean value from request body
+
+    try {
+        // Ensure bookingOpen is a proper boolean
+        const isBookingOpen = bookingOpen === true || bookingOpen === "true";
+
+        // Find the itinerary by ID
+        const itinerary = await Itinerary.findById(id);
+
+        // Check if the itinerary exists
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found' });
+        }
+
+        // Update the bookingOpen field
+        itinerary.bookingOpen = isBookingOpen;
+        await itinerary.save();
+
+        if (isBookingOpen) {
+            console.log("Booking is now open for itinerary:", itinerary.title);
+
+            // Find tourists who saved this itinerary
+            const tourists = await Tourist.find({ savedItineraries: id });
+
+            console.log("Notifying tourists who saved this itinerary:", tourists.length);
+
+            // Prepare notifications
+            const notifications = tourists.map(tourist => ({
+                touristId: tourist._id,
+                notification: {
+                    type: 'eventBooking',
+                    itineraryId: id,
+                    message: `The itinerary "${itinerary.title}" is now open for booking!`,
+                    date: new Date(),
+                    metadata: { title: itinerary.title },
+                },
+            }));
+
+            // Send notifications and emails
+            for (const { touristId, notification } of notifications) {
+                await Tourist.findByIdAndUpdate(touristId, {
+                    $push: { notifications: notification },
+                });
+
+                // Send email notification
+                const tourist = tourists.find(t => t._id.equals(touristId));
+                await transporter.sendMail({
+                    from: "winggo567@gmail.com",
+                    to: tourist.email,
+                    subject: 'Itinerary Now Open for Booking',
+                    html: `<p>Dear ${tourist.username},</p>
+                           <p>The itinerary "<strong>${itinerary.title}</strong>" you saved is now open for booking!</p>
+                           <p>Don't miss out on this opportunity to join an amazing experience.</p>
+                           <p>Best regards,</p>
+                           <p>Your Team</p>`,
+                });
+            }
+        }
+
+        res.status(200).json({
+            message: `Itinerary booking has been ${isBookingOpen ? 'opened' : 'closed'} successfully.`,
+            itinerary,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 module.exports = {
     getTourGuide,
     updateTourGuideProfile,
@@ -537,5 +641,6 @@ module.exports = {
     activateOrDeactivateItinerary,
     previewPhoto,
     getSalesReport,
-    getTouristReport
+    getTouristReport,
+    openBooking
 };

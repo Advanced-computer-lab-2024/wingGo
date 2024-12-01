@@ -497,31 +497,45 @@ const getSalesReport = async (req, res) => {
 
     try {
         // 1. Fetch activities created by the specific advertiser
-        const activities = await Activity.find({ advertiser: advertiserId, sales: { $gt: 0 } }); // Only include activities with sales > 0
-        const activityDetails = activities.map(activity => ({
-            name: activity.name,
-            sales: activity.sales,
-            revenue: activity.sales * activity.price, // Total revenue for the activity
-        }));
+        const activities = await Activity.find({ advertiser: advertiserId }); // Fetch all activities for this advertiser
+        const activityDetails = activities.map(activity => {
+            // Calculate total sales (number of people) dynamically
+            const sales = activity.touristIDs.reduce(
+                (sum, entry) => sum + entry.numberOfPeople,
+                0
+            );
+
+            // Calculate total revenue from the paidPrice field
+            const revenue = activity.touristIDs.reduce(
+                (sum, entry) => sum + entry.paidPrice,
+                0
+            );
+
+            return {
+                name: activity.name,
+                sales, // Total number of people who booked
+                revenue, // Total revenue from all bookings
+            };
+        });
+
+        // Calculate totals
         const totalActivitySales = activityDetails.reduce((sum, activity) => sum + activity.sales, 0);
         const totalActivityRevenue = activityDetails.reduce((sum, activity) => sum + activity.revenue, 0);
 
-        // 2. Grand Total Revenue (if needed)
-        const grandTotalSales = totalActivitySales;
-        const grandTotalRevenue = totalActivityRevenue;
+        const netActivityRevenue = totalActivityRevenue - (totalActivityRevenue * 0.10);
 
-        // 3. Response
+        // Response
         res.status(200).json({
             success: true,
             data: {
                 activities: {
                     details: activityDetails,
                     totalSales: totalActivitySales,
-                    totalRevenue: totalActivityRevenue,
+                    totalRevenue: netActivityRevenue,
                 },
                 totals: {
-                    totalSales: grandTotalSales,
-                    totalRevenue: grandTotalRevenue,
+                    totalSales: totalActivitySales,
+                    totalRevenue: netActivityRevenue,
                 },
             },
         });
@@ -533,6 +547,7 @@ const getSalesReport = async (req, res) => {
         });
     }
 };
+
 const getTouristReport = async (req, res) => {
     const { advertiserId } = req.params; // Extract Advertiser ID from URL parameters
 
@@ -544,10 +559,20 @@ const getTouristReport = async (req, res) => {
         const activityDetails = activities
             .filter(activity => new Date(activity.date) < new Date()) // Only include past activities
             .map(activity => {
+                // Calculate total tourists using numberOfPeople
+                const totalTourists = activity.touristIDs.reduce(
+                    (sum, entry) => sum + entry.numberOfPeople,
+                    0
+                );
+
                 return {
                     name: activity.name,
-                    totalTourists: activity.touristIDs.length, // Count tourists
-                    details: activity.touristIDs.map(touristId => ({ touristId })), // Return tourist IDs
+                    totalTourists, // Total tourists using numberOfPeople
+                    details: activity.touristIDs.map(tourist => ({
+                        touristId: tourist.touristId,
+                        numberOfPeople: tourist.numberOfPeople, // Include number of people in details
+                        paidPrice: tourist.paidPrice, // Include paid price if needed
+                    })),
                 };
             })
             .filter(activity => activity.totalTourists > 0); // Exclude activities with 0 tourists
@@ -561,7 +586,7 @@ const getTouristReport = async (req, res) => {
             data: {
                 activities: {
                     details: activityDetails,
-                    totalTourists: totalTourists,
+                    totalTourists, // Grand total across all activities
                 },
             },
         });
@@ -573,6 +598,7 @@ const getTouristReport = async (req, res) => {
         });
     }
 };
+
 module.exports = {
     advertiser_hello,
     createAdvertiserProfile, //done

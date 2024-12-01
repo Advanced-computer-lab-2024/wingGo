@@ -638,32 +638,55 @@ const getSalesReport = async (req, res) => {
     const { sellerId } = req.params; // Extract Seller ID from URL parameters
 
     try {
-        // 1. Fetch products associated with the seller
-        const products = await Product.find({ seller: sellerId, sales: { $gt: 0 } }); // Only include products with sales > 0
-        const productDetails = products.map(product => ({
-            name: product.name,
-            sales: product.sales,
-            revenue: product.sales * product.price, // Total revenue for the product
-        }));
+        // Fetch products associated with the seller
+        const products = await Product.find({ seller: sellerId });
+
+        // Map over products to calculate sales and revenue dynamically
+        const productDetails = products.map(product => {
+            // Calculate the total quantity from the discountedPrices array
+            const discountedQuantities = product.discountedPrices.reduce(
+                (sum, entry) => sum + entry.quantity,
+                0
+            );
+
+            // Calculate the total discounted revenue from the discountedPrices array
+            const discountedRevenue = product.discountedPrices.reduce(
+                (sum, entry) => sum + entry.totalDiscountedPrice,
+                0
+            );
+
+            // Combine sales from the sales field and quantities from the discountedPrices array
+            const totalSales = product.sales + discountedQuantities;
+
+            // Combine revenue from sales (non-discounted) and discounted revenue
+            const revenue = product.sales * product.price + discountedRevenue;
+
+            return {
+                name: product.name,
+                sales: totalSales, // Total sales combining sales field and discounted quantities
+                revenue, // Total revenue combining both non-discounted and discounted sales
+            };
+        });
+
+        // Calculate totals for the seller's products
         const totalProductSales = productDetails.reduce((sum, product) => sum + product.sales, 0);
         const totalProductRevenue = productDetails.reduce((sum, product) => sum + product.revenue, 0);
 
-        // 2. Grand Total Revenue (if needed)
-        const grandTotalSales = totalProductSales;
-        const grandTotalRevenue = totalProductRevenue;
+        // 2. Net Total Revenue
+        const netTotalRevenue = totalProductRevenue - (totalProductRevenue * 0.10);
 
-        // 3. Response
+        // Response
         res.status(200).json({
             success: true,
             data: {
                 products: {
                     details: productDetails,
                     totalSales: totalProductSales,
-                    totalRevenue: totalProductRevenue,
+                    totalRevenue: netTotalRevenue,
                 },
                 totals: {
-                    totalSales: grandTotalSales,
-                    totalRevenue: grandTotalRevenue,
+                    totalSales: totalProductSales,
+                    totalRevenue: netTotalRevenue,
                 },
             },
         });
@@ -675,6 +698,8 @@ const getSalesReport = async (req, res) => {
         });
     }
 };
+
+
 
  module.exports = {
     updateSellerProfile,

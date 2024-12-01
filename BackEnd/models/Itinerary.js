@@ -56,7 +56,12 @@ touristIDs: [{
     bookingDate: { type: Date }, // Booking date logic remains
     paidPrice: { type: Number }, // Price paid for this booking
     numberOfPeople: { type: Number, default: 1 } // Default 1 person
-}]
+}],
+
+bookingOpen: {
+    type: Boolean,
+    default: true
+  },
 
 }, { timestamps: true });
 
