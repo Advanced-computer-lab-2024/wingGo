@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { IPendingUser } from "@/interFace/interFace";
-import { fetchPendingUsers, approvePendingUserById, deletePendingUserById,viewPendingUserCertificate,viewPendingUserID } from "@/api/adminApi";
+import { fetchPendingUsers, approvePendingUserById, deletePendingUserById,viewPendingUserCertificate,viewPendingUserID, fetchUsers } from "@/api/adminApi";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
@@ -17,7 +17,7 @@ const PendingUsers = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await fetchPendingUsers();
+        const data = await fetchUsers();
         setPendingUsers(data);
       } catch (error) {
         console.error("Failed to load pending users:", error);

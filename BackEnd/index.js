@@ -185,7 +185,7 @@ app.post("/login", async (req, res) => {
     return res.status(200).json({ message: 'Please change your password' });
   }
 
-  res.json({ message: 'Login successful' });
+  res.json({ message: 'Login successful', token: token });
 });
 
 app.get("/logout", (req, res) => {

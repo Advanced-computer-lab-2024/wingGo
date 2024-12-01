@@ -3,6 +3,7 @@ import React, {useState, useEffect} from "react";
 import ProfileDetails from './ProfileDetails';
 
 import PendingUsers from './PendingUsers';
+import UserManagement from './UserManagement';
 import { fetchUsername } from "@/api/adminApi";
 import { set } from "date-fns";
 import Prefrences from "./Prefrences";
@@ -44,6 +45,8 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
         return <PendingUsers />;
       case 'profile':
         return <ProfileDetails profileData={profileData} id={id}/>;
+      case 'User Management':
+        return <UserManagement />;
       
       default:
         return null;
@@ -105,6 +108,22 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                         <i className="icon-doc"></i>
                         </span>
                         Pending Users
+                      </button>
+                      <button
+                        className="nav-link"
+                        id="nav-community-2-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#nav-community-2"
+                        type="button"
+                        role="tab"
+                        aria-controls="nav-community-2"
+                        aria-selected="false"
+                        onClick={() => setActiveTab('User Management')}
+                      >
+                        <span>
+                        <i className="fa-solid fa-people-roof"></i>
+                        </span>
+                        User Management
                       </button>
                       
                       
