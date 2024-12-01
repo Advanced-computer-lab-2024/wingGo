@@ -1444,6 +1444,35 @@ const getSalesReport = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to generate sales report.', error: error.message });
     }
 };
+
+const getAllUsers = async (req, res) => {
+
+    try {
+        const users = await LoginCredentials.find();
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+const searchForUserByUsername = async (req, res) => {
+    const { username } = req.query;
+  
+    try {
+      const users = await LoginCredentials.find({
+        username: { $regex: username, $options: 'i' } // Case-insensitive partial match
+      });
+  
+      if (users.length === 0) {
+        return res.status(404).json({ message: 'No users found' });
+      }
+  
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
   
 
 module.exports = {
@@ -1500,5 +1529,7 @@ module.exports = {
     getUsernameById,
     getNotifications,
     createPromoCode,
-    getSalesReport
+    getSalesReport,
+    getAllUsers,
+    searchForUserByUsername
 };

@@ -81,5 +81,25 @@ export const changeAdminPassword = async (id: string, oldPassword: string ,passw
     };
 
 
+export const fetchUsers = async (): Promise<any> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/admin/getAllUsers`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        throw error;
+    }
+}
+
+export const searchUsers = async (search: string): Promise<any> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/admin/searchUser?username=${search}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error searching users:", error);
+        throw error;
+    }
+}
+
 
 

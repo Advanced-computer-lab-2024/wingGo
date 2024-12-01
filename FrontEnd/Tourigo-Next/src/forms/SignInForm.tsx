@@ -1,4 +1,5 @@
 "use client";
+import { login } from "@/api/LoginApi";
 import ErrorMessage from "@/elements/error-message/ErrorMessage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -6,7 +7,7 @@ import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 interface FormData {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -19,11 +20,16 @@ const SignInForm = () => {
     formState: { errors },
   } = useForm<FormData>();
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    const toastId = toast.loading("");
-    toast.success("Message Send Successfully", { id: toastId, duration: 1000 });
-    reset();
-    router.push("/home-two");
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    const toastId = toast.loading("Logging in...");
+    try {
+      const response = await login(data.username, data.password);
+      toast.success("Login successful!", { id: toastId, duration: 1000 });
+      reset();
+      router.push("/home-two");
+    } catch (error) {
+      toast.error("Login failed. Please check your credentials and try again.", { id: toastId });
+    }
   };
 
   return (
@@ -31,20 +37,16 @@ const SignInForm = () => {
       <form className="form" onSubmit={handleSubmit(onSubmit)}>
         <div className="input-box mb-15">
           <input
-            type="email"
+            type="text"
             className="input"
             id="username"
-            placeholder="Email Address"
-            {...register("email", {
+            placeholder="Type Username Here"
+            {...register("username", {
               required: "Email is required",
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Invalid email address",
-              },
             })}
           />
-          {errors.email && (
-            <ErrorMessage message={errors.email.message as string} />
+          {errors.username && (
+            <ErrorMessage message={errors.username.message as string} />
           )}
         </div>
         <div className="input-box mb-20">
@@ -55,14 +57,7 @@ const SignInForm = () => {
             placeholder="Type Password Here"
             {...register("password", {
               required: "Password is required",
-              minLength: {
-                value: 6,
-                message: "Password must be at least 6 characters",
-              },
-              maxLength: {
-                value: 15,
-                message: "Password cannot exceed 15 characters",
-              },
+              
             })}
           />
           {errors.password && (

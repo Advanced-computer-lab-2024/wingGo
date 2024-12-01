@@ -110,4 +110,6 @@ router.get('/notifications/:adminId', adminController.getNotifications);
 //PromoCode
 router.post('/createPromoCode', adminController.createPromoCode);
 router.get('/sales-report', adminController.getSalesReport);
+router.get('/getAllUsers', adminController.getAllUsers);
+router.get('/searchUser', adminController.searchForUserByUsername);
 module.exports = router;
