@@ -143,4 +143,7 @@ router.get('/promoCodes/:touristId', touristController.getPromoCodesForTourist);
 router.post('/saveActivity/:touristId/:activityId', touristController.saveActivity);
 router.post('/saveItinerary/:touristId/:itineraryId', touristController.saveItinerary);
 router.get('/viewAllSavedEvents/:touristId', touristController.viewAllSavedEvents);
+
+router.put('/toggleNotificationPreference/:touristId', touristController.toggleNotificationPreference);
+
 module.exports = router;

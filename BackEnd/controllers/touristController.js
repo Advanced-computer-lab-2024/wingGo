@@ -3821,6 +3821,7 @@ const cancelOrder = async (req, res) => {
 // Method to save an activity
 const saveActivity = async (req, res) => {
     const { touristId, activityId } = req.params;
+    const { save } = req.body; // Boolean value to save or unsave
 
     try {
         // Validate if the activity exists
@@ -3835,13 +3836,24 @@ const saveActivity = async (req, res) => {
             return res.status(404).json({ message: "Tourist not found" });
         }
 
-        if (!tourist.savedActivities.includes(activityId)) {
-            tourist.savedActivities.push(activityId);
-            await tourist.save();
-            return res.status(200).json({ message: "Activity saved successfully", savedActivities: tourist.savedActivities });
+        if (save) {
+            // Save the activity
+            if (!tourist.savedActivities.includes(activityId)) {
+                tourist.savedActivities.push(activityId);
+                await tourist.save();
+                return res.status(200).json({ message: "Activity saved successfully", savedActivities: tourist.savedActivities });
+            }
+            return res.status(400).json({ message: "Activity already saved" });
+        } else {
+            // Unsave the activity
+            if (tourist.savedActivities.includes(activityId)) {
+                tourist.savedActivities = tourist.savedActivities.filter(id => id.toString() !== activityId);
+                await tourist.save();
+                return res.status(200).json({ message: "Activity unsaved successfully", savedActivities: tourist.savedActivities });
+            }
+            return res.status(400).json({ message: "Activity not found in saved list" });
         }
 
-        return res.status(400).json({ message: "Activity already saved" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "An error occurred", error });
@@ -3851,6 +3863,7 @@ const saveActivity = async (req, res) => {
 // Method to save an itinerary
 const saveItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params;
+    const { save } = req.body; // Boolean value to save or unsave
 
     try {
         // Validate if the itinerary exists
@@ -3865,13 +3878,24 @@ const saveItinerary = async (req, res) => {
             return res.status(404).json({ message: "Tourist not found" });
         }
 
-        if (!tourist.savedItineraries.includes(itineraryId)) {
-            tourist.savedItineraries.push(itineraryId);
-            await tourist.save();
-            return res.status(200).json({ message: "Itinerary saved successfully", savedItineraries: tourist.savedItineraries });
+        if (save) {
+            // Save the itinerary
+            if (!tourist.savedItineraries.includes(itineraryId)) {
+                tourist.savedItineraries.push(itineraryId);
+                await tourist.save();
+                return res.status(200).json({ message: "Itinerary saved successfully", savedItineraries: tourist.savedItineraries });
+            }
+            return res.status(400).json({ message: "Itinerary already saved" });
+        } else {
+            // Unsave the itinerary
+            if (tourist.savedItineraries.includes(itineraryId)) {
+                tourist.savedItineraries = tourist.savedItineraries.filter(id => id.toString() !== itineraryId);
+                await tourist.save();
+                return res.status(200).json({ message: "Itinerary unsaved successfully", savedItineraries: tourist.savedItineraries });
+            }
+            return res.status(400).json({ message: "Itinerary not found in saved list" });
         }
 
-        return res.status(400).json({ message: "Itinerary already saved" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "An error occurred", error });
@@ -3905,6 +3929,39 @@ const viewAllSavedEvents = async (req, res) => {
         return res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+const toggleNotificationPreference = async (req, res) => {
+    const { touristId } = req.params; // Extract tourist ID from the URL
+    const { notifyOnInterest } = req.body; // Boolean value from the request body
+
+    try {
+        // Ensure notifyOnInterest is a proper boolean
+        const notifyPreference = notifyOnInterest === true || notifyOnInterest === "true";
+
+        // Find the tourist and update their preference
+        const tourist = await Tourist.findByIdAndUpdate(
+            touristId,
+            { notifyOnInterest: notifyPreference },
+            { new: true }
+        );
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        res.status(200).json({
+            message: `Notification preference has been ${notifyPreference ? 'enabled' : 'disabled'} successfully.`,
+            tourist,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update notification preference.',
+            error: error.message,
+        });
+    }
+};
+
 
 module.exports = {
     tourist_hello,
@@ -3993,5 +4050,6 @@ module.exports = {
     addWishlistItemToCart,
     saveActivity,
     saveItinerary,
-    viewAllSavedEvents
+    viewAllSavedEvents,
+    toggleNotificationPreference
 };

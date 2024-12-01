@@ -583,10 +583,14 @@ const openBooking = async (req, res) => {
         if (isBookingOpen) {
             console.log("Booking is now open for itinerary:", itinerary.title);
 
-            // Find tourists who saved this itinerary
-            const tourists = await Tourist.find({ savedItineraries: id });
+            ////// This part is to be edited/added start
+            // Find tourists who saved this itinerary and opted for notifications
+            const tourists = await Tourist.find({
+                savedItineraries: id,
+                notifyOnInterest: true, // Notify only if they opted in
+            });
 
-            console.log("Notifying tourists who saved this itinerary:", tourists.length);
+            console.log("Notifying interested tourists who saved this itinerary:", tourists.length);
 
             // Prepare notifications
             const notifications = tourists.map(tourist => ({
@@ -619,6 +623,7 @@ const openBooking = async (req, res) => {
                            <p>Your Team</p>`,
                 });
             }
+            ////// This part is to be edited/added end
         }
 
         res.status(200).json({
@@ -629,6 +634,7 @@ const openBooking = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 
 module.exports = {
