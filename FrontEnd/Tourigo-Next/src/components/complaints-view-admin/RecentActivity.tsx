@@ -151,8 +151,8 @@ const ComplaintsList = () => {
                                                     <td>
                                             <button
                                                 onClick={() => handleStatusToggle(complaint._id, complaint.state)}
-                                                className="bd-gradient-btn btn-style radius-60 btn-tertiary"
-                                                style={{ padding: '6px 12px', fontSize: '14px', borderRadius: '20px',  float: 'right', paddingRight: '10px', marginRight: '20px', width: '150px', textAlign: 'center' }} // Adjusted for smaller size and less rounded shape
+                                                className="bd-primary-btn btn-style radius-60"
+                                                
                                             >
                                                 {complaint.state === 'pending' ? 'Mark as Resolved' : 'Mark as Pending'}
                                             </button>

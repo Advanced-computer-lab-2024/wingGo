@@ -141,16 +141,16 @@ const BookingHistory = () => {
                                                                 </p>
                                                                 <button
                                                                     onClick={() => handleRateCommentClick(product)}
-                                                                    className="rate-comment-button"
-                                                                    style={{
-                                                                        backgroundColor: "blue",
-                                                                        color: "white",
-                                                                        padding: "8px 16px",
-                                                                        fontSize: "14px",
-                                                                        borderRadius: "4px",
-                                                                        cursor: "pointer",
-                                                                        marginBottom: "8px"
-                                                                    }}
+                                                                    className="bd-primary-btn btn-style radius-60 mb-10"
+                                                                    // style={{
+                                                                    //     backgroundColor: "blue",
+                                                                    //     color: "white",
+                                                                    //     padding: "8px 16px",
+                                                                    //     fontSize: "14px",
+                                                                    //     borderRadius: "4px",
+                                                                    //     cursor: "pointer",
+                                                                    //     marginBottom: "8px"
+                                                                    // }}
                                                                 >
                                                                     Rate & Comment
                                                                 </button>
