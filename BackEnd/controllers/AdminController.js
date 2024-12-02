@@ -720,7 +720,7 @@ const sortProductsByRatings = async (req, res) => {
 };
 // Controller function to add a new admin
 const addAdmin = async (req, res) => {
-    const { username, password } = req.body;  // Get username and password from request body
+    const { username, password, email } = req.body;  // Get username and password from request body
 
     try {
         // Check if the username already exists in LoginCredentials
@@ -735,7 +735,8 @@ const addAdmin = async (req, res) => {
         // Create a new admin in the Admin collection
         const newAdmin = new Admin({
             username,
-            password: hashedPassword  // Save the hashed password
+            password: hashedPassword,  // Save the hashed password
+            email
         });
 
         // Save the admin to the Admin collection
@@ -745,6 +746,7 @@ const addAdmin = async (req, res) => {
         const loginCredentials = new LoginCredentials({
             username: newAdmin.username,
             password: newAdmin.password,  // Use the hashed password
+            email,
             role: 'admin',
             userId: newAdmin._id,  // Reference to the newly created Admin
             roleModel: 'Admin'  // Set the role model to 'Admin'

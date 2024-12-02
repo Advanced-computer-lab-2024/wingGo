@@ -84,8 +84,10 @@ const PendingUsers = () => {
   };
 
   return (
+    <section className="bd-team-details-area section-space position-relative">
+        <div className="container">
     <section className="bd-recent-activity section-space-small-bottom">
-      <div className="container" style={{ paddingTop: "40px" }}>
+      <div className="container" style={{ paddingTop: "0px" }}>
         <div className="row">
           <div className="col-xxl-12">
             <div className="recent-activity-wrapper">
@@ -206,6 +208,8 @@ const PendingUsers = () => {
           </div>
         </div>
       </div>
+    </section>
+    </div>
     </section>
   );
 };

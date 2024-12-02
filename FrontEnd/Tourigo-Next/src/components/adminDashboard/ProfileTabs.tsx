@@ -7,6 +7,7 @@ import UserManagement from './UserManagement';
 import { fetchUsername } from "@/api/adminApi";
 import { set } from "date-fns";
 import Prefrences from "./Prefrences";
+import AddUsers from "./AddUsers";
 
 
 interface ProfileDetailsProps {
@@ -47,6 +48,8 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
         return <ProfileDetails profileData={profileData} id={id}/>;
       case 'User Management':
         return <UserManagement />;
+      case 'Add Users':
+        return <AddUsers />;
       
       default:
         return null;
@@ -125,6 +128,24 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                         </span>
                         User Management
                       </button>
+
+                      <button
+                        className="nav-link"
+                        id="nav-community-2-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#nav-community-2"
+                        type="button"
+                        role="tab"
+                        aria-controls="nav-community-2"
+                        aria-selected="false"
+                        onClick={() => setActiveTab('Add Users')}
+                      >
+                        <span>
+                        <i className="fa-solid fa-user-plus"></i>
+                        </span>
+                        Add Users
+                      </button>
+
                       
                       
                     </div>

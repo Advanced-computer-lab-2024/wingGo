@@ -143,4 +143,27 @@ export const deleteUserById = async (id: string): Promise<any> => {
 };
 
 
+export const addAdmin = async (username: string, email: string, password: string): Promise<any> => {
+
+    try {
+        const response = await axios.post(`http://localhost:8000/admin/add-admin`, { username, email, password });
+        return response.data;
+    } catch (error) {
+        console.error("Error adding admin:", error);
+        throw error;
+    }
+};
+
+export const addGovernor = async (username: string, email: string, password: string): Promise<any> => {
+    
+        try {
+            const response = await axios.post(`http://localhost:8000/admin/addGovernor`, { username, email, password });
+            return response.data;
+        } catch (error) {
+            console.error("Error adding governer:", error);
+            throw error;
+        }
+    }
+
+
 
