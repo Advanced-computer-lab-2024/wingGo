@@ -16,7 +16,7 @@ export const fetchAllItineraries = async (): Promise<Itinerary[]> => {
     }
 };
 
-export const filterItineraries = async (filters: {  ////done with frontend
+export const filterItineraries = async (filters: { 
     budget?: number;
     date?: string;
     preferences?:string;

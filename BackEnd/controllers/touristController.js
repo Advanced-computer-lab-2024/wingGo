@@ -277,19 +277,21 @@ const getAllProducts = async (req, res) => {
 };
 const filterProduct = async (req, res) => {
     try {
-        const price = req.query.price;  // Assuming 'price' is the query parameter for price
+        const { budget } = req.query; // Extract price from query parameters
 
-        let result;
-        if (price) {
-            // Find products with the exact price
-            result = await Product.find({ price: price, Archive:false });
-        } else {
-            // If no price is provided, return all products
-            result = await Product.find({Archive:false});
+        // Initialize the filter with Archive: false
+        let filter = { archive: false };
+
+        if (budget) {
+            filter.price = { $lte: budget }; // Price less than or equal to the specified budget
         }
+        // Fetch products based on the constructed filter
+        const result = await Product.find(filter);
 
+        // Return the filtered results
         res.status(200).json(result);
     } catch (error) {
+        // Handle errors and return a 500 status with the error message
         res.status(500).json({ error: error.message });
     }
 };
@@ -1597,6 +1599,12 @@ const rateProduct = async (req, res) => {
 
         // Push a new rating to the `ratings` array
         product.ratings.push({ touristId, rating });
+        
+         // Recalculate the average rating
+         const totalRatings = product.ratings.length;
+         const sumRatings = product.ratings.reduce((sum, r) => sum + parseFloat(r.rating), 0);
+         product.averageRating = sumRatings / totalRatings;
+
 
         // Save the updated product
         await product.save();

@@ -7,9 +7,6 @@ const STEP = 0.1;
 const MIN = 0;
 const MAX = 500;
 
-interface RangeFilterProps {
-  onChange: (range: number[]) => void; // Explicitly define the type for onChange
-}
 
 interface RangeFilterProps {
   onChange: (range: number[]) => void; // Explicitly define the type for onChange

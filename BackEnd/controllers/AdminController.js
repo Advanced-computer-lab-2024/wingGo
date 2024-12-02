@@ -286,27 +286,24 @@ const editProduct = async (req, res) => {
 
 const filterProduct = async (req, res) => {
     try {
-        const price = req.query.price;  // Assuming 'price' is the query parameter for price
+        const { budget } = req.query; // Extract price from query parameters
 
-        // Ensure the price is provided
-        if (price) {
-            // Find products with the exact price
-            const result = await Product.find({ price: price });
+        // Initialize an empty filter
+        let filter = {};
 
-            // If no products are found, return a 404 response
-            if (result.length === 0) {
-                return res.status(404).json({ message: 'No products found with the specified price' });
-            }
-
-            res.status(200).json(result);
-        } else {
-            res.status(400).json({ message: 'Price query parameter is required' });
+        if (budget) {
+            filter.price = { $lte: budget }; // Price less than or equal to the specified budget
         }
+        // Fetch products based on the constructed filter
+        const result = await Product.find(filter);
+
+        // Return the filtered results
+        res.status(200).json(result);
     } catch (error) {
+        // Handle errors and return a 500 status with the error message
         res.status(500).json({ error: error.message });
     }
 };
-
 const deleteAccount = async (req, res) => {
     const { id } = req.params; // Extract the ID from the request parameters
 

@@ -37,12 +37,14 @@ const TourGridRight = () => {
       const data = await filterItineraries(apiFilters);
 
       // Apply local search filtering if searchQuery is provided
-      const finalFilteredData = searchQuery
-        ? data.filter(
-            (itinerary) =>
-              itinerary.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              itinerary.category?.toLowerCase().includes(searchQuery.toLowerCase())
-          )
+    const finalFilteredData = searchQuery
+      ? data.filter(
+          (itinerary) =>
+            itinerary.title.toLowerCase().includes(searchQuery.toLowerCase()) || // Match name
+            itinerary.tags.some((tag: string) =>
+              tag.toLowerCase().includes(searchQuery.toLowerCase()) // Match tags
+            )
+        )
         : data;
 
       // Apply sorting after fetching and filtering
