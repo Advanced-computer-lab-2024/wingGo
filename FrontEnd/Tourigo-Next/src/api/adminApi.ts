@@ -1,5 +1,14 @@
 import axios from 'axios';
 import { IPendingUser} from '../interFace/interFace';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+    username: string;
+    userId: string;
+    role: string;
+    mustChangePassword: boolean;
+}
 const adminID = '67326284e3b86017593a03a0'
 
 
@@ -82,24 +91,79 @@ export const changeAdminPassword = async (id: string, oldPassword: string ,passw
 
 
 export const fetchUsers = async (): Promise<any> => {
-    try {
-        const response = await axios.get(`http://localhost:8000/admin/getAllUsers`);
+            
+
+        const cookie = Cookies.get('token');
+
+        let username = '';
+    try{
+
+        if(cookie){
+            const decodedToken = jwtDecode<DecodedToken>(cookie);
+            console.log('Decoded Token:', decodedToken);
+            username = decodedToken.username;
+            
+        }
+        
+        const response = await axios.get(`http://localhost:8000/admin/getAllUsers?username=${username}`);
         return response.data;
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Error fetching users:", error);
         throw error;
     }
-}
+};
 
 export const searchUsers = async (search: string): Promise<any> => {
+    const cookie = Cookies.get('token');
+
+    let username = '';
     try {
-        const response = await axios.get(`http://localhost:8000/admin/searchUser?username=${search}`);
+        if (cookie) {
+            const decodedToken = jwtDecode<DecodedToken>(cookie);
+            console.log('Decoded Token:', decodedToken);
+            username = decodedToken.username;
+        }
+        const response = await axios.get(`http://localhost:8000/admin/searchUser?username=${search}&LoggedInUsername=${username}`);
         return response.data;
     } catch (error) {
         console.error("Error searching users:", error);
         throw error;
     }
 }
+
+export const deleteUserById = async (id: string): Promise<any> => {
+    try {
+        const response = await axios.delete(`http://localhost:8000/admin/deleteAccount/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        throw error;
+    }
+};
+
+
+export const addAdmin = async (username: string, email: string, password: string): Promise<any> => {
+
+    try {
+        const response = await axios.post(`http://localhost:8000/admin/add-admin`, { username, email, password });
+        return response.data;
+    } catch (error) {
+        console.error("Error adding admin:", error);
+        throw error;
+    }
+};
+
+export const addGovernor = async (username: string, email: string, password: string): Promise<any> => {
+    
+        try {
+            const response = await axios.post(`http://localhost:8000/admin/addGovernor`, { username, email, password });
+            return response.data;
+        } catch (error) {
+            console.error("Error adding governer:", error);
+            throw error;
+        }
+    }
 
 
 
