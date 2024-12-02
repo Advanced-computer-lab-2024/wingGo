@@ -10,7 +10,7 @@ import Link from 'next/link';
 import RateCommentModal from './RateCommentModal';
 import RateCommentModalActivity from './RateCommentModalActivity';
 import { cancelItineraryApi } from '@/api/itineraryApi';
-import { cancelActivityApi } from '@/api/activityApi';
+import { cancelActivityApi, fetchFilteredActivities } from '@/api/activityApi';
 import CancelConfirmationModal from "./CancelConfirmationModal"; // Import the new modal component
 import { useCurrency } from "@/contextApi/CurrencyContext"; 
 
@@ -25,6 +25,10 @@ const BookingHistory = () => {
     const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
     const [convertedItineraryPrices, setConvertedItineraryPrices] = useState<{ [key: string]: number }>({});
     const [convertedActivityPrices, setConvertedActivityPrices] = useState<{ [key: string]: number }>({});
+    const [filterType, setFilterType] = useState<'all' | 'past' | 'upcoming'>('all');
+    // const [filteredActivities, setFilteredActivities] = useState<BookedActivity[]>([]);
+    const [filteredActivities, setFilteredActivities] = useState<BookedActivity[]>([]);
+    
 
 
     const [showCancelModal, setShowCancelModal] = useState(false);
@@ -34,6 +38,29 @@ const BookingHistory = () => {
         setBookingToCancel(booking);
         setShowCancelModal(true);
     };
+
+      // Fetch filtered activities when filterType or activeTab changes
+      useEffect(() => {
+        const fetchData = async () => {
+            if (activeTab === 'activity') {
+                try {
+                    const activities = await fetchFilteredActivities();
+                    setFilteredActivities(activities); // Update state with filtered activities
+                    console.log('WOHOOOOO');
+                    console.log(activities);
+                // console.log(filteredActivities);
+                } catch (error) {
+                    console.error("Error fetching filtered activities:", error);
+                }
+            }
+        };
+        fetchData();
+    }, [filterType, activeTab]);
+
+    useEffect(() => {
+        console.log('Filtered Activities Updated:', filteredActivities);
+    }, [filteredActivities]);
+    
 
     const confirmCancellation = async () => {
         if (!bookingToCancel) return;
@@ -111,6 +138,8 @@ const BookingHistory = () => {
         const fetchData = async () => {
             try {
                 const Activities = await getBookedActivitiesData(touristId);
+                // console.log("yay");
+                // console.log(Activities);
                 setBookedActivities(Activities);
                 const convertedPrices = await convertPrices(Activities, 'activity');
                 setConvertedActivityPrices(convertedPrices);
@@ -183,6 +212,12 @@ const BookingHistory = () => {
         }
     };
 
+    const handleTabSwitch = (tab: 'itinerary' | 'activity') => {
+        setActiveTab(tab);
+        setFilterType('all'); // Reset filter to 'all' whenever the tab changes
+    };
+    
+
 
     return (
         <>
@@ -199,7 +234,7 @@ const BookingHistory = () => {
                                         <div className="nav nav-tabs" role="tablist" style={{ paddingTop: '7px' }}>
                                             <button
                                                 className={`nav-link ${activeTab === 'itinerary' ? 'active' : ''}`}
-                                                onClick={() => setActiveTab('itinerary')}
+                                                onClick={() => handleTabSwitch('itinerary')}
                                                 type="button"
                                                 role="tab"
                                                 aria-selected={activeTab === 'itinerary'}
@@ -207,9 +242,10 @@ const BookingHistory = () => {
                                             >
                                                 Itinerary History
                                             </button>
+                                            
                                             <button
                                                 className={`nav-link ${activeTab === 'activity' ? 'active' : ''}`}
-                                                onClick={() => setActiveTab('activity')}
+                                                onClick={() => handleTabSwitch('activity')}
                                                 type="button"
                                                 role="tab"
                                                 aria-selected={activeTab === 'activity'}
@@ -220,12 +256,33 @@ const BookingHistory = () => {
                                     </nav>
                                 </div>
 
+                                <div className="col-auto" style={{ paddingBottom: '30px'}}>
+                                <select
+                                    onChange={(e) => setFilterType(e.target.value as 'all' | 'past' | 'upcoming')}
+                                    value={filterType}
+                                    
+                                >
+                                    <option value="all">All</option>
+                                    <option value="past">Past</option>
+                                    <option value="upcoming">Upcoming</option>
+                                </select>
+                                </div>
+
                                 <div className="recent-activity-content">
+                               
                                     <div className="table-responsive">
                                         {activeTab === 'itinerary' ? (
                                             <table className="table mb-0">
+                                               
                                                 <tbody>
-                                                    {bookedItineraries.map((booking) => (
+                                                    {bookedItineraries
+                                                    .filter((booking) => {
+                                                        const isPast = new Date(booking.bookingDate) < currentDate;
+                                                        if (filterType === 'past') return isPast;
+                                                        if (filterType === 'upcoming') return !isPast;
+                                                        return true; // 'all'
+                                                    })
+                                                    .map((booking) => (
                                                         <tr key={booking.itinerary._id} className="table-custom">
                                                             <td>
                                                                 <div className="dashboard-thumb-wrapper p-relative">
@@ -319,36 +376,30 @@ const BookingHistory = () => {
                                                 
                                                 <table className="table mb-0">
                                                 <tbody>
-                                                    {bookedActivities.map((booking) => (
-                                                        <tr key={booking.activity._id} className="table-custom">
-                                                            <td>
-                                                                <div className="dashboard-thumb-wrapper p-relative">
-                                                                    <div className="dashboard-thumb image-hover-effect-two position-relative">
-                                                                        <Image
-                                                                            src=""
-                                                                            loader={imageLoader}
-                                                                            style={{ width: '100%', height: "auto" }}
-                                                                            alt="activity image" 
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div className="recent-activity-title-box d-flex align-items-center gap-10">
-                                                                    <div>
-                                                                        <h5 className="tour-title fw-5 underline">
-                                                                            <Link href={`/activity-details/${booking.activity._id}`}>
-                                                                                {booking.activity.name}
-                                                                            </Link>
-                                                                        </h5>
-                                                                        <div className="recent-activity-location">
-                                                                            Address: {booking.activity.location.address}
-                                                                        </div>
-                                                                       
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
+                                                { filteredActivities && filteredActivities.map((booking) => (
+                        <tr key={booking.activity._id} className="table-custom">
+                            <td>
+                                <div className="dashboard-thumb-wrapper p-relative">
+                                    <div className="dashboard-thumb image-hover-effect-two position-relative">
+                                        
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div className="recent-activity-title-box d-flex align-items-center gap-10">
+                                    <div>
+                                        <h5 className="tour-title fw-5 underline">
+                                            <Link href={`/activity-details/${booking.activity._id}`}>
+                                                {booking.activity.name}
+                                            </Link>
+                                        </h5>
+                                        <div className="recent-activity-location">
+                                            Address: {booking.activity.location.address}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
                                                                 <div className="recent-activity-price-box">
                                                                 <h5 className="mb-10">
                                                                       {currency} {convertedActivityPrices[booking.activity._id]?.toFixed(2) || booking.activity.price.toFixed(2)}

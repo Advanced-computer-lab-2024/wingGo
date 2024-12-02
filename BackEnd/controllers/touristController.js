@@ -3962,6 +3962,102 @@ const toggleNotificationPreference = async (req, res) => {
     }
 };
 
+const getFilteredActivities = async (req, res) => {
+    try {
+        const { touristId } = req.params;
+        const { filterType } = req.query; // Expect 'all', 'past', or 'upcoming'
+
+        // Log the filterType value
+        console.log('FilterType:', filterType);
+
+        const currentDate = new Date();
+
+        // Log the current date for debugging
+        console.log('Current Date:', currentDate);
+
+        // Fetch the tourist's booked activities and populate them
+        const tourist = await Tourist.findById(touristId).populate('bookedActivities');
+
+        if (!tourist) {
+            console.log('Tourist not found for ID:', touristId);
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+
+        // Filter activities based on the filterType
+        const filteredActivities = tourist.bookedActivities.filter((activity) => {
+            const activityDate = new Date(activity.date);
+
+
+            if (filterType === 'upcoming') {
+                return activityDate >= currentDate; // Keep upcoming activities
+            }
+
+            if (filterType === 'past') {
+                return activityDate < currentDate; // Keep past activities
+            }
+
+            return true; // Default to all activities
+        });
+
+
+        res.status(200).json(filteredActivities);
+    } catch (error) {
+        // Log the error for debugging
+        console.error('Error in getFilteredActivities:', error);
+        res.status(500).json({ message: 'Failed to fetch filtered activities', error });
+    }
+};
+
+
+
+  
+
+//   const filterUpcomingActivities = async (req, res) => {
+//     const { budget, date, category, averageRating } = req.query; 
+//     // let filter = {}; // Initialize an empty filter object
+//     let filter = { date: { $gte: new Date() }
+//     // ,flagged: false
+//   }; // Default filter: only upcoming activities (date >= today)
+
+//     // Apply budget filter (if provided)
+//     if (budget) {
+//         filter.price = { $lte: budget }; // Price less than or equal to the specified budget
+//     }
+
+//      // Apply exact date filter
+//      if (date) {
+//         // Parse the incoming date in local time
+//         const localDate = new Date(`${date}T00:00:00`); // YYYY-MM-DDT00:00:00 in local time
+
+//         // Convert to UTC start and end of day
+//         const startOfDay = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000); // UTC start
+//         const endOfDay = new Date(startOfDay);
+//         endOfDay.setUTCHours(23, 59, 59, 999); // UTC end of day
+
+//         filter.date = { $gte: startOfDay, $lte: endOfDay };
+//     }
+
+//     // Apply category filter (if provided)
+//     if (category) {
+//         filter.category = category; // Exact match for category
+//     }
+
+//     // Apply averageRating filter (if provided)
+//     if (averageRating) {
+//         filter.averageRating = { $gte: parseFloat(averageRating) }; // Ensure the value is a float and filter activities
+//     }
+
+//     try {
+//         // Find activities based on the constructed filter
+//         const activities = await Activity.find(filter); 
+        
+//         res.status(200).json(activities); // Return filtered activities
+//     } catch (error) {
+//         res.status(400).json({ error: error.message }); 
+//     }
+// };
+
 
 module.exports = {
     tourist_hello,
@@ -4051,5 +4147,6 @@ module.exports = {
     saveActivity,
     saveItinerary,
     viewAllSavedEvents,
-    toggleNotificationPreference
+    toggleNotificationPreference,
+    getFilteredActivities
 };

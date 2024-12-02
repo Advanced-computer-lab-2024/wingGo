@@ -146,4 +146,6 @@ router.get('/viewAllSavedEvents/:touristId', touristController.viewAllSavedEvent
 
 router.put('/toggleNotificationPreference/:touristId', touristController.toggleNotificationPreference);
 
+router.get('/filteractivitiesdate/:touristId', touristController.getFilteredActivities);
+
 module.exports = router;
