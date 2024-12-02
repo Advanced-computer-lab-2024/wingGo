@@ -1,6 +1,6 @@
 
 
-import { fetchActivities,fetchActivitiesAdvertiser,fetchAdminActivities,fetchBookedActivities} from '@/api/activityApi';
+import { fetchActivities,fetchActivitiesAdvertiser,fetchAdminActivities,fetchBookedActivities, fetchFilteredActivities} from '@/api/activityApi';
 import { Activity, BookedActivity } from '../interFace/interFace';
 const API_URL = 'http://localhost:8000/tourist';
 
@@ -41,4 +41,15 @@ export const getBookedActivitiesData = async (touristId: string): Promise<Booked
         return [];
     }
 };
+
+
+// export const getFilteredActivitiesData = async (touristId: string, filterType: 'all' | 'past' | 'upcoming'): Promise<BookedActivity[]> => {
+//     try {
+//         const activities = await fetchFilteredActivities(touristId, filterType);
+//         return activities;
+//     } catch (error) {
+//         console.error("Error loading filtered activities:", error);
+//         return [];
+//     }
+// };
 

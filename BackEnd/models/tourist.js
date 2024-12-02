@@ -114,7 +114,12 @@ const touristSchema = new Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Itinerary' // Reference the Itinerary model
         }
-    ]
+    ],
+    notifyOnInterest: {
+        type: Boolean,
+        default: false, // Initially set to false
+        required: true,
+    }
 
 
 }, {timestamps: true});

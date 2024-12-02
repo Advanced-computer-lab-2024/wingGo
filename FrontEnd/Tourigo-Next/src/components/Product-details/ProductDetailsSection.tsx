@@ -141,6 +141,7 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
                   <button
                     onClick={() => setEditModalOpen(true)}
                     className="edit-circle-btn"
+                    style={{ position: 'relative', top: '-5px' }}
                   >
                     <i className="fa fa-pen" />
                   </button>

@@ -316,7 +316,7 @@ const deleteAccount = async (req, res) => {
         }
 
         // No need to convert to ObjectId, Mongoose will handle it
-        const account = await LoginCredentials.findById(id);
+        const account = await LoginCredentials.findOne({ userId: id });
 
         if (!account) {
             return res.status(404).json({ message: 'Account not found in login credentials' });
@@ -324,14 +324,14 @@ const deleteAccount = async (req, res) => {
 
         // Delete the corresponding user from the correct collection based on the roleModel
         const UserModel = mongoose.model(account.roleModel);
-        const deletedUser = await UserModel.findByIdAndDelete(account.userId);
+        const deletedUser = await UserModel.findByIdAndDelete(id);
 
         if (!deletedUser) {
             return res.status(404).json({ message: `${account.roleModel} not found` });
         }
 
         // Finally, delete the account from LoginCredentials
-        await LoginCredentials.findByIdAndDelete(id);
+        await LoginCredentials.findOneAndDelete({ userId: id });
 
         res.status(200).json({ message: `Account with id '${id}' has been deleted successfully.` });
     } catch (err) {
@@ -717,7 +717,7 @@ const sortProductsByRatings = async (req, res) => {
 };
 // Controller function to add a new admin
 const addAdmin = async (req, res) => {
-    const { username, password } = req.body;  // Get username and password from request body
+    const { username, password, email } = req.body;  // Get username and password from request body
 
     try {
         // Check if the username already exists in LoginCredentials
@@ -732,7 +732,8 @@ const addAdmin = async (req, res) => {
         // Create a new admin in the Admin collection
         const newAdmin = new Admin({
             username,
-            password: hashedPassword  // Save the hashed password
+            password: hashedPassword,  // Save the hashed password
+            email
         });
 
         // Save the admin to the Admin collection
@@ -742,6 +743,7 @@ const addAdmin = async (req, res) => {
         const loginCredentials = new LoginCredentials({
             username: newAdmin.username,
             password: newAdmin.password,  // Use the hashed password
+            email,
             role: 'admin',
             userId: newAdmin._id,  // Reference to the newly created Admin
             roleModel: 'Admin'  // Set the role model to 'Admin'
@@ -1506,8 +1508,12 @@ const getSalesReport = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
 
+    const { username } = req.query;
+
     try {
-        const users = await LoginCredentials.find();
+        let users = await LoginCredentials.find();
+        //filter my username out
+        users = users.filter(user => user.username !== username);
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1516,15 +1522,19 @@ const getAllUsers = async (req, res) => {
 
 const searchForUserByUsername = async (req, res) => {
     const { username } = req.query;
+    const {LoggedInUsername} = req.query;
   
     try {
-      const users = await LoginCredentials.find({
+      let users = await LoginCredentials.find({
         username: { $regex: username, $options: 'i' } // Case-insensitive partial match
       });
   
       if (users.length === 0) {
         return res.status(404).json({ message: 'No users found' });
       }
+
+        //filter my username out
+        users = users.filter(user => user.username !== LoggedInUsername);
   
       res.status(200).json(users);
     } catch (error) {

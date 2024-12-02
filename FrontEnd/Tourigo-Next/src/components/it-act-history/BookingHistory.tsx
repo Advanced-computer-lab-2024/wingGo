@@ -4,27 +4,39 @@ import { imageLoader } from '@/hooks/image-loader';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import { getBookedItinerariesData } from '@/data/it-data';
-import { getBookedActivitiesData } from '@/data/act-data';
+// import { getBookedActivitiesData } from '@/data/act-data';
 import { BookedItinerary ,BookedActivity} from '@/interFace/interFace';
+import {Activity} from '@/interFace/interFace';
 import Link from 'next/link';
 import RateCommentModal from './RateCommentModal';
 import RateCommentModalActivity from './RateCommentModalActivity';
 import { cancelItineraryApi } from '@/api/itineraryApi';
-import { cancelActivityApi } from '@/api/activityApi';
+import { cancelActivityApi, fetchFilteredActivities } from '@/api/activityApi';
 import CancelConfirmationModal from "./CancelConfirmationModal"; // Import the new modal component
 import { useCurrency } from "@/contextApi/CurrencyContext"; 
+
+interface FilterOptions {
+    date?: string;
+    
+  
+  }
 
 const BookingHistory = () => {
     const [bookedItineraries, setBookedItineraries] = useState<BookedItinerary[]>([]);
     const [selectedBooking, setSelectedBooking] = useState<BookedItinerary | null>(null);
-    const [bookedActivities, setBookedActivities] = useState<BookedActivity[]>([]);
-    const [selectedBooking_act, setSelectedBooking_act] = useState<BookedActivity | null>(null);
+    // const [bookedActivities, setBookedActivities] = useState<BookedActivity[]>([]);
+    const [selectedBooking_act, setSelectedBooking_act] = useState<Activity | null>(null);
     const [activeTab, setActiveTab] = useState('itinerary'); // New state for tab selection
     const touristId = "67240ed8c40a7f3005a1d01d";
     const currentDate = new Date();
     const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
     const [convertedItineraryPrices, setConvertedItineraryPrices] = useState<{ [key: string]: number }>({});
     const [convertedActivityPrices, setConvertedActivityPrices] = useState<{ [key: string]: number }>({});
+    const [filterType, setFilterType] = useState<'all' | 'past' | 'upcoming'>('all');
+    // const [filteredActivities, setFilteredActivities] = useState<BookedActivity[]>([]);
+    const [filteredActivities, setFilteredActivities] = useState<Activity[]>([]);
+    const [filters, setFilters] = useState<FilterOptions>({});
+    
 
 
     const [showCancelModal, setShowCancelModal] = useState(false);
@@ -34,6 +46,46 @@ const BookingHistory = () => {
         setBookingToCancel(booking);
         setShowCancelModal(true);
     };
+
+    const loadFilteredActivities = async () => {
+        try {
+          const apiFilters: FilterOptions = {
+            date: filters.date,
+          };
+    
+          const data = await fetchFilteredActivities(apiFilters);
+    
+          // Apply local search filtering if searchQuery is provided
+       
+          setFilteredActivities(data);
+        } catch (error) {
+          console.error("Failed to fetch filtered itineraries:", error);
+        }
+      };
+    
+
+      // Fetch filtered activities when filterType or activeTab changes
+      useEffect(() => {
+       
+            if (activeTab === 'activity') {
+                loadFilteredActivities();
+                    
+            }
+       
+    }, [filters, activeTab]);
+
+    const applyFilters = (newFilters: FilterOptions) => {
+        setFilters((prevFilters) => ({
+          ...prevFilters,
+          ...newFilters, // Update filters with new values
+        }));
+      };
+    
+
+    // useEffect(() => {
+    //     console.log('Filtered Activities Updated:', filteredActivities);
+    // }, [filteredActivities]);
+    
 
     const confirmCancellation = async () => {
         if (!bookingToCancel) return;
@@ -107,37 +159,39 @@ const BookingHistory = () => {
     //     }
     // };
     ////////////////////  Activity Part  /////////////////////////////////
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const Activities = await getBookedActivitiesData(touristId);
-                setBookedActivities(Activities);
-                const convertedPrices = await convertPrices(Activities, 'activity');
-                setConvertedActivityPrices(convertedPrices);
-            } catch (error) {
-                console.error("Failed to load booked itineraries:", error);
-            }
-        };
-        fetchData();
-    }, [currency]);
-    const convertPrices = async (
-        bookings: BookedItinerary[] | BookedActivity[],
-        type: 'itinerary' | 'activity'
-      ) => {
-        const convertedPrices: Record<string, number> = {};
-        for (const booking of bookings) {
-          const price = type === 'itinerary' ? (booking as BookedItinerary).itinerary.price : (booking as BookedActivity).activity.price;
-          if (price) {
-            const convertedPrice = await convertAmount(price);
-            const id = type === 'itinerary' ? (booking as BookedItinerary).itinerary._id : (booking as BookedActivity).activity._id;
-            convertedPrices[id] = convertedPrice;
-          }
-        }
-        return convertedPrices;
-      };
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             const Activities = await getBookedActivitiesData(touristId);
+    //             // console.log("yay");
+    //             // console.log(Activities);
+    //             setFilteredActivities(Activities);
+    //             const convertedPrices = await convertPrices(Activities, 'activity');
+    //             setConvertedActivityPrices(convertedPrices);
+    //         } catch (error) {
+    //             console.error("Failed to load booked itineraries:", error);
+    //         }
+    //     };
+    //     fetchData();
+    // }, [currency]);
+    // const convertPrices = async (
+    //     bookings: BookedItinerary[] | BookedActivity[],
+    //     type: 'itinerary' | 'activity'
+    //   ) => {
+    //     const convertedPrices: Record<string, number> = {};
+    //     for (const booking of bookings) {
+    //       const price = type === 'itinerary' ? (booking as BookedItinerary).itinerary.price : (booking as BookedActivity).activity.price;
+    //       if (price) {
+    //         const convertedPrice = await convertAmount(price);
+    //         const id = type === 'itinerary' ? (booking as BookedItinerary).itinerary._id : (booking as BookedActivity).activity._id;
+    //         convertedPrices[id] = convertedPrice;
+    //       }
+    //     }
+    //     return convertedPrices;
+    //   };
 
 
-    const handleRateCommentClick_act = (booking: BookedActivity) => {
+    const handleRateCommentClick_act = (booking: Activity) => {
         setSelectedBooking_act(booking);
     };
 
@@ -164,15 +218,15 @@ const BookingHistory = () => {
     };
     
 
-    const handleCancelBookingClick_act = async (booking: BookedActivity) => {
+    const handleCancelBookingClick_act = async (booking: Activity) => {
         const userConfirmed = window.confirm("Are you sure you want to cancel this booking?");
         if (!userConfirmed) return;
     
         try {
-            await cancelActivityApi(touristId, booking.activity._id);
+            await cancelActivityApi(touristId, booking._id);
             alert('Booking canceled successfully');
-            setBookedActivities((prev) =>
-                prev.filter((item) => item.activity._id !== booking.activity._id)
+            setFilteredActivities((prev) =>
+                prev.filter((item) => item._id !== booking._id)
             );
         } catch (error: any) {
             if (error.response?.data?.message === 'Cannot cancel the activity within 48 hours of the booking date.') {
@@ -182,6 +236,12 @@ const BookingHistory = () => {
             }
         }
     };
+
+    const handleTabSwitch = (tab: 'itinerary' | 'activity') => {
+        setActiveTab(tab);
+        setFilterType('all'); // Reset filter to 'all' whenever the tab changes
+    };
+    
 
 
     return (
@@ -199,7 +259,7 @@ const BookingHistory = () => {
                                         <div className="nav nav-tabs" role="tablist" style={{ paddingTop: '7px' }}>
                                             <button
                                                 className={`nav-link ${activeTab === 'itinerary' ? 'active' : ''}`}
-                                                onClick={() => setActiveTab('itinerary')}
+                                                onClick={() => handleTabSwitch('itinerary')}
                                                 type="button"
                                                 role="tab"
                                                 aria-selected={activeTab === 'itinerary'}
@@ -207,9 +267,10 @@ const BookingHistory = () => {
                                             >
                                                 Itinerary History
                                             </button>
+                                            
                                             <button
                                                 className={`nav-link ${activeTab === 'activity' ? 'active' : ''}`}
-                                                onClick={() => setActiveTab('activity')}
+                                                onClick={() => handleTabSwitch('activity')}
                                                 type="button"
                                                 role="tab"
                                                 aria-selected={activeTab === 'activity'}
@@ -220,12 +281,33 @@ const BookingHistory = () => {
                                     </nav>
                                 </div>
 
+                                <div className="col-auto" style={{ paddingBottom: '30px'}}>
+                                <select
+                                    onChange={(e) => setFilterType(e.target.value as 'all' | 'past' | 'upcoming')}
+                                    value={filterType}
+                                    
+                                >
+                                    <option value="all">All</option>
+                                    <option value="past">Past</option>
+                                    <option value="upcoming">Upcoming</option>
+                                </select>
+                                </div>
+
                                 <div className="recent-activity-content">
+                               
                                     <div className="table-responsive">
                                         {activeTab === 'itinerary' ? (
                                             <table className="table mb-0">
+                                               
                                                 <tbody>
-                                                    {bookedItineraries.map((booking) => (
+                                                    {bookedItineraries
+                                                    .filter((booking) => {
+                                                        const isPast = new Date(booking.bookingDate) < currentDate;
+                                                        if (filterType === 'past') return isPast;
+                                                        if (filterType === 'upcoming') return !isPast;
+                                                        return true; // 'all'
+                                                    })
+                                                    .map((booking) => (
                                                         <tr key={booking.itinerary._id} className="table-custom">
                                                             <td>
                                                                 <div className="dashboard-thumb-wrapper p-relative">
@@ -319,46 +401,40 @@ const BookingHistory = () => {
                                                 
                                                 <table className="table mb-0">
                                                 <tbody>
-                                                    {bookedActivities.map((booking) => (
-                                                        <tr key={booking.activity._id} className="table-custom">
-                                                            <td>
-                                                                <div className="dashboard-thumb-wrapper p-relative">
-                                                                    <div className="dashboard-thumb image-hover-effect-two position-relative">
-                                                                        <Image
-                                                                            src=""
-                                                                            loader={imageLoader}
-                                                                            style={{ width: '100%', height: "auto" }}
-                                                                            alt="activity image" 
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div className="recent-activity-title-box d-flex align-items-center gap-10">
-                                                                    <div>
-                                                                        <h5 className="tour-title fw-5 underline">
-                                                                            <Link href={`/activity-details/${booking.activity._id}`}>
-                                                                                {booking.activity.name}
-                                                                            </Link>
-                                                                        </h5>
-                                                                        <div className="recent-activity-location">
-                                                                            Address: {booking.activity.location.address}
-                                                                        </div>
-                                                                       
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
+                                                { filteredActivities.length>0 && filteredActivities.map((booking) => (
+                        <tr key={booking._id} className="table-custom">
+                            <td>
+                                <div className="dashboard-thumb-wrapper p-relative">
+                                    <div className="dashboard-thumb image-hover-effect-two position-relative">
+                                        
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div className="recent-activity-title-box d-flex align-items-center gap-10">
+                                    <div>
+                                        <h5 className="tour-title fw-5 underline">
+                                            <Link href={`/activity-details/${booking._id}`}>
+                                                {booking.name}
+                                            </Link>
+                                        </h5>
+                                        <div className="recent-activity-location">
+                                            Address: {booking.location.address}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
                                                                 <div className="recent-activity-price-box">
                                                                 <h5 className="mb-10">
-                                                                      {currency} {convertedActivityPrices[booking.activity._id]?.toFixed(2) || booking.activity.price.toFixed(2)}
+                                                                      {currency} {convertedActivityPrices[booking._id]?.toFixed(2) || booking.price.toFixed(2)}
                                                                     </h5>
                                                                     <p>Total/Person</p>
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <div>
-                                                                    {new Date(booking.activity.date) < currentDate ? (
+                                                                    {new Date(booking.date) < currentDate ? (
                                                                         <button
                                                                             onClick={() => handleRateCommentClick_act(booking)}
                                                                             className="rate-comment-button"
@@ -379,16 +455,16 @@ const BookingHistory = () => {
                                                                             onClick={() => handleCancelBookingClick_act(booking)}
                                                                             className="cancel-booking-button"
                                                                             style={{
-                                                                                backgroundColor: isCancellable_act(booking.activity.date) ? "red" : "gray",
+                                                                                backgroundColor: isCancellable_act(booking.date) ? "red" : "gray",
                                                                                 color: "white",
                                                                                 padding: "8px 16px",
                                                                                 fontSize: "14px",
                                                                                 borderRadius: "4px",
-                                                                                cursor: isCancellable_act(booking.activity.date) ? "pointer" : "not-allowed",
+                                                                                cursor: isCancellable_act(booking.date) ? "pointer" : "not-allowed",
                                                                                 marginBottom: "8px"
                                                                             }}
-                                                                            disabled={!isCancellable_act(booking.activity.date)}
-                                                                            title={!isCancellable_act(booking.activity.date) ? "Cannot cancel within 48 hours of booking date." : ""}
+                                                                            disabled={!isCancellable_act(booking.date)}
+                                                                            title={!isCancellable_act(booking.date) ? "Cannot cancel within 48 hours of booking date." : ""}
                                                                         >
                                                                             Cancel Booking
                                                                         </button>
@@ -422,7 +498,7 @@ const BookingHistory = () => {
                 <RateCommentModalActivity
                     bookingData={selectedBooking_act}
                     touristId={touristId}
-                    activityId={selectedBooking_act.activity._id}
+                    activityId={selectedBooking_act._id}
                     
                     onClose={closeModal_act}
                 />

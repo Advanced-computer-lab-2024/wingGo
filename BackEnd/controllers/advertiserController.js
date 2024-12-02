@@ -7,7 +7,18 @@ const Transport = require('../models/Transport');
 const { uploadDocument } = require('../helpers/s3Helper');
 const {generatePreSignedUrl}  = require('../downloadMiddleware');
 const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
+const Tourist = require('../models/tourist');
+const nodemailer = require('nodemailer');
 // const Attraction = require('../models/attraction');
+
+  // Nodemailer setup
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: "winggo567@gmail.com",
+      pass: "smkg eghm yrzv yyir"
+    }
+  });
 
 const advertiser_hello = (req, res) => {
     console.log('Advertiser route hit!'); // Add this log
@@ -599,6 +610,82 @@ const getTouristReport = async (req, res) => {
     }
 };
 
+const openBookingForActivity = async (req, res) => {
+    const { id } = req.params;  // Activity ID from URL parameters
+    const { bookingOpen } = req.body;  // Boolean value from request body
+
+    try {
+        // Ensure bookingOpen is a proper boolean
+        const isBookingOpen = bookingOpen === true || bookingOpen === "true";
+
+        // Find the activity by ID
+        const activity = await Activity.findById(id);
+
+        // Check if the activity exists
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found' });
+        }
+
+        // Update the bookingOpen field
+        activity.bookingOpen = isBookingOpen;
+        await activity.save();
+
+        if (isBookingOpen) {
+            console.log("Booking is now open for activity:", activity.name);
+
+            ////// This part is to be edited/added start
+            // Find tourists who saved this activity and opted for notifications
+            const tourists = await Tourist.find({
+                savedActivities: id,
+                notifyOnInterest: true, // Notify only if they opted in
+            });
+
+            console.log("Notifying interested tourists who saved this activity:", tourists.length);
+
+            // Prepare notifications
+            const notifications = tourists.map(tourist => ({
+                touristId: tourist._id,
+                notification: {
+                    type: 'eventBooking',
+                    eventId: id,
+                    message: `The activity "${activity.name}" is now open for booking!`,
+                    date: new Date(),
+                    metadata: { name: activity.name },
+                },
+            }));
+
+            // Send notifications and emails
+            for (const { touristId, notification } of notifications) {
+                await Tourist.findByIdAndUpdate(touristId, {
+                    $push: { notifications: notification },
+                });
+
+                // Send email notification
+                const tourist = tourists.find(t => t._id.equals(touristId));
+                await transporter.sendMail({
+                    from: "winggo567@gmail.com",
+                    to: tourist.email,
+                    subject: 'Activity Now Open for Booking',
+                    html: `<p>Dear ${tourist.username},</p>
+                           <p>The activity "<strong>${activity.name}</strong>" you saved is now open for booking!</p>
+                           <p>Don't miss out on this opportunity to join an amazing experience.</p>
+                           <p>Best regards,</p>
+                           <p>Your Team</p>`,
+                });
+            }
+            ////// This part is to be edited/added end
+        }
+
+        res.status(200).json({
+            message: `Activity booking has been ${isBookingOpen ? 'opened' : 'closed'} successfully.`,
+            activity,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 module.exports = {
     advertiser_hello,
     createAdvertiserProfile, //done
@@ -622,5 +709,6 @@ module.exports = {
     getUnbookedTransportById,
     previewLogo,
     getSalesReport,
-    getTouristReport
+    getTouristReport,
+    openBookingForActivity
 };

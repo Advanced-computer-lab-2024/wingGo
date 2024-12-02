@@ -267,14 +267,7 @@ const TourDetails = ({ id }: idTypeNew) => {
         </div>
         <button
           onClick={handleSendEmail}
-          style={{
-            padding: '10px 20px',
-            borderRadius: '60px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            cursor: 'pointer'
-          }}
+          className="bd-primary-btn btn-style radius-60 mb-10"
         >
           Send Email
         </button>

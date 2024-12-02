@@ -376,10 +376,6 @@ export interface BookedItinerary {
   itinerary: Itinerary;
   bookingDate: Date;
 }
-export interface BookedActivity {
-  activity: Activity;
- 
-}
 
 
 export interface Activity {
@@ -412,6 +408,12 @@ export interface Activity {
   touristIDs?: string[]; // Array of tourist ObjectIds
   averageRating:number;
 }
+
+export interface BookedActivity {
+  activity: Activity;
+ 
+}
+
 
 
   export interface Place {

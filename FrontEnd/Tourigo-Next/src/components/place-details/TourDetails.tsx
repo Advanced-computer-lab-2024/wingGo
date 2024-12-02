@@ -12,7 +12,9 @@ import { idTypeNew } from "@/interFace/interFace";
 import TourSingleCard from "../common/tourElements/TourSingleCardPlaces";
 import BookingFormModal from "@/elements/modals/BookingFormModal";
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for styling
+import { FaShareAlt, FaEnvelope } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
+import Modal from "react-modal"; // Import Modal from react-modal
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Place | null>(null);
@@ -77,9 +79,48 @@ const TourDetails = ({ id }: idTypeNew) => {
                         <span className="bd-badge warning fw-5">Featured</span>
                         <span className="bd-badge danger fw-5">15% Off</span>
                       </div>
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '10px', marginBottom: '20px' }}>
                       <h3 className="tour-details-title mb-15">
                         {data?.name}
                       </h3>
+                      <button
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '50%',
+                          backgroundColor: '#007bff',
+                          color: 'white',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(window.location.href);
+                          toast.success("Link copied to clipboard!");
+                        }}
+                      >
+                        <FaShareAlt />
+                      </button>
+                      <button
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '50%',
+                          backgroundColor: '#007bff',
+                          color: 'white',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setIsEmailFormOpen(true)}
+                      >
+                        <FaEnvelope />
+                      </button>
+                          </div>
                       <div className="tour-details-meta d-flex flex-wrap gap-10 align-items-center justify-content-between mb-20">
                         {/* <div className="tour-details-price">
                           <h4 className="price-title">
@@ -107,45 +148,8 @@ const TourDetails = ({ id }: idTypeNew) => {
                             <Link href="https://www.youtube.com/">
                               <i className="icon-youtube"></i>
                             </Link>
-                            <button
-                              className="bd-primary-btn btn-style radius-60"
-                              onClick={() => {
-                                navigator.clipboard.writeText(window.location.href);
-                                toast.success("Link copied to clipboard!");
-                              }}
-                            >
-                              <span className="bd-primary-btn-text">Share Link</span>
-                              <span className="bd-primary-btn-circle">
-                                <i className="fa fa-share" />
-                              </span>
-                            </button>
-                            <button
-                              className="bd-primary-btn btn-style radius-60"
-                              onClick={() => setIsEmailFormOpen(!isEmailFormOpen)}
-                            >
-                              Share Via Email
-                            </button>
                           </div>
                         </div>
-                        {isEmailFormOpen && (
-                            <div className="email-form">
-                              <h3>Share Place Via Email</h3>
-                              <div className="form-group">
-                                <label htmlFor="email">Email:</label>
-                                <input
-                                  type="email"
-                                  id="email"
-                                  name="email"
-                                  value={email}
-                                  onChange={handleEmailChange}
-                                  className="form-control"
-                                />
-                              </div>
-                              <button onClick={handleSendEmail} className="bd-primary-btn btn-style radius-60">
-                                Send Email
-                              </button>
-                            </div>
-                          )}
                       </div>
                       <div className="tour-details-destination-wrapper">
                         <div className="tour-details-destination-info">
@@ -237,6 +241,56 @@ const TourDetails = ({ id }: idTypeNew) => {
       </section>
       <BookingFormModal />
       <ToastContainer />
+      <Modal
+        isOpen={isEmailFormOpen}
+        onRequestClose={() => setIsEmailFormOpen(false)}
+        contentLabel="Share Via Email"
+        style={{
+          content: {
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            width: '400px',
+            boxShadow: '0 5px 15px rgba(0, 0, 0, 0.3)'
+          },
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.75)'
+          }
+        }}
+      >
+        <h3>Share Via Email</h3>
+        <div style={{ marginBottom: '15px' }}>
+          <label htmlFor="email" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Email:</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={email}
+            onChange={handleEmailChange}
+            style={{
+              width: '100%',
+              padding: '10px',
+              border: '1px solid #ced4da',
+              borderRadius: '0.25rem',
+              fontSize: '1rem',
+              color: '#495057'
+            }}
+          />
+        </div>
+        <button
+          onClick={handleSendEmail}
+          className="bd-primary-btn btn-style radius-60 mb-10"
+        >
+          Send Email
+        </button>
+      </Modal>
     </>
   );
 };

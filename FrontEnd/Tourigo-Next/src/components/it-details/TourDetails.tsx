@@ -100,6 +100,8 @@ const TourDetails = ({ id }: idTypeNew) => {
                       <Image
                         src="/images/default-image.jpg" // Placeholder image
                         loader={imageLoader}
+                        width={1920}
+                        height={1080}
                         style={{ width: "100%", height: "auto" }}
                         alt="Itinerary Image"
                       />
@@ -244,14 +246,7 @@ const TourDetails = ({ id }: idTypeNew) => {
         </div>
         <button
           onClick={handleSendEmail}
-          style={{
-            padding: '10px 20px',
-            borderRadius: '60px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            cursor: 'pointer'
-          }}
+          className="bd-primary-btn btn-style radius-60 mb-10"
         >
           Send Email
         </button>

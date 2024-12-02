@@ -38,4 +38,7 @@ router.delete('/deleteTransport/:id', advertiserController.deleteTransport);
 router.get('/viewLogo/:id', advertiserController.previewLogo);
 router.get('/sales-report/:advertiserId', advertiserController.getSalesReport);
 router.get('/tourist-report/:advertiserId', advertiserController.getTouristReport);
+
+router.put('/openBookingForActivity/:id', advertiserController.openBookingForActivity);
+
 module.exports = router;
