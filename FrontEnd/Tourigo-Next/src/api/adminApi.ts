@@ -166,4 +166,90 @@ export const addGovernor = async (username: string, email: string, password: str
     }
 
 
+export const getAllPrefTags = async (): Promise<any[]> => {
+    try {
+        const response = await axios.get<any[]>('http://localhost:8000/admin/preferences');
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching preference tags:", error);
+        throw error;
+    }
+};
+
+
+export const updatePrefTags = async (id: string, name: string): Promise<any> => {
+    try {
+        const response = await axios.put(`http://localhost:8000/admin/preferences/${id}`, { name });
+        return response.data;
+    } catch (error) {
+        console.error("Error updating preference tags:", error);
+        throw error;
+    }
+};
+
+export const deletePrefTag = async (id: string): Promise<any> => {
+    try {
+        const response = await axios.delete(`http://localhost:8000/admin/preferences/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting preference tag:", error);
+        throw error;
+    }
+}
+
+
+export const addPrefTag = async (name: string): Promise<any> => {
+    try {
+        const response = await axios.post(`http://localhost:8000/admin/preferences`, { name });
+        return response.data;
+    } catch (error) {
+        console.error("Error adding preference tag:", error);
+        throw error;
+    }
+};
+
+
+export const getAllActCategories = async (): Promise<any> => {
+
+    try {
+        const response = await axios.get<any[]>('http://localhost:8000/admin/getcategories');
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching activity categories:", error);
+        throw error;
+    }
+};
+
+export const updateActCategories = async (id: string, name: string): Promise<any> => {
+    try {
+        const response = await axios.put(`http://localhost:8000/admin/updatecategory/${id}`, { name });
+        return response.data;
+    } catch (error) {
+        console.error("Error updating activity categories:", error);
+        throw error;
+    }
+}
+
+export const deleteActCategory = async (id: string): Promise<any> => {
+    try {
+        const response = await axios.delete(`http://localhost:8000/admin/deletecategory/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting activity category:", error);
+        throw error;
+    }
+}
+
+export const addActCategory = async (name: string): Promise<any> => {
+    try {
+        const response = await axios.post(`http://localhost:8000/admin/categories`, { name });
+        return response.data;
+    } catch (error) {
+        console.error("Error adding activity category:", error);
+        throw error;
+    }
+};
+
+
+
 
