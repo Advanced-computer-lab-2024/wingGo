@@ -1,4 +1,4 @@
-import { addPrefTag, deletePrefTag, getAllPrefTags, updatePrefTags } from '@/api/adminApi';
+import { addActCategory, updateActCategories, deleteActCategory, getAllActCategories } from '@/api/adminApi';
 import { redeemPoints } from '@/api/LoyaltyApi';
 import CountUpContent from '@/elements/counter/CountUpContent';
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
@@ -9,7 +9,7 @@ import { FaEdit, FaSave, FaWallet } from "react-icons/fa";
 
 
 
-const Prefrences = () => {
+const ActivityCategories = () => {
 
     const [availablePrefrences, setAvailablePrefrences] = useState<Array<any>>([]);
     const [isEdit, setIsEdit] = useState<{ [key:string]: boolean }>({});
@@ -20,9 +20,9 @@ const Prefrences = () => {
 
     
     useEffect(() => {
-      const fetchAllPreferenceTags = async () => {
+      const fetchAllActCategories = async () => {
         try {
-          const data = await getAllPrefTags();
+          const data = await getAllActCategories();
           console.log('Tags available:', data);
           setAvailablePrefrences(data);
         } catch (error) {
@@ -32,7 +32,7 @@ const Prefrences = () => {
 
       
   
-      fetchAllPreferenceTags();
+      fetchAllActCategories();
       
     } , []);
 
@@ -46,11 +46,11 @@ const Prefrences = () => {
 
     const handleSaveClick = async (id: string) => {
       try {
-        await updatePrefTags(id, newName[id]);
+        await updateActCategories(id, newName[id]);
         setIsEdit((prev) => ({ ...prev, [id]: false }));
         
         // Refresh the preferences list
-        const data = await getAllPrefTags();
+        const data = await getAllActCategories();
         setAvailablePrefrences(data);
       } catch (error) {
         console.error('Error updating preference:', error);
@@ -59,9 +59,9 @@ const Prefrences = () => {
 
     const handleDeleteClick = async (id: string) => {
       try {
-        await deletePrefTag(id);
+        await deleteActCategory(id);
         // Refresh the preferences list
-        const data = await getAllPrefTags();
+        const data = await getAllActCategories();
         setAvailablePrefrences(data);
       } catch (error) {
         console.error('Error deleting preference:', error);
@@ -70,9 +70,9 @@ const Prefrences = () => {
 
     const handleAddClick = async () => {
       try {
-        await addPrefTag(addTag);
+        await addActCategory(addTag);
         // Refresh the preferences list
-        const data = await getAllPrefTags();
+        const data = await getAllActCategories();
         setAvailablePrefrences(data);
         setAddTag('');
       } catch (error) {
@@ -87,7 +87,7 @@ const Prefrences = () => {
 
   return (
     <section className="bd-team-details-area section-space position-relative">
-        <h2 className="team-single-title mb-20">Preference Tags</h2>
+        <h2 className="team-single-title mb-20">Activity Categories</h2>
 
         <div className="buttons-container-pref">
         {availablePrefrences.map((preference) => (
@@ -123,11 +123,11 @@ const Prefrences = () => {
         <input
           type="text"
           className='w-auto flex g-10'
-          placeholder="Add new preference"
+          placeholder="Add new activity category"
           value={addTag}
           onChange={(e) => setAddTag(e.target.value)}
         />
-        <button className='bd-primary-btn btn-style radius-60 mt-10 flex g-10' onClick={() => handleAddClick()} > Add Preference Tag </button>
+        <button className='bd-primary-btn btn-style radius-60 mt-10 flex g-10' onClick={() => handleAddClick()} > Add Activity Category </button>
       </div>
 
 
@@ -135,4 +135,4 @@ const Prefrences = () => {
   );
 };
 
-export default Prefrences;
+export default ActivityCategories;
