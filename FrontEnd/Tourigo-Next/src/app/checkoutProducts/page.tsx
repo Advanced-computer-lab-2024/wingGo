@@ -1,4 +1,4 @@
-import CheckoutMain from "@/components/checkout/CheckoutMain";
+import CheckoutMain from "@/components/checkoutProducts/CheckoutMain";
 import MetaData from "@/hooks/useMetaData";
 import Wrapper from "@/layout/DefaultWrapper";
 import React from "react";
