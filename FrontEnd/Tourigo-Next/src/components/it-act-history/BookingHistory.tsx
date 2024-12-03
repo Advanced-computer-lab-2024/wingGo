@@ -32,6 +32,7 @@ const BookingHistory = () => {
     const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
     const [convertedItineraryPrices, setConvertedItineraryPrices] = useState<{ [key: string]: number }>({});
     const [convertedActivityPrices, setConvertedActivityPrices] = useState<{ [key: string]: number }>({});
+    // const [filterType_it, setFilterType_it] = useState<'all' | 'past' | 'upcoming'>('all');
     const [filterType, setFilterType] = useState<'all' | 'past' | 'upcoming'>('all');
     // const [filteredActivities, setFilteredActivities] = useState<BookedActivity[]>([]);
     const [filteredActivities, setFilteredActivities] = useState<Activity[]>([]);
@@ -240,6 +241,7 @@ const BookingHistory = () => {
     const handleTabSwitch = (tab: 'itinerary' | 'activity') => {
         setActiveTab(tab);
         setFilterType('all'); // Reset filter to 'all' whenever the tab changes
+        // setFilterType_it('all'); // Reset filter to 'all' whenever the tab changes
     };
     
 
@@ -401,7 +403,12 @@ const BookingHistory = () => {
                                                 
                                                 <table className="table mb-0">
                                                 <tbody>
-                                                { filteredActivities.length>0 && filteredActivities.map((booking) => (
+                                                { filteredActivities.length>0 && filteredActivities.filter((booking) => {
+                                                        const isPast = new Date(booking.date) < currentDate;
+                                                        if (filterType === 'past') return isPast;
+                                                        else if (filterType === 'upcoming') return !isPast;
+                                                        return true; // 'all'
+                                                    }).map((booking) => (
                         <tr key={booking._id} className="table-custom">
                             <td>
                                 <div className="dashboard-thumb-wrapper p-relative">

@@ -20,6 +20,7 @@ import StarRating from "@/components/Products/StarRating";
 import { fetchSellerData, purchaseProduct, editProduct,fetchProductImage } from "@/api/productApi"; 
 import { calculateAverageRating } from "@/utils/utils"; 
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
+import { addToCart } from "@/api/cartApi";
 
 
 
@@ -109,6 +110,16 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
       }
     }
   };
+  const handleAddToCart = async () => {
+  
+    try {
+      addToCart(item?._id);
+      
+      alert("Product added to cart successfully!");
+    } catch (error: any) {
+      alert(error.message || "Failed to add product to cart. Please try again.");
+    }
+  };
 
   // Adding the `return` statement to return JSX
   return (
@@ -189,7 +200,13 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
                     <span className="bd-primary-btn-text">Purchase</span>
                     <span className="bd-primary-btn-circle"></span>
                   </button>
-                </div>          
+                  <button className="bd-primary-btn btn-style radius-60" onClick={()=>handleAddToCart()}>
+                    <span className="bd-primary-btn-text">Add To Cart</span>
+                    <span className="bd-primary-btn-circle"></span>
+                  </button>
+                </div>  
+                  
+
               )}
             </div>
           </div>

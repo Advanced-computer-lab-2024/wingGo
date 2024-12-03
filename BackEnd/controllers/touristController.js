@@ -3108,27 +3108,33 @@ const addToCart = async (req, res) => {
             return res.status(400).json({ message: 'This product is already in the cart for this tourist.' });
         }
 
-        // Step 2: Fetch the product to get its amount
+        // Step 2: Fetch the product to get its details
         const product = await Product.findById(productId);
 
         if (!product) {
             return res.status(404).json({ message: 'Product not found.' });
         }
 
-        const productAmount = product.quantity; // Assuming the product has a `price` field
+        // Validate product quantity
+        if (product.quantity <= 0) {
+            return res.status(400).json({ message: 'Product is out of stock.' });
+        }
 
         // Step 3: Create a new cart item
         const cartItem = new Cart({
             touristId,
-            productId
+            productId,
+            amount: 1, // Default to 1
+            price: product.price, // Set product price in the cart
+            name: product.name // Set product name in the cart
         });
 
         // Step 4: Save the cart item
         await cartItem.save();
 
-        // Step 5: Return success response with product amount
+        // Step 5: Return success response
         return res.status(201).json({
-            message: `Product added to cart successfully. Product amount: ${productAmount}.`,
+            message: 'Product added to cart successfully.',
             cartItem
         });
     } catch (error) {
@@ -3136,6 +3142,7 @@ const addToCart = async (req, res) => {
         return res.status(500).json({ message: 'Error adding item to cart.', error });
     }
 };
+
 
 
 
@@ -3574,29 +3581,24 @@ const payForOrder = async (req, res) => {
 
     try {
         // Find all cart items for the given touristId
-        const cartItems = await Cart.find({ touristId }).populate('productId');
+        const cartItems = await Cart.find({ touristId });
 
         if (!cartItems || cartItems.length === 0) {
             return res.status(404).json({ message: 'No items found in the cart for this tourist.' });
         }
 
         // Map the cart items to include product details
-        const itemsWithDetails = cartItems.map(item => ({
-            cartItemId: item._id,
-            product: {
-                id: item.productId._id,
-                name: item.productId.name, // Assuming the Product model has a 'name' field
-                price: item.productId.price, // Assuming the Product model has a 'price' field
-                quantity: item.productId.quantity // Assuming the Product model has a 'quantity' field
-            },
-            amount: item.amount // Assuming Cart has an 'amount' field
+        const productData = cartItems.map(item => ({
+            _id: item._id,
+            productId:item.productId,
+            touristId:item.touristId,
+            amount: item.amount, // Assuming Cart has an 'amount' field
+            price: item.price,
+            name:item.name
         }));
 
-        // Return the items in the cart
-        return res.status(200).json({
-            message: 'Cart items retrieved successfully.',
-            items: itemsWithDetails
-        });
+        res.status(200).json(productData);
+
     } catch (error) {
         console.error('Error retrieving cart items:', error); // Log the error for debugging
         return res.status(500).json({ message: 'Error retrieving cart items.', error });

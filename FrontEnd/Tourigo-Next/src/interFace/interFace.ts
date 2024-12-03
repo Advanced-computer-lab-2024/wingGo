@@ -517,4 +517,13 @@ export interface TourGuide {
   updatedAt?: Date;
 }
 
+export interface Cart {
+  _id: string;
+  productId:string;
+  touristId:string;
+  amount: number;
+  price: number;
+  name:string;
+}
+             
 
