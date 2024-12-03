@@ -250,6 +250,15 @@ export const addActCategory = async (name: string): Promise<any> => {
     }
 };
 
+export const fetchSalesReport = async (): Promise<any> => {
+    try {
+        const response = await axios.get('http://localhost:8000/admin/sales-report');
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching sales report:", error);
+        throw error;
+    }
+};
 
 
 
