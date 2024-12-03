@@ -8,6 +8,8 @@ import { fetchUsername } from "@/api/adminApi";
 import { set } from "date-fns";
 import Prefrences from "./Prefrences";
 import AddUsers from "./AddUsers";
+import ActivityCategories from "./ActivityCategories";
+import { TbCategory } from "react-icons/tb";
 
 
 interface ProfileDetailsProps {
@@ -50,6 +52,10 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
         return <UserManagement />;
       case 'Add Users':
         return <AddUsers />;
+      case 'Prefrences':
+        return <Prefrences />;
+      case 'ActivityCategories':
+        return <ActivityCategories />;
       
       default:
         return null;
@@ -145,6 +151,42 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                         </span>
                         Add Users
                       </button>
+
+                      <button
+                        className="nav-link"
+                        id="nav-community-2-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#nav-community-2"
+                        type="button"
+                        role="tab"
+                        aria-controls="nav-community-2"
+                        aria-selected="false"
+                        onClick={() => setActiveTab('Prefrences')}
+                      >
+                        <span>
+                        <TbCategory />
+                        </span>
+                        Prefrence Tags
+                      </button>
+
+                      <button
+                        className="nav-link"
+                        id="nav-community-2-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#nav-community-2"
+                        type="button"
+                        role="tab"
+                        aria-controls="nav-community-2"
+                        aria-selected="false"
+                        onClick={() => setActiveTab('ActivityCategories')}
+                      >
+                        <span>
+                        <TbCategory />
+                        </span>
+                        Activity Categories
+                      </button>
+
+
 
                       
                       

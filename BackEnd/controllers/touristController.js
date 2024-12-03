@@ -900,6 +900,10 @@ const viewComplaints = async (req, res) => {
 const bookItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params; // Extracting touristId and itineraryId from URL parameters
     const { numberOfPeople, paymentMethod, promoCode, bookingDate } = req.query;
+    console.log(paymentMethod);
+    console.log(numberOfPeople);
+    
+    console.log("promocode "+promoCode);
 
     try {
        
@@ -966,13 +970,17 @@ const bookItinerary = async (req, res) => {
             await promoCodeDetails.save();
         }
 
+        console.log("totalPrice "+ totalPrice);
+
         // Wallet payment handling
         if (paymentMethod === 'wallet' && reqTourist.wallet < totalPrice) {
             return res.status(400).json({ message: 'Insufficient funds in wallet' });
         }
 
         if (paymentMethod === 'wallet') {
+            console.log("wallet before "+ reqTourist.wallet);
             reqTourist.wallet -= totalPrice;
+            console.log("wallet after "+ reqTourist.wallet);
             await reqTourist.save();
         }
 
@@ -3975,49 +3983,38 @@ const toggleNotificationPreference = async (req, res) => {
 const getFilteredActivities = async (req, res) => {
     try {
         const { touristId } = req.params;
-        const { filterType } = req.query; // Expect 'all', 'past', or 'upcoming'
+        const { filterType } = req.query; // Dynamically fetch filterType from query
 
-        // Log the filterType value
-        console.log('FilterType:', filterType);
+        console.log("Received filterType:", filterType); // Debugging
 
         const currentDate = new Date();
 
-        // Log the current date for debugging
-        console.log('Current Date:', currentDate);
-
-        // Fetch the tourist's booked activities and populate them
         const tourist = await Tourist.findById(touristId).populate('bookedActivities');
 
         if (!tourist) {
-            console.log('Tourist not found for ID:', touristId);
             return res.status(404).json({ message: 'Tourist not found' });
         }
 
-
-        // Filter activities based on the filterType
         const filteredActivities = tourist.bookedActivities.filter((activity) => {
             const activityDate = new Date(activity.date);
 
-
             if (filterType === 'upcoming') {
-                return activityDate >= currentDate; // Keep upcoming activities
+                return activityDate >= currentDate;
+            } else if (filterType === 'past') {
+                return activityDate < currentDate;
             }
-
-            if (filterType === 'past') {
-                return activityDate < currentDate; // Keep past activities
-            }
-
-            return true; // Default to all activities
+            return true; // Default to all
         });
 
+        console.log("Filtered Activities:", filteredActivities); // Debug the filtered result
 
         res.status(200).json(filteredActivities);
     } catch (error) {
-        // Log the error for debugging
-        console.error('Error in getFilteredActivities:', error);
-        res.status(500).json({ message: 'Failed to fetch filtered activities', error });
+        console.error("Error in getFilteredActivities:", error);
+        res.status(500).json({ message: "Failed to fetch activities" });
     }
 };
+
 
 
 
@@ -4067,6 +4064,45 @@ const getFilteredActivities = async (req, res) => {
 //         res.status(400).json({ error: error.message }); 
 //     }
 // };
+
+const getPrice = async (req, res) => {
+    const { itineraryId } = req.params; // Extract itineraryId from URL parameters
+    const { numberOfPeople, promoCode } = req.query; // Extract from query
+  
+    try {
+      // Fetch itinerary details
+      const itinerary = await Itinerary.findById(itineraryId);
+      if (!itinerary) {
+        return res.status(404).json({ message: 'Itinerary not found' });
+      }
+  
+      let totalPrice = itinerary.price * numberOfPeople; // Base price calculation
+      let promoCodeDetails = null;
+  
+      // Validate and apply promo code
+      if (promoCode) {
+        promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+        if (
+          !promoCodeDetails ||
+          !promoCodeDetails.isActive ||
+          promoCodeDetails.endDate < new Date()
+        ) {
+          return res.status(400).json({ message: 'Invalid or expired promo code' });
+        }
+  
+        const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+        totalPrice -= discountAmount;
+      }
+
+      
+  
+      return res.status(200).json({ totalPrice });
+    } catch (error) {
+      console.error("Error during price calculation:", error);
+      return res.status(500).json({ message: 'Error calculating price', error });
+    }
+  };
+  
 
 
 module.exports = {
@@ -4158,5 +4194,6 @@ module.exports = {
     saveItinerary,
     viewAllSavedEvents,
     toggleNotificationPreference,
-    getFilteredActivities
+    getFilteredActivities,
+    getPrice
 };

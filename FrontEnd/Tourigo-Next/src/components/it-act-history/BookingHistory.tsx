@@ -37,6 +37,8 @@ const BookingHistory = () => {
     // const [filteredActivities, setFilteredActivities] = useState<BookedActivity[]>([]);
     const [filteredActivities, setFilteredActivities] = useState<Activity[]>([]);
     const [filters, setFilters] = useState<FilterOptions>({});
+    const [loading, setLoading] = useState(false);
+
     
 
 
@@ -50,30 +52,34 @@ const BookingHistory = () => {
 
     const loadFilteredActivities = async () => {
         try {
-          const apiFilters: FilterOptions = {
-            date: filters.date,
-          };
+            setLoading(true); // Set loading to true
+            setFilteredActivities([]); // Clear previous activities
     
-          const data = await fetchFilteredActivities(apiFilters);
+            const apiFilters = { filterType }; // Use the current filterType
+            const data = await fetchFilteredActivities(apiFilters); // Fetch filtered activities
+            console.log("Filtered Activities from API:", data);
     
-          // Apply local search filtering if searchQuery is provided
-       
-          setFilteredActivities(data);
+            setFilteredActivities(data); // Update state with new data
         } catch (error) {
-          console.error("Failed to fetch filtered itineraries:", error);
+            console.error("Failed to fetch filtered activities:", error);
+        } finally {
+            setLoading(false); // Set loading to false
         }
-      };
+    };
+    
+    
+    
+    
     
 
       // Fetch filtered activities when filterType or activeTab changes
       useEffect(() => {
-       
-            if (activeTab === 'activity') {
-                loadFilteredActivities();
-                    
-            }
-       
-    }, [filters, activeTab]);
+        if (activeTab === 'activity') {
+            loadFilteredActivities();
+        }
+    }, [filterType, activeTab]);
+    
+
 
     const applyFilters = (newFilters: FilterOptions) => {
         setFilters((prevFilters) => ({
@@ -83,9 +89,9 @@ const BookingHistory = () => {
       };
     
 
-    // useEffect(() => {
-    //     console.log('Filtered Activities Updated:', filteredActivities);
-    // }, [filteredActivities]);
+    useEffect(() => {
+        console.log('Filtered Activities Updated:', filteredActivities);
+    }, [filteredActivities]);
     
 
     const confirmCancellation = async () => {
@@ -285,14 +291,17 @@ const BookingHistory = () => {
 
                                 <div className="col-auto" style={{ paddingBottom: '30px'}}>
                                 <select
-                                    onChange={(e) => setFilterType(e.target.value as 'all' | 'past' | 'upcoming')}
-                                    value={filterType}
-                                    
-                                >
-                                    <option value="all">All</option>
-                                    <option value="past">Past</option>
-                                    <option value="upcoming">Upcoming</option>
-                                </select>
+    onChange={(e) => {
+        console.log("Filter Type Selected:", e.target.value); // Debug dropdown selection
+        setFilterType(e.target.value as 'all' | 'past' | 'upcoming');
+    }}
+    value={filterType}
+>
+    <option value="all">All</option>
+    <option value="past">Past</option>
+    <option value="upcoming">Upcoming</option>
+</select>
+
                                 </div>
 
                                 <div className="recent-activity-content">

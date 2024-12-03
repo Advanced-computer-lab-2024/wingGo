@@ -517,6 +517,71 @@ export interface TourGuide {
   updatedAt?: Date;
 }
 
+export interface ActivitySales {
+  name: string;
+  sales: number;
+  revenue?: number | null;
+  appRevenue?: number | null;
+}
+
+export interface ItinerarySales {
+  name: string;
+  sales: number;
+  revenue?: number | null;
+  appRevenue?: number | null;
+}
+
+export interface ProductSales {
+  name: string;
+  sales: number;
+  revenue: number | null;
+  appRevenue: number | null;
+}
+
+
+export interface SalesReport {
+  success: boolean;
+  data: {
+    activities: {
+      details: {
+        name: string;
+        sales: number;
+        revenue: number | null;
+        appRevenue: number | null;
+      }[];
+      totalSales: number;
+      totalRevenue: number | null;
+      totalAppRevenue: number | null;
+    };
+    itineraries: {
+      details: {
+        name: string;
+        sales: number;
+        revenue: number | null;
+        appRevenue: number | null;
+      }[];
+      totalSales: number;
+      totalRevenue: number | null;
+      totalAppRevenue: number | null;
+    };
+    products: {
+      details: {
+        name: string;
+        sales: number;
+        revenue: number | null;
+        appRevenue: number | null;
+      }[];
+      totalSales: number;
+      totalRevenue: number | null;
+    };
+    
+    totals: {
+      totalSales: number;
+      totalRevenue: number | null;
+      totalAppRevenue: number | null;
+    };
+  };
+}
 export interface Cart {
   _id: string;
   productId:string;

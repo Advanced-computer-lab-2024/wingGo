@@ -200,13 +200,26 @@ export const fetchTouristUsername = async (touristId: string): Promise<string> =
 
 
 // Next will be hardcoded in
-// Function to book an itinerary for a specific tourist
-export const bookItineraryApi = async (touristId: string, itineraryId: string, bookingDate: Date): Promise<void> => {
+export const bookItineraryApi = async (
+    touristId: string,
+    itineraryId: string,
+    bookingDate: Date,
+    paymentMethod: string,
+    numberOfPeople: number,
+    promoCode?: string
+): Promise<void> => {
     try {
         const response = await axios.post(
             `http://localhost:8000/tourist/bookItinerary/${touristId}/${itineraryId}`,
-            null,
-            { params: { bookingDate: bookingDate.toISOString() } } // Send booking date as a query parameter
+            null, // No body payload, parameters are sent via query
+            {
+                params: {
+                    bookingDate: bookingDate.toISOString(),
+                    paymentMethod,
+                    numberOfPeople,
+                    promoCode: promoCode || "", // Optional promo code
+                },
+            }
         );
         return response.data; // Return the response data if needed
     } catch (error) {
@@ -214,6 +227,21 @@ export const bookItineraryApi = async (touristId: string, itineraryId: string, b
         throw error;
     }
 };
+
+// Function to book an itinerary for a specific tourist
+// export const bookItineraryApi = async (touristId: string, itineraryId: string, bookingDate: Date, paymentMethod: string): Promise<void> => {
+//     try {
+//         const response = await axios.post(
+//             `http://localhost:8000/tourist/bookItinerary/${touristId}/${itineraryId}`,
+//             null,
+//             { params: { bookingDate: bookingDate.toISOString() } } // Send booking date as a query parameter
+//         );
+//         return response.data; // Return the response data if needed
+//     } catch (error) {
+//         console.error("Error booking itinerary:", error);
+//         throw error;
+//     }
+// };
 
 
 
@@ -237,3 +265,18 @@ export const fetchTourGuideRatings = async (tourGuideId: string) => {
         throw error;
     }
 };
+
+export const getPriceApi = async (itineraryId: string, numberOfPeople: number, promoCode : string) => {
+    const params = {
+      numberOfPeople,
+      promoCode,
+    };
+  
+    try {
+      const response = await axios.get(`http://localhost:8000/tourist/itineraryPrice/${itineraryId}`, { params });
+      return response.data.totalPrice;
+    } catch (error) {
+      console.error('Error fetching price:', error);
+      throw error;
+    }
+  };

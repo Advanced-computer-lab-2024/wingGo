@@ -129,18 +129,16 @@ export const isActivityBooked = async (activityId: string): Promise<boolean> => 
 };
 
 
-export const fetchFilteredActivities = async (filters: {  
-    
-    date?: string;
-   
-    
-}): Promise<any[]> => {
+export const fetchFilteredActivities = async (filters: { filterType: string }): Promise<any[]> => {
     try {
-        const response = await axios.get(`http://localhost:8000/tourist/filteractivitiesdate/67240ed8c40a7f3005a1d01d`,{ params: filters });
+        const response = await axios.get(`http://localhost:8000/tourist/filteractivitiesdate/${touristId}`, {
+            params: filters, // Pass filters including filterType
+        });
         return response.data;
     } catch (error) {
         console.error("Error fetching filtered activities:", error);
         throw error;
     }
 };
+
 
