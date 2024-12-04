@@ -17,6 +17,8 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ArchiveUnarchiveProduct, ArchiveUnarchiveProductAdmin, fetchProductImage } from "@/api/productApi";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import the currency con
 
+import { addToCart } from "@/api/cartApi";
+
 
 interface propsType {
   item: Product;
@@ -49,8 +51,15 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
     loadImage();
   }, [item._id, item.picture]);
 
-  const handleAddToCart = (product: Product) => {
-    dispatch(cart_product(product));
+  const handleAddToCart = async () => {
+  
+    try {
+      addToCart(item._id);
+      
+      alert("Product added to cart successfully!");
+    } catch (error: any) {
+      alert(error.message || "Failed to add product to cart. Please try again.");
+    }
   };
 
   const handleAddToWishlist = (product: Product) => {
@@ -122,7 +131,7 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleAddToCart(item)}>
+                  <button onClick={() => handleAddToCart()}>
                     <i className="far fa-cart-plus"></i>
                   </button>
                 </li>

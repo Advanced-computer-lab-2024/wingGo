@@ -39,6 +39,12 @@ const productSchema = new Schema({
             rating:  { type: Number, required: true, min: 1, max: 5 }
         }
     ],
+    averageRating: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5
+    },
     reviews: [
         {
             touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },

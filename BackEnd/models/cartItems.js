@@ -15,15 +15,21 @@ const cartSchema = new Schema({
     amount: {
         type: Number,
         default: 1, // Starts from 1
-        validate: {
-            validator: async function (value) {
-                // Fetch the product using the productId
-                const product = await mongoose.model('Product').findById(this.productId);
-                if (!product) return false; // Ensure the product exists
-                return value >= 1 && value <= product.quantity; // Validate against product quantity
-            },
-            message: 'Amount must be at least 1 and cannot exceed the available product quantity.'
-        }
+        // validate: {
+        //     validator: async function (value) {
+        //         // Fetch the product using the productId
+        //         const product = await mongoose.model('Product').findById(this.productId);
+        //         if (!product) return false; // Ensure the product exists
+        //         return value >= 1 && value <= product.quantity; // Validate against product quantity
+        //     },
+        //     message: 'Amount must be at least 1 and cannot exceed the available product quantity.'
+        // }
+    },
+    price:{
+        type:Number
+    },
+    name:{
+        type:String
     }
 }, { timestamps: true });
 

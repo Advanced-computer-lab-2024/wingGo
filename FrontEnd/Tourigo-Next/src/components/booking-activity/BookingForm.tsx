@@ -1,5 +1,6 @@
-// import BookingComponentForm from "../checkout/ActivityPayment";
-import BookingComponentForm from "@/forms/BookingComponentForm";
+//BookingForm.tsx
+
+import BookingComponentForm from "./BookingComponentFormAct";
 import Link from "next/link";
 import React from "react";
 import { idTypeNew } from "@/interFace/interFace";

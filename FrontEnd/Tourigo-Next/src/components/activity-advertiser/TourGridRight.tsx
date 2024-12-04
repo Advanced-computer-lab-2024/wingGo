@@ -36,6 +36,7 @@ const TourGridRight = () => {
                       className="col-xxl-4 col-xl-6 col-lg-6 col-md-6"
                       tourWrapperClass="tour-wrapper style-one"
                       isparentClass={true}
+                      isAdvertiser={true}
                     />
                   ))
                 ) : (

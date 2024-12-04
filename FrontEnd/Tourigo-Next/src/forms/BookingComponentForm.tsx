@@ -37,7 +37,7 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
     
     try {
       // Call the API with only the `id` as the parameter
-      await bookActivityApi(id);  // Only pass `id`
+      // await bookActivityApi(id);  // Only pass `id`
       
       // Show success message once the API call is successful
       toast.success("Booking Successful!", { id: toastId, duration: 1000 });

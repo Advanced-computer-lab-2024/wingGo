@@ -1,31 +1,26 @@
+// RangeFilter.tsx
 "use client";
-import useGlobalContext from "@/hooks/use-context";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Range, getTrackBackground } from "react-range";
 
 const STEP = 0.1;
 const MIN = 0;
 const MAX = 500;
 
-const RangeFilter = () => {
-  const { setFilterRange, setNiceSelectData, setFilterSearch } =
-    useGlobalContext();
-  const [values, setValues] = useState([25, 225]);
-  const [inputValue, setInputValue] = useState(
-    `$${values[0].toFixed(1)} - ${values[1].toFixed(1)}`
-  );
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
+interface RangeFilterProps {
+  onChange: (range: number[]) => void; // Explicitly define the type for onChange
+}
+
+const RangeFilter: React.FC<RangeFilterProps> = ({ onChange }) => {
+  const [values, setValues] = useState([MIN, 225]);
+
+  const handleFilterByRange = (updatedValues: number[]) => {
+    const newValues = [MIN, updatedValues[1]]; // Fix the min to 0
+    setValues(newValues);
+    onChange(newValues); // Send the new range to the parent
   };
 
-  const handleFilterByRange = (values: number[]) => {
-    setValues(values);
-    setFilterRange(values);
-    setInputValue(`$${values[0].toFixed(1)} - ${values[1].toFixed(1)}`);
-    setNiceSelectData("");
-    setFilterSearch("");
-  };
   return (
     <div className="sidebar-widget-range">
       <div className="slider-range-wrap">
@@ -34,9 +29,7 @@ const RangeFilter = () => {
           step={STEP}
           min={MIN}
           max={MAX}
-          onChange={(values) => {
-            handleFilterByRange(values);
-          }}
+          onChange={(updatedValues) => handleFilterByRange(updatedValues)}
           renderTrack={({ props, children }) => (
             <div
               className="slider-range-wrap-inner"
@@ -71,8 +64,8 @@ const RangeFilter = () => {
         <label htmlFor="amount">
           <input
             type="text"
-            value={inputValue}
-            onChange={handleInputChange}
+            value={`$${values[0].toFixed(1)} - $${values[1].toFixed(1)}`}
+            readOnly
             id="amount"
           />
         </label>

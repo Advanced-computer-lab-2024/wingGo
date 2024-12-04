@@ -158,3 +158,42 @@ export const fetchProductImage = async (productId: string) => {
     }
   }
 };
+export const filterProducts = async (filters: { 
+  budget?: number;
+ 
+}): Promise<any[]> => {
+  try {
+      const response = await axios.get(`http://localhost:8000/tourist/filterProducts`, { params: filters });
+      return response.data;
+  } catch (error) {
+      console.error("Error fetching filtered itineraries:", error);
+      throw error;
+  }
+};
+
+export const filterProductsAdmin = async (filters: {  
+  budget?: number;
+ 
+}): Promise<any[]> => {
+  try {
+      const response = await axios.get(`http://localhost:8000/admin/filterProducts`, { params: filters });
+      return response.data;
+  } catch (error) {
+      console.error("Error fetching filtered itineraries:", error);
+      throw error;
+  }
+};
+
+export const filterProductsSeller = async (filters: {  
+  budget?: number;
+ 
+}): Promise<any[]> => {
+  try {
+      const response = await axios.get(`http://localhost:8000/seller/filterProducts`, { params: filters });
+      return response.data;
+  } catch (error) {
+      console.error("Error fetching filtered itineraries:", error);
+      throw error;
+  }
+};
+

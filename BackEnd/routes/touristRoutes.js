@@ -148,4 +148,8 @@ router.put('/toggleNotificationPreference/:touristId', touristController.toggleN
 
 router.get('/filteractivitiesdate/:touristId', touristController.getFilteredActivities);
 
+router.get('/itineraryPrice/:itineraryId', touristController.getPrice);
+
+router.get('/activityPrice/:activityId', touristController.calculateActivityPrice);
+
 module.exports = router;

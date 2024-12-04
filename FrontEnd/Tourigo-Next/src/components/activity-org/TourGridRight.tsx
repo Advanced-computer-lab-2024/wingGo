@@ -38,8 +38,11 @@ const TourGridRight = () => {
         ? data.filter(
             (activity) =>
               activity.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              activity.category?.toLowerCase().includes(searchQuery.toLowerCase())
+              activity.category?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+              activity.tags.some((tag: string) =>
+                tag.toLowerCase().includes(searchQuery.toLowerCase()) // Match tags
           )
+        )
         : data;
 
       // Apply sorting after fetching and filtering

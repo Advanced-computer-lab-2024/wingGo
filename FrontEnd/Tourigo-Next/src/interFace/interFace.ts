@@ -283,6 +283,7 @@ export interface ProductsType {
   labelColor?: string;
   totalCart?: number;
   shiping?: number;
+  averageRating?:number
 }
 // menu data type
 // menu-data type
@@ -375,10 +376,6 @@ export interface BookedItinerary {
   itinerary: Itinerary;
   bookingDate: Date;
 }
-export interface BookedActivity {
-  activity: Activity;
- 
-}
 
 
 export interface Activity {
@@ -411,6 +408,12 @@ export interface Activity {
   touristIDs?: string[]; // Array of tourist ObjectIds
   averageRating:number;
 }
+
+export interface BookedActivity {
+  activity: Activity;
+ 
+}
+
 
 
   export interface Place {
@@ -514,6 +517,87 @@ export interface TourGuide {
   updatedAt?: Date;
 }
 
+export interface ActivitySales {
+  name: string;
+  sales: number;
+  revenue?: number | null;
+  appRevenue?: number | null;
+}
+
+export interface ItinerarySales {
+  name: string;
+  sales: number;
+  revenue?: number | null;
+  appRevenue?: number | null;
+}
+
+export interface ProductSales {
+  name: string;
+  sales: number;
+  revenue: number | null;
+  appRevenue: number | null;
+}
+
+
+export interface SalesReport {
+  success: boolean;
+  data: {
+    activities: {
+      details: {
+        name: string;
+        sales: number;
+        revenue: number | null;
+        appRevenue: number | null;
+      }[];
+      totalSales: number;
+      totalRevenue: number | null;
+      totalAppRevenue: number | null;
+    };
+    itineraries: {
+      details: {
+        name: string;
+        sales: number;
+        revenue: number | null;
+        appRevenue: number | null;
+      }[];
+      totalSales: number;
+      totalRevenue: number | null;
+      totalAppRevenue: number | null;
+    };
+    products: {
+      details: {
+        name: string;
+        sales: number;
+        revenue: number | null;
+        appRevenue: number | null;
+      }[];
+      totalSales: number;
+      totalRevenue: number | null;
+    };
+    
+    totals: {
+      totalSales: number;
+      totalRevenue: number | null;
+      totalAppRevenue: number | null;
+    };
+  };
+}
+export interface Cart {
+  _id: string;
+  productId:string;
+  touristId:string;
+  amount: number;
+  price: number;
+  name:string;
+}
+             
+export interface Notification {
+  _id: string;
+  message: string;
+  date: string;
+  eventId?: string; // Optional for event-related notifications
+  itineraryId?: string; // Optional for itinerary-related notifications
+}
 
 
 export interface Order {

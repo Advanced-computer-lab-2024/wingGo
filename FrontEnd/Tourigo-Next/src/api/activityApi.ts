@@ -68,15 +68,36 @@ export const fetchAdminActivities = async (): Promise<Activity[]> => {
         throw error;
     }
 };
-export const bookActivityApi = async ( activityId: string) => {
+
+export const bookActivityApi = async (
+    touristId: string,
+    activityId: string,
+    paymentMethod: string,
+    numberOfPeople: number,
+    promoCode?: string // Optional promo code
+  ) => {
     try {
-        const response = await axios.post(`http://localhost:8000/tourist/bookActivity/${touristId}/${activityId}`);
-        return response.data;
+      // Prepare the payload
+      const payload = {
+        numberOfPeople,
+        paymentMethod,
+        promoCode, // Optional; include only if provided
+      };
+  
+      // Send a POST request with the payload
+      const response = await axios.post(
+        `http://localhost:8000/tourist/bookActivity/${touristId}/${activityId}`,
+        payload // Request body
+      );
+  
+      // Return the response data
+      return response.data;
     } catch (error) {
-        console.error('Error booking activity:', error);
-        throw error;
+      console.error("Error booking activity:", error);
+      throw error;
     }
-};
+  };
+
 export const fetchBookedActivities = async (touristId: string): Promise<BookedActivity[]> => {
     try {
         const response = await axios.get(`http://localhost:8000/tourist/booked-activities/${touristId}`);
@@ -129,14 +150,52 @@ export const isActivityBooked = async (activityId: string): Promise<boolean> => 
 };
 
 
-export const fetchFilteredActivities = async (): Promise<BookedActivity[]> => {
+export const fetchFilteredActivities = async (filters: { filterType: string }): Promise<any[]> => {
     try {
-        const response = await axios.get(`http://localhost:8000/tourist/filteractivitiesdate/67240ed8c40a7f3005a1d01d?filterType=all`);
-        console.log(response.data);
-        return response.data; // Return the filtered activities
+        const response = await axios.get(`http://localhost:8000/tourist/filteractivitiesdate/${touristId}`, {
+            params: filters, // Pass filters including filterType
+        });
+        return response.data;
     } catch (error) {
         console.error("Error fetching filtered activities:", error);
         throw error;
     }
 };
 
+
+export const getPriceApi = async (
+    activityId: string,
+    numberOfPeople: number,
+    promoCode?: string // Optional promo code
+  ): Promise<number> => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/tourist/activityPrice/${activityId}`,
+        {
+          params: {
+            numberOfPeople,
+            promoCode, // Optional promo code
+          },
+        }
+      );
+  
+      return response.data.totalPrice; // Return total price from response
+    } catch (error) {
+      console.error("Error fetching activity price:", error);
+      throw error;
+    }
+  };
+
+  export const toggleBookingState = async (activityId: string, bookingOpen: boolean) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/advertiser/openBookingForActivity/${activityId}`,
+        { bookingOpen }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error toggling booking state:", error);
+      throw error;
+    }
+  };
+  
