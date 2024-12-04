@@ -5,6 +5,7 @@ import { Itinerary, BookedItinerary } from '../interFace/interFace';
 
 const touristId = '67240ed8c40a7f3005a1d01d';
 const tourGuideId = '67244655313a2a345110c1e6';  // Hardcoded tour guide ID
+//const itineraryId='67472355bdbfc021df0e293b';
 
 export const fetchAllItineraries = async (): Promise<Itinerary[]> => {
     try {
@@ -280,3 +281,19 @@ export const getPriceApi = async (itineraryId: string, numberOfPeople: number, p
       throw error;
     }
   };
+
+//To save/unsave an itinerary
+export const saveOrUnsaveItineraryApi = async (touristId: string,itineraryId: string, save: boolean): Promise<any> => {
+    try {
+      const response = await axios.post( `http://localhost:8000/tourist/saveItinerary/${touristId}/${itineraryId}`,
+        { save } // Pass the save/unsave state in the request body
+      );
+      return response.data.savedItineraries; // Return the updated saved itineraries list
+    } catch (error) {
+      console.error("Error saving/unsaving itinerary:", error);
+      throw error;
+    }
+  };
+
+
+

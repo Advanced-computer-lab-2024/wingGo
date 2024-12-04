@@ -252,6 +252,34 @@ const sortProductsByRatings = async (req, res) => {
     }
 };
 
+const getAllProducts2 = async(req,res)=>{
+    try{
+        const touristId = req.params.id;
+        //const touristExist = await Tourist.findById(touristId);
+        // if (!touristExist) {
+        //     return res.status(404).json({ message: 'tourist not found can not view products' });
+        // }
+        const products = await Product.find().populate('seller', 'username');  // Populate seller username if available
+
+        // If you need to send a public path for pictures stored locally
+        const productData = products.map(product => ({
+            name: product.name,
+            picture: `../images/${product.picture}`,  // Build image URL dynamically
+            // picture: `${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
+            price: product.price,
+            description: product.description,
+            quantity: product.quantity,
+            seller: product.seller ? product.seller.username : 'Admin',  // Handle null seller field
+            ratings: product.ratings,
+            reviews: product.reviews
+        }));
+
+        res.status(200).json(productData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+
+}
 
 const getAllProducts = async (req, res) => {
     try {
@@ -275,6 +303,7 @@ const getAllProducts = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
 const filterProduct = async (req, res) => {
     try {
         const { budget } = req.query; // Extract price from query parameters
@@ -3740,7 +3769,7 @@ const addWishlistItemToCart = async (req, res) => {
 const orderDetails=async(req,res)=>{
     const { id } = req.params;
     try{
-        const details=await Order.findById(id);
+        const details=await Order.findById(id).populate('products.productId', 'name price ');
         res.status(200).json(details);
     } catch(error){
         res.status(500).json({error:error.message});
@@ -3752,7 +3781,11 @@ const viewAllorders = async (req, res) => {
   
     try {
       const orders = await Order.find({ buyer: touristId, paymentStatus:'paid' })
-        .sort({ createdAt: -1 }); 
+            .populate({
+        path: 'products.productId', // Populate the product details
+        select: 'name price', // Only include name and price fields
+      })  
+      .sort({ createdAt: -1 }); 
   
       if (!orders || orders.length === 0) {
         return res.status(404).json({ message: 'No orders found for this tourist' });
@@ -3862,6 +3895,11 @@ const saveItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params;
     const { save } = req.body; // Boolean value to save or unsave
 
+        // Ensure the "save" field is present and is a boolean
+        if (save === undefined || typeof save !== 'boolean') {
+            return res.status(400).json({ message: "Please provide a valid 'save' field with a boolean value" });
+        }
+    
     try {
         // Validate if the itinerary exists
         const itinerary = await Itinerary.findById(itineraryId);
@@ -4215,5 +4253,6 @@ module.exports = {
     toggleNotificationPreference,
     getFilteredActivities,
     getPrice,
-    calculateActivityPrice
+    calculateActivityPrice,
+    getAllProducts2
 };

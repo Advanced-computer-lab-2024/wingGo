@@ -36,7 +36,7 @@ const ComplaintForm = () => {
     <section>
       <form onSubmit={handleSubmit(onSubmit)} style={{ marginLeft: "20px" }}>
         <div className="form-section">
-          <h4 className="mb-20">Complaint Details</h4>
+          <h4 className="mb-20 mt-50">Complaint Details</h4>
 
           {/* Complaint Title */}
           <div className="form-input-box">
@@ -85,7 +85,7 @@ const ComplaintForm = () => {
           <div className="submit-btn">
   <Link
     href="#"
-    className="bd-primary-btn btn-style bd-success radius-60"
+    className="bd-primary-btn btn-style radius-60 mb-30"
     onClick={handleSubmit(onSubmit)} // Call onSubmit when clicked
   >
     <span className="bd-primary-btn-text">Submit Complaint</span>
