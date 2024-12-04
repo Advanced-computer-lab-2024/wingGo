@@ -467,11 +467,13 @@ const getSalesReport = async (req, res) => {
                 (sum, entry) => sum + entry.paidPrice,
                 0
             );
+            const soldDates = [...new Set(itinerary.touristIDs.map(entry => entry.bookingDate))];
 
             return {
                 name: itinerary.title,
                 sales, // Total number of people who booked
                 revenue, // Total revenue from all bookings
+                soldDates, // Include only the sold dates
             };
         });
 

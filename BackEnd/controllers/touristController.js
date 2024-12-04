@@ -252,6 +252,34 @@ const sortProductsByRatings = async (req, res) => {
     }
 };
 
+const getAllProducts2 = async(req,res)=>{
+    try{
+        const touristId = req.params.id;
+        //const touristExist = await Tourist.findById(touristId);
+        // if (!touristExist) {
+        //     return res.status(404).json({ message: 'tourist not found can not view products' });
+        // }
+        const products = await Product.find().populate('seller', 'username');  // Populate seller username if available
+
+        // If you need to send a public path for pictures stored locally
+        const productData = products.map(product => ({
+            name: product.name,
+            picture: `../images/${product.picture}`,  // Build image URL dynamically
+            // picture: `${req.protocol}://${req.get('host')}/images/${product.picture}`,  // Build image URL dynamically
+            price: product.price,
+            description: product.description,
+            quantity: product.quantity,
+            seller: product.seller ? product.seller.username : 'Admin',  // Handle null seller field
+            ratings: product.ratings,
+            reviews: product.reviews
+        }));
+
+        res.status(200).json(productData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+
+}
 
 const getAllProducts = async (req, res) => {
     try {
@@ -275,6 +303,7 @@ const getAllProducts = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
 const filterProduct = async (req, res) => {
     try {
         const { budget } = req.query; // Extract price from query parameters
@@ -4224,5 +4253,6 @@ module.exports = {
     toggleNotificationPreference,
     getFilteredActivities,
     getPrice,
-    calculateActivityPrice
+    calculateActivityPrice,
+    getAllProducts2
 };

@@ -665,6 +665,7 @@ const getSalesReport = async (req, res) => {
                 name: product.name,
                 sales: totalSales, // Total sales combining sales field and discounted quantities
                 revenue, // Total revenue combining both non-discounted and discounted sales
+                sellingDates: product.sellingDates, // Include sellingDates directly
             };
         });
 

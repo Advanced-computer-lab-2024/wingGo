@@ -526,6 +526,7 @@ const getSalesReport = async (req, res) => {
                 name: activity.name,
                 sales, // Total number of people who booked
                 revenue, // Total revenue from all bookings
+                soldDate: activity.date.toISOString().split('T')[0], // Use the activity date directly
             };
         });
 
@@ -578,11 +579,13 @@ const getTouristReport = async (req, res) => {
 
                 return {
                     name: activity.name,
+                    soldDate: activity.date.toISOString().split('T')[0], // Use the activity date directly
                     totalTourists, // Total tourists using numberOfPeople
                     details: activity.touristIDs.map(tourist => ({
                         touristId: tourist.touristId,
                         numberOfPeople: tourist.numberOfPeople, // Include number of people in details
                         paidPrice: tourist.paidPrice, // Include paid price if needed
+                        soldDate: activity.date.toISOString().split('T')[0], // Use the activity date directly
                     })),
                 };
             })
