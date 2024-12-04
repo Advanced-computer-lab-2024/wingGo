@@ -86,7 +86,7 @@ const LoyaltyProgram: React.FC<Props> = ({id, profileData, refreshData, setRefre
                     onClick={handleClaimReward}
                     className="bd-switch-btn has-left mt-20">
                         <div className="bd-switch-default">
-                        <span>Loyality Points</span>
+                        <span>Loyalty Points</span>
                         </div>
                         <div className="bd-switch-hover">
                         <span>Claim</span>
