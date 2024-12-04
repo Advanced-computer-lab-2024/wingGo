@@ -52,4 +52,28 @@ export const getAllPreferenceTags = async (): Promise<Array<any>> => {
   }
 };
 
+export const toggleNotificationPreferenceApi = async (
+  touristId: string,
+  notifyOnInterest: boolean
+) => {
+  try {
+    const response = await axios.put(
+      `http://localhost:8000/tourist/toggleNotificationPreference/${touristId}`,
+      { notifyOnInterest }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error toggling notification preference:', error);
+    throw error;
+  }
+};
 
+export const getTouristNotificationsApi = async (touristId: string) => {
+  try {
+    const response = await axios.get(`http://localhost:8000/tourist/notifications/${touristId}`);
+    return response.data.notifications;
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    throw error;
+  }
+};

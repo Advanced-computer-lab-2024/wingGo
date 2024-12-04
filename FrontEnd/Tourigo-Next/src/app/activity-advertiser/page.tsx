@@ -1,4 +1,4 @@
-import TourGridRightMain from "@/components/activity-admin/TourGridRightMain";
+import TourGridRightMain from "@/components/activity-advertiser/TourGridRightMain";
 import MetaData from "@/hooks/useMetaData";
 import Wrapper from "@/layout/DefaultWrapper";
 import React from "react";

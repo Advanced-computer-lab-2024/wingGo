@@ -8,9 +8,11 @@ import { Activity } from "@/interFace/interFace";
 import Image from "next/image";
 import Link from "next/link";
 import React ,{useState, useEffect} from "react";
-import { toggleFlagActivity, isActivityBooked  } from '@/api/activityApi';
+import { toggleFlagActivity, isActivityBooked, toggleBookingState  } from '@/api/activityApi';
 import { useRouter } from "next/navigation";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
+import Modal from "react-modal";
+import { toast } from 'sonner';
 
 
 interface ItourPropsType {
@@ -19,6 +21,7 @@ interface ItourPropsType {
   tourWrapperClass: string;
   isparentClass: boolean;
   isAdmin?: boolean;
+  isAdvertiser?: boolean;
 }
 
 const TourSingleCard = ({
@@ -27,6 +30,7 @@ const TourSingleCard = ({
   tourWrapperClass,
   isparentClass,
   isAdmin = false,
+  isAdvertiser = false
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const router = useRouter();
@@ -36,6 +40,10 @@ const TourSingleCard = ({
   const { currency, convertAmount } = useCurrency(); 
   const [isBooked, setIsBooked] = useState(false);
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
+  const [bookingState, setBookingState] = useState(tour.bookingOpen);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility
+  const [modalAction, setModalAction] = useState(""); // To track the action (Open/Close Booking)
+
 
 
    // Fetch booking status when component mounts
@@ -69,9 +77,29 @@ const TourSingleCard = ({
       console.error("Error updating flagged status:", error);
     }
   };
+
   const handleBookNowClick = () => {
     // Redirect to the specific page (replace "/booking-page" with the desired path)
     router.push(`/booking-activity/${tour._id}`);
+  };
+
+  const handleToggleBooking = (action: string) => {
+    setModalAction(action); // Set the action (Open or Close)
+    setIsModalOpen(true); // Open the modal
+  };
+  
+  const confirmToggleBooking = async () => {
+    try {
+      const newBookingState = modalAction === "Open"; // Determine the new state
+      await toggleBookingState(tour._id, newBookingState); // Call the backend API
+      setBookingState(newBookingState); // Update state after successful API call
+      setIsModalOpen(false); // Close the modal
+      console.log(`Booking state toggled to: ${newBookingState ? "Open" : "Closed"}`);
+      toast.success(`Booking state toggled to ${newBookingState ? 'Open' : 'Closed'} successfully!`);
+    } catch (error) {
+      console.error("Error toggling booking state:", error);
+      toast.error('Failed to toggle booking state. Please try again.');
+    }
   };
 
 
@@ -139,6 +167,7 @@ const TourSingleCard = ({
                     {isFlagged ? "Unflag" : "Flag"}
                   </button>
                 )}
+                
               <span className="tour-price b3">
                 {currency}{" "}
                 {convertedPrice !== null
@@ -153,7 +182,84 @@ const TourSingleCard = ({
                   <span>{tour.time}</span>
                 </div>
                 <div className="tour-btn">
-                <button
+                {/* {isAdvertiser && (
+                  <button
+                    onClick={handleToggleBooking}                  
+                    style={{
+                      backgroundColor: bookingState ? "red" : "green",
+                      color: "white",
+                      padding: "8px 16px",
+                      fontSize: "14px",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {bookingState ? "Close Booking" : "Open Booking"}
+                  </button>
+                )} */}
+                
+                {isAdvertiser && <button
+                    onClick={() => handleToggleBooking(bookingState ? "Close" : "Open")} 
+                    className="bd-text-btn style-two"
+                    type="button"
+                    style={{
+                      color:  bookingState ? "red" : "blue"
+                     }}
+                  >
+                   {bookingState ? "Close Booking" : "Open Booking"}
+                    <span className="icon__box">
+                    <i className="fa-regular fa-arrow-right-long icon__first"></i>
+                    <i className="fa-regular fa-arrow-right-long icon__second"></i>
+                    </span>
+                  </button>}
+                
+                  <Modal
+                    isOpen={isModalOpen}
+                    onRequestClose={() => setIsModalOpen(false)}
+                    contentLabel="Confirm Booking Action"
+                    style={{
+                      content: {
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        right: "auto",
+                        bottom: "auto",
+                        marginRight: "-50%",
+                        transform: "translate(-50%, -50%)",
+                        background: "white",
+                        padding: "20px",
+                        borderRadius: "10px",
+                        width: "500px",
+                        boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
+                      },
+                      overlay: {
+                        backgroundColor: "rgba(0, 0, 0, 0.75)",
+                      },
+                    }}
+                  >
+                    <h3>Confirm {modalAction} Booking</h3>
+                    <p>Are you sure you want to {modalAction.toLowerCase()} booking for this activity?</p>
+                    <div style={{ display: "flex", marginTop: "20px" }}>
+                      <button
+                        onClick={confirmToggleBooking}
+                        className="bd-primary-btn btn-style radius-60"
+                        style={{
+                          marginRight: "10px",
+                        }}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => setIsModalOpen(false)}
+                        className="bd-primary-btn btn-style radius-60"
+                      >
+                        No
+                      </button>
+                    </div>
+                  </Modal>
+
+                
+                {(!isAdvertiser) && <button
                     onClick={isBooked ? undefined : handleBookNowClick} // Disable click if already booked
                     className="bd-text-btn style-two"
                     type="button"
@@ -168,7 +274,7 @@ const TourSingleCard = ({
                       <i className="fa-regular fa-arrow-right-long icon__first"></i>
                       <i className="fa-regular fa-arrow-right-long icon__second"></i>
                     </span>
-                  </button>
+                  </button>}
                 </div>
               </div>
             </div>

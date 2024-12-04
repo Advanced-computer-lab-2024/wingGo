@@ -1427,15 +1427,6 @@ const cancelActivity = async (req, res) => {
     const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
 
     try {
-        // Step 1: Fetch the tourist with the given touristId and populate bookedActivities
-        // const tourist = await Tourist.findById(touristId).populate('bookedActivities');
-
-        // // Check if the tourist exists
-        // if (!tourist) {
-        //     return res.status(404).json({ message: 'Tourist not found.' });
-        // }
-
-        // Step 2: Check if the activity exists in the tourist's bookedActivities array
         const activity = await Activity.findById(activityId);
 
         // Check if the activity exists
@@ -1443,10 +1434,8 @@ const cancelActivity = async (req, res) => {
             return res.status(404).json({ message: 'Activity not found.' });
         }
 
-        // console.log('Retrieved Activity:', activity); // Debugging line
-
-         // Step 2: Find the tourist entry in the activity's touristIDs array
-         const touristEntry = activity.touristIDs.find(
+        // Find the tourist entry in the activity's touristIDs array
+        const touristEntry = activity.touristIDs.find(
             entry => entry.touristId.toString() === touristId
         );
 
@@ -1454,40 +1443,31 @@ const cancelActivity = async (req, res) => {
             return res.status(404).json({ message: 'Booking not found for this tourist.' });
         }
 
-        // Step 3: Check if the booking date is more than 48 hours from now
+        // Check if the booking date is more than 48 hours from now
         const now = new Date();
         const bookingDate = activity.date; // Ensure this is the correct path
 
-        // Check if bookingDate is valid
         if (!bookingDate) {
             return res.status(400).json({ message: 'Booking date is not valid.' });
         }
 
         const diffInMilliseconds = bookingDate.getTime() - now.getTime();
-
         if (diffInMilliseconds < 48 * 60 * 60 * 1000) {
             return res.status(400).json({ message: 'Cannot cancel the activity within 48 hours of the booking date.' });
         }
-         // Step 4: Add the price of the activity to the tourist's wallet
 
-         const paidPrice = touristEntry.paidPrice; // Retrieve the paid price from the touristIDs array
-         const tourist = await Tourist.findById(touristId);
- 
-         if (!tourist) {
-             return res.status(404).json({ message: 'Tourist not found.' });
-         }
- 
-         tourist.wallet = (tourist.wallet || 0) + paidPrice;
- 
-         // Save the updated tourist document
-         await tourist.save();
+        // Add the price of the activity to the tourist's wallet
+        const paidPrice = touristEntry.paidPrice; // Retrieve the paid price from the touristIDs array
+        const tourist = await Tourist.findById(touristId);
 
-        //  const activityPrice = activity.price; // Ensure the 'price' field exists in the Activity schema
-        //  tourist.wallet = (tourist.wallet || 0) + activityPrice;
-        //  // Save the updated tourist document
-        // await tourist.save();
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found.' });
+        }
 
-        // Step 4: Remove the specific activity from the bookedActivities array using $pull
+        tourist.wallet = (tourist.wallet || 0) + paidPrice;
+        await tourist.save();
+
+        // Remove the specific activity from the bookedActivities array using $pull
         const touristUpdate = await Tourist.findByIdAndUpdate(
             touristId,
             { $pull: { bookedActivities: activityId } },
@@ -1498,26 +1478,23 @@ const cancelActivity = async (req, res) => {
             return res.status(404).json({ message: 'Failed to update tourist bookings.' });
         }
 
-        // Step 5: Remove the touristId from the activity's touristIDs array
+        // Remove the specific tourist entry from the activity's touristIDs array
         const activityUpdate = await Activity.findByIdAndUpdate(
             activityId,
-            { $pull: { touristIDs: { touristId: touristId } } },
+            { $pull: { touristIDs: { touristId: touristId } } }, // Ensure the query matches nested documents
             { new: true }
         );
-        await activityUpdate.save();
 
-         // Step 5: Remove the specific tourist entry from the activity's touristIDs array
-        //  activity.touristIDs = activity.touristIDs.filter(
-        //     entry => entry.touristId.toString() !== touristId
-        // );
-
-        // Update sales if no promo code was used (optional, based on previous logic)
-        if (!touristEntry.promoCodeId) {
-            activity.sales -= touristEntry.numberOfPeople;
-        }
+        console.log("Activity Update Result:", activityUpdate); // Debugging line
 
         if (!activityUpdate) {
             return res.status(404).json({ message: 'Activity not found or failed to update.' });
+        }
+
+        // Adjust sales if no promo code was used
+        if (!touristEntry.promoCodeId) {
+            activity.sales -= touristEntry.numberOfPeople;
+            await activity.save();
         }
 
         return res.status(200).json({
@@ -1532,6 +1509,7 @@ const cancelActivity = async (req, res) => {
         return res.status(500).json({ message: 'Error cancelling the booking process.', error });
     }
 };
+
 
 const purchaseProduct = async (req, res) => {
     const { touristId, productId } = req.params;
@@ -3332,6 +3310,7 @@ const getNotifications = async (req, res) => {
     try {
       // Extract userId from the route parameter
       const { userId } = req.params;
+      console.log('INNNN');
   
       // Fetch the tourist by ID
       const tourist = await Tourist.findById(userId)
@@ -4103,6 +4082,46 @@ const getPrice = async (req, res) => {
     }
   };
   
+  const calculateActivityPrice = async (req, res) => {
+    const { activityId } = req.params; // Extract activityId from URL parameters
+    const { numberOfPeople, promoCode } = req.query; // Extract number of people and promo code from query parameters
+
+    try {
+        // Fetch activity details
+        const activity = await Activity.findById(activityId);
+        if (!activity || !activity.bookingOpen) {
+            return res.status(404).json({ message: 'Activity not found or booking closed' });
+        }
+
+        let totalPrice = activity.price * numberOfPeople; // Base price calculation
+
+        let promoCodeDetails = null;
+
+        // Validate and apply promo code
+        if (promoCode) {
+            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date()
+            ) {
+                return res.status(400).json({ message: 'Invalid or expired promo code' });
+            }
+
+            const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+            totalPrice -= discountAmount; // Apply discount
+        }
+
+        // Return the calculated total price
+        return res.status(200).json({ totalPrice });
+    } catch (error) {
+        console.error('Error calculating activity price:', error);
+        return res.status(500).json({
+            message: 'Error calculating activity price',
+            error: error.message || 'An unknown error occurred',
+        });
+    }
+};
 
 
 module.exports = {
@@ -4195,5 +4214,6 @@ module.exports = {
     viewAllSavedEvents,
     toggleNotificationPreference,
     getFilteredActivities,
-    getPrice
+    getPrice,
+    calculateActivityPrice
 };

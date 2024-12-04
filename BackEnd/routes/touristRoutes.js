@@ -150,4 +150,6 @@ router.get('/filteractivitiesdate/:touristId', touristController.getFilteredActi
 
 router.get('/itineraryPrice/:itineraryId', touristController.getPrice);
 
+router.get('/activityPrice/:activityId', touristController.calculateActivityPrice);
+
 module.exports = router;

@@ -591,4 +591,11 @@ export interface Cart {
   name:string;
 }
              
+export interface Notification {
+  _id: string;
+  message: string;
+  date: string;
+  eventId?: string; // Optional for event-related notifications
+  itineraryId?: string; // Optional for itinerary-related notifications
+}
 
