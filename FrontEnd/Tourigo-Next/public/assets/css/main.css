@@ -18940,6 +18940,34 @@ input:checked + .switch:before {
   object-fit: cover;
 }
 
+.notification-bell {
+  display: inline-block;
+  transition: transform 0.2s ease-in-out; /* For smooth animation */
+}
+
+.notification-bell:hover {
+  animation: ring 0.5s ease-in-out infinite; /* Add the ringing animation on hover */
+}
+
+@keyframes ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  75% {
+    transform: rotate(-10deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+
 /*----------------------------------------*/
 /*  2.11 Range Slider 
 /*----------------------------------------*/

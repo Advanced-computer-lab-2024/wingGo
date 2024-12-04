@@ -93,7 +93,7 @@ const Prefrences: React.FC<Props> = ({profileData, id, setPrefrenceRefresh}) => 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const data = await getTouristNotificationsApi(id);
+        const data = await getTouristNotificationsApi();
         setNotifications(data);
       } catch (error) {
         console.error("Error fetching notifications:", error);

@@ -4,6 +4,8 @@ import homeTowImg from "../../../public/assets/images/menu/menu-home-2.jpg";
 import homeThreeImg from "../../../public/assets/images/menu/menu-home-3.jpg";
 import homeFourImg from "../../../public/assets/images/menu/menu-home-4.jpg";
 import homeFiveImg from "../../../public/assets/images/menu/menu-home-5.jpg";
+import {Notification} from '@/interFace/interFace'
+import { FaBell } from "react-icons/fa";
 
 const menu_data: MenuType[] = [
 
@@ -116,12 +118,26 @@ const menu_data: MenuType[] = [
     children: false,
     megaMenu: true,
     active: true,
-    title: "My Profile",
+    title: "Profile",
     pluseIncon: true,
     pageLayout: true,
     link: "/my-profile",
   },
+
+  {
+    id: 11, // Unique ID for the bell icon
+    hasDropdown: true, // Enables the dropdown for notifications
+    children: false, // No submenus in this case
+    megaMenu: false,
+    active: true,
+    title: "", // No visible title, only the icon
+    pluseIncon: false,
+    link: "#", // No link since it’s an icon
+    // icon: true, // Custom property to indicate this is an icon
+},
+
   
 ];
+
 
 export default menu_data;

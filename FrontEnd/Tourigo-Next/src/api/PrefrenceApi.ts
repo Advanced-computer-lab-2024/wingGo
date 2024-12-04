@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8000';
+const touristId = "67240ed8c40a7f3005a1d01d";
 
 export const addPreferencesToTourist = async (id: string, preferences: any): Promise<any> => {
   try {
@@ -68,7 +69,7 @@ export const toggleNotificationPreferenceApi = async (
   }
 };
 
-export const getTouristNotificationsApi = async (touristId: string) => {
+export const getTouristNotificationsApi = async () => {
   try {
     const response = await axios.get(`http://localhost:8000/tourist/notifications/${touristId}`);
     return response.data.notifications;
