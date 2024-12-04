@@ -99,7 +99,7 @@ const TourSingleCard = ({
               <div className="tour-thumb image-overly">
                 <Link href={`/it-details/${tour._id}`}>
                   <Image
-                    src="/images/default-image.jpg"
+                    src="/assets/images/Itinerary.png"
                     loader={imageLoader}
                     width={370}
                     height={370}
