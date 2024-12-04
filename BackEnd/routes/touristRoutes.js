@@ -92,6 +92,7 @@ router.get('/getUsername/:id', touristController.getTouristUsername);
 router.get('/orderDetails/:id', touristController.orderDetails);
 router.get('/pastandcurrentorders/:touristId',touristController.viewAllorders);
 router.put('/cancelOrder/:touristId/:orderId', touristController.cancelOrder);
+router.get('/getallproducts2/:touristId', touristController.getAllProducts2);
 
 
 router.get('/purchasedProducts/:touristId', touristController.getPurchasedProducts);
