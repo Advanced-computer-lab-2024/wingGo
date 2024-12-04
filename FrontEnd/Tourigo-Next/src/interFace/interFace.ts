@@ -515,3 +515,16 @@ export interface TourGuide {
 }
 
 
+
+export interface Order {
+  _id: string; 
+  orderId: string;
+  products: {
+    productId: string | Omit<Product, 'image' | 'imageTwo'>; 
+    quantity: number; 
+  }[];
+  paymentStatus: 'notPaid' | 'paid'; 
+  orderStatus: 'cancelled' | 'confirmed' | 'preparing' | 'delivering' | 'delivered';
+  buyer: string; 
+  totalPrice: number; 
+}

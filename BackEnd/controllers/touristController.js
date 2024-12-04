@@ -3743,7 +3743,7 @@ const addWishlistItemToCart = async (req, res) => {
 const orderDetails=async(req,res)=>{
     const { id } = req.params;
     try{
-        const details=await Order.findById(id);
+        const details=await Order.findById(id).populate('products.productId', 'name price ');
         res.status(200).json(details);
     } catch(error){
         res.status(500).json({error:error.message});
@@ -3755,7 +3755,11 @@ const viewAllorders = async (req, res) => {
   
     try {
       const orders = await Order.find({ buyer: touristId, paymentStatus:'paid' })
-        .sort({ createdAt: -1 }); 
+            .populate({
+        path: 'products.productId', // Populate the product details
+        select: 'name price', // Only include name and price fields
+      })  
+      .sort({ createdAt: -1 }); 
   
       if (!orders || orders.length === 0) {
         return res.status(404).json({ message: 'No orders found for this tourist' });
@@ -3865,6 +3869,11 @@ const saveItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params;
     const { save } = req.body; // Boolean value to save or unsave
 
+        // Ensure the "save" field is present and is a boolean
+        if (save === undefined || typeof save !== 'boolean') {
+            return res.status(400).json({ message: "Please provide a valid 'save' field with a boolean value" });
+        }
+    
     try {
         // Validate if the itinerary exists
         const itinerary = await Itinerary.findById(itineraryId);
