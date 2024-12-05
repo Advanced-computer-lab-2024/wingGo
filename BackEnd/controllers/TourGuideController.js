@@ -637,6 +637,26 @@ const openBooking = async (req, res) => {
     }
 };
 
+const getNotifications = async (req, res) => {
+    try {
+      // Extract seller ID from the route parameter
+      const { userId } = req.params;
+  
+      // Find the seller by ID
+      const seller = await TourGuide.findById(userId).select('notifications');
+  
+      if (!seller) {
+        return res.status(404).json({ message: 'Seller not found' });
+      }
+  
+      // Return the notifications
+      res.status(200).json({ notifications: TourGuide.notifications });
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ message: 'Error fetching notifications', error });
+    }
+  };
+
 
 
 module.exports = {
@@ -650,5 +670,6 @@ module.exports = {
     previewPhoto,
     getSalesReport,
     getTouristReport,
-    openBooking
+    openBooking,
+    getNotifications
 };

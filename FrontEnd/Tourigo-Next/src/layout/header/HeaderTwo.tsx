@@ -4,7 +4,7 @@ import React from "react";
 import logoBlack from "../../../public/assets/images/logo/logo-black.svg";
 import { imageLoader } from "@/hooks/image-loader";
 import useGlobalContext from "@/hooks/use-context";
-import MenuTwo from "./components/MenuTourist";
+import Menu from "./components/MenuTourist";
 
 const HeaderTwo = () => {
   const { toggleSideMenu, scrollDirection } = useGlobalContext();
@@ -23,7 +23,7 @@ const HeaderTwo = () => {
                 <div className="header-left">
                   <div className="header-logo">
                     <Link href="/">
-                      <Image
+                    <Image
                         src={logoBlack}
                         loader={imageLoader}
                         style={{ width: "100%", height: "auto" }}
@@ -48,7 +48,7 @@ const HeaderTwo = () => {
                           className="main-menu main-menu-three header-two"
                           id="mobile-menu"
                         >
-                          <MenuTwo />
+                          <Menu />
                         </nav>
                       </div>
                     </div>

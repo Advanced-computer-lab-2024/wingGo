@@ -104,6 +104,17 @@ const menu_data: MenuType[] = [
     link: "/adminDashboard",
     
   },
+  {
+    id: 11, // Unique ID for the bell icon
+    hasDropdown: true, // Enables the dropdown for notifications
+    children: false, // No submenus in this case
+    megaMenu: false,
+    active: true,
+    title: "", // No visible title, only the icon
+    pluseIncon: false,
+    link: "#", // No link since it’s an icon
+    // icon: true, // Custom property to indicate this is an icon
+},
 ];
 
 export default menu_data;

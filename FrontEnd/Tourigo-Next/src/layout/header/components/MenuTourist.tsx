@@ -50,9 +50,10 @@ useEffect(() => {
                 ? "menu-item-has-children"
                 : `${item?.children === false ? "has-mega-menu" : ""}`
             } `}
+            style={{ marginTop: "25px"}}
           >
 
-             {item.id === 11 ? ( // Check for the Bell Icon ID
+{item.id === 11 ? ( // Check for the Bell Icon ID
       <div
       style={{
         position: "relative",
@@ -152,7 +153,7 @@ useEffect(() => {
                         background: "none",
                         border: "none",
                         cursor: "pointer",
-                        color: currency === currencyOption.currency ? "blue" : "inherit",
+                        color: currency === currencyOption.currency ? "blue" : "inherit", 
                       }}
                     >
                       {currencyOption.title}
