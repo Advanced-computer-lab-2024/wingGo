@@ -43,7 +43,7 @@ router.get('/sales-report/:tourGuideId', tourGuideController.getSalesReport);
 router.get('/tourist-report/:tourGuideId', tourGuideController.getTouristReport);
 
 router.put('/openBooking/:id', tourGuideController.openBooking);
-router.get('/notifications/:userId', tourGuideController.getNotifications);
+router.get('/notifications/:tourguideId', tourGuideController.getNotifications);
 
 
 module.exports = router;

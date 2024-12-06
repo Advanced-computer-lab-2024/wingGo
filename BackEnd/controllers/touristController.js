@@ -4085,6 +4085,8 @@ const getFilteredActivities = async (req, res) => {
 const getPrice = async (req, res) => {
     const { itineraryId } = req.params; // Extract itineraryId from URL parameters
     const { numberOfPeople, promoCode } = req.query; // Extract from query
+
+    console.log("code: ",promoCode);
   
     try {
       // Fetch itinerary details
@@ -4095,6 +4097,8 @@ const getPrice = async (req, res) => {
   
       let totalPrice = itinerary.price * numberOfPeople; // Base price calculation
       let promoCodeDetails = null;
+
+      let isValidPromoCode= true;
   
       // Validate and apply promo code
       if (promoCode) {
@@ -4104,16 +4108,24 @@ const getPrice = async (req, res) => {
           !promoCodeDetails.isActive ||
           promoCodeDetails.endDate < new Date()
         ) {
-          return res.status(400).json({ message: 'Invalid or expired promo code' });
+            isValidPromoCode= false;
+        //   return res.status(400).json({  message: 'Invalid or expired promo code',
+        //     isValidPromoCode: false,  });
         }
+
+        else if(isValidPromoCode){
   
+        console.log("price before: ",totalPrice);
         const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+        console.log("discountAmount: ",discountAmount);
         totalPrice -= discountAmount;
+        }
       }
 
       
   
-      return res.status(200).json({ totalPrice });
+      return res.status(200).json({ totalPrice,
+        isValidPromoCode, });
     } catch (error) {
       console.error("Error during price calculation:", error);
       return res.status(500).json({ message: 'Error calculating price', error });
@@ -4143,7 +4155,8 @@ const getPrice = async (req, res) => {
                 !promoCodeDetails.isActive ||
                 promoCodeDetails.endDate < new Date()
             ) {
-                return res.status(400).json({ message: 'Invalid or expired promo code' });
+                return res.status(400).json({  message: 'Invalid or expired promo code',
+                    isValidPromoCode: false,  });
             }
 
             const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
@@ -4151,7 +4164,8 @@ const getPrice = async (req, res) => {
         }
 
         // Return the calculated total price
-        return res.status(200).json({ totalPrice });
+        return res.status(200).json({ totalPrice,
+            isValidPromoCode: true, });
     } catch (error) {
         console.error('Error calculating activity price:', error);
         return res.status(500).json({

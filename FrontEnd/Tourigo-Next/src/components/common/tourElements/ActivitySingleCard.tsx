@@ -69,6 +69,7 @@ const TourSingleCard = ({
   }, [currency, tour.price, convertAmount]); 
 
   const handleFlagActivity = async () => {
+    
     try {
       // Toggle the flagged state in the backend
       await toggleFlagActivity(tour._id, !isFlagged);
@@ -89,16 +90,17 @@ const TourSingleCard = ({
   };
   
   const confirmToggleBooking = async () => {
+    const toastId = toast.loading("Processing your Request...");
     try {
       const newBookingState = modalAction === "Open"; // Determine the new state
       await toggleBookingState(tour._id, newBookingState); // Call the backend API
       setBookingState(newBookingState); // Update state after successful API call
       setIsModalOpen(false); // Close the modal
       console.log(`Booking state toggled to: ${newBookingState ? "Open" : "Closed"}`);
-      toast.success(`Booking state toggled to ${newBookingState ? 'Open' : 'Closed'} successfully!`);
+      toast.success(`Booking state toggled to ${newBookingState ? 'Open' : 'Closed'} successfully!`, { id: toastId, duration: 1000 });
     } catch (error) {
       console.error("Error toggling booking state:", error);
-      toast.error('Failed to toggle booking state. Please try again.');
+      toast.error('Failed to toggle booking state. Please try again.', { id: toastId });
     }
   };
 
@@ -177,9 +179,9 @@ const TourSingleCard = ({
               <div className="tour-divider"></div>
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
-                <div className="time d-flex align-items-center gap--5">
-                  <i className="icon-heart"></i>
-                  <span>{tour.time}</span>
+                <div className="time d-flex align-items-center gap--5" >
+                {(!isAdvertiser) && <i className="icon-heart"></i>}
+                  {(!isAdvertiser) && <span>{tour.time}</span>}
                 </div>
                 <div className="tour-btn">
                 {/* {isAdvertiser && (

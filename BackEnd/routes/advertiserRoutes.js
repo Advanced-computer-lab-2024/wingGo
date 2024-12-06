@@ -41,4 +41,6 @@ router.get('/tourist-report/:advertiserId', advertiserController.getTouristRepor
 
 router.put('/openBookingForActivity/:id', advertiserController.openBookingForActivity);
 
+router.get("/notifications/:advertiserId", advertiserController.getNotifications);
+
 module.exports = router;

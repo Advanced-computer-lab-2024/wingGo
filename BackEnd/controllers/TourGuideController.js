@@ -638,24 +638,36 @@ const openBooking = async (req, res) => {
 };
 
 const getNotifications = async (req, res) => {
+    const { tourguideId } = req.params; // Extract Tour Guide ID from request parameters
+
     try {
-      // Extract seller ID from the route parameter
-      const { userId } = req.params;
-  
-      // Find the seller by ID
-      const seller = await TourGuide.findById(userId).select('notifications');
-  
-      if (!seller) {
-        return res.status(404).json({ message: 'Seller not found' });
-      }
-  
-      // Return the notifications
-      res.status(200).json({ notifications: TourGuide.notifications });
+        // Find the tour guide by ID
+        const tourGuide = await TourGuide.findById(tourguideId);
+
+        // Check if the tour guide exists
+        if (!tourGuide) {
+            return res.status(404).json({ message: "Tour Guide not found." });
+        }
+
+        // Sort notifications by date in descending order (newest first)
+        const notifications = tourGuide.notifications.sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+        );
+
+        // Return all notifications
+        res.status(200).json({
+            success: true,
+            notifications: notifications,
+        });
     } catch (error) {
-      console.error('Error fetching notifications:', error);
-      res.status(500).json({ message: 'Error fetching notifications', error });
+        console.error("Error fetching notifications:", error); // Debugging
+        res.status(500).json({
+            success: false,
+            message: "Error fetching notifications.",
+            error,
+        });
     }
-  };
+};
 
 
 

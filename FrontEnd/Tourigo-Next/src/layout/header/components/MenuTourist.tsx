@@ -19,11 +19,29 @@ const handleBellClick = () => {
   setShowDropdown((prev) => !prev);
 };
 
+// useEffect(() => {
+//   const fetchNotifications = async () => {
+//     try {
+//       const data = await getTouristNotificationsApi(); // Pass the user's ID
+//       setNotifications(data);
+//     } catch (error) {
+//       console.error("Error fetching notifications:", error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   fetchNotifications();
+// }, []);
+
 useEffect(() => {
   const fetchNotifications = async () => {
     try {
-      const data = await getTouristNotificationsApi(); // Pass the user's ID
-      setNotifications(data);
+      const data: Notification[] = await getTouristNotificationsApi(); // Fetch notifications and specify the type
+      const sortedData = data.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() // Use .getTime() to ensure numeric comparison
+      );
+      setNotifications(sortedData); // Set sorted notifications
     } catch (error) {
       console.error("Error fetching notifications:", error);
     } finally {

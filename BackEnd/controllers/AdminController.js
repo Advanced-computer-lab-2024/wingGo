@@ -933,7 +933,7 @@ const flagActivity = async (req, res) => {
 
         // Notify the advertiser in-app
         const advertiser = activity.advertiser;
-        if (advertiser) {
+        if (advertiser && flagged) {
             await Advertiser.findByIdAndUpdate(advertiser._id, {
                 $push: {
                     notifications: {
@@ -985,7 +985,7 @@ const flagItinerary = async (req, res) => {
 
         // Notify the tour guide in-app
         const tourGuide = itinerary.tourGuideId;
-        if (tourGuide) {
+        if (tourGuide && flagged) {
             await TourGuide.findByIdAndUpdate(tourGuide._id, {
                 $push: {
                     notifications: {

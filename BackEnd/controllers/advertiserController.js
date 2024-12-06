@@ -688,6 +688,39 @@ const openBookingForActivity = async (req, res) => {
     }
 };
 
+const getNotifications = async (req, res) => {
+    const { advertiserId } = req.params; // Extract advertiser ID from the request parameters
+
+    try {
+        // Find the advertiser by ID
+        const advertiser = await Advertiser.findById(advertiserId);
+
+        // Check if the advertiser exists
+        if (!advertiser) {
+            return res.status(404).json({ message: "Advertiser not found." });
+        }
+
+        // Sort notifications by date in descending order (latest first)
+        const notifications = advertiser.notifications.sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+        );
+
+        // Return all notifications
+        res.status(200).json({
+            success: true,
+            notifications: notifications,
+        });
+    } catch (error) {
+        console.error("Error fetching notifications:", error); // Debugging
+        res.status(500).json({
+            success: false,
+            message: "Error fetching notifications.",
+            error,
+        });
+    }
+};
+
+
 
 module.exports = {
     advertiser_hello,
@@ -713,5 +746,6 @@ module.exports = {
     previewLogo,
     getSalesReport,
     getTouristReport,
-    openBookingForActivity
+    openBookingForActivity,
+    getNotifications
 };

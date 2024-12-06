@@ -364,6 +364,7 @@ export interface Itinerary {
       tourist: string;
       text: string;
   }[];
+  bookingOpen: boolean;
   flagged: boolean;
   deactivated: boolean;
   touristIDs: {
