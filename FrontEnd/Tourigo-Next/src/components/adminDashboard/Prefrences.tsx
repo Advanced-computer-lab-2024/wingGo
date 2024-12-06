@@ -127,7 +127,12 @@ const Prefrences = () => {
           value={addTag}
           onChange={(e) => setAddTag(e.target.value)}
         />
-        <button className='bd-primary-btn btn-style radius-60 mt-10 flex g-10' onClick={() => handleAddClick()} > Add Preference Tag </button>
+        <button 
+        className='bd-primary-btn btn-style radius-60' 
+        style={{ marginLeft: "20px" }}
+        onClick={() => handleAddClick()} > 
+        Add Preference Tag 
+        </button>
       </div>
 
 
