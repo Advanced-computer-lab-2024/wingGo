@@ -25,6 +25,7 @@
     "bootstrap": "5.2.2",
     "date-fns": "^4.1.0",
     "draft-js": "^0.11.7",
+    "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "leaflet-geosearch": "^4.0.0",
     "mobiscroll-react": "^4.0.0",
