@@ -3,6 +3,16 @@ import { loadSalesReport } from '@/data/sales-report';
 import { SalesReport } from '@/interFace/interFace';
 import React, { useEffect, useState } from 'react';
 
+// Helper function to format dates
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
 const RecentActivity = () => {
   const [salesReport, setSalesReport] = useState<SalesReport | null>(null);
 
@@ -24,6 +34,7 @@ const RecentActivity = () => {
                       <th>Sales</th>
                       <th>Revenue</th>
                       <th>App Revenue</th>
+                      <th>Date(s)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -31,7 +42,7 @@ const RecentActivity = () => {
                       <>
                         {/* Activities Section */}
                         <tr className="section-header">
-                          <td colSpan={4} className="text-center">
+                          <td colSpan={5} className="text-center">
                             <strong>Activities</strong>
                           </td>
                         </tr>
@@ -45,6 +56,7 @@ const RecentActivity = () => {
                             <td>
                               {activity.appRevenue !== null ? `$${activity.appRevenue}` : 'N/A'}
                             </td>
+                            <td>{activity.soldDate ? formatDate(activity.soldDate) : 'N/A'}</td>
                           </tr>
                         ))}
                         {/* Activities Totals */}
@@ -57,11 +69,12 @@ const RecentActivity = () => {
                           <td>
                             {salesReport.data.activities.totalAppRevenue !== null ? `$${salesReport.data.activities.totalAppRevenue}` : 'N/A'}
                           </td>
+                          <td>N/A</td>
                         </tr>
 
                         {/* Itineraries Section */}
                         <tr className="section-header">
-                          <td colSpan={4} className="text-center">
+                          <td colSpan={5} className="text-center">
                             <strong>Itineraries</strong>
                           </td>
                         </tr>
@@ -75,6 +88,11 @@ const RecentActivity = () => {
                             <td>
                               {itinerary.appRevenue !== null ? `$${itinerary.appRevenue}` : 'N/A'}
                             </td>
+                            <td>
+                              {itinerary.soldDates.length > 0
+                                ? itinerary.soldDates.map(formatDate).join(', ')
+                                : 'N/A'}
+                            </td>
                           </tr>
                         ))}
                         {/* Itineraries Totals */}
@@ -87,11 +105,12 @@ const RecentActivity = () => {
                           <td>
                             {salesReport.data.itineraries.totalAppRevenue !== null ? `$${salesReport.data.itineraries.totalAppRevenue}` : 'N/A'}
                           </td>
+                          <td>N/A</td>
                         </tr>
 
                         {/* Products Section */}
                         <tr className="section-header">
-                          <td colSpan={4} className="text-center">
+                          <td colSpan={5} className="text-center">
                             <strong>Products</strong>
                           </td>
                         </tr>
@@ -105,6 +124,11 @@ const RecentActivity = () => {
                             <td>
                               {product.appRevenue !== null ? `$${product.appRevenue}` : 'N/A'}
                             </td>
+                            <td>
+                              {product.sellingDates.length > 0
+                                ? product.sellingDates.map(formatDate).join(', ')
+                                : 'N/A'}
+                            </td>
                           </tr>
                         ))}
                         {/* Products Totals */}
@@ -114,7 +138,8 @@ const RecentActivity = () => {
                           <td>
                             {salesReport.data.products.totalRevenue !== null ? `$${salesReport.data.products.totalRevenue}` : 'N/A'}
                           </td>
-                          <td>N/A</td> {/* No appRevenue total for products */}
+                          <td>N/A</td>
+                          <td>N/A</td>
                         </tr>
 
                         {/* Grand Totals */}
@@ -127,11 +152,12 @@ const RecentActivity = () => {
                           <td>
                             {salesReport.data.totals.totalAppRevenue !== null ? `$${salesReport.data.totals.totalAppRevenue}` : 'N/A'}
                           </td>
+                          <td>N/A</td>
                         </tr>
                       </>
                     ) : (
                       <tr>
-                        <td colSpan={4} className="text-center">
+                        <td colSpan={5} className="text-center">
                           <strong>Loading data...</strong>
                         </td>
                       </tr>

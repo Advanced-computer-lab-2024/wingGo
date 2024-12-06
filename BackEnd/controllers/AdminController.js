@@ -1365,7 +1365,6 @@ const createPromoCode = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 const getSalesReport = async (req, res) => {
     try {
          // 1. Activities
@@ -1388,6 +1387,7 @@ const getSalesReport = async (req, res) => {
                  sales, // Total number of people who booked
                  revenue, // Total revenue from all bookings
                  appRevenue: revenue * 0.10, // 10% of total revenue
+                 soldDate: activity.date.toISOString().split('T')[0], // Use the activity date directly
              };
          });
  
@@ -1411,12 +1411,14 @@ const getSalesReport = async (req, res) => {
                  (sum, entry) => sum + entry.paidPrice,
                  0
              );
- 
+             const soldDates = [...new Set(itinerary.touristIDs.map(entry => entry.bookingDate))];
+
              return {
                  name: itinerary.title,
                  sales, // Total number of people who booked
                  revenue, // Total revenue from all bookings
                  appRevenue: revenue * 0.10, // 10% of total revenue
+                 soldDates, // Include only the sold dates
              };
          });
  
@@ -1458,6 +1460,8 @@ const getSalesReport = async (req, res) => {
                 sales: totalSales, // Total sales combining sales field and discounted quantities
                 revenue, // Total revenue combining both non-discounted and discounted sales
                 appRevenue, // 10% of total revenue
+                sellingDates: product.sellingDates,
+                
             };
         });
 

@@ -538,8 +538,6 @@ export interface ProductSales {
   revenue: number | null;
   appRevenue: number | null;
 }
-
-
 export interface SalesReport {
   success: boolean;
   data: {
@@ -549,6 +547,7 @@ export interface SalesReport {
         sales: number;
         revenue: number | null;
         appRevenue: number | null;
+        soldDate: string; // Added soldDate for activities
       }[];
       totalSales: number;
       totalRevenue: number | null;
@@ -560,6 +559,7 @@ export interface SalesReport {
         sales: number;
         revenue: number | null;
         appRevenue: number | null;
+        soldDates: string[]; // Added soldDates for itineraries
       }[];
       totalSales: number;
       totalRevenue: number | null;
@@ -571,11 +571,11 @@ export interface SalesReport {
         sales: number;
         revenue: number | null;
         appRevenue: number | null;
+        sellingDates: string[]; // Added sellingDates for products
       }[];
       totalSales: number;
       totalRevenue: number | null;
     };
-    
     totals: {
       totalSales: number;
       totalRevenue: number | null;
@@ -583,6 +583,8 @@ export interface SalesReport {
     };
   };
 }
+
+
 export interface Cart {
   _id: string;
   productId:string;
