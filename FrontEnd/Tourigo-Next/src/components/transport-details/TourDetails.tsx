@@ -3,9 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { Transport } from "@/interFace/interFace";
 import { getTransportsData, bookTransport } from "@/data/transport-data";
-import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
+import { useCurrency } from "@/contextApi/CurrencyContext";
+import TourDetailTabArea from "./TourDetailTabArea";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Image from "next/image";
 
 interface TourDetailsProps {
   id: string;
@@ -44,12 +46,7 @@ const TourDetails: React.FC<TourDetailsProps> = ({ id }) => {
         toast.success("Transport booked successfully!");
       }
     } catch (error) {
-      console.error("Error booking transport:", error);
-      if (error instanceof Error) {
-        toast.error("Error booking transport: " + error.message);
-      } else {
-        toast.error("Error booking transport");
-      }
+      toast.error("Error booking transport.");
     }
   };
 
@@ -60,40 +57,47 @@ const TourDetails: React.FC<TourDetailsProps> = ({ id }) => {
   return (
     <section className="bd-tour-details-area section-space">
       <div className="container">
-        <div className="row gy-24">
-          <div className="col-xxl-8 col-xl-8 col-lg-7">
+        <div className="row gy-24 justify-content-center">
+          <div className="col-xxl-12 col-xl-12 col-lg-12">
             <div className="tour-details-wrapper">
-              <div className="tour-details-content">
-                <h2 className="tour-details-title">{transport.type}</h2>
-                <p className="tour-details-description">{transport.city}</p>
-                <div className="tour-details-price mb-10">
-                  <h4 className="tour-details-ammount">
-                    {currency}{" "}
-                    {convertedPrice !== null
-                      ? convertedPrice.toFixed(2)
-                      : transport.price.toLocaleString("en-US")}
-                  </h4>
+              <div className="tour-details mb-25">
+                <div className="tour-details-thumb details-slide-full mb-30">
+                  <Image
+                    src="/images/default-image.jpg" // Placeholder for transport image
+                    width={1920}
+                    height={1080}
+                    alt="Transport Image"
+                    style={{ width: "100%", height: "auto" }}
+                  />
                 </div>
-                <div className="tour-details-info mb-10">
-                  <p>Duration:</p>
-                  <span>{transport.duration}</span>
+                <div className="tour-details-content">
+                  <h3 className="tour-details-title mb-15">{transport.type}</h3>
+                  <div className="tour-details-meta d-flex flex-wrap gap-10 align-items-center justify-content-between mb-20">
+                    <div className="tour-details-price">
+                      <h4 className="price-title">
+                        {currency}{" "}
+                        {convertedPrice !== null
+                          ? convertedPrice.toFixed(2)
+                          : transport.price.toFixed(2)}
+                        <span>/Per Person</span>
+                      </h4>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleBookNowClick}
+                    disabled={isBooked}
+                    className="bd-primary-btn btn-style radius-60 mb-10"
+                    style={{
+                      cursor: isBooked ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {isBooked ? "Booked!" : "Book Now"}
+                  </button>
+                  {/* Added the new styled tab area */}
+                  <TourDetailTabArea transport={transport} />
                 </div>
-                <div className="tour-details-info mb-10">
-                  <p>City:</p>
-                  <span>{transport.city}</span>
-                </div>
-                <button
-                  className="bd-primary-btn btn-style radius-60"
-                  onClick={handleBookNowClick}
-                  disabled={isBooked}
-                >
-                  {isBooked ? "Booked" : "Book Now"}
-                </button>
               </div>
             </div>
-          </div>
-          <div className="col-xxl-4 col-xl-4 col-lg-5">
-            {/* Sidebar or additional content can go here */}
           </div>
         </div>
       </div>
