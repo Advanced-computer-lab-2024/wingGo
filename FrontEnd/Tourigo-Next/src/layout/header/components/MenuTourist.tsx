@@ -258,7 +258,7 @@ useEffect(() => {
           </li>
         ))}
       </ul>
-      <p>Current selected currency: {currency}</p>
+      {/* <p>Current selected currency: {currency}</p> */}
     </>
   );
 };

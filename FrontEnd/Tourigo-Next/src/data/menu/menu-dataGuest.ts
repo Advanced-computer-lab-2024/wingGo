@@ -7,23 +7,6 @@ import homeFiveImg from "../../../public/assets/images/menu/menu-home-5.jpg";
 
 const menu_data: MenuType[] = [
   {
-    id: 1,
-    hasDropdown: true,
-    children: false,
-    active: true,
-    title: "Home",
-    pluseIncon: true,
-    link: "#",
-    previewImg: true,
-    submenus: [
-      { title: "Home One", link: "/home", prviewIMg: homeOneImg },
-      { title: "Home Two", link: "/home-two", prviewIMg: homeTowImg },
-      { title: "Home Three", link: "/home-three", prviewIMg: homeThreeImg },
-      { title: "Home Four", link: "/home-four", prviewIMg: homeFourImg },
-      { title: "Home Five", link: "/home-five", prviewIMg: homeFiveImg },
-    ],
-  },
-  {
     id: 2,
     hasDropdown: true,
     active: true,
