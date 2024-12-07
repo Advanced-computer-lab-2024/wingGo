@@ -197,3 +197,18 @@ export const filterProductsSeller = async (filters: {
   }
 };
 
+export const getProductById = async (productId: string): Promise<any> => {
+  try {
+    // Make the GET request to fetch the product by ID
+    const response = await axios.get(`http://localhost:8000/tourist/product/${productId}`); // Replace with your actual backend URL
+
+    console.log('Product details fetched successfully:', response.data);
+    return response.data; // Return the fetched product data
+  } catch (error: any) {
+    console.error('Error fetching product details:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || 'Failed to fetch product details. Please try again.'
+    );
+  }
+};
+

@@ -3262,6 +3262,8 @@ const addDeliveryAddress = async (req, res) => {
 
         // Add unique addresses to the deliveryAddresses array
         tourist.deliveryAddresses.push(...uniqueAddresses);
+        // Set the chosenAddress field
+        tourist.chosenAddress = addresses[0].trim();
 
         // Save the updated tourist document
         await tourist.save();
@@ -4102,7 +4104,167 @@ const getPrice = async (req, res) => {
       return res.status(500).json({ message: 'Error calculating price', error });
     }
   };
+  const getCartTotalPrice = async (req, res) => {
+    const { touristId } = req.params; // Extract touristId from URL parameters
+    const { promoCode } = req.query; // Extract promo code from query
   
+    try {
+        // Fetch cart items for the given tourist
+        const cartItems = await Cart.find({ touristId }).populate('productId'); // Populate product details
+        
+        if (!cartItems || cartItems.length === 0) {
+            return res.status(404).json({ message: 'No items found in the cart' });
+        }
+
+        // Calculate total price for all cart items
+        let totalPrice = 0;
+        cartItems.forEach(item => {
+            if (!item.productId) {
+                throw new Error(`Product with ID ${item.productId} not found`);
+            }
+            totalPrice += item.price * item.amount; // price * quantity for each cart item
+        });
+
+        let promoCodeDetails = null;
+        let discount = 0; // Initialize discount
+
+        // Validate and apply promo code
+        if (promoCode) {
+            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date()
+            ) {
+                return res.status(400).json({ message: 'Invalid or expired promo code' });
+            }
+
+            discount = promoCodeDetails.discount; // Get discount percentage
+            const discountAmount = (discount / 100) * totalPrice;
+            totalPrice -= discountAmount;
+        }
+
+        return res.status(200).json({ totalPrice, discount });
+    } catch (error) {
+        console.error("Error during cart total price calculation:", error);
+        return res.status(500).json({ message: 'Error calculating cart total price', error });
+    }
+};
+
+  const getProductById = async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      // Validate the ID
+      if (!id) {
+        return res.status(400).json({ message: 'Product ID is required' });
+      }
+  
+      // Find the product by ID
+      const product = await Product.findById(id);
+  
+      // Check if the product exists
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
+      }
+  
+      res.status(200).json({ product });
+    } catch (error) {
+      console.error('Error fetching product by ID:', error);
+      res.status(500).json({ message: 'Internal server error', error });
+    }
+  };
+
+
+const getDiscountByCode = async (req, res) => {
+    try {
+        const { code } = req.params; // Extract promo code from request parameters
+
+        // Validate the code
+        if (!code) {
+            return res.status(400).json({ message: 'Promo code is required' });
+        }
+
+        // Find the promo code in the database
+        const promoCode = await PromoCode.findOne({ code });
+
+        // Check if the promo code exists and is active
+        if (!promoCode || !promoCode.isActive) {
+            return res.status(404).json({ message: 'Promo code not found or inactive' });
+        }
+
+        // Check if the promo code is within the validity period
+        const currentDate = new Date();
+        if (promoCode.startDate > currentDate || promoCode.endDate < currentDate) {
+            return res.status(400).json({ message: 'Promo code is expired or not yet valid' });
+        }
+
+        // Return the discount
+        res.status(200).json({ discount: promoCode.discount });
+    } catch (error) {
+        console.error('Error fetching promo code:', error.message);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+};
+
+const getDeliveryAddresses = async (req, res) => {
+    const { touristId } = req.params;
+  
+    try {
+      // Find the tourist by ID
+      const tourist = await Tourist.findById(touristId).select("deliveryAddresses");
+  
+      if (!tourist) {
+        return res.status(404).json({ message: "Tourist not found" });
+      }
+  
+      // Return the delivery addresses
+      return res.status(200).json({
+        message: "Delivery addresses fetched successfully",
+        deliveryAddresses: tourist.deliveryAddresses,
+      });
+    } catch (error) {
+      console.error("Error fetching delivery addresses:", error);
+      return res.status(500).json({ message: "Error fetching delivery addresses", error });
+    }
+  };
+
+  
+
+const getPlacesTags = async (req, res) => {
+  try {
+    console.log("enetered");
+    // Fetch all places and project only the `tagss` field
+    const places = await Place.find({}, "tagss"); // Use an empty filter object and select only `tagss`
+
+    // Check if places exist
+    if (!places || places.length === 0) {
+      return res.status(404).json({ message: "No places found" });
+    }
+
+    // Extract all tags into a single array
+    const allTags = places.reduce((acc, place) => {
+      return acc.concat(place.tagss || []);
+    }, []);
+
+    // Get distinct values using a Set
+    const distinctTags = [...new Set(allTags)];
+
+    // Return the distinct tags
+    return res.status(200).json({
+      message: "Distinct tags fetched successfully",
+      distinctTags,
+    });
+  } catch (error) {
+    console.error("Error fetching distinct tags:", error);
+    return res.status(500).json({
+      message: "Error fetching distinct tags",
+      error: error.message, // Simplify error for client response
+    });
+  }
+};
+
+
 
 
 module.exports = {
@@ -4195,5 +4357,10 @@ module.exports = {
     viewAllSavedEvents,
     toggleNotificationPreference,
     getFilteredActivities,
-    getPrice
+    getPrice,
+    getCartTotalPrice,
+    getProductById,
+    getDiscountByCode,
+    getDeliveryAddresses,
+    getPlacesTags
 };
