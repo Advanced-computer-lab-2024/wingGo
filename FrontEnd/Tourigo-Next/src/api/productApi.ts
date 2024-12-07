@@ -195,18 +195,36 @@ export const filterProductsAdmin = async (filters: {
   }
 };
 
+// export const filterProductsSeller = async (filters: {  
+//   budget?: number;
+ 
+// }): Promise<any[]> => {
+//   try {
+//       const response = await axios.get(`http://localhost:8000/seller/filterProducts`, { params: filters });
+//       return response.data;
+//   } catch (error) {
+//       console.error("Error fetching filtered itineraries:", error);
+//       throw error;
+//   }
+// };
+
 export const filterProductsSeller = async (filters: {  
   budget?: number;
- 
+  sellerId: string; // Seller ID is now required
 }): Promise<any[]> => {
   try {
-      const response = await axios.get(`http://localhost:8000/seller/filterProducts`, { params: filters });
-      return response.data;
+    // Include sellerId in the URL path and budget as a query parameter
+    const response = await axios.get(`http://localhost:8000/seller/filterProducts/${filters.sellerId}`, {
+      params: { budget: filters.budget },
+    });
+    return response.data;
   } catch (error) {
-      console.error("Error fetching filtered itineraries:", error);
-      throw error;
+    console.error("Error fetching filtered products:", error);
+    throw error;
   }
 };
+
+
 
 export const getProductById = async (productId: string): Promise<any> => {
   try {

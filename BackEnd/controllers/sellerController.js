@@ -336,14 +336,18 @@ const editProduct = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-
-
 const filterProduct = async (req, res) => {
     try {
-        const { budget } = req.query; // Extract price from query parameters
+        const { budget } = req.query;
+        const { sellerId } = req.params;  // Extract sellerId from route parameters
 
         // Initialize an empty filter
-        let filter = { }; 
+        let filter = {
+            $or: [
+                { archive: false }, // Include non-archived products
+                { seller: sellerId } // Include archived products only if they belong to the specified seller
+            ]
+        };
 
         // Apply budget filter if provided
         if (budget) {
@@ -353,6 +357,8 @@ const filterProduct = async (req, res) => {
         // Fetch products based on the constructed filter
         const result = await Product.find(filter);
 
+        console.log("Filtered Products: ", result);
+        
         // Return the filtered results
         res.status(200).json(result);
     } catch (error) {
@@ -360,6 +366,7 @@ const filterProduct = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 const searchProductsByName = async (req, res) => {
     try {
         const query = req.query.name;  
