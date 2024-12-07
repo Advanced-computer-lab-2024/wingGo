@@ -26,6 +26,7 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
   const [paymentMethod, setPaymentMethod] = useState<"wallet" | "stripe" | "creditCard">("wallet");
   const [numberOfPeople, setNumberOfPeople] = useState(1); // Default to 1 person
   // const [promocode, setPromocode] = useState(""); // State for promo code
+  const [validPromo, setValidPromo] = useState(true); 
 
   
   // const [price, setPrice] = useState(0);
@@ -39,23 +40,52 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
   const [promocode, setPromocode] = useState("");
   const [price, setPrice] = useState(0);
 
+  // const updatePrice = async () => {
+  //   if (!data?._id) return;
+  //   try {
+  //     const calculatedPrice = await getPriceApi(
+  //       data._id, // Activity ID
+  //       numberOfPeople, // Number of people
+  //       promocode // Optional promo code
+  //     );
+  //     setPrice(calculatedPrice);
+  //   } catch (error) {
+  //     console.error("Error updating price:", error);
+  //   }
+  // };
+
   const updatePrice = async () => {
     if (!data?._id) return;
+
     try {
-      const calculatedPrice = await getPriceApi(
-        data._id, // Activity ID
-        numberOfPeople, // Number of people
-        promocode // Optional promo code
-      );
-      setPrice(calculatedPrice);
+        const response = await getPriceApi(data._id, numberOfPeople, promocode);
+
+        // Handle invalid promo code
+        if (!response.isValidPromoCode) {
+            if (validPromo || promocode !== "") {
+                toast.error("Invalid or expired promo code."); // Show error toast
+            }
+            setValidPromo(false); // Mark promo code as invalid
+        } else {
+            // Handle valid promo code
+            if (!validPromo) {
+                toast.success("Promo code applied successfully!"); // Show success toast
+            }
+            setPrice(response.totalPrice); // Update price
+            setValidPromo(true); // Mark promo code as valid
+        }
     } catch (error) {
-      console.error("Error updating price:", error);
+        console.error("Error updating price:", error);
+        toast.error("Error calculating price.");
     }
-  };
+};
+
+
+
   
-  useEffect(() => {
-    updatePrice(); // Recalculate price on `promocode` or `numberOfPeople` change
-  }, [promocode, numberOfPeople]);
+useEffect(() => {
+  updatePrice(); // Recalculate price on `promocode` or `numberOfPeople` change
+}, [promocode, numberOfPeople]);
   
   
   // useEffect(() => {
@@ -224,40 +254,7 @@ const onSubmit = async (event: React.FormEvent) => {
              
             </div>
           </div>
-          {/* Part 1.1: Email Verification */}
-          {/* <div className="row setup-content" id="step-one">
-              <div className="col-md-12">
-                <div className="booking-form-wrapper mb-35">
-                  <h4 className="booking-form-title mb-15">Verification</h4>
-                  <div className="booking-form-input-box">
-                    <div className="booking-form-input-title">
-                      <label htmlFor="email">
-                        Email address<span>*</span>
-                      </label>
-                    </div>
-                    <div className="booking-form-input">
-                      <input
-                        id="email"
-                        type="email"
-                        autoComplete="email"
-                        placeholder="Email address"
-                        {...register("email", {
-                          required: "Email is required",
-                          pattern: {
-                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                            message: "Invalid email address",
-                          },
-                        })}
-                      />
-                      {errors.email && (
-                        <ErrorMessage message={errors.email.message as string} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div> */}
-
+         
        
           {/* Part 2: Payment Details */}
           <div className="row setup-content" id="step-two">
@@ -266,11 +263,11 @@ const onSubmit = async (event: React.FormEvent) => {
                 <h4 className="booking-form-title mb-15">Payment Details</h4>
                 <AddCupon setPromocode={setPromocode} />
                 <div className="order-info-list">
-                  <ul>
+                <ul>
                     <li><span>Subtotal</span><span>${data.price * numberOfPeople}</span></li>
-                    <li><span>Discount</span><span>     ${promocode ? (((data.price * numberOfPeople) - price).toFixed(2)) : "0.00"}
+                    <li><span>Discount</span><span>     ${promocode && validPromo ? (((data.price * numberOfPeople) - price).toFixed(2)) : "0.00"}
                     </span></li>
-                    <li><span>Total</span><span> ${promocode ? price.toFixed(2) : (data.price * numberOfPeople).toFixed(2)}</span></li>
+                    <li><span>Total</span><span> ${promocode && validPromo ? price.toFixed(2) : (data.price * numberOfPeople).toFixed(2)}</span></li>
                   </ul>
                 </div>
 

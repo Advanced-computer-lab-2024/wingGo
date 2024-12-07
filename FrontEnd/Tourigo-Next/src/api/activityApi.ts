@@ -163,25 +163,40 @@ export const fetchFilteredActivities = async (filters: { filterType: string }): 
 };
 
 
-export const getPriceApi = async (
-    activityId: string,
-    numberOfPeople: number,
-    promoCode?: string // Optional promo code
-  ): Promise<number> => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8000/tourist/activityPrice/${activityId}`,
-        {
-          params: {
-            numberOfPeople,
-            promoCode, // Optional promo code
-          },
-        }
-      );
+// export const getPriceApi = async (
+//     activityId: string,
+//     numberOfPeople: number,
+//     promoCode?: string // Optional promo code
+//   ): Promise<number> => {
+//     try {
+//       const response = await axios.get(
+//         `http://localhost:8000/tourist/activityPrice/${activityId}`,
+//         {
+//           params: {
+//             numberOfPeople,
+//             promoCode, // Optional promo code
+//           },
+//         }
+//       );
   
-      return response.data.totalPrice; // Return total price from response
+//       return response.data; // Return total price from response
+//     } catch (error) {
+//       console.error("Error fetching activity price:", error);
+//       throw error;
+//     }
+//   };
+
+  export const getPriceApi = async (activityId: string, numberOfPeople: number, promoCode : string) => {
+    const params = {
+      numberOfPeople,
+      promoCode,
+    };
+  
+    try {
+      const response = await axios.get(`http://localhost:8000/tourist/activityPrice/${activityId}`, { params });
+      return response.data;
     } catch (error) {
-      console.error("Error fetching activity price:", error);
+      console.error('Error fetching price:', error);
       throw error;
     }
   };
