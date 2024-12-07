@@ -181,6 +181,9 @@ const createItinerary = async (req, res) => {
             return res.status(403).json({ error: 'Terms and conditions must be accepted to create an itinerary.' });
         }
 
+        const photoUrl = req.file.location;
+
+
 
         // Create and save the new itinerary without latitude and longitude
         const newItinerary = new Itinerary({
@@ -197,7 +200,8 @@ const createItinerary = async (req, res) => {
             pickupLocation,
             dropoffLocation,
             bookings,
-            tags
+            tags,
+            photo: photoUrl,
         });
 
         await newItinerary.save();
@@ -206,6 +210,31 @@ const createItinerary = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+
+const getItineraryPhoto = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const itinerary = await Itinerary.findById(id);
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found' });
+        }
+
+        if (itinerary.photo) {
+            const key = itinerary.photo.split('/').slice(-1)[0];
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
+            
+            // Instead of redirecting, send the pre-signed URL directly
+            return res.json({ imageUrl: preSignedUrl });
+        } else {
+            return res.status(404).json({ message: 'Image not found for this itinerary.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 // Read itinerary with tour guide id and itinerary id
 // const getItineraries = async (req, res) => {
@@ -683,5 +712,6 @@ module.exports = {
     getSalesReport,
     getTouristReport,
     openBooking,
+    getItineraryPhoto,
     getNotifications
 };
