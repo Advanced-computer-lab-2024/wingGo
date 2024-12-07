@@ -434,6 +434,12 @@ export interface BookedActivity {
     tagss: string[];
 };
 
+export interface Wishlist {
+  _id: string; 
+  touristId: string; 
+  productId: string; 
+  addedDate: Date; 
+};
 
 
 export interface Product {
