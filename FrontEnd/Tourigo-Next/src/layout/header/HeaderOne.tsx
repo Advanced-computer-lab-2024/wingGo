@@ -62,12 +62,6 @@ const HeaderOne = () => {
                       <div className="">
                         <Link
                           className="bd-btn btn-style text-btn"
-                          href="/contact"
-                        >
-                          Help
-                        </Link>
-                        <Link
-                          className="bd-btn btn-style text-btn"
                           href="/sign-up"
                         >
                           Sign up

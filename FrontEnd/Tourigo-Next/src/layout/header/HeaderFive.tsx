@@ -6,68 +6,18 @@ import { imageLoader } from "@/hooks/image-loader";
 import Menu from "./components/MenuSeller";
 import useGlobalContext from "@/hooks/use-context";
 
-const HeaderFive = () => {
+const HeaderFour = () => {
   const { toggleSideMenu, scrollDirection } = useGlobalContext();
   return (
     <>
       <header>
-        {/** header top bar start**/}
-        <div className={`header-top-area bg-theme-primary d-none d-sm-block`}>
-          <div className="container">
-            <div className="header-top-main">
-              <div className="header-top-left d-flex align-items-center">
-                <div className="header-top-left-item">
-                  <span>
-                    <i className="fa-solid fa-location-dot"></i>
-                  </span>
-                  <Link href="#">100 San Francisco Street, New York</Link>
-                </div>
-                <div className="header-top-left-item">
-                  <span>
-                    <i className="fa-solid fa-envelope"></i>
-                  </span>
-                  <Link href="/mailto:contact@tourigo.com">
-                    contact@tourigo.com
-                  </Link>
-                </div>
-              </div>
-              <div className="heder-top-right d-none d-md-flex align-items-center gap-3">
-                <div className="topbar-social">
-                  <ul>
-                    <li>
-                      <Link href="#">
-                        <i className="icon-facebook"></i>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="#">
-                        <i className="icon-twitter-x"></i>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="#">
-                        <i className="icon-linkedin"></i>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="#">
-                        <i className="icon-youtube"></i>
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/** header top bar end**/}
         <div
           id="header-sticky"
-          className={`header-area ${
+          className={`header-area header-transparent header-fullwidth ${
             scrollDirection === "down" ? "bd-sticky" : ""
           }`}
         >
-          <div className="container">
+          <div className="container-fluid">
             <div className="mega-menu-wrapper p-relative">
               <div className="header-main">
                 <div className="header-left">
@@ -96,14 +46,12 @@ const HeaderFive = () => {
                   <div className="header-action d-flex align-items-center">
                     <div className="header-btn-wrap">
                       <div className="d-none d-xs-inline-flex gap-15 align-items-center">
-                        <div className="bd-search-btn-wrapper">
-                          <button className="bd-search-open-btn">
-                            <i className="fa-regular fa-magnifying-glass"></i>
-                          </button>
-                        </div>
                         <div className="header-currency-item style-two header-currency">
                           <span
                             className="header-currency-toggle"
+                            style={{
+                              marginRight: "10px",
+                            }}
                             id="header-currency-toggle"
                           >
                             USD
@@ -119,31 +67,16 @@ const HeaderFive = () => {
                               <Link href="#">EUR</Link>
                             </li>
                           </ul>
-                        </div>
-                        <div className="header-language-item header-language">
-                          <span
-                            className="header-language-toggle"
-                            id="header-language-toggle"
-                          >
-                            Eng
-                          </span>
-                          <ul>
-                            <li>
-                              <Link href="#">Are</Link>
-                            </li>
-                            <li>
-                              <Link href="#">Ita</Link>
-                            </li>
-                            <li>
-                              <Link href="#">Rus</Link>
-                            </li>
-                          </ul>
-                        </div>
+                        </div>                      
                       </div>
                     </div>
-                    <div onClick={toggleSideMenu} className="header-hamburger">
+                    {/* <div className="header-hamburger">
                       <div className="sidebar-toggle">
-                        <Link className="bar-icon-square" href="#">
+                        <Link
+                          onClick={toggleSideMenu}
+                          className="bar-icon-square"
+                          href="#"
+                        >
                           <span></span>
                           <span></span>
                           <span></span>
@@ -155,8 +88,8 @@ const HeaderFive = () => {
                           <span></span>
                         </Link>
                       </div>
-                    </div>
-                    {/** for wp**/}
+                    </div> */}
+                    {/*for wp */}
                     <div className="header-hamburger ml-20 d-none">
                       <button
                         type="button"
@@ -178,4 +111,4 @@ const HeaderFive = () => {
   );
 };
 
-export default HeaderFive;
+export default HeaderFour;

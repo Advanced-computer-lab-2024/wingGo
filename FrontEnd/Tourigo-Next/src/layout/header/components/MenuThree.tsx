@@ -41,7 +41,7 @@ useEffect(() => {
 
   return (
     <>
-      <ul>
+      <ul className="mb-20">
         {menu_data.map((item) => (
           <li
             key={item.id}
@@ -240,7 +240,6 @@ useEffect(() => {
           </li>
         ))}
       </ul>
-      <p>Current selected currency: {currency}</p>
     </>
   );
 };
