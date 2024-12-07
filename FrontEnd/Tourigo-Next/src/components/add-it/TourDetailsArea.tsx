@@ -38,6 +38,8 @@ const TourDetailsArea = () => {
   });
 
   const [image, setImage] = useState<File | null>(null);
+  const [largeImg, setlargeImg] = useState<string>("");
+
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = e.target as HTMLInputElement;
@@ -99,7 +101,7 @@ const TourDetailsArea = () => {
           <div className="row gy-24 justify-content-center">
             <div className="col-xxl-12 col-xl-12 col-lg-12">
               <div className="tour-details-wrapper">
-                {/* <UploadSingleImg setlargeImg={setImage} /> */}
+                <UploadSingleImg setlargeImg={setlargeImg} setImage={setImage}/>
 
                 <div className="form-input-box mb-15">
                   <label htmlFor="title">Itinerary Title<span>*</span></label>
