@@ -59,7 +59,7 @@ useEffect(() => {
 
   return (
     <>
-      <ul>
+      <ul className="mb-20">
         {menu_data.map((item) => (
           <li
             key={item.id}
