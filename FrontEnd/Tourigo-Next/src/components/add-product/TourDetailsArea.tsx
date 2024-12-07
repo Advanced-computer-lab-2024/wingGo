@@ -55,6 +55,7 @@ const TourDetailsArea = () => {
     }
 
     try {
+      console.log(formData);
       const response = await createProduct(formData); // Make sure createProduct accepts FormData
       toast.success(response.message || "Product added successfully");
     } catch (error) {
