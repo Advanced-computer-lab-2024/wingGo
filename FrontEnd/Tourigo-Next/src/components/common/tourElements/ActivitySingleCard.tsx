@@ -177,6 +177,7 @@ const TourSingleCard = ({
         
       } else {
         console.error("Failed to toggle save/unsave:", saveResult);
+        toast.error("Failed to toggle save/unsave. Please try again later");
       }
     } catch (error) {
       console.error("Error saving/unsaving activity:", error);

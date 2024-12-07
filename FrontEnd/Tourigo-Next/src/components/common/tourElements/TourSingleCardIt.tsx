@@ -12,7 +12,7 @@ import axios from "axios";
 import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked,toggleSaveItinerary, checkIfSaved } from '@/api/itineraryApi';
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
-
+import { toast } from 'sonner';
 
 
 interface ItourPropsType {
@@ -142,8 +142,10 @@ const handleSave = async () => {
     } else {
       setIsSaved(false); // Set as unsaved
     }
+    toast.success(`Itinerary ${isSaved ? 'unsaved' : 'saved'} successfully!`);
   } catch (error) {
     console.error("Error toggling save/unsave itinerary:", error);
+    toast.error("Failed to toggle save/unsave. Please try again later");
   }
 };
 
