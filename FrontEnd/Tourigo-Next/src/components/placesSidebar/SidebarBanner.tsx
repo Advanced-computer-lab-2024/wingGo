@@ -12,7 +12,15 @@ const SidebarBanner = () => {
             <div className="sidebar-widget-content">
                 <span className="bd-play-btn pulse-white mb-40"><i className="icon-call-ring"></i></span>
                 <p className="b3 mb-0">Free Call</p>
-                <h5 className="mb-25"><p>02 (908) 480-20</p></h5>
+                <h5 className="mb-25"><Link href="tel:+0290848020">02 (908) 480-20</Link></h5>
+                <div className="sidebar-btn">
+                    <Link className="bd-text-btn style-two" href="/blog-list-right">Contact
+                        <span className="icon__box">
+                            <i className="fa-light fa-angle-right icon__first"></i>
+                            <i className="fa-light fa-angle-right icon__second"></i>
+                        </span>
+                    </Link>
+                </div>
             </div>
         </>
     );

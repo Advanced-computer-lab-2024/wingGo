@@ -195,16 +195,49 @@ export const filterProductsAdmin = async (filters: {
   }
 };
 
+// export const filterProductsSeller = async (filters: {  
+//   budget?: number;
+ 
+// }): Promise<any[]> => {
+//   try {
+//       const response = await axios.get(`http://localhost:8000/seller/filterProducts`, { params: filters });
+//       return response.data;
+//   } catch (error) {
+//       console.error("Error fetching filtered itineraries:", error);
+//       throw error;
+//   }
+// };
+
 export const filterProductsSeller = async (filters: {  
   budget?: number;
- 
+  sellerId: string; // Seller ID is now required
 }): Promise<any[]> => {
   try {
-      const response = await axios.get(`http://localhost:8000/seller/filterProducts`, { params: filters });
-      return response.data;
+    // Include sellerId in the URL path and budget as a query parameter
+    const response = await axios.get(`http://localhost:8000/seller/filterProducts/${filters.sellerId}`, {
+      params: { budget: filters.budget },
+    });
+    return response.data;
   } catch (error) {
-      console.error("Error fetching filtered itineraries:", error);
-      throw error;
+    console.error("Error fetching filtered products:", error);
+    throw error;
+  }
+};
+
+
+
+export const getProductById = async (productId: string): Promise<any> => {
+  try {
+    // Make the GET request to fetch the product by ID
+    const response = await axios.get(`http://localhost:8000/tourist/product/${productId}`); // Replace with your actual backend URL
+
+    console.log('Product details fetched successfully:', response.data);
+    return response.data; // Return the fetched product data
+  } catch (error: any) {
+    console.error('Error fetching product details:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || 'Failed to fetch product details. Please try again.'
+    );
   }
 };
 

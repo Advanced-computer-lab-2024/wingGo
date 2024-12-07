@@ -7,6 +7,7 @@ import {
   remove_cart_product,
 } from "@/redux/slices/cartSlice";
 import { RootState } from "@/redux/store";
+import { useRouter } from "next/navigation"; // Import useRouter from Next.js
 import CrossIcon from "@/svg/CrossIcon";
 import MinusIcon from "@/svg/MinusIcon";
 import PlusIcon from "@/svg/PlusIcon";
@@ -15,14 +16,16 @@ import Link from "next/link";
 import React, { useState,useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import {fetchCartItems,updateCartItemAmount,removeFromCart} from '@/api/cartApi'
+import {fetchCartItems,updateCartItemAmount,removeFromCart,createOrder,fetchCartTotalPrice} from '@/api/cartApi'
 import { Cart} from "@/interFace/interFace";
 
 const CartArea = () => {
-
+  const router = useRouter(); // Initialize useRouter
     const [items, setItems] = useState<Cart[]>([]); // Use Cart[] for the state type
     const dispatch = useDispatch();
     const [total, setTotal] = useState<number>(0); // Explicitly type total as number
+    const [promoCode, setPromoCode] = useState<string>("");
+   const [discount, setDiscount] = useState<number>(0);
   
 
 
@@ -33,7 +36,7 @@ const CartArea = () => {
           setItems(data || []); // Fallback to an empty array if data is undefined
         } catch (error) {
           console.error("Error fetching cart items:", error);
-          alert("Failed to fetch cart items. Please try again.");
+         
         }
       };
   
@@ -53,11 +56,9 @@ const CartArea = () => {
 
 
 
-  const cartProducts = useSelector(
-    (state: RootState) => state.cart.cartProducts
-  );
-  const totalPrice = cartProducts.reduce(
-    (total, product) => total + (product.price ?? 0) * (product.quantity ?? 0),
+  
+  const subtotal = items.reduce(
+    (total, product) => total + (product.price ?? 0) * (product.amount ?? 0),
     0
   );
   const handleUpdateAmount = async (cartItemId: string, newAmount: number) => {
@@ -106,8 +107,17 @@ const CartArea = () => {
     return prevItems.filter((item) => item.productId !== cartItemId);
   };
 
-  const handleExtraMoney = (extra: number) => {
-    setTotal(totalPrice + extra);
+  const handleApplyPromoCode = async () => {
+    try {
+      console.log("hello");
+      const { totalPrice, discount: appliedDiscount } = await fetchCartTotalPrice(promoCode);
+      setTotal(totalPrice);
+      setDiscount(subtotal*((appliedDiscount)/100));
+      // alert("Promo code applied successfully!");
+    } catch (error) {
+      console.error("Error applying promo code:", error);
+      alert("Failed to apply promo code. Please check and try again.");
+    }
   };
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>, cartItemId: string) => {
   //   const newAmount = parseInt(e.target.value, 10);
@@ -115,7 +125,36 @@ const CartArea = () => {
   //     handleUpdateAmount(cartItemId, newAmount); // Call the update handler
   //   }
   // };
-
+  const handleCreateOrder = async () => {
+    try {
+      if (!items || items.length === 0) {
+        console.error('No items in the cart to process.');
+        return alert('Your cart is empty. Add items before proceeding.');
+      }
+  
+      // Extract unique touristIds using Array.from() for compatibility
+      const touristIds = Array.from(new Set(items.map((item) => item.touristId)));
+  
+      if (touristIds.length > 1) {
+        console.error('Multiple tourist IDs detected:', touristIds);
+        return alert('Cannot proceed with multiple tourist IDs in the cart.');
+      }
+  
+      const buyerId = touristIds[0];
+      console.log('Processing order for buyerId:', buyerId);
+  
+      const order = await createOrder(buyerId);
+      console.log('Order details:', order.orderId);
+     
+  
+      setItems([]);
+      router.push(`/checkoutProducts?promoCode=${encodeURIComponent(promoCode)}&orderId=${encodeURIComponent(order.orderId)}`
+);
+    } catch (error) {
+      console.error('Error during order creation:', error);
+      alert('Failed to create order. Please try again.');
+    }
+  };
  
   return (
     <>
@@ -123,11 +162,46 @@ const CartArea = () => {
     
     
       <section className="bd-cart-area section-space">
+        
         <div className="container">
+        
           {items?.length ? (
             <>
-              <div className="row">
+            <div className="bd-cart-bottom">
+                    <div className="row align-items-end">
+                      <div className="col-xl-7 col-md-8">
+                        <div className="bd-cart-coupon">
+                          
+                            <div className="bd-cart-coupon-input-box">
+                              <label style={{ marginLeft: '15px' }}>Coupon Code:</label>
+                              <div className="bd-cart-coupon-input d-flex flex-wrap gap-15 align-items-center">
+                                <input
+                                  type="text"
+                                  placeholder="Enter Coupon Code"
+                                  value={promoCode}
+                                 onChange={(e) => setPromoCode(e.target.value)}
+                                />
+                                <button
+                                 
+                                  onClick={handleApplyPromoCode}
+                                  className="bd-primary-btn btn-style is-bg radius-60"
+                                >
+                                  <span className="bd-primary-btn-text">
+                                    Apply Coupon
+                                  </span>
+                                  <span className="bd-primary-btn-circle"></span>
+                                </button>
+                              </div>
+                            </div>
+                          
+                        </div>
+                      </div>
+                      
+                    </div>
+                  </div>
+              <div className="row" style={{ marginTop: '20px' }}>
                 <div className="col-xl-9 col-lg-8">
+                
                   <div className="bd-cart-list mb-25 mr-30">
                     <table className="table">
                       <thead>
@@ -194,37 +268,72 @@ const CartArea = () => {
                       </tbody>
                     </table>
                   </div>
-                  <div className="bd-cart-bottom">
+                  {/* <div className="bd-cart-bottom">
                     <div className="row align-items-end">
                       <div className="col-xl-6 col-md-4">
                         <div className="bd-cart-update">
-                          <Link
-                            href="/cart"
+                          <button
+                            onClick={handleCreateOrder}
                             className="bd-primary-btn btn-style has-arrow is-bg radius-60"
                           >
                             <span className="bd-primary-btn-arrow arrow-right">
                               <i className="fa-regular fa-arrow-right"></i>
                             </span>
-                            <span className="bd-primary-btn-text">
-                              Proceed to Checkout
-                            </span>
+                            <span className="bd-primary-btn-text">Proceed to Checkout</span>
                             <span className="bd-primary-btn-circle"></span>
                             <span className="bd-primary-btn-arrow arrow-left">
                               <i className="fa-regular fa-arrow-right"></i>
                             </span>
-                          </Link>
+                          </button>
                         </div>
                       </div>
                     </div>
+                  </div> */}
+                </div>
+                <div className="col-xl-3 col-lg-4 col-md-6">
+                  <div className="bd-cart-checkout-wrapper">
+                    <div className="bd-cart-checkout-top d-flex align-items-center justify-content-between">
+                      <span className="bd-cart-checkout-top-title">
+                        Subtotal
+                      </span>
+                      <span className="bd-cart-checkout-top-price">
+                        ${subtotal.toFixed(0)}
+                      </span>
+                    </div>
+                    <div className="bd-cart-checkout-top d-flex align-items-center justify-content-between">
+                      <span>Discount</span>
+                      <span>
+                     - ${discount}
+                      </span>
+                    </div>
+                    
+                    <div className="bd-cart-checkout-top d-flex align-items-center justify-content-between">
+                      <span>Total</span>
+                      <span>
+                        ${total > 0 ? total.toFixed(2) : subtotal.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="bd-cart-checkout-proceed">
+                    <button
+                            onClick={handleCreateOrder}
+                            className="bd-primary-btn btn-style has-arrow is-bg radius-60"
+                          >
+                            <span className="bd-primary-btn-arrow arrow-right">
+                              <i className="fa-regular fa-arrow-right"></i>
+                            </span>
+                            <span className="bd-primary-btn-text">Proceed to Checkout</span>
+                            <span className="bd-primary-btn-circle"></span>
+                            <span className="bd-primary-btn-arrow arrow-left">
+                              <i className="fa-regular fa-arrow-right"></i>
+                            </span>
+                          </button>
+                    </div>
                   </div>
                 </div>
-                
               </div>
             </>
           ) : (
-            <>
-              <h3 className="text-center">No Cart Product Found</h3>
-            </>
+            <h3 className="text-center">No Cart Product Found</h3>
           )}
         </div>
       </section>

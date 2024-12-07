@@ -2,11 +2,10 @@
 "use client";
 import useGlobalContext from "@/hooks/use-context";
 import { Product } from "@/interFace/interFace";
-import { ToastContainer, toast } from "react-toastify";
 import { useAppDispatch } from "@/redux/hooks";
 import { cart_product } from "@/redux/slices/cartSliceproduct";
 import { wishlist_product } from "@/redux/slices/wishlistSliceproduct";
-import "react-toastify/dist/ReactToastify.css"; // Import the CSS for styling
+import { toast } from "sonner";// Import the CSS for styling
 
 import Image from "next/image";
 import Link from "next/link";
@@ -68,33 +67,40 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
 
   const handleEyeClick = async () => {
     const sellerId = userRole === "Seller" ? hardcodedSellerId : "Admin";
+    const toastId = toast.loading("Processing your Request...");
+
     try {
-      if (userRole === "Seller") {
-        if (item._id) {
-          const response = await ArchiveUnarchiveProduct(item._id, sellerId, true);
-          if (!item.archive)
-            toast.success("Item archived successfully!");
-          else
-            toast.success("Item unarchived successfully!");
-        } else {
-          console.error('Error: item._id is undefined');
+      if (item._id) {
+        let response;
+        if (userRole === "Seller") {
+          console.log("seller id of item: ",item.seller);
+          console.log("seller id hardcoded: ",hardcodedSellerId);
+          console.log("condition: ",item.seller == hardcodedSellerId);
+          response = await ArchiveUnarchiveProduct(item._id, sellerId, !item.archive);
+        } else if (userRole === "Admin") {
+          response = await ArchiveUnarchiveProductAdmin(item._id, !item.archive);
         }
-      } else if (userRole === "Admin") {
-        if (item._id) {
-          const response = await ArchiveUnarchiveProductAdmin(item._id, true);
-          if (!item.archive)
-            toast.success("Item archived successfully!");
-          else
-            toast.success("Item unarchived successfully!");
-        } else {
-          console.error('Error: item._id is undefined');
+
+        console.log("item archive state: ", response.archive);
+  
+        // Toggle the archive status locally
+        if (response) {
+          item.archive = response.archive; // Update the product's archive status
+          if (item.archive) {
+            toast.success("Item archived successfully!", { id: toastId });
+          } else {
+            toast.success("Item unarchived successfully!", { id: toastId });
+          }
         }
+      } else {
+        console.error("Error: item._id is undefined");
       }
     } catch (error) {
-      console.error('Error:', error);
-      toast.error("Failed to archive item.");
+      console.error("Error:", error);
+      toast.error("Failed to archive/unarchive item.");
     }
-  }
+  };
+  
 
   // Calculate the average rating
   const averageRating = calculateAverageRating(item.ratings);
@@ -126,36 +132,23 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
             <div className="product-links">
               <ul>
                 <li>
-                  <button onClick={() => handleAddToWishlist(item)}>
-                    <i className="fa fa-heart"></i>
-                  </button>
-                </li>
-                <li>
                   <button onClick={() => handleAddToCart()}>
                     <i className="far fa-cart-plus"></i>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setModalData(item)}
-                    data-bs-toggle="modal"
-                    data-bs-target="#productModalId"
-                  >
-                    <i className="far fa-eye"></i>
                   </button>
                 </li>
               </ul>
             </div>
           </div>
           <div className="product-content">
-            {(userRole === "Admin" || (userRole === "Seller" && item.sellerID === hardcodedSellerId)) && (
+            {(userRole === "Admin" || (userRole === "Seller" && item.seller==hardcodedSellerId )) && (
               <div
                 onClick={handleEyeClick}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 style={{ cursor: "pointer" }}
               >
-                {isHovered ? <FaEyeSlash /> : <FaEye />}
+                 {item.archive ? <FaEyeSlash /> : <FaEye />}
+                {/* {isHovered && item.archive ? <FaEye /> : <FaEyeSlash />} */}
               </div>
             )}
             <div className="product-rating">
@@ -179,7 +172,7 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
             </div>
           </div>
         </div>
-        <ToastContainer />
+       
       </div>
 
       <style jsx>{`

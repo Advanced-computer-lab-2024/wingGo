@@ -29,6 +29,8 @@ const ShopMain = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("Default");
 
+  const hardcodedSellerId = "67158afc7b1ec4bfb0240575";
+
   
   // const mapData = (searchData.length ? searchData : filterData).filter(
   //   (item) => !item.archive && item._id 
@@ -40,7 +42,7 @@ const ShopMain = () => {
         budget: filters.budget,
       };
 
-      const data = await filterProductsSeller(apiFilters);
+      const data = await filterProductsSeller({ ...apiFilters, sellerId:hardcodedSellerId  });
 
       // Apply local search filtering if searchQuery is provided
     const finalFilteredData = searchQuery
@@ -51,7 +53,7 @@ const ShopMain = () => {
         )
         : data;
         // Apply the mapData logic to filter out archived products
-      const mapData = finalFilteredData.filter((item) => !item.archive);
+      const mapData = finalFilteredData;
 
       // Apply sorting after fetching and filtering
       const sortedData = sortData(mapData, sortOption);
@@ -124,7 +126,7 @@ const ShopMain = () => {
                         classItem="col-xxl-4 col-xl-4 col-lg4 col-md-4 col-sm-6"
                         key={index}
                         item={item}
-                        userRole="Tourist"
+                        userRole="Seller"
                       />
                     ))}
                   </div>

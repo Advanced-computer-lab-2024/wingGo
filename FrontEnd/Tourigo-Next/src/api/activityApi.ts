@@ -163,28 +163,47 @@ export const fetchFilteredActivities = async (filters: { filterType: string }): 
 };
 
 
-export const getPriceApi = async (
-    activityId: string,
-    numberOfPeople: number,
-    promoCode?: string // Optional promo code
-  ): Promise<number> => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8000/tourist/activityPrice/${activityId}`,
-        {
-          params: {
-            numberOfPeople,
-            promoCode, // Optional promo code
-          },
-        }
-      );
+// export const getPriceApi = async (
+//     activityId: string,
+//     numberOfPeople: number,
+//     promoCode?: string // Optional promo code
+//   ): Promise<number> => {
+//     try {
+//       const response = await axios.get(
+//         `http://localhost:8000/tourist/activityPrice/${activityId}`,
+//         {
+//           params: {
+//             numberOfPeople,
+//             promoCode, // Optional promo code
+//           },
+//         }
+//       );
   
-      return response.data.totalPrice; // Return total price from response
+//       return response.data; // Return total price from response
+//     } catch (error) {
+//       console.error("Error fetching activity price:", error);
+//       throw error;
+//     }
+//   };
+
+export const getPriceApi = async (activityId: string, numberOfPeople: number, promoCode: string) => {
+    const params = {
+        numberOfPeople,
+        promoCode,
+    };
+
+    try {
+        const response = await axios.get(
+            `http://localhost:8000/tourist/activityPrice/${activityId}`,
+            { params }
+        );
+        return response.data; // Includes `totalPrice` and `isValidPromoCode`
     } catch (error) {
-      console.error("Error fetching activity price:", error);
-      throw error;
+        console.error('Error fetching price:', error);
+        throw error;
     }
-  };
+};
+
 
   export const toggleBookingState = async (activityId: string, bookingOpen: boolean) => {
     try {
@@ -199,3 +218,15 @@ export const getPriceApi = async (
     }
   };
   
+    //To save/unsave an itinerary
+export const saveOrUnsaveActivityApi = async (activityId: string, save: boolean): Promise<any> => {
+    try {
+      const response = await axios.post( `http://localhost:8000/tourist/saveActivity/${touristId}/${activityId}`,
+        { save } // Pass the save/unsave state in the request body
+      );
+      return response.data.savedActivities; 
+    } catch (error) {
+      console.error("Error saving/unsaving activity:", error);
+      throw error;
+    }
+  };

@@ -7,6 +7,7 @@ import React from "react";
 import sideBarBg from "../../../public/assets/images/bg/sidebar-img.png";
 import SidebarBookingForm from "@/forms/SidebarBookingForm";
 import SidebarBlogList from "./SidebarBlogList";
+import SidebarBanner from "./SidebarBanner";
 import SidebarSearchInputBox from "./SidebarSearchInputBoxPlaces";
 
 interface PropsType {
@@ -27,14 +28,9 @@ const SidebarSearchArea = ({ placeHolderTextData, onSearch }: PropsType) => {
           </div>
 
           <div className="sidebar-widget-divider"></div>
-          <div className="sidebar-widget widget">
-            <h6 className="sidebar-widget-title small mb-15">
-              Contact for Booking
-            </h6>
-            <SidebarBookingForm />
-          </div>
-          <div className="sidebar-widget-divider"></div>
-          <SidebarBlogList />
+          <div className="sidebar-widget-banner p-relative">
+          <SidebarBanner />
+        </div>
         </div>
        
       </aside>

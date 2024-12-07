@@ -183,26 +183,6 @@ const TourDetails = ({ id }: idTypeNew) => {
                         </div> 
                       </div>
                       <div className="tour-details-meta-right d-flex flex-wrap gap-10 align-items-center justify-content-between">
-                        <div className="rating-badge border-badge">
-                          <span>
-                            <i className="icon-star"></i>
-                            {data.averageRating ? data.averageRating.toFixed(1) : 0}
-                          </span>
-                        </div>
-                        <div className="theme-social">
-                          <Link href="https://www.facebook.com/">
-                            <i className="icon-facebook"></i>
-                          </Link>
-                          <Link href="https://www.twitter.com/">
-                            <i className="icon-twitter-x"></i>
-                          </Link>
-                          <Link href="https://www.linkedin.com/">
-                            <i className="icon-linkedin"></i>
-                          </Link>
-                          <Link href="https://www.youtube.com/">
-                            <i className="icon-youtube"></i>
-                          </Link>
-                        </div>
                       </div>
                     </div>
                     {/* Include more fields as necessary */}

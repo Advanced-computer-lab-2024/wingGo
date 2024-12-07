@@ -6,53 +6,71 @@ import { Place } from "@/interFace/interFace";
 import { getPlacesData } from "@/data/placeData";
 // import ItinerariesContentHeader from "@/elements/itineraries/it-header";
 import SidebarSearchArea from "../shearedComponents/SidebarSearchAreaPlaces";
+import PlacesSidebar from "../placesSidebar/ItinerariesSidebarMain";
+import { filterPlaces } from "@/api/placesApi";
 
-// interface FilterOptions {
-//   budget?: number;
-//   date?: string;
-//   preferences?: string;
-//   language?: string;
-//   touristId?: string;
-// }
+interface FilterOptions {
+  
+  tag?: string;
+  
+
+}
 
 const TourGridRight = () => {
-  const [places, setPlaces] = useState<Place[]>([]);
   const [filteredPlaces, setFilteredPlaces] = useState<Place[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  
+  const [filters, setFilters] = useState<FilterOptions>({});
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortOption, setSortOption] = useState<string>("Default");
 
-  // Load initial data
-// Load initial data
-useEffect(() => {
-  const loadInitialData = async () => {
-    const data = await getPlacesData();
-    setPlaces(data);
-    setFilteredPlaces(data); // Set the initial filtered list
+  // Fetch filtered activities from the API
+  const loadFilteredPlaces = async () => {
+    try {
+      const apiFilters: FilterOptions = {
+       
+        tag: filters.tag,
+        
+      };
+
+      const data = await filterPlaces(apiFilters);
+
+      // Apply local search filtering if searchQuery is provided
+    const finalFilteredData = searchQuery
+      ? data.filter(
+          (place) =>
+            place.name.toLowerCase().includes(searchQuery.toLowerCase()) || // Match name
+            place.tagss.some((tag: string) =>
+              tag.toLowerCase().includes(searchQuery.toLowerCase()) // Match tags
+            )
+        )
+        : data;
+
+      
+        setFilteredPlaces(finalFilteredData);
+        console.log(finalFilteredData);
+    } catch (error) {
+      console.error("Failed to fetch filtered itineraries:", error);
+    }
   };
-  loadInitialData();
-}, []);
 
-// Update filtered places based on search term
-useEffect(() => {
-  if (searchTerm) {
-    const lowercasedTerm = searchTerm.toLowerCase();
-    const results = places.filter((place) =>
-      place.name.toLowerCase().includes(lowercasedTerm) ||
-      place.tagss.some(tag => tag.toLowerCase().includes(lowercasedTerm))
-    );
-    setFilteredPlaces(results);
-  } else {
-    setFilteredPlaces(places); // Show all places if there's no search term
-  }
-}, [searchTerm, places]);
-
-const handleSearch = (query: string) => {
-  setSearchTerm(query);
-};
+  // Load filtered activities whenever filters, searchQuery, or sortOption change
+  useEffect(() => {
+    loadFilteredPlaces();
+  }, [filters, searchQuery]);
 
   
 
-  
+  const applyFilters = (newFilters: FilterOptions) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      ...newFilters, // Update filters with new values
+    }));
+  };
+
+  const applySearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+
 
   return (
     <>
@@ -74,7 +92,10 @@ const handleSearch = (query: string) => {
               </div>
             </div>
             <div className="col-xxl-4 col-xl-4 col-lg-5">
-            <SidebarSearchArea placeHolderTextData="Places" onSearch={handleSearch} />
+            <PlacesSidebar
+          applyFilters={applyFilters}
+          applySearch={applySearch}
+        />
             </div>
           </div>
         </div>

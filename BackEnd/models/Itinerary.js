@@ -63,6 +63,8 @@ bookingOpen: {
     default: true
   },
 
+  photo: {type: String},
+
 }, { timestamps: true });
 
 

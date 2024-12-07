@@ -66,9 +66,6 @@ const ReviewComments: React.FC<ReviewCommentsProps> = ({ product }) => {
                           {review.name}
                         </Link>
                       </h5>
-                      <Link href="#" className="thumbs-up-icon">
-                        <i className="fa-solid fa-thumbs-up"></i>
-                      </Link>
                       <ul className="bd-meta">
                         <li className="has-seperator">
                           On: <span>{new Date().toLocaleDateString()}</span>

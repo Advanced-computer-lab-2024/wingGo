@@ -53,3 +53,164 @@ export const addToCart = async (productId: any): Promise<any> => {
     );
   }
 };
+
+// Define the createOrder API call
+export const createOrder = async (buyerId: string): Promise<{ order: any; orderId: string }> => {
+  try {
+    // API payload
+    const payload = {
+      buyerId, // Pass the buyer ID dynamically
+    };
+
+    // Make the POST request to create the order
+    const response = await axios.post(
+      'http://localhost:8000/order/add', // Replace with the actual backend URL
+      payload
+    );
+
+    console.log('Order created successfully:', response.data);
+    return response.data; // Return the created order data
+  } catch (error: any) {
+    console.error('Error creating order:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || 'Failed to create order. Please try again.'
+    );
+  }
+};
+
+///////////////////////////////////////////////////////////Order APIs
+
+// Define the getOrderDetails API call
+export const getOrderDetails = async (orderId:string|null): Promise<{ products: any[]; totalPrice: number }> => {
+  try {
+    // Make the GET request to fetch the order details
+    const response = await axios.get(`http://localhost:8000/order/get/${orderId}`); // Replace with the actual backend URL
+
+    console.log('Order details fetched successfully:', response.data);
+    return response.data; // Return the fetched order data
+  } catch (error: any) {
+    console.error('Error fetching order details:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || 'Failed to fetch order details. Please try again.'
+    );
+  }
+};
+export const fetchCartTotalPrice = async (
+  promoCode?: string | null
+): Promise<{ totalPrice: number; discount: number }> => {
+  try {
+    // Construct the API URL with query parameters
+    const url = `http://localhost:8000/tourist/cartItemsPrice/${touristId}`;
+    const response = await axios.get(url, {
+      params: { promoCode }, // Pass promoCode as a query parameter
+    });
+
+    console.log('Cart total price fetched successfully:', response.data);
+    return response.data; // Return total price and discount details
+  } catch (error: any) {
+    console.error('Error fetching cart total price:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || 'Failed to fetch cart total price. Please try again.'
+    );
+  }
+};
+
+export const getProductById = async (productId: string): Promise<any> => {
+  try {
+    // Construct the API URL with the product ID
+    const url = `http://localhost:8000/tourist/product/${productId}`;
+
+    // Make the GET request
+    const response = await axios.get(url);
+
+    console.log('Product fetched successfully:', response.data);
+    return response.data.product; // Return the product details
+  } catch (error: any) {
+    console.error('Error fetching product by ID:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || 'Failed to fetch the product. Please try again.'
+    );
+  }
+};
+
+export const getDiscountByCode = async (promoCode: string): Promise<number> => {
+  try {
+    // Construct the API URL with the promo code
+    const url = `http://localhost:8000/tourist/getDiscount/${promoCode}`;
+
+    // Make the GET request
+    const response = await axios.get(url);
+
+    console.log('Promo code discount fetched successfully:', response.data);
+    return response.data.discount; // Return the discount
+  } catch (error: any) {
+    console.error('Error fetching discount by promo code:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || 'Failed to fetch the promo code discount. Please try again.'
+    );
+  }
+};
+
+
+export const addDeliveryAddresses = async (
+  addresses: string[]
+): Promise<{
+  message: string;
+  addedAddresses: string[];
+  deliveryAddresses: string[];
+}> => {
+  try {
+    // API endpoint
+    const url = `http://localhost:8000/tourist/addDeliveryAddress/${touristId}`;
+
+    // Make a POST request to add addresses
+    const response = await axios.post(url, { addresses });
+
+    console.log('Addresses added successfully:', response.data);
+    return response.data; // Return response containing success message and updated addresses
+  } catch (error: any) {
+    console.error('Error adding delivery addresses:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || 'Failed to add delivery addresses. Please try again.'
+    );
+  }
+};
+
+export const fetchDeliveryAddresses = async (): Promise<string[]> => {
+  try {
+    // API endpoint
+    const url = `http://localhost:8000/tourist/deliveryAddresses/${touristId}`;
+
+    // Make a GET request to fetch the delivery addresses
+    const response = await axios.get(url);
+
+    console.log("Delivery addresses fetched successfully:", response.data);
+    return response.data.deliveryAddresses; // Return the array of delivery addresses
+  } catch (error: any) {
+    console.error("Error fetching delivery addresses:", error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch delivery addresses. Please try again."
+    );
+  }
+};
+
+export const payForOrder = async (
+  orderId: string |null, 
+  paymentMethod: string, 
+  promoCode: string | null = null
+): Promise<any> => {
+  try {
+    const response = await axios.put(
+      `http://localhost:8000/tourist/pay/${orderId}`,
+      { paymentMethod, promoCode }
+    );
+
+    console.log('Order payment successful:', response.data);
+    return response.data; // Return API response
+  } catch (error: any) {
+    console.error('Error processing payment:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || 'Failed to process payment. Please try again.'
+    );
+  }
+};

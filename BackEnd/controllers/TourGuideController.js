@@ -167,7 +167,6 @@ const updateTourGuideProfile = async (req, res) => {
     }
 };
 
-// Create an itinerary
 const createItinerary = async (req, res) => {
     const { tourGuideId, title, activities, locations, timeline, duration, language, price, availableDates, accessibility, pickupLocation, dropoffLocation, bookings , tags} = req.body;
 
@@ -179,6 +178,11 @@ const createItinerary = async (req, res) => {
         }
         if (!tourGuideExists.termsAccepted) {
             return res.status(403).json({ error: 'Terms and conditions must be accepted to create an itinerary.' });
+        }
+
+        let photoUrl = null;
+        if(req.file){
+            photoUrl = req.file.location;
         }
 
 
@@ -197,15 +201,44 @@ const createItinerary = async (req, res) => {
             pickupLocation,
             dropoffLocation,
             bookings,
-            tags
+            tags,
+            photo: photoUrl,
         });
 
         await newItinerary.save();
         res.status(201).json(newItinerary);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+      console.error("Error creating itinerary:", error);
+      res.status(400).json({ error: error.message });
+    }
+  };
+  
+  
+
+
+const getItineraryPhoto = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const itinerary = await Itinerary.findById(id);
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found' });
+        }
+
+        if (itinerary.photo) {
+            const key = itinerary.photo.split('/').slice(-1)[0];
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
+            
+            // Instead of redirecting, send the pre-signed URL directly
+            return res.json({ imageUrl: preSignedUrl });
+        } else {
+            return res.status(404).json({ message: 'Image not found for this itinerary.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
+
 
 // Read itinerary with tour guide id and itinerary id
 // const getItineraries = async (req, res) => {
@@ -683,5 +716,6 @@ module.exports = {
     getSalesReport,
     getTouristReport,
     openBooking,
+    getItineraryPhoto,
     getNotifications
 };

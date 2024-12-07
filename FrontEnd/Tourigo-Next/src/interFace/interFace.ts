@@ -371,6 +371,7 @@ export interface Itinerary {
       touristId: string;
       bookingDate: Date;
   }[];
+  photo: string;
 }
 
 export interface BookedItinerary {
@@ -434,6 +435,12 @@ export interface BookedActivity {
     tagss: string[];
 };
 
+export interface Wishlist {
+  _id: string; 
+  touristId: string; 
+  productId: string; 
+  addedDate: Date; 
+};
 
 
 export interface Product {
@@ -613,7 +620,8 @@ export interface Order {
   paymentStatus: 'notPaid' | 'paid'; 
   orderStatus: 'cancelled' | 'confirmed' | 'preparing' | 'delivering' | 'delivered';
   buyer: string; 
-  totalPrice: number; 
+  totalPrice: number;
+  paymentMethod:String; 
 }
 
 export interface TourGuideSales {
@@ -708,6 +716,12 @@ export interface TouristReportOfAdvertiser {
       totalTourists: number; // Total number of tourists across all activities
     };
   };
+}
+export interface CustomFile extends Blob {
+  name: string;
+  lastModified: number;
+  webkitRelativePath?: string;
+  src?: string;  // If you need a `src` property
 }
 
 

@@ -71,14 +71,14 @@ const TourDetails = ({ id }: idTypeNew) => {
                         src={data?.pictures[0]}
                         loader={imageLoader}
                         style={{ width: "100%", height: "auto" }}
-                        alt="image"
+                        alt="Place's Image"
                       />
                     </div>
                     <div className="tour-details-content">
-                      <div className="tour-details-badge d-flex gap--5 mb-10">
+                      {/* <div className="tour-details-badge d-flex gap--5 mb-10">
                         <span className="bd-badge warning fw-5">Featured</span>
                         <span className="bd-badge danger fw-5">15% Off</span>
-                      </div>
+                      </div> */}
                       <div style={{ display: 'flex', gap: '10px', marginTop: '10px', marginBottom: '20px' }}>
                       <h3 className="tour-details-title mb-15">
                         {data?.name}
@@ -135,7 +135,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                               {data?.tourRating}
                             </span>
                           </div> */}
-                          <div className="theme-social">
+                          {/* <div className="theme-social">
                             <Link href="https://www.facebook.com/">
                               <i className="icon-facebook"></i>
                             </Link>
@@ -148,7 +148,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                             <Link href="https://www.youtube.com/">
                               <i className="icon-youtube"></i>
                             </Link>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                       <div className="tour-details-destination-wrapper">

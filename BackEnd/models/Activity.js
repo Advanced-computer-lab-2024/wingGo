@@ -92,7 +92,8 @@ touristIDs: [
 ],
 
 
-averageRating: { type: Number, default: 0 }
+averageRating: { type: Number, default: 0 },
+photo: {type: String},
 });
 
 const Activity = mongoose.model('Activity', activitySchema);

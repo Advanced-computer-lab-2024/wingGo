@@ -1217,6 +1217,8 @@ const ArchiveUnarchiveProduct = async (req, res) => {
             { new: true, runValidators: true } // Options: return the updated document, run validation
         );
 
+        console.log("item archive state: ", updatedProduct.archive);
+
         res.status(200).json(updatedProduct);
     } catch (error) {
         res.status(500).json({ error: error.message });

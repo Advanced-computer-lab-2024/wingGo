@@ -168,9 +168,6 @@ const TourSingleCard = ({
                 </Link>
               </div>
               <div className="tour-meta d-flex align-items-center justify-content-between">
-                <button className="tour-favorite tour-like">
-                  <i className="icon-heart"></i>
-                </button>
                 <div className="tour-location">
                   <span>
                     <Link href={`/it-details/${tour._id}`}>
@@ -237,23 +234,26 @@ const TourSingleCard = ({
                   ? convertedPrice.toFixed(2)
                   : tour.price.toLocaleString("en-US")}
               </span>
-
+              <div className="d-flex justify-content-between align-items-center mb-2">
+              <h5 className="tour-title fw-5 underline custom_mb-5"> </h5>
               <div className="bookmark-container">
-  <span
-    className={`bookmark-icon ${isSaved ? "bookmarked" : ""}`}
-    onClick={handleSave}
-    title={isSaved ? "Unsave Itinerary" : "Save Itinerary"}
-    style={{
-      cursor: "pointer",
-      fontSize: "24px",
-      color: isSaved ? "gold" : "gray",
-      transition: "color 0.3s ease",
-    }}
-  >
-    <i className={`fa${isSaved ? "s" : "r"} fa-bookmark`}></i> {/* Solid for saved, Regular for unsaved */}
-  </span>
-
-</div>
+              <span
+              className={`bookmark-icon ${isSaved ? "bookmarked" : ""}`}
+              onClick={handleSave}
+              title={isSaved ? "Unsave Itinerary" : "Save Itinerary"}
+              style={{
+              cursor: "pointer",
+              fontSize: "24px",
+              color: isSaved ? "gold" : "gray",
+              transition: "color 0.3s ease",
+              position: "relative",
+              top: "-5px", // Adjust height, lift the icon slightly
+              }}
+                >
+            <i className={`fa${isSaved ? "s" : "r"} fa-bookmark`}></i> {/* Solid for saved, Regular for unsaved */}
+            </span>
+            </div>
+            </div>
 
               <div className="tour-divider"></div>
 

@@ -72,34 +72,34 @@ interface ItinerariesSidebarMainProps {
                 <div className="sidebar-widget widget">
                     <h6 className="sidebar-widget-title small mb-15">Language Filter</h6>
                     <select
-        className="sidebar-select"
-        value={selectedLanguage}
-        onChange={handleLanguageChange}
-        style={{
-          width: "100%",
-          padding: "10px",
-          borderRadius: "5px",
-          border: "1px solid #ced4da",
-          fontSize: "16px",
-          color: "#495057",
-          backgroundColor: "#fff",
-          marginBottom: "15px",
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-          appearance: "none",
-          WebkitAppearance: "none",
-          MozAppearance: "none",
-          backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23999999' d='M2 0L0 2h4zM2 5L0 3h4z'/></svg>")`,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "right 10px center",
-          backgroundSize: "10px",
-        }}
-      >
-        <option value="">All Languages</option>
-        <option value="English">English</option>
-        <option value="Arabic">Arabic</option>
-        <option value="French">French</option>
-        {/* Add more languages as needed */}
-      </select>
+                      className="sidebar-select"
+                      value={selectedLanguage}
+                      onChange={handleLanguageChange}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        borderRadius: "5px",
+                        border: "1px solid #ced4da",
+                        fontSize: "16px",
+                        color: "#495057",
+                        backgroundColor: "#fff",
+                        marginBottom: "15px",
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                        appearance: "none",
+                        WebkitAppearance: "none",
+                        MozAppearance: "none",
+                        backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23999999' d='M2 0L0 2h4zM2 5L0 3h4z'/></svg>")`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 10px center",
+                        backgroundSize: "10px",
+                      }}
+                    >
+                      <option value="">All Languages</option>
+                      <option value="English">English</option>
+                      <option value="Arabic">Arabic</option>
+                      <option value="French">French</option>
+                      {/* Add more languages as needed */}
+                    </select>
                 </div>
                 <div className="sidebar-widget-divider"></div>
                 <div className="sidebar-widget widget">
@@ -132,7 +132,7 @@ interface ItinerariesSidebarMainProps {
               textAlign: "center", // Align the text inside
             }}
           >
-            {isPreferencesActive ? "Unfilter" : "Filter by Tag"}
+            {isPreferencesActive ? "Unfilter" : "Filter by Preference Tags"}
          </button>
           {/* <SidebarTags /> */}
         </div>

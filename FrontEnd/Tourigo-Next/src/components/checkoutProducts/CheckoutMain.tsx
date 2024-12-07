@@ -1,12 +1,19 @@
+"use client";
+
 import React from "react";
 import Breadcrumb from "../common/breadcrumb/BreadCrumb";
 import CheckoutArea from "./CheckoutArea";
 
-const CheckoutMain = () => {
+interface CheckoutMainProps {
+  promoCode: string | null; // Accept promoCode as a prop
+  orderId:string|null
+}
+
+const CheckoutMain: React.FC<CheckoutMainProps> = ({ promoCode,orderId }) => {
   return (
     <>
       <Breadcrumb titleOne="Checkout" titleTwo="Checkout" />
-      <CheckoutArea />
+      <CheckoutArea promoCode={promoCode} orderId={orderId}/>
     </>
   );
 };

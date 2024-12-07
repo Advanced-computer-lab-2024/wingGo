@@ -138,6 +138,8 @@ const createActivity = async (req, res) => {
     const { name, date, time, location, price, category, tags, specialDiscounts, isBookingOpen, advertiser } = req.body;
 
     try {
+
+        console.log(req.file);
         // Fetch the advertiser from the database
         const advertiserRecord = await Advertiser.findById(advertiser);
         if (!advertiserRecord) {
@@ -148,6 +150,13 @@ const createActivity = async (req, res) => {
         if (!advertiserRecord.termsAccepted) {
             return res.status(403).json({ error: 'Terms and conditions must be accepted to create an activity.' });
         }
+
+        let photoUrl = null;
+        if (req.file) {
+            photoUrl = req.file.location;
+        }
+        console.log(photoUrl);
+
 
         // Proceed to create a new activity
         const newActivity = new Activity({
@@ -160,7 +169,8 @@ const createActivity = async (req, res) => {
             tags,
             specialDiscounts,
             isBookingOpen,
-            advertiser
+            advertiser,
+            photo: photoUrl
         });
 
         await newActivity.save();
@@ -268,6 +278,7 @@ const changeLogo = async (req, res) => {
         
         const logoUrl = req.file.location;
         advertiser.logoUrl = logoUrl;
+        
         await advertiser.save();
 
         res.status(200).json({ message: 'Logo updated successfully', advertiser });
@@ -275,6 +286,28 @@ const changeLogo = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+const changeActivityLogo = async (req, res) => {
+
+    const { id } = req.params;
+
+    try {
+        const activity = await Activity.findById(id);
+
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found' });
+        }
+
+        const photoUrl = req.file.location;
+        activity.photo = photoUrl;
+        await activity.save();
+
+        res.status(200).json({ message: 'Photo updated successfully', activity });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
+
 const acceptTerms = async (req, res) => {
     const advertiserId = req.params.id;
 
@@ -497,6 +530,29 @@ const previewLogo = async (req, res) => {
         } else {
             console.log('error');
             return res.status(404).json({ message: 'Image not found for this advertiser.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const previewActivityLogo = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const activity = await Activity.findById(id);
+
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found' });
+        }
+
+        if (activity.photo) {
+            const key = activity.photo.split('/').slice(-1)[0];
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
+
+            // Instead of redirecting, send the pre-signed URL directly
+            return res.json({ imageUrl: preSignedUrl });
+        } else {
+            return res.status(404).json({ message: 'Image not found for this activity.' });
         }
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -747,5 +803,7 @@ module.exports = {
     getSalesReport,
     getTouristReport,
     openBookingForActivity,
+    changeActivityLogo,
+    previewActivityLogo,
     getNotifications
 };

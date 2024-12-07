@@ -64,12 +64,60 @@ const createOrder = async (req, res) => {
     // Clear the cart for the buyer
     await Cart.deleteMany({ touristId: buyerId });
 
-    res.status(201).json({ message: 'Order created successfully', order: savedOrder });
+    res.status(201).json({
+      message: 'Order created successfully',
+      orderId: savedOrder._id, // Include order ID
+      order: savedOrder,
+    });
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(500).json({ message: 'Internal server error', error });
   }
 };
+const getOrderDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate orderId
+    if (!id) {
+      return res.status(400).json({ message: 'Order ID is required' });
+    }
+
+    // Find the order by orderId and populate related fields
+    const order = await Order.findOne({ _id: id})
+      .populate({
+        path: 'products.productId',
+        select: 'price', // Include only the price field from Product
+      })
+      .populate({
+        path: 'buyer',
+        select: 'name email', // Include buyer details (name and email)
+      });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Format the products array to include productId, quantity, and price
+    const formattedProducts = order.products.map((product) => ({
+      productId: product.productId._id,
+      quantity: product.quantity,
+      price: product.productId.price,
+    }));
+
+    // Build the response object
+    const orderDetails = {
+      products: formattedProducts,
+      buyer: order.buyer,
+      totalPrice: order.totalPrice,
+    };
+
+    res.status(200).json(orderDetails);
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+    res.status(500).json({ message: 'Internal server error', error });
+  }
+};
 
 
-module.exports = { createOrder };
+module.exports = { createOrder ,getOrderDetails};
