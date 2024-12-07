@@ -3469,6 +3469,7 @@ const payForOrder = async (req, res) => {
 
             // Update the order's total price with the discounted price
             order.totalPrice = totalPrice;
+            order.paymentMethod = paymentMethod;
             await order.save();
         }
 
@@ -3853,6 +3854,10 @@ const saveActivity = async (req, res) => {
     const { touristId, activityId } = req.params;
     const { save } = req.body; // Boolean value to save or unsave
 
+           // Ensure the "save" field is present and is a boolean
+           if (save === undefined || typeof save !== 'boolean') {
+            return res.status(400).json({ message: "Please provide a valid 'save' field with a boolean value" });
+        }
     try {
         // Validate if the activity exists
         const activity = await Activity.findById(activityId);

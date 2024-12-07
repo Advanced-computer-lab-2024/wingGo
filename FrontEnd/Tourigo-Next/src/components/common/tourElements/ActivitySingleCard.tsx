@@ -8,7 +8,7 @@ import { Activity } from "@/interFace/interFace";
 import Image from "next/image";
 import Link from "next/link";
 import React ,{useState, useEffect} from "react";
-import { toggleFlagActivity, isActivityBooked, toggleBookingState  } from '@/api/activityApi';
+import { toggleFlagActivity, isActivityBooked, toggleBookingState,saveOrUnsaveActivityApi  } from '@/api/activityApi';
 import { useRouter } from "next/navigation";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
 import Modal from "react-modal";
@@ -43,6 +43,7 @@ const TourSingleCard = ({
   const [bookingState, setBookingState] = useState(tour.bookingOpen);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility
   const [modalAction, setModalAction] = useState(""); // To track the action (Open/Close Booking)
+  const [isSaved, setIsSaved] = useState(false);
 
 
 
@@ -67,6 +68,37 @@ const TourSingleCard = ({
     };
     convertTourPrice();
   }, [currency, tour.price, convertAmount]); 
+
+
+  useEffect(() => {
+    const fetchSavedStatus = async () => {
+      try {
+        if (!tour._id ) {
+          console.error("Missing IDs: Cannot fetch activity id.");
+          return;
+        }
+        if(!tour.touristIDs){
+
+          console.error("Missing IDs: Cannot fetch tourist id.");
+return;
+        }
+  
+        // Fetch saved status (true/false) from the backend
+        const isSavedStatus = await saveOrUnsaveActivityApi(
+          //tour.touristIDs[0], // Pass the tourist ID
+          tour._id, 
+          false // Fetch current status; no save/unsave action
+        );
+  
+        // Update the local state to reflect the saved status
+        setIsSaved(isSavedStatus);
+      } catch (error) {
+        console.error("Error fetching saved status:", error);
+      }
+    };
+  
+    fetchSavedStatus();
+  }, [tour._id, tour.touristIDs]);
 
   const handleFlagActivity = async () => {
     try {
@@ -102,6 +134,38 @@ const TourSingleCard = ({
     }
   };
 
+  const handleSave = async () => {
+    
+   
+    try {
+      if (!tour.touristIDs|| !tour._id?.length) {
+        console.error("Missing IDs: Cannot perform save/unsave action.");
+        return;
+      }
+      const touristId = tour.touristIDs[0]; // Use the string directly
+      if (!touristId) {
+        console.error("Tourist ID is missing.");
+        return;
+      }
+      const action = !isSaved; // Determine action based on current state (save if not saved, unsave if saved)
+      const saveResult = await saveOrUnsaveActivityApi(
+      //  touristId, // Pass first tourist ID
+        tour._id, 
+        action // Save (true) or Unsave (false)
+      );
+  
+      
+      if (saveResult) {
+        setIsSaved(action); // Update state to reflect the action
+        
+      } else {
+        console.error("Failed to toggle save/unsave:", saveResult);
+      }
+    } catch (error) {
+      console.error("Error saving/unsaving activity:", error);
+      
+    } 
+  };
 
   return (
     <>
@@ -174,6 +238,27 @@ const TourSingleCard = ({
                   ? convertedPrice.toFixed(2)
                   : tour.price.toLocaleString("en-US")}
               </span>
+
+              <div className="d-flex justify-content-between align-items-center mb-2">
+              <h5 className="tour-title fw-5 underline custom_mb-5"> </h5>
+              <div className="bookmark-container">
+              <span
+              className={`bookmark-icon ${isSaved ? "bookmarked" : ""}`}
+              onClick={handleSave}
+              title={isSaved ? "Unsave Itinerary" : "Save Itinerary"}
+              style={{
+              cursor: "pointer",
+              fontSize: "24px",
+              color: isSaved ? "gold" : "gray",
+              transition: "color 0.3s ease",
+              position: "relative",
+              top: "-5px", // Adjust height, lift the icon slightly
+              }}
+                >
+            <i className={`fa${isSaved ? "s" : "r"} fa-bookmark`}></i> {/* Solid for saved, Regular for unsaved */}
+            </span>
+            </div>
+            </div>
               <div className="tour-divider"></div>
 
               <div className="tour-meta d-flex align-items-center justify-content-between">

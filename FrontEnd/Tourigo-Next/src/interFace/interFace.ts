@@ -611,4 +611,5 @@ export interface Order {
   orderStatus: 'cancelled' | 'confirmed' | 'preparing' | 'delivering' | 'delivered';
   buyer: string; 
   totalPrice: number; 
+  paymentMethod:String;
 }

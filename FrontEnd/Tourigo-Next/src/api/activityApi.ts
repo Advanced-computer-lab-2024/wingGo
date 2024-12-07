@@ -199,3 +199,15 @@ export const getPriceApi = async (
     }
   };
   
+  //To save/unsave an itinerary
+export const saveOrUnsaveActivityApi = async (activityId: string, save: boolean): Promise<any> => {
+    try {
+      const response = await axios.post( `http://localhost:8000/tourist/saveActivity/${touristId}/${activityId}`,
+        { save } // Pass the save/unsave state in the request body
+      );
+      return response.data.savedActivities; 
+    } catch (error) {
+      console.error("Error saving/unsaving activity:", error);
+      throw error;
+    }
+  };
