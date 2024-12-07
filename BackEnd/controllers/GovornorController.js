@@ -345,6 +345,7 @@ const addTagToPlace2 = async (req, res) => {
 
 
 
+
 module.exports = {
     createPlace,
     getAllPlaces,
@@ -357,6 +358,7 @@ module.exports = {
     addTagUpdated,
     changePassword,
     getActivePreferenceTags,
-    addTagToPlace2
+    addTagToPlace2,
+    
     
 };

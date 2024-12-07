@@ -181,8 +181,10 @@ const createItinerary = async (req, res) => {
             return res.status(403).json({ error: 'Terms and conditions must be accepted to create an itinerary.' });
         }
 
-        const photoUrl = req.file.location;
-
+        let photoUrl = null;
+        if(req.file){
+            photoUrl = req.file.location;
+        }
 
 
         // Create and save the new itinerary without latitude and longitude

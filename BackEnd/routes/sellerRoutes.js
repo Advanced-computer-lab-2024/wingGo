@@ -17,7 +17,7 @@ router.get('/viewProfile/get/:id', sellerController.getSeller);
 router.post('/addProduct', upload.single('file'), sellerController.addProduct);  // Use multer middleware for file upload
 router.put('/product/:productId', upload.single('file'), sellerController.editProduct);
 router.get('/sortProducts', sellerController.sortProductsByRatings);
-router.get('/filterProducts', sellerController.filterProduct);
+router.get('/filterProducts/:sellerId', sellerController.filterProduct);
 router.post('/createProfile/:id', sellerController.createSellerProfile);
 router.get('/searchProductName', sellerController.searchProductsByName);
 router.get('/productImage/:id', sellerController.getProductImage);

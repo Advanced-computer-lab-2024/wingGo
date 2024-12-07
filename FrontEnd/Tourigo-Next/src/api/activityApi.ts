@@ -186,20 +186,24 @@ export const fetchFilteredActivities = async (filters: { filterType: string }): 
 //     }
 //   };
 
-  export const getPriceApi = async (activityId: string, numberOfPeople: number, promoCode : string) => {
+export const getPriceApi = async (activityId: string, numberOfPeople: number, promoCode: string) => {
     const params = {
-      numberOfPeople,
-      promoCode,
+        numberOfPeople,
+        promoCode,
     };
-  
+
     try {
-      const response = await axios.get(`http://localhost:8000/tourist/activityPrice/${activityId}`, { params });
-      return response.data;
+        const response = await axios.get(
+            `http://localhost:8000/tourist/activityPrice/${activityId}`,
+            { params }
+        );
+        return response.data; // Includes `totalPrice` and `isValidPromoCode`
     } catch (error) {
-      console.error('Error fetching price:', error);
-      throw error;
+        console.error('Error fetching price:', error);
+        throw error;
     }
-  };
+};
+
 
   export const toggleBookingState = async (activityId: string, bookingOpen: boolean) => {
     try {
@@ -214,7 +218,7 @@ export const fetchFilteredActivities = async (filters: { filterType: string }): 
     }
   };
   
-  //To save/unsave an itinerary
+    //To save/unsave an itinerary
 export const saveOrUnsaveActivityApi = async (activityId: string, save: boolean): Promise<any> => {
     try {
       const response = await axios.post( `http://localhost:8000/tourist/saveActivity/${touristId}/${activityId}`,

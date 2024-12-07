@@ -113,9 +113,18 @@ const OrderDetails = ({ id }: idTypeNew) => {
               {order.products.map((product, index) => (
                 <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
                   <div>
-                    <h6>{typeof product.productId === 'object' ? product.productId.name : 'N/A'}</h6>
+                  <h6>
+          {product?.productId && typeof product.productId === 'object' && product.productId.name
+            ? product.productId.name
+            : "Product name not available"}
+        </h6>
                     <p>Quantity: {product.quantity}</p>
-                    <p>Price: ${typeof product.productId === 'object' ? product.productId.price : 'N/A'}</p>
+                    <p>
+          Price: $
+          {product?.productId && typeof product.productId === 'object' && product.productId.price
+            ? product.productId.price
+            : "N/A"}
+        </p>
                   </div>
                   <div>
                   
