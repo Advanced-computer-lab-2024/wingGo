@@ -1,22 +1,23 @@
+import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 import logoBlack from "../../../public/assets/images/logo/logo-black.svg";
-import Link from "next/link";
-import Image from "next/image";
 import { imageLoader } from "@/hooks/image-loader";
 import Menu from "./components/MenuAdmin";
 import useGlobalContext from "@/hooks/use-context";
-const HeaderSix = () => {
+
+const HeaderFour = () => {
   const { toggleSideMenu, scrollDirection } = useGlobalContext();
   return (
     <>
       <header>
         <div
           id="header-sticky"
-          className={`header-area header-style header-style-two primary-border-bottom ${
+          className={`header-area header-transparent header-fullwidth ${
             scrollDirection === "down" ? "bd-sticky" : ""
           }`}
         >
-          <div className="container">
+          <div className="container-fluid">
             <div className="mega-menu-wrapper p-relative">
               <div className="header-main">
                 <div className="header-left">
@@ -30,19 +31,27 @@ const HeaderSix = () => {
                       />
                     </Link>
                   </div>
-                  <div className="header-menu">
-                    <nav className="main-menu main-menu-three" id="mobile-menu">
-                      <Menu />
-                    </nav>
+                  <div className="mean-menu-wrapper d-none d-xl-block">
+                    <div className="main-menu">
+                      <nav
+                        className="main-menu main-menu-three"
+                        id="mobile-menu"
+                      >
+                        <Menu />
+                      </nav>
+                    </div>
                   </div>
                 </div>
                 <div className="header-right">
                   <div className="header-action d-flex align-items-center">
-                    <div className="header-btn-wrap d-flex align-items-center h-gap-55">
-                      <div className="d-none d-sm-inline-flex h-gap-55">
-                        <div className="header-currency-item header-currency">
+                    <div className="header-btn-wrap">
+                      <div className="d-none d-xs-inline-flex gap-15 align-items-center">
+                        <div className="header-currency-item style-two header-currency">
                           <span
                             className="header-currency-toggle"
+                            style={{
+                              marginRight: "10px",
+                            }}
                             id="header-currency-toggle"
                           >
                             USD
@@ -58,27 +67,29 @@ const HeaderSix = () => {
                               <Link href="#">EUR</Link>
                             </li>
                           </ul>
-                        </div>
-                      </div>
-                      <div className="d-flex h-gap-55">
-                        <div className="d-xxs-none">
-                          
-                        </div>
+                        </div>                      
                       </div>
                     </div>
-                    <div
-                      onClick={toggleSideMenu}
-                      className="header-hamburger ml-20 d-xl-none"
-                    >
+                    {/* <div className="header-hamburger">
                       <div className="sidebar-toggle">
-                        <Link className="bar-icon" href="">
+                        <Link
+                          onClick={toggleSideMenu}
+                          className="bar-icon-square"
+                          href="#"
+                        >
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
                           <span></span>
                           <span></span>
                           <span></span>
                         </Link>
                       </div>
-                    </div>
-
+                    </div> */}
+                    {/*for wp */}
                     <div className="header-hamburger ml-20 d-none">
                       <button
                         type="button"
@@ -100,4 +111,4 @@ const HeaderSix = () => {
   );
 };
 
-export default HeaderSix;
+export default HeaderFour;

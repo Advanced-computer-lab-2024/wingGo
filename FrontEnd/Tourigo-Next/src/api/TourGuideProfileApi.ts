@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { TourGuideSales , TouristReportOfGuide} from '@/interFace/interFace'; // Adjust the path based on your project structure
+
 
 const ADVERTISER_API_URL = 'http://localhost:8000/tourguide';
 
@@ -113,3 +115,34 @@ export const acceptTermsAndConditions = async (id: string): Promise<any> => {
         }
     }
     }
+
+    export const getSalesReport = async (tourGuideId: string): Promise<TourGuideSales> => {
+      try {
+        const response = await axios.get<TourGuideSales>(`${ADVERTISER_API_URL}/sales-report/${tourGuideId}`);
+        console.log('Sales report data:', response.data);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching sales report:', error);
+        if (axios.isAxiosError(error)) {
+          throw error.response?.data || error.message;
+        } else {
+          throw error;
+        }
+      }
+    };
+
+    // Fetch Tourist Report
+export const getTouristReportofguide = async (tourGuideId: string): Promise<TouristReportOfGuide> => {
+  try {
+    const response = await axios.get<TouristReportOfGuide>(`${ADVERTISER_API_URL}/tourist-report/${tourGuideId}`);
+    console.log('Tourist report data:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching tourist report:', error);
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || error.message;
+    } else {
+      throw error;
+    }
+  }
+};

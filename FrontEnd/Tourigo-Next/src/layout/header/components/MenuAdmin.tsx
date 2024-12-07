@@ -12,11 +12,29 @@ const Menu = () => {
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
 
+  // useEffect(() => {
+  //   const fetchNotifications = async () => {
+  //     try {
+  //       const data = await getAdminNotificationsApi();
+  //       setNotifications(data);
+  //     } catch (error) {
+  //       console.error("Error fetching notifications:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  
+  //   fetchNotifications();
+  // }, []);
+
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const data = await getAdminNotificationsApi();
-        setNotifications(data);
+        const data: Notification[] = await getAdminNotificationsApi(); // Fetch notifications
+        const sortedData = data.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() // Sort by newest first
+        );
+        setNotifications(sortedData); // Set sorted notifications
       } catch (error) {
         console.error("Error fetching notifications:", error);
       } finally {
@@ -26,6 +44,7 @@ const Menu = () => {
   
     fetchNotifications();
   }, []);
+  
 
   return (
     <>

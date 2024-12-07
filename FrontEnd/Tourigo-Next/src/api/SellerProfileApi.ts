@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 const ADVERTISER_API_URL = 'http://localhost:8000/seller';
+import { SellerSales } from '@/interFace/interFace';
+
 
 export const viewSellerProfile = async (id: string): Promise<any> => {
   try {
@@ -108,6 +110,21 @@ export const acceptSellerTermsAndConditions = async (id: string): Promise<any> =
     return response.data;
   } catch (error) {
     console.error('Error accepting terms:', error);
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || error.message;
+    } else {
+      throw error;
+    }
+  }
+}
+
+export const getSellerSalesReport = async (sellerId: string): Promise<SellerSales> => {
+  try {
+    const response = await axios.get<SellerSales>(`${ADVERTISER_API_URL}/sales-report/${sellerId}`);
+    console.log('Seller sales report data:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching seller sales report:', error);
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
     } else {

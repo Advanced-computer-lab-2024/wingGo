@@ -119,33 +119,16 @@ const PendingUsers = () => {
                             </div>
                           </td>
                           <td>
+                          <div className="d-flex align-items-center gap-10">
                           <button
-                              className="view-document-button"
-                              style={{
-                                backgroundColor: "#006CE4",
-                                color: "white",
-                                padding: "8px 16px",
-                                fontSize: "14px",
-                                borderRadius: "4px",
-                                cursor: "pointer",
-                                marginBottom: "8px",
-                              }}
+                              className="bd-primary-btn btn-style radius-60"
                               onClick={() => handleViewCertificate(booking._id)}
                             >
                               View Certificate
                             </button>
                             <button
-                              className="view-id-button"
-                              style={{
-                                backgroundColor: "#007BFF",
-                                color: "white",
-                                padding: "8px 16px",
-                                fontSize: "14px",
-                                borderRadius: "4px",
-                                cursor: "pointer",
-                                marginLeft: "10px",
-                                marginBottom: "8px",
-                              }}
+                              className="bd-primary-btn btn-style radius-60"
+                              style={{ marginLeft: "5px" }}
                               onClick={() => handleViewId(booking._id)}
                             >
                               View ID
@@ -153,22 +136,10 @@ const PendingUsers = () => {
 
                             <button
                               onClick={() => handleAccept(booking._id)}
+                              className="bd-primary-btn btn-style radius-60"
                               style={{
-                                backgroundColor: buttonStates[booking._id] === "accepted" ? "green" : "lightgray",
-                                color: buttonStates[booking._id] === "accepted" ? "white" : "black",
-                                fontSize: "20px",
-                                marginLeft: "10px",
-                                cursor: "pointer",
-                                padding: "5px",
-                                border: "none",
-                                borderRadius: "4px",
-                                transition: "background-color 0.3s",
-                              }}
-                              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "darkgreen")}
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor = buttonStates[booking._id] === "accepted"
-                                  ? "green"
-                                  : "lightgray")
+                                marginLeft: "5px",
+                              }
                               }
                             >
                               <FontAwesomeIcon icon={faCheck} />
@@ -177,26 +148,15 @@ const PendingUsers = () => {
 
                             <button
                               onClick={() => handleReject(booking._id)}
+                              className="bd-primary-btn btn-style radius-60"
                               style={{
-                                backgroundColor: buttonStates[booking._id] === "rejected" ? "red" : "lightgray",
-                                color: buttonStates[booking._id] === "rejected" ? "white" : "black",
-                                fontSize: "20px",
-                                marginLeft: "10px",
-                                cursor: "pointer",
-                                padding: "5px",
-                                border: "none",
-                                borderRadius: "4px",
-                                transition: "background-color 0.3s",
-                              }}
-                              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "darkred")}
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor = buttonStates[booking._id] === "rejected"
-                                  ? "red"
-                                  : "lightgray")
+                                marginLeft: "5px",
+                              }
                               }
                             >
                               <FontAwesomeIcon icon={faTimes} />
                             </button>
+                            </div>
                           </td>
                         </tr>
                       ))}

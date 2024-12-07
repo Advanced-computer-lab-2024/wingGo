@@ -52,15 +52,14 @@ const TransportSingleCard = ({
                   <Image
                     src="/images/default-image.jpg" // Placeholder image
                     loader={imageLoader}
+                    width={370}
+                    height={250}
                     style={{ width: "100%", height: "auto" }}
                     alt="Transport Image"
                   />
                 </Link>
               </div>
               <div className="transport-meta d-flex align-items-center justify-content-between">
-                <button className="transport-favorite transport-like">
-                  <i className="icon-heart"></i>
-                </button>
                 <div className="transport-location">
                   <span>
                     <Link href={`/transport-details/${transport._id}`}>
@@ -89,19 +88,6 @@ const TransportSingleCard = ({
                 <div className="duration d-flex align-items-center gap--5">
                   <i className="icon-clock"></i>
                   <span>{transport.duration}</span>
-                </div>
-                <div className="transport-btn">
-                  <button
-                    onClick={handleBookNowClick}
-                    className="bd-text-btn style-two"
-                    type="button"
-                  >
-                    Book Now
-                    <span className="icon__box">
-                      <i className="fa-regular fa-arrow-right-long icon__first"></i>
-                      <i className="fa-regular fa-arrow-right-long icon__second"></i>
-                    </span>
-                  </button>
                 </div>
               </div>
             </div>

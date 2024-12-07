@@ -27,6 +27,7 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
   const [paymentMethod, setPaymentMethod] = useState<"wallet" | "stripe" | "creditCard">("wallet");
   const [numberOfPeople, setNumberOfPeople] = useState(1); // Default to 1 person
   // const [promocode, setPromocode] = useState(""); // State for promo code
+  const [validPromo, setValidPromo] = useState(true); 
 
   
   // const [price, setPrice] = useState(0);
@@ -43,12 +44,29 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
   const updatePrice = async () => {
     if (!data?._id) return;
     try {
-      const calculatedPrice = await getPriceApi(data._id, numberOfPeople, promocode);
-      setPrice(calculatedPrice);
+        const response = await getPriceApi(data._id, numberOfPeople, promocode);
+
+        // Check if the promo code is invalid
+        if (!response.isValidPromoCode) {
+            if (validPromo || promocode === "") {
+                // Only show error toast if the promo code is newly invalid
+                toast.error("Invalid or expired promo code.");
+            }
+            setValidPromo(false); // Update state
+        } else {
+            if (!validPromo) {
+                // Only show success toast if the promo code was previously invalid
+                toast.success("Promo code applied successfully!");
+            }
+            setPrice(response.totalPrice); // Update price
+            setValidPromo(true); // Update state
+        }
     } catch (error) {
-      console.error("Error updating price:", error);
+        console.error("Error updating price:", error);
+        toast.error("Error calculating price.");
     }
-  };
+};
+
 
   useEffect(() => {
     updatePrice(); // Recalculate price on `promocode` or `numberOfPeople` change
@@ -239,7 +257,7 @@ const onSubmit = async (event: React.FormEvent) => {
                       </option>
                       {data.availableDates.map((date) => (
                         <option key={date.toString()} value={new Date(date).toISOString()}>
-                          {new Date(date).toLocaleDateString()}
+                          {new Date(date).toLocaleDateString("en-CA")}
                         </option>
                       ))}
                     </select>
@@ -295,9 +313,9 @@ const onSubmit = async (event: React.FormEvent) => {
                 <div className="order-info-list">
                   <ul>
                     <li><span>Subtotal</span><span>${data.price * numberOfPeople}</span></li>
-                    <li><span>Discount</span><span>     ${promocode ? (((data.price * numberOfPeople) - price).toFixed(2)) : "0.00"}
+                    <li><span>Discount</span><span>     ${promocode && validPromo ? (((data.price * numberOfPeople) - price).toFixed(2)) : "0.00"}
                     </span></li>
-                    <li><span>Total</span><span> ${promocode ? price.toFixed(2) : (data.price * numberOfPeople).toFixed(2)}</span></li>
+                    <li><span>Total</span><span> ${promocode && validPromo ? price.toFixed(2) : (data.price * numberOfPeople).toFixed(2)}</span></li>
                   </ul>
                 </div>
 

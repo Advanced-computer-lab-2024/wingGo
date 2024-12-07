@@ -4,7 +4,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { imageLoader } from "@/hooks/image-loader";
 import { FaBell } from "react-icons/fa"; // Import the bell icon
-import { getTouristNotificationsApi } from "@/api/PrefrenceApi";
+import { getAdvertiserNotificationsApi } from "@/api/PrefrenceApi";
 import { Notification } from "@/interFace/interFace";
 
 const MenuFour = () => {
@@ -15,7 +15,8 @@ const MenuFour = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const data = await getTouristNotificationsApi();
+        const data = await getAdvertiserNotificationsApi();
+        console.log(data);
         setNotifications(data);
       } catch (error) {
         console.error("Error fetching notifications:", error);

@@ -168,9 +168,6 @@ const TourSingleCard = ({
                 </Link>
               </div>
               <div className="tour-meta d-flex align-items-center justify-content-between">
-                <button className="tour-favorite tour-like">
-                  <i className="icon-heart"></i>
-                </button>
                 <div className="tour-location">
                   <span>
                     <Link href={`/it-details/${tour._id}`}>
@@ -262,8 +259,8 @@ const TourSingleCard = ({
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
                 <div className="time d-flex align-items-center gap--5">
-                  <i className="icon-heart"></i>
-                  <span>{tour.duration}</span>
+                {(!isTourGuide) &&<i className="icon-heart"></i>}
+                {(!isTourGuide) && <span>{tour.duration}</span>}
                 </div>
                 <div className="tour-btn">
                 <button

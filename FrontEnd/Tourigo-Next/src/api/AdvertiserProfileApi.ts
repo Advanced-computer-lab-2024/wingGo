@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 const ADVERTISER_API_URL = 'http://localhost:8000/advertiser';
+import { AdvertiserSales , TouristReportOfAdvertiser} from '@/interFace/interFace'; 
+
 
 export const viewAdvertiserProfile = async (id: string): Promise<any> => {
   try {
@@ -33,7 +35,20 @@ export const updateAdvertiserProfile = async (id: string, updatedData: any): Pro
     }
   }
 }
-
+export const getAdvertiserSalesReport = async (advertiserId: string): Promise<AdvertiserSales> => {
+  try {
+    const response = await axios.get<AdvertiserSales>(`${ADVERTISER_API_URL}/sales-report/${advertiserId}`);
+    console.log('Sales report data:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching sales report:', error);
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || error.message;
+    } else {
+      throw error;
+    }
+  }
+};
 
 export const requestAccountDeletion = async (id: string): Promise<any> => {
   try {
@@ -116,3 +131,19 @@ export const acceptAdvertiserTermsAndConditions = async (id: string): Promise<an
     }
   }
 }
+
+// Fetch Tourist Report
+export const getTouristReportofAdvertiser = async (advertiserId: string): Promise<TouristReportOfAdvertiser> => {
+  try {
+    const response = await axios.get<TouristReportOfAdvertiser>(`${ADVERTISER_API_URL}/tourist-report/${advertiserId}`);
+    console.log('Tourist report data:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching tourist report:', error);
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || error.message;
+    } else {
+      throw error;
+    }
+  }
+};

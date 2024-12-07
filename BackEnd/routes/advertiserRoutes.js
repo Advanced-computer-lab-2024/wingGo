@@ -12,7 +12,9 @@ router.get('/activities', advertiserController.getAllActivities);
 router.get('/activities/:id', advertiserController.getActivity);
 router.delete('/activities/:id', advertiserController.deleteActivity);
 router.put('/activities/:id', advertiserController.updateActivity);
-router.post('/activities', advertiserController.createActivity);
+router.post('/activities', upload.single('file') ,advertiserController.createActivity);
+router.put('/activities/photo/:id', upload.single('file'), advertiserController.changeActivityLogo);
+router.get('/activities/photo/:id', advertiserController.previewActivityLogo);
 
 router.post('/uploadLogo/:id', upload.single('file'), advertiserController.changeLogo);
 router.put('/acceptterms/:id', advertiserController.acceptTerms);
@@ -40,5 +42,7 @@ router.get('/sales-report/:advertiserId', advertiserController.getSalesReport);
 router.get('/tourist-report/:advertiserId', advertiserController.getTouristReport);
 
 router.put('/openBookingForActivity/:id', advertiserController.openBookingForActivity);
+
+router.get("/notifications/:advertiserId", advertiserController.getNotifications);
 
 module.exports = router;

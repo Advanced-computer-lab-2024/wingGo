@@ -126,22 +126,8 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
             <div className="product-links">
               <ul>
                 <li>
-                  <button onClick={() => handleAddToWishlist(item)}>
-                    <i className="fa fa-heart"></i>
-                  </button>
-                </li>
-                <li>
                   <button onClick={() => handleAddToCart()}>
                     <i className="far fa-cart-plus"></i>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setModalData(item)}
-                    data-bs-toggle="modal"
-                    data-bs-target="#productModalId"
-                  >
-                    <i className="far fa-eye"></i>
                   </button>
                 </li>
               </ul>

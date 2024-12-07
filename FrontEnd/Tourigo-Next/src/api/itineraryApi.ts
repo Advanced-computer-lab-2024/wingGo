@@ -275,7 +275,7 @@ export const getPriceApi = async (itineraryId: string, numberOfPeople: number, p
   
     try {
       const response = await axios.get(`http://localhost:8000/tourist/itineraryPrice/${itineraryId}`, { params });
-      return response.data.totalPrice;
+      return response.data;
     } catch (error) {
       console.error('Error fetching price:', error);
       throw error;
@@ -297,3 +297,16 @@ export const saveOrUnsaveItineraryApi = async (touristId: string,itineraryId: st
 
 
 
+  export const toggleBookingState = async (itineraryId: string, bookingOpen: boolean) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/tourguide/openBooking/${itineraryId}`,
+        { bookingOpen }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error toggling booking state:", error);
+      throw error;
+    }
+  };
+  
