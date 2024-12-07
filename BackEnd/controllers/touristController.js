@@ -3856,14 +3856,12 @@ const cancelOrder = async (req, res) => {
 
 
 // Method to save an activity
-const saveActivity = async (req, res) => {
+const toggleSaveActivity = async (req, res) => {
     const { touristId, activityId } = req.params;
     const { save } = req.body; // Boolean value to save or unsave
 
            // Ensure the "save" field is present and is a boolean
-           if (save === undefined || typeof save !== 'boolean') {
-            return res.status(400).json({ message: "Please provide a valid 'save' field with a boolean value" });
-        }
+           
     try {
         // Validate if the activity exists
         const activity = await Activity.findById(activityId);
@@ -3877,15 +3875,14 @@ const saveActivity = async (req, res) => {
             return res.status(404).json({ message: "Tourist not found" });
         }
 
-        if (save) {
+        
             // Save the activity
             if (!tourist.savedActivities.includes(activityId)) {
                 tourist.savedActivities.push(activityId);
                 await tourist.save();
                 return res.status(200).json({ message: "Activity saved successfully", savedActivities: tourist.savedActivities });
-            }
-            return res.status(400).json({ message: "Activity already saved" });
-        } else {
+            }           
+           else {
             // Unsave the activity
             if (tourist.savedActivities.includes(activityId)) {
                 tourist.savedActivities = tourist.savedActivities.filter(id => id.toString() !== activityId);
@@ -3902,14 +3899,12 @@ const saveActivity = async (req, res) => {
 };
 
 // Method to save an itinerary
-const saveItinerary = async (req, res) => {
+const toggleSaveItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params;
-    const { save } = req.body; // Boolean value to save or unsave
+    // const { save } = req.body; // Boolean value to save or unsave
 
         // Ensure the "save" field is present and is a boolean
-        if (save === undefined || typeof save !== 'boolean') {
-            return res.status(400).json({ message: "Please provide a valid 'save' field with a boolean value" });
-        }
+      
     
     try {
         // Validate if the itinerary exists
@@ -3923,16 +3918,15 @@ const saveItinerary = async (req, res) => {
         if (!tourist) {
             return res.status(404).json({ message: "Tourist not found" });
         }
-
-        if (save) {
+  
             // Save the itinerary
             if (!tourist.savedItineraries.includes(itineraryId)) {
                 tourist.savedItineraries.push(itineraryId);
                 await tourist.save();
                 return res.status(200).json({ message: "Itinerary saved successfully", savedItineraries: tourist.savedItineraries });
             }
-            return res.status(400).json({ message: "Itinerary already saved" });
-        } else {
+            
+         else {
             // Unsave the itinerary
             if (tourist.savedItineraries.includes(itineraryId)) {
                 tourist.savedItineraries = tourist.savedItineraries.filter(id => id.toString() !== itineraryId);
@@ -4360,7 +4354,106 @@ const getPlacesTags = async (req, res) => {
     }
 };
 
+const getSavedItineraries = async (req, res) => {
+    const { touristId } = req.params;
 
+    try {
+        // Find the tourist by ID and populate saved itineraries
+        const tourist = await Tourist.findById(touristId).populate('savedItineraries');
+
+        if (!tourist) {
+            return res.status(404).json({ message: "Tourist not found" });
+        }
+
+        // Return the saved itineraries
+        return res.status(200).json(tourist.savedItineraries);
+    } catch (error) {
+        console.error("Error fetching saved itineraries:", error);
+        return res.status(500).json({ message: "An error occurred", error });
+    }
+};
+
+const checkIfSaved = async (req, res) => {
+    try {
+      const { touristId, itineraryId } = req.params;
+  
+      // Fetch the tourist and check if the itinerary is in their savedItineraries
+      const tourist = await Tourist.findById(touristId);
+      if (!tourist) {
+        return res.status(404).json({ message: "Tourist not found" });
+      }
+  
+      const isSaved = tourist.savedItineraries.includes(itineraryId);
+      res.status(200).json({ isSaved });
+    } catch (error) {
+      console.error("Error checking if itinerary is saved:", error);
+      res.status(500).json({ message: "An error occurred", error });
+    }
+  };
+  
+  const saveActivity = async (req, res) => {
+    const { touristId, activityId } = req.params;
+    const { save } = req.body; // Boolean value to save or unsave
+
+           // Ensure the "save" field is present and is a boolean
+           if (save === undefined || typeof save !== 'boolean') {
+            return res.status(400).json({ message: "Please provide a valid 'save' field with a boolean value" });
+        }
+    try {
+        // Validate if the activity exists
+        const activity = await Activity.findById(activityId);
+        if (!activity) {
+            return res.status(404).json({ message: "Activity not found" });
+        }
+
+        // Add the activity to the savedActivities array if not already added
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            return res.status(404).json({ message: "Tourist not found" });
+        }
+
+        if (save) {
+            // Save the activity
+            if (!tourist.savedActivities.includes(activityId)) {
+                tourist.savedActivities.push(activityId);
+                await tourist.save();
+                return res.status(200).json({ message: "Activity saved successfully", savedActivities: tourist.savedActivities });
+            }
+            return res.status(400).json({ message: "Activity already saved" });
+        } else {
+            // Unsave the activity
+            if (tourist.savedActivities.includes(activityId)) {
+                tourist.savedActivities = tourist.savedActivities.filter(id => id.toString() !== activityId);
+                await tourist.save();
+                return res.status(200).json({ message: "Activity unsaved successfully", savedActivities: tourist.savedActivities });
+            }
+            return res.status(400).json({ message: "Activity not found in saved list" });
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "An error occurred", error });
+    }
+};
+
+const checkIfActivitySaved = async (req, res) => {
+    try {
+      const { touristId, activityId } = req.params;
+  
+      // Fetch the tourist and check if the activity is in their savedActivities
+      const tourist = await Tourist.findById(touristId);
+      if (!tourist) {
+        return res.status(404).json({ message: "Tourist not found" });
+      }
+  
+      const isSaved = tourist.savedActivities.includes(activityId);
+      res.status(200).json({ isSaved });
+    } catch (error) {
+      console.error("Error checking if activity is saved:", error);
+      res.status(500).json({ message: "An error occurred", error });
+    }
+  };
+  
 
 module.exports = {
     tourist_hello,
@@ -4448,7 +4541,7 @@ module.exports = {
     getPromoCodesForTourist,
     addWishlistItemToCart,
     saveActivity,
-    saveItinerary,
+    toggleSaveItinerary,
     viewAllSavedEvents,
     toggleNotificationPreference,
     getFilteredActivities,
@@ -4459,5 +4552,8 @@ module.exports = {
     getProductById,
     getDiscountByCode,
     getDeliveryAddresses,
-    getPlacesTags
+    getPlacesTags,
+    getSavedItineraries,
+    checkIfSaved,
+    checkIfActivitySaved
 };

@@ -15,14 +15,70 @@ const formatDate = (dateString: string): string => {
 
 const RecentActivity = () => {
   const [salesReport, setSalesReport] = useState<AdvertiserSales | null>(null);
+  const [filterMonth, setFilterMonth] = useState<string>(''); // State for filtering by month
   const advertiserId = '6748d83cda04f07884aba0fe'; // Example Advertiser ID, replace as needed
 
   useEffect(() => {
     loadAdvertiserSalesReport(advertiserId).then(setSalesReport);
   }, []);
 
+  const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = event.target.value;
+    setFilterMonth(selectedValue); // Update filter month state
+  };
+
+  const filterByMonth = (date: string | null | undefined): boolean => {
+    if (!filterMonth) {
+      return true; // Include all records when no filter is selected
+    }
+    if (!date || date === 'N/A') {
+      return false; // Exclude records with no dates or 'N/A' when a specific month is selected
+    }
+    const itemMonth = new Date(date).toISOString().substring(0, 7); // Extract YYYY-MM
+    return itemMonth === filterMonth; // Compare with the selected filter month
+  };
+
+  // Collect unique months from activities' sold dates
+  const uniqueMonthsSet = new Set<string>();
+
+  if (salesReport) {
+    salesReport.data.activities.details.forEach((activity) => {
+      if (activity.soldDate) {
+        const month = new Date(activity.soldDate).toISOString().substring(0, 7);
+        uniqueMonthsSet.add(month);
+      }
+    });
+  }
+
+  // Convert the set to an array and sort it
+  const uniqueMonths = Array.from(uniqueMonthsSet).sort((a, b) => a.localeCompare(b));
+
   return (
     <>
+      {/* Filter Dropdown */}
+      <div className="filter-container">
+        <label htmlFor="filterMonth" className="filter-label">
+          Filter by Month:
+        </label>
+        <select
+          id="filterMonth"
+          className="filter-select"
+          value={filterMonth}
+          onChange={handleFilterChange}
+        >
+          <option value="">All Months</option>
+          {uniqueMonths.map((month, index) => (
+            <option key={index} value={month}>
+              {new Date(month + '-01').toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+              })}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Table */}
       <div className="row">
         <div className="col-12">
           <div className="card shadow-lg rounded-lg border-0">
@@ -46,21 +102,38 @@ const RecentActivity = () => {
                             <strong>Activities</strong>
                           </td>
                         </tr>
-                        {salesReport.data.activities.details.map((activity, index) => (
-                          <tr key={index} className="data-row">
-                            <td>{activity.name}</td>
-                            <td>{activity.sales}</td>
-                            <td>
-                              {activity.revenue !== null ? `$${activity.revenue}` : 'N/A'}
-                            </td>
-                            <td>
-                              {activity.soldDate ? formatDate(activity.soldDate) : 'N/A'}
-                            </td>
-                          </tr>
-                        ))}
+                        {salesReport.data.activities.details
+                          .filter((activity) => {
+                            // Exclude records with no dates when a specific filter is applied
+                            if (filterMonth && (!activity.soldDate || activity.soldDate === 'N/A')) {
+                              return false;
+                            }
+
+                            // Include all records when "All Months" is selected
+                            if (!filterMonth) {
+                              return true;
+                            }
+
+                            // Match specific months
+                            return filterByMonth(activity.soldDate);
+                          })
+                          .map((activity, index) => (
+                            <tr key={index} className="data-row">
+                              <td>{activity.name}</td>
+                              <td>{activity.sales}</td>
+                              <td>
+                                {activity.revenue !== null ? `$${activity.revenue}` : 'N/A'}
+                              </td>
+                              <td>
+                                {activity.soldDate ? formatDate(activity.soldDate) : 'N/A'}
+                              </td>
+                            </tr>
+                          ))}
                         {/* Activities Totals */}
                         <tr className="totals-row">
-                          <td><strong>Total</strong></td>
+                          <td>
+                            <strong>Total</strong>
+                          </td>
                           <td>{salesReport.data.activities.totalSales}</td>
                           <td>
                             {salesReport.data.activities.totalRevenue !== null
@@ -72,7 +145,9 @@ const RecentActivity = () => {
 
                         {/* Grand Totals */}
                         <tr className="grand-total">
-                          <td><strong>Grand Total</strong></td>
+                          <td>
+                            <strong>Grand Total</strong>
+                          </td>
                           <td>{salesReport.data.totals.totalSales}</td>
                           <td>
                             {salesReport.data.totals.totalRevenue !== null
@@ -139,6 +214,25 @@ const RecentActivity = () => {
           background-color: #000000 !important;
           color: white !important;
           font-weight: bold;
+        }
+
+        .filter-container {
+          display: flex;
+          align-items: center;
+          margin-bottom: 20px;
+          justify-content: flex-end;
+        }
+
+        .filter-label {
+          margin-right: 10px;
+          font-weight: bold;
+        }
+
+        .filter-select {
+          width: 200px;
+          padding: 5px 10px;
+          border-radius: 5px;
+          border: 1px solid #ccc;
         }
       `}</style>
     </>

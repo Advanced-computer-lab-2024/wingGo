@@ -9,10 +9,10 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked,saveOrUnsaveItineraryApi } from '@/api/itineraryApi';
+import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked,toggleSaveItinerary, checkIfSaved } from '@/api/itineraryApi';
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
-import { fetchItImage } from "@/api/itineraryApi";
+import { toast } from 'sonner';import { fetchItImage } from "@/api/itineraryApi";
 
 
 
@@ -45,12 +45,32 @@ const TourSingleCard = ({
   const DEFAULT_IMAGE = "/assets/images/Itinerary.png";
   const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
   const [isBooked, setIsBooked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
- 
- 
+  const [isSaved, setIsSaved] = useState(false); // Initialize as null
 
+
+  const touristId = "67240ed8c40a7f3005a1d01d";
+ 
 
   useEffect(() => {
+    const fetchSavedStatus = async () => {
+      try {
+        const isSavedStatus = await checkIfSaved(touristId, tour._id); // Call the new API
+        setIsSaved(isSavedStatus); // Update the state
+      } catch (error) {
+        console.error("Error fetching saved status:", error);
+        setIsSaved(false); // Default to not saved on error
+      }
+    };
+  
+    fetchSavedStatus(); // Call the function to fetch the status
+  }, [tour._id, touristId]); // Ensure it runs when either changes
+  
+
+  console.log("status: ",isSaved); 
+
+  
+  useEffect(() => {
+    console.log("CHECKINGG22");
     const checkBookingStatus = async () => {
       try {
         const bookedStatus = await isItineraryBooked(tour._id); // Fetch booking status
@@ -72,30 +92,7 @@ const TourSingleCard = ({
     convertTourPrice();
   }, [currency, tour.price, convertAmount]); // Re-run if currency or tour.price changes
 
-  useEffect(() => {
-    const fetchSavedStatus = async () => {
-      try {
-        if (!tour._id || !tour.touristIDs?.length) {
-          console.error("Missing IDs: Cannot fetch saved status.");
-          return;
-        }
-  
-        // Fetch saved status (true/false) from the backend
-        const isSavedStatus = await saveOrUnsaveItineraryApi(
-          tour.touristIDs[0].touristId, // Pass the tourist ID
-          tour._id, // Itinerary ID
-          false // Fetch current status; no save/unsave action
-        );
-  
-        // Update the local state to reflect the saved status
-        setIsSaved(isSavedStatus);
-      } catch (error) {
-        console.error("Error fetching saved status:", error);
-      }
-    };
-  
-    fetchSavedStatus();
-  }, [tour._id, tour.touristIDs]);
+
   useEffect(() => {
     const loadImage = async () => {
       try {
@@ -137,33 +134,42 @@ const TourSingleCard = ({
   const handleBookNowClick = () => {
     router.push(`/booking-it/${tour._id}`);
   };
-
-  const handleSave = async () => {
-    try {
-      if (!tour._id || !tour.touristIDs?.length) {
-        console.error("Missing IDs: Cannot perform save/unsave action.");
-        return;
-      }
   
-      const action = !isSaved; // Determine action based on current state (save if not saved, unsave if saved)
-      const saveResult = await saveOrUnsaveItineraryApi(
-        tour.touristIDs[0].touristId, // Pass first tourist ID
-        tour._id, // Itinerary ID
-        action // Save (true) or Unsave (false)
-      );
-  
-      // Ensure the backend returned an updated list of saved itineraries
-      if (saveResult) {
-        setIsSaved(action); // Update state to reflect the action
-        
-      } else {
-        console.error("Failed to toggle save/unsave:", saveResult);
-      }
-    } catch (error) {
-      console.error("Error saving/unsaving itinerary:", error);
+  // useEffect(() => {
+  //   const fetchSavedStatus = async () => {
+  //     try {
       
-    } 
-  };
+  //       const savedItineraries = await axios.get(`http://localhost:8000/tourist/savedItineraries/${touristId}`);
+  //       // Check if the current itinerary ID is in the tourist's saved itineraries
+  //       const isSavedStatus = savedItineraries.data.includes(tour._id);
+        
+  //       setIsSaved(isSavedStatus);
+  //     } catch (error) {
+  //       console.error("Error fetching saved status:", error);
+  //     }
+  //   };
+  
+  //   fetchSavedStatus();
+  // }, [tour._id]);
+  
+
+const handleSave = async () => {
+  try {
+    const result = await toggleSaveItinerary(touristId, tour._id);
+
+    if (result.savedItineraries.includes(tour._id)) {
+      setIsSaved(true); // Set as saved
+    } else {
+      setIsSaved(false); // Set as unsaved
+    }
+    toast.success(`Itinerary ${isSaved ? 'unsaved' : 'saved'} successfully!`);
+  } catch (error) {
+    console.error("Error toggling save/unsave itinerary:", error);
+    toast.error("Failed to toggle save/unsave. Please try again later");
+  }
+};
+
+  
   
   
   
@@ -259,7 +265,7 @@ const TourSingleCard = ({
               <div className="d-flex justify-content-between align-items-center mb-2">
               <h5 className="tour-title fw-5 underline custom_mb-5"> </h5>
               <div className="bookmark-container">
-              <span
+              {/* <span
               className={`bookmark-icon ${isSaved ? "bookmarked" : ""}`}
               onClick={handleSave}
               title={isSaved ? "Unsave Itinerary" : "Save Itinerary"}
@@ -272,8 +278,24 @@ const TourSingleCard = ({
               top: "-5px", // Adjust height, lift the icon slightly
               }}
                 >
-            <i className={`fa${isSaved ? "s" : "r"} fa-bookmark`}></i> {/* Solid for saved, Regular for unsaved */}
+            <i className={`fa${isSaved ? "s" : "r"} fa-bookmark`}></i> 
+            </span> */}
+                        <span
+              className={`bookmark-icon ${isSaved ? "bookmarked" : ""}`}
+              onClick={handleSave}
+              title={isSaved ? "Unsave Itinerary" : "Save Itinerary"}
+              style={{
+                cursor: "pointer",
+                fontSize: "24px",
+                color: isSaved ? "gold" : "gray",
+                transition: "color 0.3s ease",
+                position: "relative",
+                top: "-5px",
+              }}
+            >
+              <i className={`fa${isSaved ? "s" : "r"} fa-bookmark`}></i>
             </span>
+
             </div>
             </div>
 

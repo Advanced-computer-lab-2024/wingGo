@@ -1,6 +1,6 @@
 'use client';
-import { loadTouristReportofguide } from '@/data/sales-report'; // Ensure the correct path is used
-import { TouristReportOfGuide } from '@/interFace/interFace'; // Ensure the interface path is correct
+import { loadTouristReportofguide } from '@/data/sales-report'; 
+import { TouristReportOfGuide } from '@/interFace/interFace'; 
 import React, { useEffect, useState } from 'react';
 
 // Helper function to format dates
@@ -15,14 +15,70 @@ const formatDate = (dateString: string): string => {
 
 const RecentActivity = () => {
   const [touristReport, setTouristReport] = useState<TouristReportOfGuide | null>(null);
-  const tourGuideId = '67244655313a2a345110c1e6'; // Example Tour Guide ID, replace as needed
+  const [filterMonth, setFilterMonth] = useState<string>(''); 
+  const tourGuideId = '67244655313a2a345110c1e6'; 
 
   useEffect(() => {
     loadTouristReportofguide(tourGuideId).then(setTouristReport);
   }, []);
 
+  const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = event.target.value;
+    setFilterMonth(selectedValue); 
+  };
+
+  const filterByMonth = (date: string | null | undefined): boolean => {
+    if (!filterMonth) {
+      return true; 
+    }
+    if (!date) {
+      return false; 
+    }
+    const itemMonth = new Date(date).toISOString().substring(0, 7); 
+    return itemMonth === filterMonth; 
+  };
+
+  const uniqueMonthsSet = new Set<string>();
+  if (touristReport) {
+    touristReport.data.itineraries.details.forEach((itinerary) => {
+      itinerary.details.forEach((detail) => {
+        const month = new Date(detail.bookingDate).toISOString().substring(0, 7);
+        uniqueMonthsSet.add(month);
+      });
+    });
+  }
+  const uniqueMonths = Array.from(uniqueMonthsSet).sort((a, b) => a.localeCompare(b));
+
+  const filteredItineraries = touristReport?.data.itineraries.details.filter((itinerary) =>
+    itinerary.details.some((detail) => filterByMonth(detail.bookingDate))
+  );
+
   return (
     <>
+      {/* Filter Dropdown */}
+      <div className="filter-container">
+        <label htmlFor="filterMonth" className="filter-label">
+          Filter by Month:
+        </label>
+        <select
+          id="filterMonth"
+          className="filter-select"
+          value={filterMonth}
+          onChange={handleFilterChange}
+        >
+          <option value="">All Months</option>
+          {uniqueMonths.map((month, index) => (
+            <option key={index} value={month}>
+              {new Date(month + '-01').toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+              })}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Table */}
       <div className="row">
         <div className="col-12">
           <div className="card shadow-lg rounded-lg border-0">
@@ -37,34 +93,35 @@ const RecentActivity = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {touristReport ? (
+                    {filteredItineraries && filteredItineraries.length > 0 ? (
                       <>
-                        {touristReport.data.itineraries.details.map((itinerary, index) => (
+                        {filteredItineraries.map((itinerary, index) => (
                           <tr key={index} className="data-row">
                             <td>{itinerary.name}</td>
                             <td>{itinerary.totalTourists}</td>
                             <td>
-                              {itinerary.details.map((detail, idx) => (
-                                <div key={idx}>
-                                  <strong>Tourist ID:</strong> {detail.touristId}, 
-                                  <strong> Booking Date:</strong> {formatDate(detail.bookingDate)}, 
-                                  <strong> People:</strong> {detail.numberOfPeople}
-                                </div>
-                              ))}
+                              {itinerary.details
+                                .filter((detail) => filterByMonth(detail.bookingDate))
+                                .map((detail, idx) => (
+                                  <div key={idx}>
+                                    <strong>Tourist ID:</strong> {detail.touristId}, 
+                                    <strong> Booking Date:</strong> {formatDate(detail.bookingDate)}, 
+                                    <strong> People:</strong> {detail.numberOfPeople}
+                                  </div>
+                                ))}
                             </td>
                           </tr>
                         ))}
-                        {/* Totals */}
                         <tr className="totals-row">
                           <td><strong>Total Tourists</strong></td>
-                          <td>{touristReport.data.itineraries.totalTourists}</td>
+                          <td>{touristReport?.data.itineraries.totalTourists}</td>
                           <td></td>
                         </tr>
                       </>
                     ) : (
                       <tr>
                         <td colSpan={3} className="text-center">
-                          <strong>Loading data...</strong>
+                          <strong>No Results Found</strong>
                         </td>
                       </tr>
                     )}
@@ -76,8 +133,33 @@ const RecentActivity = () => {
         </div>
       </div>
 
-      {/* CSS styles */}
       <style jsx>{`
+        .filter-container {
+          display: flex;
+          align-items: center;
+          margin-bottom: 20px;
+          justify-content: flex-end;
+        }
+
+        .filter-label {
+          margin-right: 10px;
+          font-weight: bold;
+        }
+
+        .filter-select {
+          width: 200px;
+          padding: 8px 12px;
+          border-radius: 5px;
+          border: 1px solid #ccc;
+          font-size: 14px;
+          outline: none;
+          transition: border-color 0.3s ease;
+        }
+
+        .filter-select:hover {
+          border-color: #007bff;
+        }
+
         .custom-table {
           font-family: 'Poppins', sans-serif;
           border-collapse: collapse;
@@ -106,12 +188,11 @@ const RecentActivity = () => {
           transition: background-color 0.3s;
         }
 
-       .custom-table .totals-row {
-       background-color: #000000 !important; /* Black background */
-       color: white !important; /* White text */
-       font-weight: bold;
-      }
-
+        .custom-table .totals-row {
+          background-color: #000000 !important; 
+          color: white !important; 
+          font-weight: bold;
+        }
       `}</style>
     </>
   );
