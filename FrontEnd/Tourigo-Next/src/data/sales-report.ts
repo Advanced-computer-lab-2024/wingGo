@@ -1,11 +1,11 @@
 import { fetchSalesReport } from '@/api/adminApi';
-import { getSalesReport } from '@/api/TourGuideProfileApi';
-import { getAdvertiserSalesReport } from '@/api/AdvertiserProfileApi'; // Import the advertiser API
+import { getSalesReport , getTouristReportofguide} from '@/api/TourGuideProfileApi';
+import { getAdvertiserSalesReport,getTouristReportofAdvertiser } from '@/api/AdvertiserProfileApi'; // Import the advertiser API
 import { getSellerSalesReport } from '@/api/SellerProfileApi'; // Import the seller API
 
 import { SalesReport } from "@/interFace/interFace"; // Assuming interfaces are in this path
-import { TourGuideSales } from "@/interFace/interFace"; // Assuming the interface is defined here
-import { AdvertiserSales } from "@/interFace/interFace"; // Assuming the advertiser interface is defined here
+import { TourGuideSales, TouristReportOfGuide  } from "@/interFace/interFace"; // Assuming the interface is defined here
+import { AdvertiserSales,TouristReportOfAdvertiser } from "@/interFace/interFace"; // Assuming the advertiser interface is defined here
 import { SellerSales } from "@/interFace/interFace"; // Assuming the seller interface is defined here
 
 
@@ -51,6 +51,30 @@ export const loadSellerSalesReport = async (sellerId: string): Promise<SellerSal
     return salesReport; // Return the fetched sales report data
   } catch (error) {
     console.error("Failed to load seller sales report:", error);
+    // Return null or handle the error as needed
+    return null;
+  }
+};
+
+export const loadTouristReportofguide = async (tourGuideId: string): Promise<TouristReportOfGuide | null> => {
+  try {
+    // Fetch the tourist report for the given Tour Guide ID
+    const touristReport: TouristReportOfGuide = await getTouristReportofguide(tourGuideId);
+    return touristReport; // Return the fetched tourist report data
+  } catch (error) {
+    console.error("Failed to load tourist report:", error);
+    // Return null or handle the error as needed
+    return null;
+  }
+};
+
+export const loadTouristReportofAdvertiser = async (advertiserId: string): Promise<TouristReportOfAdvertiser | null> => {
+  try {
+    // Fetch the tourist report for the given Advertiser ID
+    const touristReport: TouristReportOfAdvertiser = await getTouristReportofAdvertiser(advertiserId);
+    return touristReport; // Return the fetched tourist report data
+  } catch (error) {
+    console.error("Failed to load advertiser tourist report:", error);
     // Return null or handle the error as needed
     return null;
   }
