@@ -4147,47 +4147,65 @@ const getPrice = async (req, res) => {
     const { promoCode } = req.query; // Extract promo code from query
   
     try {
-        // Fetch cart items for the given tourist
-        const cartItems = await Cart.find({ touristId }).populate('productId'); // Populate product details
-        
-        if (!cartItems || cartItems.length === 0) {
-            return res.status(404).json({ message: 'No items found in the cart' });
+      // Fetch cart items for the given tourist
+      const cartItems = await Cart.find({ touristId }).populate('productId'); // Populate product details
+  
+      if (!cartItems || cartItems.length === 0) {
+        return res.status(404).json({ message: 'No items found in the cart' });
+      }
+  
+      // Calculate total price for all cart items
+      let totalPrice = 0;
+      cartItems.forEach((item) => {
+        if (!item.productId) {
+          throw new Error(`Product with ID ${item.productId} not found`);
         }
-
-        // Calculate total price for all cart items
-        let totalPrice = 0;
-        cartItems.forEach(item => {
-            if (!item.productId) {
-                throw new Error(`Product with ID ${item.productId} not found`);
-            }
-            totalPrice += item.price * item.amount; // price * quantity for each cart item
-        });
-
-        let promoCodeDetails = null;
-        let discount = 0; // Initialize discount
-
-        // Validate and apply promo code
-        if (promoCode) {
-            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
-            if (
-                !promoCodeDetails ||
-                !promoCodeDetails.isActive ||
-                promoCodeDetails.endDate < new Date()
-            ) {
-                return res.status(400).json({ message: 'Invalid or expired promo code' });
-            }
-
-            discount = promoCodeDetails.discount; // Get discount percentage
-            const discountAmount = (discount / 100) * totalPrice;
-            totalPrice -= discountAmount;
+        totalPrice += item.price * item.amount; // price * quantity for each cart item
+      });
+  
+      let discount = 0; // Initialize discount
+  
+      // Validate and apply promo code
+      if (promoCode) {
+        const promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+        if (!promoCodeDetails) {
+          return res.status(400).json({ message: 'Invalid promo code' });
         }
-
-        return res.status(200).json({ totalPrice, discount });
+  
+        // Check if the tourist has this promo code
+        const tourist = await Tourist.findById(touristId).populate('promoCodes');
+  
+        const hasPromoCode = tourist.promoCodes.some(
+          (code) => code._id.toString() === promoCodeDetails._id.toString()
+        );
+  
+        if (!hasPromoCode) {
+          return res
+            .status(400)
+            .json({ message: 'Unauthorized promo code for this tourist' });
+        }
+  
+        // Check if promo code is active and not expired
+        if (!promoCodeDetails.isActive || promoCodeDetails.endDate < new Date()) {
+          return res.status(400).json({ message: 'Promo code expired or inactive' });
+        }
+  
+        // Calculate and apply discount
+        discount = promoCodeDetails.discount; // Get discount percentage
+        const discountAmount = (discount / 100) * totalPrice;
+        totalPrice -= discountAmount;
+      }
+  
+      // Return total price and discount applied
+      return res.status(200).json({ totalPrice, discount });
     } catch (error) {
-        console.error("Error during cart total price calculation:", error);
-        return res.status(500).json({ message: 'Error calculating cart total price', error });
+      console.error('Error during cart total price calculation:', error);
+      return res
+        .status(500)
+        .json({ message: 'Error calculating cart total price', error });
     }
-};
+  };
+  
 
   const getProductById = async (req, res) => {
     try {
