@@ -9,10 +9,11 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked } from '@/api/itineraryApi';
+import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked, toggleBookingState } from '@/api/itineraryApi';
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
 import Modal from "react-modal"; // Import Modal from react-modal
+import { toast } from 'sonner';
 
 interface ItourPropsType {
   tour: Itinerary; // Use Itinerary type
@@ -43,6 +44,10 @@ const TourSingleCard = ({
 
   const [isBooked, setIsBooked] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen2, setIsModalOpen2] = useState(false);
+  const [bookingState, setBookingState] = useState(tour.bookingOpen);
+  const [modalAction, setModalAction] = useState(""); 
+  
 
 
   useEffect(() => {
@@ -90,6 +95,26 @@ const TourSingleCard = ({
     router.push(`/booking-it/${tour._id}`);
   };
 
+  const handleToggleBooking = (action: string) => {
+    setModalAction(action); // Set the action (Open or Close)
+    setIsModalOpen2(true); // Open the modal
+  };
+  
+  const confirmToggleBooking = async () => {
+    const toastId = toast.loading("Processing your Request...");
+    try {
+      const newBookingState = modalAction === "Open"; // Determine the new state
+      await toggleBookingState(tour._id, newBookingState); // Call the backend API
+      setBookingState(newBookingState); // Update state after successful API call
+      setIsModalOpen2(false); // Close the modal
+      console.log(`Booking state toggled to: ${newBookingState ? "Open" : "Closed"}`);
+      toast.success(`Booking state toggled to ${newBookingState ? 'Open' : 'Closed'} successfully!`, { id: toastId, duration: 1000 });
+    } catch (error) {
+      console.error("Error toggling booking state:", error);
+      toast.error('Failed to toggle booking state. Please try again.', { id: toastId });
+    }
+  };
+
   return (
     <>
       {isparentClass ? (
@@ -109,9 +134,6 @@ const TourSingleCard = ({
                 </Link>
               </div>
               <div className="tour-meta d-flex align-items-center justify-content-between">
-                <button className="tour-favorite tour-like">
-                  <i className="icon-heart"></i>
-                </button>
                 <div className="tour-location">
                   <span>
                     <Link href={`/it-details/${tour._id}`}>
@@ -149,10 +171,10 @@ const TourSingleCard = ({
               <div className="tour-divider"></div>
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
-                <div className="time d-flex align-items-center gap--5">
+                {/* <div className="time d-flex align-items-center gap--5">
                   <i className="icon-heart"></i>
                   <span>{tour.duration}</span>
-                </div>
+                </div> */}
                 <div className="tour-btn">
                 <button
                     onClick={handleToggleActivation}
@@ -160,15 +182,78 @@ const TourSingleCard = ({
                     type="button"
                     style={{
                       cursor: "pointer",
-                      color: isDeactivated ? "red" : "blue",
+                      color: isDeactivated ? "grey" : "grey",
                     }}
                   >
                     {isDeactivated ?  "Activate" : "Deactivate"}
-                    <span className="icon__box">
+                    {/* <span className="icon__box">
                       <i className="fa-regular fa-arrow-right-long icon__first"></i>
                       <i className="fa-regular fa-arrow-right-long icon__second"></i>
-                    </span>
+                    </span> */}
                   </button>
+                </div>
+
+                <div className="tour-btn">
+                {<button
+                    onClick={() => handleToggleBooking(bookingState ? "Close" : "Open")} 
+                    className="bd-text-btn style-two"
+                    type="button"
+                    style={{
+                      color:  bookingState ? "red" : "blue"
+                     }}
+                  >
+                   {bookingState ? "Close Booking" : "Open Booking"}
+                    <span className="icon__box">
+                    <i className="fa-regular fa-arrow-right-long icon__first"></i>
+                    <i className="fa-regular fa-arrow-right-long icon__second"></i>
+                    </span>
+                  </button>}
+                
+                  <Modal
+                    isOpen={isModalOpen2}
+                    onRequestClose={() => setIsModalOpen2(false)}
+                    contentLabel="Confirm Booking Action"
+                    style={{
+                      content: {
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        right: "auto",
+                        bottom: "auto",
+                        marginRight: "-50%",
+                        transform: "translate(-50%, -50%)",
+                        background: "white",
+                        padding: "20px",
+                        borderRadius: "10px",
+                        width: "500px",
+                        boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
+                      },
+                      overlay: {
+                        backgroundColor: "rgba(0, 0, 0, 0.75)",
+                      },
+                    }}
+                  >
+                    <h3>Confirm {modalAction} Booking</h3>
+                    <p>Are you sure you want to {modalAction.toLowerCase()} booking for this Itinerary?</p>
+                    <div style={{ display: "flex", marginTop: "20px" }}>
+                      <button
+                        onClick={confirmToggleBooking}
+                        className="bd-primary-btn btn-style radius-60"
+                        style={{
+                          marginRight: "10px",
+                        }}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => setIsModalOpen2(false)}
+                        className="bd-primary-btn btn-style radius-60"
+                      >
+                        No
+                      </button>
+                    </div>
+                  </Modal>   
+
                 </div>
               </div>
             </div>
@@ -201,7 +286,7 @@ const TourSingleCard = ({
           }
         }}
       >
-        <h3>Confirm Flag Itinerary</h3>
+        <h3>{isDeactivated?"Confirm Activate Itinerary":"Confirm Deactivate Itinerary"}</h3>
         <p>Are you sure you want to toggle the Activation status?</p>
         <div style={{ display: 'flex', marginTop: '20px' }}>
           <button

@@ -10,6 +10,17 @@ export const fetchAllProducts = async (): Promise<Product[]> => {
         throw error;
     }
 };
+//localhost:8000/tourist/getallproducts2/6703fe37af26882204ffb006
+export const fetchallproductsTourist = async(touristId: string): Promise<Product[]>=>{
+  try{
+    const response = await axios.get(`http://localhost:8000/tourist/getallproducts2/${touristId}`);
+    return response.data;
+  }
+  catch(error){
+    console.error('Error fetching products',error);
+    throw error;
+  }
+}
 export const fetchTouristData = async (touristId: string) => {
     try {
         const response = await axios.get(`http://localhost:8000/tourist/${touristId}`);

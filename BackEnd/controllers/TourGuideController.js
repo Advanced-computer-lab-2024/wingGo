@@ -181,6 +181,9 @@ const createItinerary = async (req, res) => {
             return res.status(403).json({ error: 'Terms and conditions must be accepted to create an itinerary.' });
         }
 
+        const photoUrl = req.file.location;
+
+
 
         // Create and save the new itinerary without latitude and longitude
         const newItinerary = new Itinerary({
@@ -197,7 +200,8 @@ const createItinerary = async (req, res) => {
             pickupLocation,
             dropoffLocation,
             bookings,
-            tags
+            tags,
+            photo: photoUrl,
         });
 
         await newItinerary.save();
@@ -206,6 +210,31 @@ const createItinerary = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+
+const getItineraryPhoto = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const itinerary = await Itinerary.findById(id);
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found' });
+        }
+
+        if (itinerary.photo) {
+            const key = itinerary.photo.split('/').slice(-1)[0];
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
+            
+            // Instead of redirecting, send the pre-signed URL directly
+            return res.json({ imageUrl: preSignedUrl });
+        } else {
+            return res.status(404).json({ message: 'Image not found for this itinerary.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 // Read itinerary with tour guide id and itinerary id
 // const getItineraries = async (req, res) => {
@@ -467,11 +496,13 @@ const getSalesReport = async (req, res) => {
                 (sum, entry) => sum + entry.paidPrice,
                 0
             );
+            const soldDates = [...new Set(itinerary.touristIDs.map(entry => entry.bookingDate))];
 
             return {
                 name: itinerary.title,
                 sales, // Total number of people who booked
                 revenue, // Total revenue from all bookings
+                soldDates, // Include only the sold dates
             };
         });
 
@@ -635,6 +666,38 @@ const openBooking = async (req, res) => {
     }
 };
 
+const getNotifications = async (req, res) => {
+    const { tourguideId } = req.params; // Extract Tour Guide ID from request parameters
+
+    try {
+        // Find the tour guide by ID
+        const tourGuide = await TourGuide.findById(tourguideId);
+
+        // Check if the tour guide exists
+        if (!tourGuide) {
+            return res.status(404).json({ message: "Tour Guide not found." });
+        }
+
+        // Sort notifications by date in descending order (newest first)
+        const notifications = tourGuide.notifications.sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+        );
+
+        // Return all notifications
+        res.status(200).json({
+            success: true,
+            notifications: notifications,
+        });
+    } catch (error) {
+        console.error("Error fetching notifications:", error); // Debugging
+        res.status(500).json({
+            success: false,
+            message: "Error fetching notifications.",
+            error,
+        });
+    }
+};
+
 
 
 module.exports = {
@@ -648,5 +711,7 @@ module.exports = {
     previewPhoto,
     getSalesReport,
     getTouristReport,
-    openBooking
+    openBooking,
+    getItineraryPhoto,
+    getNotifications
 };

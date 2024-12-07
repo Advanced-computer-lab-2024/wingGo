@@ -8,9 +8,11 @@ import { Activity } from "@/interFace/interFace";
 import Image from "next/image";
 import Link from "next/link";
 import React ,{useState, useEffect} from "react";
-import { toggleFlagActivity, isActivityBooked  } from '@/api/activityApi';
+import { toggleFlagActivity, isActivityBooked, toggleBookingState,saveOrUnsaveActivityApi  } from '@/api/activityApi';
 import { useRouter } from "next/navigation";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
+import Modal from "react-modal";
+import { toast } from 'sonner';
 
 
 interface ItourPropsType {
@@ -19,6 +21,7 @@ interface ItourPropsType {
   tourWrapperClass: string;
   isparentClass: boolean;
   isAdmin?: boolean;
+  isAdvertiser?: boolean;
 }
 
 const TourSingleCard = ({
@@ -27,6 +30,7 @@ const TourSingleCard = ({
   tourWrapperClass,
   isparentClass,
   isAdmin = false,
+  isAdvertiser = false
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const router = useRouter();
@@ -36,6 +40,11 @@ const TourSingleCard = ({
   const { currency, convertAmount } = useCurrency(); 
   const [isBooked, setIsBooked] = useState(false);
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
+  const [bookingState, setBookingState] = useState(tour.bookingOpen);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility
+  const [modalAction, setModalAction] = useState(""); // To track the action (Open/Close Booking)
+  const [isSaved, setIsSaved] = useState(false);
+
 
 
    // Fetch booking status when component mounts
@@ -60,7 +69,39 @@ const TourSingleCard = ({
     convertTourPrice();
   }, [currency, tour.price, convertAmount]); 
 
+
+  useEffect(() => {
+    const fetchSavedStatus = async () => {
+      try {
+        if (!tour._id ) {
+          console.error("Missing IDs: Cannot fetch activity id.");
+          return;
+        }
+        if(!tour.touristIDs){
+
+          console.error("Missing IDs: Cannot fetch tourist id.");
+return;
+        }
+  
+        // Fetch saved status (true/false) from the backend
+        const isSavedStatus = await saveOrUnsaveActivityApi(
+          //tour.touristIDs[0], // Pass the tourist ID
+          tour._id, 
+          false // Fetch current status; no save/unsave action
+        );
+  
+        // Update the local state to reflect the saved status
+        setIsSaved(isSavedStatus);
+      } catch (error) {
+        console.error("Error fetching saved status:", error);
+      }
+    };
+  
+    fetchSavedStatus();
+  }, [tour._id, tour.touristIDs]);
+
   const handleFlagActivity = async () => {
+    
     try {
       // Toggle the flagged state in the backend
       await toggleFlagActivity(tour._id, !isFlagged);
@@ -69,11 +110,64 @@ const TourSingleCard = ({
       console.error("Error updating flagged status:", error);
     }
   };
+
   const handleBookNowClick = () => {
     // Redirect to the specific page (replace "/booking-page" with the desired path)
     router.push(`/booking-activity/${tour._id}`);
   };
 
+  const handleToggleBooking = (action: string) => {
+    setModalAction(action); // Set the action (Open or Close)
+    setIsModalOpen(true); // Open the modal
+  };
+  
+  const confirmToggleBooking = async () => {
+    const toastId = toast.loading("Processing your Request...");
+    try {
+      const newBookingState = modalAction === "Open"; // Determine the new state
+      await toggleBookingState(tour._id, newBookingState); // Call the backend API
+      setBookingState(newBookingState); // Update state after successful API call
+      setIsModalOpen(false); // Close the modal
+      console.log(`Booking state toggled to: ${newBookingState ? "Open" : "Closed"}`);
+      toast.success(`Booking state toggled to ${newBookingState ? 'Open' : 'Closed'} successfully!`, { id: toastId, duration: 1000 });
+    } catch (error) {
+      console.error("Error toggling booking state:", error);
+      toast.error('Failed to toggle booking state. Please try again.', { id: toastId });
+    }
+  };
+
+  const handleSave = async () => {
+    
+   
+    try {
+      if (!tour.touristIDs|| !tour._id?.length) {
+        console.error("Missing IDs: Cannot perform save/unsave action.");
+        return;
+      }
+      const touristId = tour.touristIDs[0]; // Use the string directly
+      if (!touristId) {
+        console.error("Tourist ID is missing.");
+        return;
+      }
+      const action = !isSaved; // Determine action based on current state (save if not saved, unsave if saved)
+      const saveResult = await saveOrUnsaveActivityApi(
+      //  touristId, // Pass first tourist ID
+        tour._id, 
+        action // Save (true) or Unsave (false)
+      );
+  
+      
+      if (saveResult) {
+        setIsSaved(action); // Update state to reflect the action
+        
+      } else {
+        console.error("Failed to toggle save/unsave:", saveResult);
+      }
+    } catch (error) {
+      console.error("Error saving/unsaving activity:", error);
+      
+    } 
+  };
 
   return (
     <>
@@ -84,7 +178,7 @@ const TourSingleCard = ({
               <div className="tour-thumb image-overly">
                 <Link href={`/activity-details/${tour._id}`}>
                   <Image
-                    src="/images/default-image.jpg" // Placeholder image
+                    src="/assets/images/Activity.jpeg" // Placeholder image
                     loader={imageLoader}
                     width={370}
                     height={370}
@@ -94,9 +188,6 @@ const TourSingleCard = ({
                 </Link>
               </div>
               <div className="tour-meta d-flex align-items-center justify-content-between">
-                <button className="tour-favorite tour-like">
-                  <i className="icon-heart"></i>
-                </button>
                 <div className="tour-location">
                   <span>
                     <Link href={`/activity-details/${tour._id}`}>
@@ -139,21 +230,120 @@ const TourSingleCard = ({
                     {isFlagged ? "Unflag" : "Flag"}
                   </button>
                 )}
+                
               <span className="tour-price b3">
                 {currency}{" "}
                 {convertedPrice !== null
                   ? convertedPrice.toFixed(2)
                   : tour.price.toLocaleString("en-US")}
               </span>
+
+              <div className="d-flex justify-content-between align-items-center mb-2">
+              <h5 className="tour-title fw-5 underline custom_mb-5"> </h5>
+              <div className="bookmark-container">
+              <span
+              className={`bookmark-icon ${isSaved ? "bookmarked" : ""}`}
+              onClick={handleSave}
+              title={isSaved ? "Unsave Itinerary" : "Save Itinerary"}
+              style={{
+              cursor: "pointer",
+              fontSize: "24px",
+              color: isSaved ? "gold" : "gray",
+              transition: "color 0.3s ease",
+              position: "relative",
+              top: "-5px", // Adjust height, lift the icon slightly
+              }}
+                >
+            <i className={`fa${isSaved ? "s" : "r"} fa-bookmark`}></i> {/* Solid for saved, Regular for unsaved */}
+            </span>
+            </div>
+            </div>
               <div className="tour-divider"></div>
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
-                <div className="time d-flex align-items-center gap--5">
-                  <i className="icon-heart"></i>
-                  <span>{tour.time}</span>
+                <div className="time d-flex align-items-center gap--5" >
+                {(!isAdvertiser) && <i className="icon-heart"></i>}
+                  {(!isAdvertiser) && <span>{tour.time}</span>}
                 </div>
                 <div className="tour-btn">
-                <button
+                {/* {isAdvertiser && (
+                  <button
+                    onClick={handleToggleBooking}                  
+                    style={{
+                      backgroundColor: bookingState ? "red" : "green",
+                      color: "white",
+                      padding: "8px 16px",
+                      fontSize: "14px",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {bookingState ? "Close Booking" : "Open Booking"}
+                  </button>
+                )} */}
+                
+                {isAdvertiser && <button
+                    onClick={() => handleToggleBooking(bookingState ? "Close" : "Open")} 
+                    className="bd-text-btn style-two"
+                    type="button"
+                    style={{
+                      color:  bookingState ? "red" : "blue"
+                     }}
+                  >
+                   {bookingState ? "Close Booking" : "Open Booking"}
+                    <span className="icon__box">
+                    <i className="fa-regular fa-arrow-right-long icon__first"></i>
+                    <i className="fa-regular fa-arrow-right-long icon__second"></i>
+                    </span>
+                  </button>}
+                
+                  <Modal
+                    isOpen={isModalOpen}
+                    onRequestClose={() => setIsModalOpen(false)}
+                    contentLabel="Confirm Booking Action"
+                    style={{
+                      content: {
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        right: "auto",
+                        bottom: "auto",
+                        marginRight: "-50%",
+                        transform: "translate(-50%, -50%)",
+                        background: "white",
+                        padding: "20px",
+                        borderRadius: "10px",
+                        width: "500px",
+                        boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
+                      },
+                      overlay: {
+                        backgroundColor: "rgba(0, 0, 0, 0.75)",
+                      },
+                    }}
+                  >
+                    <h3>Confirm {modalAction} Booking</h3>
+                    <p>Are you sure you want to {modalAction.toLowerCase()} booking for this activity?</p>
+                    <div style={{ display: "flex", marginTop: "20px" }}>
+                      <button
+                        onClick={confirmToggleBooking}
+                        className="bd-primary-btn btn-style radius-60"
+                        style={{
+                          marginRight: "10px",
+                        }}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => setIsModalOpen(false)}
+                        className="bd-primary-btn btn-style radius-60"
+                      >
+                        No
+                      </button>
+                    </div>
+                  </Modal>
+
+                
+                {(!isAdvertiser) && <button
                     onClick={isBooked ? undefined : handleBookNowClick} // Disable click if already booked
                     className="bd-text-btn style-two"
                     type="button"
@@ -168,7 +358,7 @@ const TourSingleCard = ({
                       <i className="fa-regular fa-arrow-right-long icon__first"></i>
                       <i className="fa-regular fa-arrow-right-long icon__second"></i>
                     </span>
-                  </button>
+                  </button>}
                 </div>
               </div>
             </div>

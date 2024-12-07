@@ -127,7 +127,12 @@ const ActivityCategories = () => {
           value={addTag}
           onChange={(e) => setAddTag(e.target.value)}
         />
-        <button className='bd-primary-btn btn-style radius-60 mt-10 flex g-10' onClick={() => handleAddClick()} > Add Activity Category </button>
+        <button 
+        className='bd-primary-btn btn-style radius-60' 
+        style={{ marginLeft: "20px" }}
+        onClick={() => handleAddClick()} > 
+        Add Activity Category
+        </button>
       </div>
 
 

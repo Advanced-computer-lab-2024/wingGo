@@ -1,9 +1,11 @@
 import React from "react";
 import Link from "next/link";
 import SignUpForm from "@/forms/SignUpForm";
+import Breadcrumb from "../common/breadcrumb/BreadCrumb";
 const RegisterMain = () => {
   return (
     <>
+    <Breadcrumb titleOne="Sign-up" titleTwo="Sign-up" />
       <section className="bd-sign-area section-space">
         <div className="container">
           <div className="row justify-content-center">

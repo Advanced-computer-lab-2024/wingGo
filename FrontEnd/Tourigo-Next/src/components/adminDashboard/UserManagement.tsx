@@ -101,23 +101,7 @@ const UserManagement = () => {
 
                             <button
                               
-                              style={{
-                                backgroundColor: buttonStates[user.userId] === "rejected" ? "red" : "lightgray",
-                                color: buttonStates[user.userId] === "rejected" ? "white" : "black",
-                                fontSize: "20px",
-                                
-                                cursor: "pointer",
-                                padding: "5px",
-                                border: "none",
-                                borderRadius: "4px",
-                                transition: "background-color 0.3s",
-                              }}
-                              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "darkred")}
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor = buttonStates[user.userId] === "rejected"
-                                  ? "red"
-                                  : "lightgray")
-                              }
+                              className="bd-primary-btn btn-style radius-60"
                               onClick={() => handleDelete(user.userId)}
                         
                             >

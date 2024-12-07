@@ -10,6 +10,7 @@ import { toggleFlagActivity } from '@/api/activityApi';
 import { useRouter } from "next/navigation";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
 import Modal from "react-modal"; // Import Modal from react-modal
+import { toast } from "sonner";
 
 interface ItourPropsType {
   tour: Activity; // Use Itinerary type
@@ -50,13 +51,16 @@ const TourSingleCard = ({
   };
 
   const confirmFlagActivity = async () => {
+    const toastId = toast.loading("Processing your Request...");
     try {
       // Toggle the flagged state in the backend
       await toggleFlagActivity(tour._id, !isFlagged);
       setIsFlagged((prevFlagged) => !prevFlagged);
       setIsModalOpen(false);
+      toast.success(isFlagged?"Activity Unflagged Successfully!": "Activity Flagged Successfully!", { id: toastId, duration: 1000 });
     } catch (error) {
       console.error("Error updating flagged status:", error);
+      toast.error("Error updating flagged status.", { id: toastId });
     }
   };
 
@@ -172,7 +176,7 @@ const TourSingleCard = ({
           }
         }}
       >
-        <h3>Confirm Flag Activity</h3>
+        <h3>{isFlagged?"Confirm Unflag Activity":"Confirm Flag Activity"}</h3>
         <p>Are you sure you want to toggle the flag status?</p>
         <div style={{ display: 'flex', marginTop: '20px' }}>
           <button

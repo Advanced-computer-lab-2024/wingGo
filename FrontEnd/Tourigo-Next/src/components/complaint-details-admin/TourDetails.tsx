@@ -61,7 +61,7 @@ const ComplaintDetails = ({ id }: idTypeNew) => {
           <div className="row mb-3 align-items-center">
             {/* Title and Date Section */}
             <div className="col-md-6">
-              <h3 className="complaint-title mb-0 text-primary" style={{ fontSize: '6rem', fontWeight: 'bold' }}>
+              <h3 className="complaint-title mb-0" style={{ fontSize: '6rem', fontWeight: 'bold' }}>
                 {data.title}
               </h3>
               <p className="mb-0" style={{ fontSize: '1.5rem' }}>
@@ -76,7 +76,7 @@ const ComplaintDetails = ({ id }: idTypeNew) => {
   </p>
   <button
     onClick={handleStatusToggle}
-    className="bd-gradient-btn btn-style radius-60 btn-tertiary"
+    className="bd-primary-btn btn-style radius-60"
     style={{
       padding: '6px 12px',
       fontSize: '14px',

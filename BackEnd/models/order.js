@@ -36,6 +36,10 @@ const orderSchema = new Schema(
       type: Number,
       required: true,
     },
+    paymentMethod: {
+      type: String,
+   
+    },
   },
   { timestamps: true }
 );

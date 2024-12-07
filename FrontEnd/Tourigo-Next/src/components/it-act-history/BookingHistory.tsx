@@ -290,17 +290,37 @@ const BookingHistory = () => {
                                 </div>
 
                                 <div className="col-auto" style={{ paddingBottom: '30px'}}>
-                                <select
-    onChange={(e) => {
-        console.log("Filter Type Selected:", e.target.value); // Debug dropdown selection
-        setFilterType(e.target.value as 'all' | 'past' | 'upcoming');
-    }}
-    value={filterType}
->
-    <option value="all">All</option>
-    <option value="past">Past</option>
-    <option value="upcoming">Upcoming</option>
-</select>
+                    <select
+                      className="sidebar-select"
+                      value={filterType}
+                      onChange={(e) => {
+                        console.log("Filter Type Selected:", e.target.value); // Debug dropdown selection
+                        setFilterType(e.target.value as 'all' | 'past' | 'upcoming');
+                    }}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        borderRadius: "5px",
+                        border: "1px solid #ced4da",
+                        fontSize: "16px",
+                        color: "#495057",
+                        backgroundColor: "#fff",
+                        marginBottom: "15px",
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                        appearance: "none",
+                        WebkitAppearance: "none",
+                        MozAppearance: "none",
+                        backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23999999' d='M2 0L0 2h4zM2 5L0 3h4z'/></svg>")`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 10px center",
+                        backgroundSize: "10px",
+                      }}
+                    >
+                      <option value="all">All</option>
+                      <option value="past">Past</option>
+                      <option value="upcoming">Upcoming</option>
+                      {/* Add more languages as needed */}
+                    </select>
 
                                 </div>
 
@@ -368,31 +388,16 @@ const BookingHistory = () => {
                                                                     {new Date(booking.bookingDate) < currentDate ? (
                                                                         <button
                                                                             onClick={() => handleRateCommentClick(booking)}
-                                                                            className="rate-comment-button"
-                                                                            style={{
-                                                                                backgroundColor: "blue",
-                                                                                color: "white",
-                                                                                padding: "8px 16px",
-                                                                                fontSize: "14px",
-                                                                                borderRadius: "4px",
-                                                                                cursor: "pointer",
-                                                                                marginBottom: "8px"
-                                                                            }}
+                                                                            className="bd-primary-btn btn-style radius-60 "
                                                                         >
                                                                             Rate & Comment
                                                                         </button>
                                                                     ) : (
                                                                         <button
                                                                             onClick={() => handleCancelBookingClick(booking)}
-                                                                            className="cancel-booking-button"
+                                                                            className="bd-primary-btn btn-style radius-60"
                                                                             style={{
-                                                                                backgroundColor: isCancellable(booking.bookingDate) ? "red" : "gray",
-                                                                                color: "white",
-                                                                                padding: "8px 16px",
-                                                                                fontSize: "14px",
-                                                                                borderRadius: "4px",
                                                                                 cursor: isCancellable(booking.bookingDate) ? "pointer" : "not-allowed",
-                                                                                marginBottom: "8px"
                                                                             }}
                                                                             disabled={!isCancellable(booking.bookingDate)}
                                                                             title={!isCancellable(booking.bookingDate) ? "Cannot cancel within 48 hours of booking date." : ""}
@@ -453,31 +458,17 @@ const BookingHistory = () => {
                                                                     {new Date(booking.date) < currentDate ? (
                                                                         <button
                                                                             onClick={() => handleRateCommentClick_act(booking)}
-                                                                            className="rate-comment-button"
-                                                                            style={{
-                                                                                backgroundColor: "blue",
-                                                                                color: "white",
-                                                                                padding: "8px 16px",
-                                                                                fontSize: "14px",
-                                                                                borderRadius: "4px",
-                                                                                cursor: "pointer",
-                                                                                marginBottom: "8px"
-                                                                            }}
+                                                                            className="bd-primary-btn btn-style radius-60"
+                                                                        
                                                                         >
                                                                             Rate & Comment
                                                                         </button>
                                                                     ) : (
                                                                         <button
                                                                             onClick={() => handleCancelBookingClick_act(booking)}
-                                                                            className="cancel-booking-button"
+                                                                            className="bd-primary-btn btn-style radius-60"
                                                                             style={{
-                                                                                backgroundColor: isCancellable_act(booking.date) ? "red" : "gray",
-                                                                                color: "white",
-                                                                                padding: "8px 16px",
-                                                                                fontSize: "14px",
-                                                                                borderRadius: "4px",
                                                                                 cursor: isCancellable_act(booking.date) ? "pointer" : "not-allowed",
-                                                                                marginBottom: "8px"
                                                                             }}
                                                                             disabled={!isCancellable_act(booking.date)}
                                                                             title={!isCancellable_act(booking.date) ? "Cannot cancel within 48 hours of booking date." : ""}

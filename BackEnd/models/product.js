@@ -51,6 +51,12 @@ const productSchema = new Schema({
             review: { type: String, required: true }
         }
     ],
+    sellingDates: [
+        {
+            type: Date,
+            // required: true // if each date in the array must be provided
+        }
+    ],
     discountedPrices: [
         {
             promoCodeId: { type: mongoose.Schema.Types.ObjectId, ref: 'PromoCode' }, // Applied promo code
@@ -58,6 +64,12 @@ const productSchema = new Schema({
             quantity: { type: Number, required: true } // Quantity purchased under this discount
         }
     ],
+    sellingDates: [
+        {
+            type: Date,
+            // required: true // if each date in the array must be provided
+        }
+    ],    
     archive:{
         type:Boolean,
         default:false,

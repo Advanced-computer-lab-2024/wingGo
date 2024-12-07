@@ -81,7 +81,7 @@ const BookingSidebar = ({ id }: idTypeNew) => {
                   <div className="booking-sidebar-price-content">
                     <div className="booking-sidebar-price-total d-flex flex-wrap justify-content-between">
                       <div className="booking-sidebar-price-item-title b3 fw-7">
-                        Price
+                        Price/Person
                       </div>
                       <div className="booking-sidebar-price-item-amount b3 fw-7">
                         ${data.price || "1800.00"}

@@ -143,7 +143,7 @@ const RatingTabArea: React.FC<RatingTabAreaProps> = ({ touristId, itineraryId, t
                     style={{ padding: '8px', width: '100%' }}
                   />
                 </div>
-                <button type="submit" className="btn btn-primary mt-3">
+                <button type="submit" className="btn-style bd-primary-btn radius-60 mt-3">
                   Submit Itinerary Review
                 </button>
               </form>
@@ -191,7 +191,7 @@ const RatingTabArea: React.FC<RatingTabAreaProps> = ({ touristId, itineraryId, t
                     style={{ padding: '8px', width: '100%' }}
                   />
                 </div>
-                <button type="submit" className="btn btn-primary mt-3">
+                <button type="submit" className="btn-style bd-primary-btn radius-60 mt-3">
                   Submit Guide Review
                 </button>
               </form>

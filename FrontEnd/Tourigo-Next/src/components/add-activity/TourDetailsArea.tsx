@@ -10,6 +10,10 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { createActivity } from "@/api/activityApi";
 import { File } from "@/interFace/interFace";
+import L from "leaflet";
+import { OpenStreetMapProvider } from "leaflet-geosearch";
+import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
 // interface FormData {
 //   tag: string;
 //   discount: string;
@@ -51,8 +55,20 @@ interface NewActivity {
   averageRating:number;
 }
 
-
+const customIcon = new L.Icon({
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+interface Suggestion {
+  label: string;
+  x: number;
+  y: number;
+}
 const TourDetailsArea = () => {
+  
   const [largeImg, setlargeImg] = useState<string>("");
   const selectHandler = () => {};
   const {
@@ -67,8 +83,28 @@ const TourDetailsArea = () => {
     const formData = { ...data, largeImg };
     toast.success("Message Send Successfully", { id: toastId, duration: 1000 });
     reset();
+    
+    
+  };
+  const [addressQuery, setAddressQuery] = useState<string>("");
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [mapCenter, setMapCenter] = useState({ lat: 45.652478, lng: 25.596463 });
+  const [markerPosition, setMarkerPosition] = useState(mapCenter);
+
+  const provider = new OpenStreetMapProvider();
+
+  const searchAddress = async (query: string) => {
+    const results: Suggestion[] = await provider.search({ query });
+    setSuggestions(results);
   };
 
+  const handleSelectAddress = (suggestion: Suggestion) => {
+    setAddressQuery(suggestion.label); // Update the address query
+    const newLatLng = { lat: suggestion.y, lng: suggestion.x }; // Use suggestion coordinates
+    setMapCenter(newLatLng); // Update map center
+    setMarkerPosition(newLatLng); // Update marker position
+    setSuggestions([]); // Clear suggestions list
+  };
   const advertiserId ="67325dcb0b3e54ad8bfe1684"; 
   const [newActivity, setNewActivity] = React.useState<NewActivity>({
     date: '',
@@ -254,54 +290,71 @@ const TourDetailsArea = () => {
                         <TourGallery />
                       </div>
                       <div className="tour-details-location mb-35">
-                        <h4 className="mb-20">Location</h4>
-                        <div className="row gy-24">
-                          <div className="col-lg-6">
-                            <div className="row gy-24">
-                              <div className="col-md-12">
-                                <div className="form-input-box">
-                                  <div className="form-input-title">
-                                    <label htmlFor="address">Address: </label>
-                                  </div>
-                                  <div className="form-input">
-                                  <input type="text" name="location.address" value={newActivity.location.address} onChange={handleInputChange} required />
-                                    
-                                  </div>
-                                </div>
-                              </div>
-                             
-                              {/* <MultiSelect/> */}
+        <h4 className="mb-20">Location</h4>
+        <div className="form-input-box mb-20">
+        <input
+  type="text"
+  value={addressQuery}
+  onChange={(e) => {
+    setAddressQuery(e.target.value); // Update the input value
+    searchAddress(e.target.value); // Fetch suggestions for typed address
+  }}
+  placeholder="Type an address"
+  className="form-input"
+/>
+{suggestions.length > 0 && (
+  <ul className="suggestions-list">
+    {suggestions.map((s, index) => (
+      <li key={index} onClick={() => handleSelectAddress(s)}>
+        {s.label}
+      </li>
+    ))}
+  </ul>
+)}
+        </div>
+        <div style={{ height: "400px", width: "100%" }}>
+        <MapContainer
+  center={mapCenter}
+  zoom={13}
+  style={{ height: "100%", width: "100%" }}
+  key={JSON.stringify(mapCenter)} // Force re-render when center changes
+>
+  <TileLayer
+    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
+  />
+<Marker
+  position={markerPosition}
+  icon={customIcon}
+  draggable={true} // Enable dragging
+  eventHandlers={{
+    dragend: (e) => {
+      const marker = e.target as L.Marker; // Get the marker instance
+      const position = marker.getLatLng(); // Get new position after dragging
+      setMarkerPosition(position); // Update marker position state
 
-                             
-                              <div className="col-md-12">
-                                
-                               
-                              </div>
-                             
+      // Perform reverse geocoding to get the new address
+      fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.lat}&lon=${position.lng}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          setAddressQuery(data.display_name || "Unknown location"); // Update the text box with the new address
+        });
+    },
+  }}
+></Marker>
+  </MapContainer>
+</div>
+      </div>
+      </div>
+      </div>
+      
+      </div>
+      
+      </div>
+      
 
-
-                              
-                              
-                            
-                            </div>
-                          </div>
-                          
-                          <div className="col-lg-6">
-                            <div className="tour-details-location-map">
-                              <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d89245.36062680863!2d25.596462799999998!3d45.652478099999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40b35b862aa214f1%3A0x6cf5f2ef54391e0f!2sBra%C8%99ov%2C%20Romania!5e0!3m2!1sen!2sbd!4v1707640089632!5m2!1sen!2sbd"
-                                allowFullScreen={true}
-                                loading="lazy"
-                                referrerPolicy="no-referrer-when-downgrade"
-                              ></iframe>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
               <div className="tour-edit-btn text-start">
                 <button type="submit" className="bd-btn btn-style radius-4">
                   Add Activity

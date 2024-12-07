@@ -49,15 +49,14 @@ const TourSingleCard = ({
                   <Image
                     src={tour.pictures[0] || "/images/default-image.jpg"}
                     loader={imageLoader}
+                    width={370}
+                    height={270}
                     style={{ width: "100%", height: "auto" }}
                     alt={tour.name}
                   />
                 </Link>
               </div>
               <div className="tour-meta d-flex align-items-center justify-content-between">
-                <button className="tour-favorite tour-like">
-                  <i className="icon-heart"></i>
-                </button>
                 <div className="tour-location">
                   <span>
                     <Link href={`/place-details/${tour._id}`}>

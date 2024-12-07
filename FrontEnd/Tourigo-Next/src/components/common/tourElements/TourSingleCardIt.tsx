@@ -9,9 +9,10 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked } from '@/api/itineraryApi';
+import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked,saveOrUnsaveItineraryApi } from '@/api/itineraryApi';
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
+
 
 
 interface ItourPropsType {
@@ -42,6 +43,8 @@ const TourSingleCard = ({
   const [isDeactivated, setIsDeactivated] = useState(tour.deactivated);
 
   const [isBooked, setIsBooked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+ 
 
 
   useEffect(() => {
@@ -66,7 +69,32 @@ const TourSingleCard = ({
     convertTourPrice();
   }, [currency, tour.price, convertAmount]); // Re-run if currency or tour.price changes
 
-
+  useEffect(() => {
+    const fetchSavedStatus = async () => {
+      try {
+        if (!tour._id || !tour.touristIDs?.length) {
+          console.error("Missing IDs: Cannot fetch saved status.");
+          return;
+        }
+  
+        // Fetch saved status (true/false) from the backend
+        const isSavedStatus = await saveOrUnsaveItineraryApi(
+          tour.touristIDs[0].touristId, // Pass the tourist ID
+          tour._id, // Itinerary ID
+          false // Fetch current status; no save/unsave action
+        );
+  
+        // Update the local state to reflect the saved status
+        setIsSaved(isSavedStatus);
+      } catch (error) {
+        console.error("Error fetching saved status:", error);
+      }
+    };
+  
+    fetchSavedStatus();
+  }, [tour._id, tour.touristIDs]);
+  
+  
   const handleFlagItinerary = async () => {
     try {
       // Toggle the flagged state in the backend
@@ -90,6 +118,37 @@ const TourSingleCard = ({
     router.push(`/booking-it/${tour._id}`);
   };
 
+  const handleSave = async () => {
+    try {
+      if (!tour._id || !tour.touristIDs?.length) {
+        console.error("Missing IDs: Cannot perform save/unsave action.");
+        return;
+      }
+  
+      const action = !isSaved; // Determine action based on current state (save if not saved, unsave if saved)
+      const saveResult = await saveOrUnsaveItineraryApi(
+        tour.touristIDs[0].touristId, // Pass first tourist ID
+        tour._id, // Itinerary ID
+        action // Save (true) or Unsave (false)
+      );
+  
+      // Ensure the backend returned an updated list of saved itineraries
+      if (saveResult) {
+        setIsSaved(action); // Update state to reflect the action
+        
+      } else {
+        console.error("Failed to toggle save/unsave:", saveResult);
+      }
+    } catch (error) {
+      console.error("Error saving/unsaving itinerary:", error);
+      
+    } 
+  };
+  
+  
+  
+  
+
   return (
     <>
       {isparentClass ? (
@@ -99,7 +158,7 @@ const TourSingleCard = ({
               <div className="tour-thumb image-overly">
                 <Link href={`/it-details/${tour._id}`}>
                   <Image
-                    src="/images/default-image.jpg"
+                    src="/assets/images/Itinerary.png"
                     loader={imageLoader}
                     width={370}
                     height={370}
@@ -109,9 +168,6 @@ const TourSingleCard = ({
                 </Link>
               </div>
               <div className="tour-meta d-flex align-items-center justify-content-between">
-                <button className="tour-favorite tour-like">
-                  <i className="icon-heart"></i>
-                </button>
                 <div className="tour-location">
                   <span>
                     <Link href={`/it-details/${tour._id}`}>
@@ -178,12 +234,33 @@ const TourSingleCard = ({
                   ? convertedPrice.toFixed(2)
                   : tour.price.toLocaleString("en-US")}
               </span>
+              <div className="d-flex justify-content-between align-items-center mb-2">
+              <h5 className="tour-title fw-5 underline custom_mb-5"> </h5>
+              <div className="bookmark-container">
+              <span
+              className={`bookmark-icon ${isSaved ? "bookmarked" : ""}`}
+              onClick={handleSave}
+              title={isSaved ? "Unsave Itinerary" : "Save Itinerary"}
+              style={{
+              cursor: "pointer",
+              fontSize: "24px",
+              color: isSaved ? "gold" : "gray",
+              transition: "color 0.3s ease",
+              position: "relative",
+              top: "-5px", // Adjust height, lift the icon slightly
+              }}
+                >
+            <i className={`fa${isSaved ? "s" : "r"} fa-bookmark`}></i> {/* Solid for saved, Regular for unsaved */}
+            </span>
+            </div>
+            </div>
+
               <div className="tour-divider"></div>
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
                 <div className="time d-flex align-items-center gap--5">
-                  <i className="icon-heart"></i>
-                  <span>{tour.duration}</span>
+                {(!isTourGuide) &&<i className="icon-heart"></i>}
+                {(!isTourGuide) && <span>{tour.duration}</span>}
                 </div>
                 <div className="tour-btn">
                 <button
@@ -203,7 +280,11 @@ const TourSingleCard = ({
                     </span>
                   </button>
                 </div>
+
+
+
               </div>
+          
             </div>
           </div>
         </div>

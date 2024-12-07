@@ -46,14 +46,12 @@ const HeaderFour = () => {
                   <div className="header-action d-flex align-items-center">
                     <div className="header-btn-wrap">
                       <div className="d-none d-xs-inline-flex gap-15 align-items-center">
-                        <div className="bd-search-btn-wrapper">
-                          <button className="bd-search-open-btn">
-                            <i className="fa-regular fa-magnifying-glass"></i>
-                          </button>
-                        </div>
                         <div className="header-currency-item style-two header-currency">
                           <span
                             className="header-currency-toggle"
+                            style={{
+                              marginRight: "10px",
+                            }}
                             id="header-currency-toggle"
                           >
                             USD
@@ -69,29 +67,10 @@ const HeaderFour = () => {
                               <Link href="#">EUR</Link>
                             </li>
                           </ul>
-                        </div>
-                        <div className="header-language-item header-language">
-                          <span
-                            className="header-language-toggle"
-                            id="header-language-toggle"
-                          >
-                            Eng
-                          </span>
-                          <ul>
-                            <li>
-                              <Link href="#">Are</Link>
-                            </li>
-                            <li>
-                              <Link href="#">Ita</Link>
-                            </li>
-                            <li>
-                              <Link href="#">Rus</Link>
-                            </li>
-                          </ul>
-                        </div>
+                        </div>                      
                       </div>
                     </div>
-                    <div className="header-hamburger">
+                    {/* <div className="header-hamburger">
                       <div className="sidebar-toggle">
                         <Link
                           onClick={toggleSideMenu}
@@ -109,7 +88,7 @@ const HeaderFour = () => {
                           <span></span>
                         </Link>
                       </div>
-                    </div>
+                    </div> */}
                     {/*for wp */}
                     <div className="header-hamburger ml-20 d-none">
                       <button
