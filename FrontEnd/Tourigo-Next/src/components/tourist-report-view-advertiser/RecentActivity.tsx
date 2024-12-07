@@ -15,14 +15,70 @@ const formatDate = (dateString: string): string => {
 
 const RecentActivity = () => {
   const [touristReport, setTouristReport] = useState<TouristReportOfAdvertiser | null>(null);
+  const [filterMonth, setFilterMonth] = useState<string>(''); // State for filtering by month
   const advertiserId = '66fb37dda63c04def29f944e'; // Example Advertiser ID, replace as needed
 
   useEffect(() => {
     loadTouristReportofAdvertiser(advertiserId).then(setTouristReport);
   }, []);
 
+  const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = event.target.value;
+    setFilterMonth(selectedValue); // Update filter month state
+  };
+
+  const filterByMonth = (date: string | null | undefined): boolean => {
+    if (!filterMonth) {
+      return true; // Include all records when no filter is selected
+    }
+    if (!date || date === 'N/A') {
+      return false; // Exclude records with no dates or 'N/A' when a specific month is selected
+    }
+    const itemMonth = new Date(date).toISOString().substring(0, 7); // Extract YYYY-MM
+    return itemMonth === filterMonth; // Compare with the selected filter month
+  };
+
+  // Collect unique months from activities' details sold dates
+  const uniqueMonthsSet = new Set<string>();
+
+  if (touristReport) {
+    touristReport.data.activities.details.forEach((activity) => {
+      activity.details.forEach((detail) => {
+        const month = new Date(detail.soldDate).toISOString().substring(0, 7);
+        uniqueMonthsSet.add(month);
+      });
+    });
+  }
+
+  // Convert the set to an array and sort it
+  const uniqueMonths = Array.from(uniqueMonthsSet).sort((a, b) => a.localeCompare(b));
+
   return (
     <>
+      {/* Filter Dropdown */}
+      <div className="filter-container">
+        <label htmlFor="filterMonth" className="filter-label">
+          Filter by Month:
+        </label>
+        <select
+          id="filterMonth"
+          className="filter-select"
+          value={filterMonth}
+          onChange={handleFilterChange}
+        >
+          <option value="">All Months</option>
+          {uniqueMonths.map((month, index) => (
+            <option key={index} value={month}>
+              {new Date(month + '-01').toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+              })}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Table */}
       <div className="row">
         <div className="col-12">
           <div className="card shadow-lg rounded-lg border-0">
@@ -39,23 +95,35 @@ const RecentActivity = () => {
                   <tbody>
                     {touristReport ? (
                       <>
-                        {touristReport.data.activities.details.map((activity, index) => (
-                          <tr key={index} className="data-row">
-                            <td>{activity.name}</td>
-                            <td>{activity.totalTourists}</td>
-                            <td>
-                              {activity.details.map((detail, idx) => (
-                                <div key={idx}>
-                                  <strong>People:</strong> {detail.numberOfPeople}, 
-                                  <strong> Date:</strong> {formatDate(detail.soldDate)}
-                                </div>
-                              ))}
-                            </td>
-                          </tr>
-                        ))}
+                        {touristReport.data.activities.details
+                          .filter((activity) => {
+                            // Filter activities based on details' sold dates
+                            const filteredDetails = activity.details.filter((detail) =>
+                              filterByMonth(detail.soldDate)
+                            );
+                            return filterMonth ? filteredDetails.length > 0 : true;
+                          })
+                          .map((activity, index) => (
+                            <tr key={index} className="data-row">
+                              <td>{activity.name}</td>
+                              <td>{activity.totalTourists}</td>
+                              <td>
+                                {activity.details
+                                  .filter((detail) => filterByMonth(detail.soldDate))
+                                  .map((detail, idx) => (
+                                    <div key={idx}>
+                                      <strong>People:</strong> {detail.numberOfPeople},{' '}
+                                      <strong>Date:</strong> {formatDate(detail.soldDate)}
+                                    </div>
+                                  ))}
+                              </td>
+                            </tr>
+                          ))}
                         {/* Totals */}
                         <tr className="totals-row">
-                          <td><strong>Total Tourists</strong></td>
+                          <td>
+                            <strong>Total Tourists</strong>
+                          </td>
                           <td>{touristReport.data.activities.totalTourists}</td>
                           <td></td>
                         </tr>
@@ -109,6 +177,25 @@ const RecentActivity = () => {
           background-color: #000000 !important; /* Black background */
           color: white !important; /* White text */
           font-weight: bold;
+        }
+
+        .filter-container {
+          display: flex;
+          align-items: center;
+          margin-bottom: 20px;
+          justify-content: flex-end;
+        }
+
+        .filter-label {
+          margin-right: 10px;
+          font-weight: bold;
+        }
+
+        .filter-select {
+          width: 200px;
+          padding: 5px 10px;
+          border-radius: 5px;
+          border: 1px solid #ccc;
         }
       `}</style>
     </>

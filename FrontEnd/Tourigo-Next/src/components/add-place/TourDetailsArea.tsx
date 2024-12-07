@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, FormEvent, ChangeEvent } from "react";
+import React, { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import UploadSingleImg from "./UploadSingleImg";
 import TourGallery from "./TourGallary";
 import TourContent from "./TourContent";
@@ -7,9 +7,10 @@ import NiceSelect from "@/elements/NiceSelect";
 import ErrorMessage from "@/elements/error-message/ErrorMessage";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
-import { createPlace } from "@/api/placesApi";
+import { createPlace, getAvailableTags } from "@/api/placesApi";
 import { selectLocationData } from "@/data/nice-select-data";
-import { File } from "@/interFace/interFace";
+
+
 
 interface NewPlace {
   governorId: string;
@@ -27,24 +28,44 @@ interface NewPlace {
   tagss: string[];
 }
 
+interface FormData {
+  governorId: string;
+  name: string;
+  description: string;
+  pictures: string[];
+  location: string,
+  openingHours: string;
+  ticketPrices: {
+    foreigner: number;
+    native: number;
+    student: number;
+  };
+  flagged: boolean;
+  tagss: string[];
+}
+
 const TourDetailsArea = () => {
-  const [largeImg, setlargeImg] = useState<string>("");
-  const selectHandler = () => {};
+
   const {
     register,
+    setValue,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<FormData>();
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    const toastId = toast.loading("");
-    const formData = { ...data, largeImg };
-    toast.success("Message Send Successfully", { id: toastId, duration: 1000 });
-    reset();
-  };
+
+  const [largeImg, setlargeImg] = useState<string>("");
+  const [availablePrefrences, setAvailablePrefrences] = useState<Array<any>>([]);
+  const [selectedPrefrences, setSelectedPrefrences] = useState<Array<any>>([]);
+  const [isLoadingPreferences, setIsLoadingPreferences] = useState<boolean>(true);
+
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoName, setPhotoName] = useState<string | null>(null);
+
+
   const [newPlace, setNewPlace] = useState<NewPlace>({
-    governorId: "1",
+    governorId: "674d045f99ed6f4415cbdd39",
     name: "",
     description: "",
     pictures: [],
@@ -56,8 +77,90 @@ const TourDetailsArea = () => {
       student: 0,
     },
     flagged: false,
-    tagss: [],
+    tagss: selectedPrefrences,
   });
+
+  
+
+  useEffect(() => {
+    const fetchAllPreferenceTags = async () => {
+      try {
+        const data = await getAvailableTags();
+        console.log("Tags available:", data);
+        setAvailablePrefrences(data);
+      } catch (error) {
+        console.error("Error fetching Tags:", error);
+      } finally {
+        setIsLoadingPreferences(false);
+      }
+    };
+
+    fetchAllPreferenceTags();
+  }, []);
+
+  const handleSelectPrefClick = (id: string) => {
+    console.log("Before update:", selectedPrefrences);
+  
+    // Update selectedPrefrences and sync with newPlace
+    setSelectedPrefrences((prevSelected) => {
+      const updatedState = prevSelected.includes(id)
+        ? prevSelected.filter((item) => item !== id)
+        : [...prevSelected, id];
+  
+      console.log("After update:", updatedState);
+  
+      // Update newPlace with the updated selectedPrefrences
+      setNewPlace((prevState) => ({
+        ...prevState,
+        tagss: updatedState, // Use the latest updatedState
+      }));
+      
+
+      
+      
+  
+      return updatedState; // Return the updated state
+    });
+  
+    console.log("New Place:", newPlace);
+  };
+
+  const selectHandler = () => {};
+ 
+
+  useEffect(() => {
+    // Update form data when selectedPrefrences changes
+    setValue("tagss", selectedPrefrences);
+  }, [selectedPrefrences, setValue]);
+
+
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    const toastId = toast.loading("");
+
+    console.log("Form Data:", data);
+    try {
+      const response = await createPlace(data);
+      console.log("Response:", response);
+
+
+      toast.success(response.message || "Place added successfully", {
+        duration: 1000, id: toastId
+      });
+    } catch (error) {
+      console.error("Error adding place:", error);
+      toast.error("Failed to add place.", { id: toastId });
+  }
+};
+  
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>, setFileName: React.Dispatch<React.SetStateAction<string | null>>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setPhoto(e.target.files[0]);
+      setFileName(e.target.files[0].name);
+    } else {
+      setFileName(null);
+    }
+  };
+  
   const [pictureUrl, setPictureUrl] = useState<string>("");
 
   const handleAddPicture = () => {
@@ -105,6 +208,7 @@ const TourDetailsArea = () => {
 
   const handleAddPlace = async (e: FormEvent) => {
     e.preventDefault();
+    console.log("New Place GET OUT:", newPlace);
     try {
       const response = await createPlace(newPlace);
       toast.success(response.message || "Place added successfully", {
@@ -119,7 +223,7 @@ const TourDetailsArea = () => {
   return ( 
     <>
       <section className="bd-tour-details-area section-space">
-        <form onSubmit={handleAddPlace}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="container">
             <div className="row gy-24 justify-content-center">
               <div className="col-xxl-12 col-xl-12 col-lg-12">
@@ -134,7 +238,19 @@ const TourDetailsArea = () => {
                         </label>
                       </div>
                       <div className="form-input">
-                        <input type="text" name="name" onChange={handleInputChange} required />
+                        <input id="name" type="text"
+                        {...register("name", {
+                          required: "Name is required",
+                          minLength: {
+                            value: 2,
+                            message: "must be at least 2 characters",
+                          },
+                          maxLength: {
+                            value: 15,
+                            message: "Name cannot exceed 15 characters",
+                          },
+                        })}
+                         />
                       </div>
                     </div>
                     <div className="tour-details-content">
@@ -150,7 +266,15 @@ const TourDetailsArea = () => {
                                     </label>
                                   </div>
                                   <div className="form-input">
-                                    <input type="number" name="ticketPrices.foreigner" value={newPlace.ticketPrices.foreigner} onChange={handleInputChange} required />
+                                    <input id="ticketPrices.foreigner" type="number"  
+                                    {...register("ticketPrices.foreigner", {
+                                      required: "Ticket Price is required",
+                                      min: {
+                                        value: 0,
+                                        message: "Price must be greater than 0",
+                                      },
+                                    })}
+                                    />
                                   </div>
                                 </div>
                               </div>
@@ -163,7 +287,14 @@ const TourDetailsArea = () => {
                                   </label>
                                 </div>
                                 <div className="form-input">
-                                  <input type="number" name="ticketPrices.native" value={newPlace.ticketPrices.native} onChange={handleInputChange} />
+                                  <input id="ticketPrices.native" type="number"  
+                                  {...register("ticketPrices.native", {
+                                    required: "Ticket Price is required",
+                                    min: {
+                                      value: 0,
+                                      message: "Price must be greater than 0",
+                                    },
+                                  })}/>
                                 </div>
                               </div>
                             </div>
@@ -180,7 +311,12 @@ const TourDetailsArea = () => {
                                 </label>
                               </div>
                               <div className="form-input">
-                                <input type="text" name="openingHours" value={newPlace.openingHours} onChange={handleInputChange} required />
+                                <input id="openingHours" type="text"
+                                {...register("openingHours", {
+                                  required: "Opening Hours is required",
+
+
+                                })} />
                               </div>
                             </div>
                           </div>
@@ -194,20 +330,51 @@ const TourDetailsArea = () => {
                                 </label>
                               </div>
                               <div className="form-input">
-                                <input type="text" name="description" value={newPlace.description} onChange={handleInputChange} required />
+                                <input id="description" type="text"  
+                                {...register("description", {
+                                  required: "Description is required",
+                                  minLength: {
+                                    value: 2,
+                                    message: "Description must be at least 2 characters",
+                                  }
+                                  
+                                })} />
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
                       <div className="mb-35">
-                        <h4 className="mb-20">Tour Content</h4>
-                        <TourContent />
+                      <h4 className="mb-20">Preference Tags</h4>
+                      
+                      <div className="buttons-container-pref">
+                      
+                        {isLoadingPreferences ? (
+                          <p>Loading preferences...</p>
+                        ) : (
+                          availablePrefrences.map((item) => (
+                            <button
+                              onClick={() => handleSelectPrefClick(item._id)}
+                              className={`button-pref ${
+                                selectedPrefrences.includes(item._id) ? "active-pref" : ""
+                              }`}
+                              key={item._id}
+                            >
+                              {item.name}
+                            </button>
+                          ))
+                        )}
                       </div>
+                      </div>
+
                       <div className="tour-details-gallery mb-35">
-                        <h4 className="mb-20">Tour Gallery</h4>
-                        <TourGallery />
+                        <h4 className="mb-20">Gallery</h4>
+                        <TourGallery
+                         
+                          
+                        />
                       </div>
+                      
                       <div className="tour-details-location mb-35">
                         <h4 className="mb-20">Location</h4>
                         <div className="row gy-24">
@@ -219,21 +386,15 @@ const TourDetailsArea = () => {
                                     <label htmlFor="address">Address: </label>
                                   </div>
                                   <div className="form-input">
-                                    <input type="text" name="location.address" value={newPlace.location} onChange={handleInputChange} required />
+                                    <input id="location" type="text" 
+                                    {...register("location", {
+                                      required: "Location is required",
+                                      
+                                    })} />
                                   </div>
                                 </div>
                               </div>
-                              <div className="col-md-12">
-                                <div className="input-box-select w-100">
-                                  <NiceSelect
-                                    options={selectLocationData}
-                                    defaultCurrent={0}
-                                    onChange={selectHandler}
-                                    name="country"
-                                    className="country-select"
-                                  />
-                                </div>
-                              </div>
+                              
                             </div>
                           </div>
                           <div className="col-lg-6">
