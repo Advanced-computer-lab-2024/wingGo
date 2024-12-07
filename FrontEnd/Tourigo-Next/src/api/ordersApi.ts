@@ -2,7 +2,7 @@ import axios from "axios";
 import { Order } from "../interFace/interFace";
 
 const touristId = '67240ed8c40a7f3005a1d01d'; 
-const orderId= '6743699901c1ed599c8de321';
+const orderId= '67542c64b5ad15107a3b0fa0';
 
 export const fetchTouristOrders = async (): Promise<Order[]> => {
   try {

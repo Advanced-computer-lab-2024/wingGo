@@ -331,4 +331,18 @@ export const getPriceApi = async (itineraryId: string, numberOfPeople: number, p
       throw error;
     }
   };
+  // Fetch all saved events for a tourist
+export const viewAllSavedEventsApi = async (touristId: string): Promise<any> => {
+    try {
+      const response = await axios.get(`http://localhost:8000/tourist/viewAllSavedEvents/${touristId}`);
+      return {
+        savedActivities: response.data.savedActivities,
+        savedItineraries: response.data.savedItineraries,
+      }; // Return both saved activities and itineraries
+    } catch (error) {
+      console.error("Error fetching saved events:", error);
+      throw error;
+    }
+  };
+
   

@@ -371,6 +371,7 @@ export interface Itinerary {
       touristId: string;
       bookingDate: Date;
   }[];
+  photo: string;
 }
 
 export interface BookedItinerary {
@@ -715,6 +716,12 @@ export interface TouristReportOfAdvertiser {
       totalTourists: number; // Total number of tourists across all activities
     };
   };
+}
+export interface CustomFile extends Blob {
+  name: string;
+  lastModified: number;
+  webkitRelativePath?: string;
+  src?: string;  // If you need a `src` property
 }
 
 

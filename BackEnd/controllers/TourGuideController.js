@@ -167,7 +167,6 @@ const updateTourGuideProfile = async (req, res) => {
     }
 };
 
-// Create an itinerary
 const createItinerary = async (req, res) => {
     const { tourGuideId, title, activities, locations, timeline, duration, language, price, availableDates, accessibility, pickupLocation, dropoffLocation, bookings , tags} = req.body;
 
@@ -181,8 +180,10 @@ const createItinerary = async (req, res) => {
             return res.status(403).json({ error: 'Terms and conditions must be accepted to create an itinerary.' });
         }
 
-        const photoUrl = req.file.location;
-
+        let photoUrl = null;
+        if(req.file){
+            photoUrl = req.file.location;
+        }
 
 
         // Create and save the new itinerary without latitude and longitude
@@ -207,9 +208,12 @@ const createItinerary = async (req, res) => {
         await newItinerary.save();
         res.status(201).json(newItinerary);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+      console.error("Error creating itinerary:", error);
+      res.status(400).json({ error: error.message });
     }
-};
+  };
+  
+  
 
 
 const getItineraryPhoto = async (req, res) => {

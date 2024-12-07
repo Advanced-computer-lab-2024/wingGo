@@ -193,3 +193,24 @@ export const fetchDeliveryAddresses = async (): Promise<string[]> => {
     );
   }
 };
+
+export const payForOrder = async (
+  orderId: string |null, 
+  paymentMethod: string, 
+  promoCode: string | null = null
+): Promise<any> => {
+  try {
+    const response = await axios.put(
+      `http://localhost:8000/tourist/pay/${orderId}`,
+      { paymentMethod, promoCode }
+    );
+
+    console.log('Order payment successful:', response.data);
+    return response.data; // Return API response
+  } catch (error: any) {
+    console.error('Error processing payment:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || 'Failed to process payment. Please try again.'
+    );
+  }
+};

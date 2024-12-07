@@ -15,6 +15,8 @@ export const fetchAllPlaces = async (): Promise<Place[]> => {
 };
 export const createPlace = async (placeData: any): Promise<any> => {
     try {
+        console.log("placeData",placeData);
+        console.log("HELOOOOOOOOOOOOOOOOOOOOOO")
         const response = await axios.post(`http://localhost:8000/govornor/createPlace`, placeData);
         return response.data.place; // Return the created place data
     } catch (error) {
@@ -72,6 +74,18 @@ export const fetchDistinctTags = async (): Promise<string[]> => {
         return response.data;
     } catch (error) {
         console.error("Error fetching filtered places:", error);
+        throw error;
+    }
+};
+
+
+export const getAvailableTags = async (): Promise<string[]> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/govornor/viewPreferences`);
+        console.log("Tags available:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching tags:", error);
         throw error;
     }
 };
