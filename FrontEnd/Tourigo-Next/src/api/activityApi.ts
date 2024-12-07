@@ -221,7 +221,7 @@ export const getPriceApi = async (activityId: string, numberOfPeople: number, pr
     //To save/unsave an itinerary
 export const saveOrUnsaveActivityApi = async (activityId: string, save: boolean): Promise<any> => {
     try {
-      const response = await axios.post( `http://localhost:8000/tourist/saveActivity/${touristId}/${activityId}`,
+      const response = await axios.post( `http://localhost:8000/tourist/toggleSaveActivity/${touristId}/${activityId}`,
         { save } // Pass the save/unsave state in the request body
       );
       return response.data.savedActivities; 

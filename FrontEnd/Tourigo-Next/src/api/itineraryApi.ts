@@ -283,15 +283,25 @@ export const getPriceApi = async (itineraryId: string, numberOfPeople: number, p
   };
 
 //To save/unsave an itinerary
-export const saveOrUnsaveItineraryApi = async (touristId: string,itineraryId: string, save: boolean): Promise<any> => {
+// export const saveOrUnsaveItineraryApi = async (touristId: string,itineraryId: string, save: boolean): Promise<any> => {
+//     try {
+//       const response = await axios.post( `http://localhost:8000/tourist/saveItinerary/${touristId}/${itineraryId}`,
+//         { save } // Pass the save/unsave state in the request body
+//       );
+//       return response.data.savedItineraries; // Return the updated saved itineraries list
+//     } catch (error) {
+//       console.error("Error saving/unsaving itinerary:", error);
+//       throw error;
+//     }
+//   };
+
+  export const toggleSaveItinerary = async (touristId: string,itineraryId: string): Promise<any> => {
     try {
-      const response = await axios.post( `http://localhost:8000/tourist/saveItinerary/${touristId}/${itineraryId}`,
-        { save } // Pass the save/unsave state in the request body
-      );
-      return response.data.savedItineraries; // Return the updated saved itineraries list
-    } catch (error) {
+      const response = await axios.post( `http://localhost:8000/tourist/toggleSaveItinerary/${touristId}/${itineraryId}`);
+      return response.data; // Return the updated saved itineraries list
+    } catch (error: any) {
       console.error("Error saving/unsaving itinerary:", error);
-      throw error;
+      throw error.response?.data || error.message;
     }
   };
 
@@ -310,7 +320,18 @@ export const saveOrUnsaveItineraryApi = async (touristId: string,itineraryId: st
     }
   };
   
-// Fetch all saved events for a tourist
+  export const checkIfSaved = async (touristId: string, itineraryId: string) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/tourist/isItinerarySaved/${touristId}/${itineraryId}`
+      );
+      return response.data.isSaved;
+    } catch (error) {
+      console.error("Error checking if itinerary is saved:", error);
+      throw error;
+    }
+  };
+  // Fetch all saved events for a tourist
 export const viewAllSavedEventsApi = async (touristId: string): Promise<any> => {
     try {
       const response = await axios.get(`http://localhost:8000/tourist/viewAllSavedEvents/${touristId}`);
