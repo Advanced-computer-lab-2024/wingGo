@@ -78,9 +78,9 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
               case "/shop-details":
                 return <ShopHeader />;
               case "/sign-up":
-                return <HeaderSix />;
+                return <HeaderOne />;
               case "/sign-in":
-                return <HeaderSix />;
+                return <HeaderOne />;
               case "/forgot":
                 return <HeaderSix />;
               case "/otp":
