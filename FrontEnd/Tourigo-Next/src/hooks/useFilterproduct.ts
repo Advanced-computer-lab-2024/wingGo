@@ -13,6 +13,8 @@ export const useFilter = (start: number, end: number) => {
     };
     fetchProducts();
   }, []);
+  
+  
 
   const { filterRange, niceSelectData } = useGlobalContext();
 

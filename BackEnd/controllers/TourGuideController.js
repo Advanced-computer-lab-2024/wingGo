@@ -168,56 +168,45 @@ const updateTourGuideProfile = async (req, res) => {
 };
 
 const createItinerary = async (req, res) => {
+    const { tourGuideId, title, activities, locations, timeline, duration, language, price, availableDates, accessibility, pickupLocation, dropoffLocation, bookings , tags} = req.body;
+
     try {
-      const {
-        tourGuideId,
-        title,
-        activities,
-        timeline,
-        duration,
-        language,
-        price,
-        pickupLocation,
-        dropoffLocation,
-      } = req.body;
-  
-      // Safely parse JSON fields
-      const locations = req.body.locations ? JSON.parse(req.body.locations) : [];
-      const availableDates = req.body.availableDates ? JSON.parse(req.body.availableDates) : [];
-      const tags = req.body.tags ? JSON.parse(req.body.tags) : [];
-  
-      // Validate uploaded file
-      if (!req.file) {
-        return res.status(400).json({ error: "Image file is required." });
-      }
-  
-      const photoUrl = req.file.path; // Use correct file path
-  
-      // Validate if tour guide exists
-      const tourGuideExists = await TourGuide.findById(tourGuideId);
-      if (!tourGuideExists) {
-        return res.status(400).json({ error: "Invalid tourGuideId. Tour guide not found." });
-      }
-  
-      // Save the new itinerary
-      const newItinerary = new Itinerary({
-        tourGuideId,
-        title,
-        activities,
-        locations,
-        timeline,
-        duration,
-        language,
-        price,
-        availableDates,
-        pickupLocation,
-        dropoffLocation,
-        tags,
-        photo: photoUrl,
-      });
-  
-      await newItinerary.save();
-      res.status(201).json(newItinerary);
+        // Validate if tourGuideId exists in the TourGuide collection
+        const tourGuideExists = await TourGuide.findById(tourGuideId);
+        if (!tourGuideExists) {
+            return res.status(400).json({ error: 'Invalid tourGuideId. Tour guide not found.' });
+        }
+        if (!tourGuideExists.termsAccepted) {
+            return res.status(403).json({ error: 'Terms and conditions must be accepted to create an itinerary.' });
+        }
+
+        let photoUrl = null;
+        if(req.file){
+            photoUrl = req.file.location;
+        }
+
+
+        // Create and save the new itinerary without latitude and longitude
+        const newItinerary = new Itinerary({
+            tourGuideId,
+            title,
+            activities,
+            locations,
+            timeline,
+            duration,
+            language,
+            price,
+            availableDates,
+            accessibility,
+            pickupLocation,
+            dropoffLocation,
+            bookings,
+            tags,
+            photo: photoUrl,
+        });
+
+        await newItinerary.save();
+        res.status(201).json(newItinerary);
     } catch (error) {
       console.error("Error creating itinerary:", error);
       res.status(400).json({ error: error.message });

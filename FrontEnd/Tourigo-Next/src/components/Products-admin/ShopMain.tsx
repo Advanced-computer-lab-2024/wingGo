@@ -51,7 +51,7 @@ const ShopMain = () => {
         )
         : data;
         // Apply the mapData logic to filter out archived products
-      const mapData = finalFilteredData.filter((item) => !item.archive);
+      const mapData = finalFilteredData;
 
       // Apply sorting after fetching and filtering
       const sortedData = sortData(mapData, sortOption);
@@ -124,7 +124,7 @@ const ShopMain = () => {
                         classItem="col-xxl-4 col-xl-4 col-lg4 col-md-4 col-sm-6"
                         key={index}
                         item={item}
-                        userRole="Tourist"
+                        userRole="Admin"
                       />
                     ))}
                   </div>

@@ -150,7 +150,11 @@ const createActivity = async (req, res) => {
         if (!advertiserRecord.termsAccepted) {
             return res.status(403).json({ error: 'Terms and conditions must be accepted to create an activity.' });
         }
-        const photoUrl = req.file.location;
+
+        let photoUrl = null;
+        if (req.file) {
+            photoUrl = req.file.location;
+        }
         console.log(photoUrl);
 
 
