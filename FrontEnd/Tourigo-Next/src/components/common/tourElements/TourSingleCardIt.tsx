@@ -12,6 +12,7 @@ import axios from "axios";
 import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked,saveOrUnsaveItineraryApi } from '@/api/itineraryApi';
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
+import { fetchItImage } from "@/api/itineraryApi";
 
 
 
@@ -41,9 +42,11 @@ const TourSingleCard = ({
   // Local state to keep track of the flagged and deactivated status
   const [isFlagged, setIsFlagged] = useState(tour.flagged);
   const [isDeactivated, setIsDeactivated] = useState(tour.deactivated);
-
+  const DEFAULT_IMAGE = "/assets/images/Itinerary.png";
+  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
   const [isBooked, setIsBooked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+ 
  
 
 
@@ -93,6 +96,23 @@ const TourSingleCard = ({
   
     fetchSavedStatus();
   }, [tour._id, tour.touristIDs]);
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        if (tour._id && tour.photo) { // Check if the item has an image
+          const url = await fetchItImage(tour._id);
+          if (url) {
+            console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
+            setImageUrl(url);
+            console.log(imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load image:", error);
+      }
+    };
+    loadImage();
+  }, [tour._id, tour.photo,imageUrl]);
   
   
   const handleFlagItinerary = async () => {
@@ -158,12 +178,14 @@ const TourSingleCard = ({
               <div className="tour-thumb image-overly">
                 <Link href={`/it-details/${tour._id}`}>
                   <Image
-                    src="/assets/images/Itinerary.png"
+                    src={imageUrl}
                     loader={imageLoader}
                     width={370}
                     height={370}
                     style={{ width: "100%", height: "auto" }}
                     alt="Itinerary Image"
+                    unoptimized 
+                    
                   />
                 </Link>
               </div>
