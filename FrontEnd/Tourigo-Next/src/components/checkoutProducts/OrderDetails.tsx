@@ -1,31 +1,112 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import SelectPaymentType from "./SelectPaymentType";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useRouter } from "next/navigation";
-const OrderDetails = () => {
+import { getOrderDetails,getProductById } from '@/api/cartApi';
+import { Product } from '@/interFace/interFace';
+import {fetchCartTotalPrice,getDiscountByCode} from '@/api/cartApi'
+
+interface SelectPaymentTypeProps {
+  
+  promoCode: string | null;
+  orderId:string| null;
+}
+const OrderDetails : React.FC<SelectPaymentTypeProps> = ({ promoCode,orderId}) => {
   const router = useRouter();
-  const [total, setTotal] = useState(0);
-  const [shipingAmount, setShipingAmount] = useState(0);
-  const [shipingTitle, setShipingTitle] = useState("");
-  const cartProducts = useSelector(
-    (state: RootState) => state.cart.cartProducts
-  );
-  const totalPrice = cartProducts.reduce(
-    (total, product) => total + (product.price ?? 0) * (product.quantity ?? 0),
-    0
-  );
-  const handleExtraMoney = (extra: number, text: string) => {
-    setTotal(totalPrice + extra);
-    setShipingTitle(text);
-    setShipingAmount(extra);
-  };
-  const handleSubmit = () => {
-    const shipingInfo = `${shipingTitle} ${shipingAmount}`;
-    localStorage.setItem("Shiping Info", shipingInfo);
-    router.push("/order");
-  };
+  const [total, setTotal] = useState<number>(0); // Explicitly define type
+  const [items, setItems] = useState<any[]>([]); // Use any[] or define a proper type for products
+  const [shippingAmount, setShippingAmount] = useState<number>(0);
+  const [shippingTitle, setShippingTitle] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [discount, setDiscount] = useState<number>(0);
+  const [subtotal, setSubtotal] = useState<number>(0);
+  
+
+
+  // const subtotal = items.reduce(
+  //   (total, product) => total + (product.price ?? 0) * (product.amount ?? 0),
+  //   0
+  // );
+
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      try {
+       
+        const orderData = await getOrderDetails(orderId); // Fetch order details
+        const products = orderData.products; // Extract product array from the order
+        
+        if (products && products.length > 0) {
+          const detailedProducts = await Promise.all(
+            products.map(async (item: any) => {
+              const productDetails = await getProductById(item.productId);
+              return {
+                ...item,
+                product: productDetails, // Add detailed product data
+              };
+            })
+          );
+
+          setItems(detailedProducts);
+          console.log(detailedProducts);
+          const orderTotal = detailedProducts.reduce(
+            (sum, item) => sum + (item.product.price || 0) * (item.quantity || 1),
+            0
+          );
+          const sub = detailedProducts.reduce(
+            (sum, item) => sum + (item.product.price || 0) * (item.quantity || 1),
+            0
+          );
+          setSubtotal(orderTotal);
+         
+
+         
+        }
+      } catch (error) {
+        console.error("Error fetching order details:", error);
+        alert("Failed to fetch order details. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderDetails();
+  }, []);
+  useEffect(() => {
+    const fetchDiscount = async () => {
+      if (promoCode) {
+        try {
+          const discountValue = await getDiscountByCode(promoCode); // Fetch discount using the promo code
+          setDiscount(subtotal*((discountValue)/100)); // Set the discount value
+          // console.log("Discount fetched successfully:", discount);
+          setTotal(((100-discountValue)/100)*subtotal);
+          console.log("Discount fetched successfully:",discountValue );
+         
+        } catch (error) {
+          console.error("Error fetching discount:", error);
+          alert("Failed to fetch discount. Please check the promo code.");
+        }
+      }
+    };
+
+    fetchDiscount();
+  }, [promoCode,subtotal,discount]);
+
+  
+
+  // const handleExtraMoney = (extra: number, text: string) => {
+  //   setTotal((prevTotal) => prevTotal + extra);
+  //   setShipingTitle(text);
+  //   setShipingAmount(extra);
+  // };
+
+  // const handleSubmit = () => {
+  //   const shippingInfo = `${shipingTitle} ${shipingAmount}`;
+  //   localStorage.setItem("Shipping Info", shippingInfo);
+  //   router.push("/order");
+  // };
+
   return (
     <>
       <div className="col-lg-5">
@@ -38,43 +119,37 @@ const OrderDetails = () => {
                 <h4>Total</h4>
               </li>
 
-              {cartProducts?.length ? (
+              {items?.length > 0 ? (
                 <>
-                  {cartProducts?.map((item, index) => {
-                    const totalAmount = item?.price * item?.quantity;
+                  {items.map((item, index) => {
+                    const totalAmount = item.price * item.quantity;
                     return (
                       <li key={index} className="order-info-list-desc">
                         <p>
-                          {item?.title} <span> x {item?.quantity}</span>
+                          {item.product.name} <span> x {item.quantity}</span>
                         </p>
-                        <span>${totalAmount}</span>
+                        <span>${totalAmount.toFixed(2)}</span>
                       </li>
                     );
                   })}
                 </>
               ) : (
-                <>
-                  <li className="order-info-list-desc">
-                    <p>
-                      Tourigo Short sleeve t-shirts <span> x 1</span>
-                    </p>
-                    <span>$499:00</span>
-                  </li>
-                  <li className="order-info-list-desc">
-                    <p>
-                      Tourigo Backpack - 21L <span> x 1</span>
-                    </p>
-                    <span>$999:00</span>
-                  </li>
-                </>
+                <li className="order-info-list-desc">
+                  <p>No items in your order.</p>
+                </li>
               )}
 
               <li className="order-info-list-subtotal">
                 <span>Subtotal</span>
-                <span>${totalPrice.toFixed(2)}</span>
+                <span>${subtotal.toFixed(2)}</span>
               </li>
 
-              <li className="order-info-list-shipping">
+              <li className="order-info-list-subtotal">
+                <span>Discount</span>
+                <span>- ${discount.toFixed(2)}</span>
+              </li>
+
+              {/* <li className="order-info-list-shipping">
                 <span>Shipping</span>
                 <div className="order-info-list-shipping-item d-flex flex-column align-items-start">
                   <span>
@@ -82,7 +157,7 @@ const OrderDetails = () => {
                       id="flat_rate"
                       type="radio"
                       name="shipping"
-                      onChange={() => handleExtraMoney(20, "Flat Rate")}
+                      // onChange={() => handleExtraMoney(20, "Flat Rate")}
                     />
                     <label htmlFor="flat_rate">
                       Flat rate: <span>$20.00</span>
@@ -93,7 +168,7 @@ const OrderDetails = () => {
                       id="local_pickup"
                       type="radio"
                       name="shipping"
-                      onChange={() => handleExtraMoney(25, "Local Pickup")}
+                      // onChange={() => handleExtraMoney(25, "Local Pickup")}
                     />
                     <label htmlFor="local_pickup">
                       Local pickup: <span>$25.00</span>
@@ -104,42 +179,29 @@ const OrderDetails = () => {
                       id="free_shipping"
                       type="radio"
                       name="shipping"
-                      onChange={() => handleExtraMoney(0, "Free Shipping")}
+                      // onChange={() => handleExtraMoney(0, "Free Shipping")}
                     />
                     <label htmlFor="free_shipping">Free shipping</label>
                   </span>
                 </div>
-              </li>
+              </li> */}
 
               <li className="order-info-list-total">
                 <span>Total</span>
-                <span>
-                  ${total > 0 ? total.toFixed(2) : totalPrice.toFixed(2)}
-                </span>
+                <span> ${total > 0 ? total.toFixed(2) : subtotal.toFixed(2)}</span>
               </li>
             </ul>
           </div>
-          <div className="checkout-payment">
-            <SelectPaymentType />
-          </div>
-          <div className="checkout-agree">
+          
+          {/* <div className="checkout-agree">
             <div className="checkout-option mb-15">
               <input id="read_all" type="checkbox" />
               <label htmlFor="read_all">
-                I have read and agree to the website.
+                I have read and agree to the website terms.
               </label>
             </div>
-          </div>
-          <div className="checkout-btn-wrapper">
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              className="bd-primary-btn btn-style is-bg radius-60 w-100"
-            >
-              <span className="bd-primary-btn-text">Place Order</span>
-              <span className="bd-primary-btn-circle"></span>
-            </button>
-          </div>
+          </div> */}
+          
         </div>
       </div>
     </>

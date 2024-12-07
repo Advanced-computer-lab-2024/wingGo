@@ -44,3 +44,34 @@ export const updatePlace = async (id:string, governorId:string, updatedData:any)
         throw error;
     }
 };
+
+// Fetch distinct tags for places
+export const fetchDistinctTags = async (): Promise<string[]> => {
+    try {
+      const response = await axios.get(`${API_URL}/places/tags`);
+      console.log("Distinct tags fetched successfully:", response.data);
+      return response.data.distinctTags; // Return the array of distinct tags
+    } catch (error: any) {
+      console.error("Error fetching distinct tags:", error.response?.data || error.message);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch distinct tags. Please try again."
+      );
+    }
+  };
+
+  
+  export const filterPlaces = async (filters: { 
+    
+    tag?:string;
+    
+    
+}): Promise<any[]> => {
+    try {
+        const response = await axios.get(`http://localhost:8000/tourist/filterPlacesByTag`, { params: filters });
+        console.log("tag is",filters);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching filtered places:", error);
+        throw error;
+    }
+};

@@ -150,6 +150,17 @@ router.put('/toggleNotificationPreference/:touristId', touristController.toggleN
 router.get('/filteractivitiesdate/:touristId', touristController.getFilteredActivities);
 
 router.get('/itineraryPrice/:itineraryId', touristController.getPrice);
+router.get('/cartItemsPrice/:touristId', touristController.getCartTotalPrice);
+
+router.get('/product/:id', touristController.getProductById);
+router.get('/getDiscount/:code', touristController.getDiscountByCode);
+
+router.get("/deliveryAddresses/:touristId", touristController.getDeliveryAddresses);
+
+router.get('/places/tags', touristController.getPlacesTags);
+
+
+
 
 router.get('/activityPrice/:activityId', touristController.calculateActivityPrice);
 
