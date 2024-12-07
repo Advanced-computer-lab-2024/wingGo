@@ -124,9 +124,9 @@ const OrderDetails = () => {
           </ul>
         </div>
         
-        <div className="checkout-payment">
-          <SelectPaymentType /> {/* Payment selection component */}
-        </div>
+        {/* <div className="checkout-payment">
+          <SelectPaymentType /> {/* Payment selection component 
+        </div> */}
         
         <div className="checkout-agree">
           <div className="checkout-option mb-15">

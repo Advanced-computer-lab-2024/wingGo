@@ -1,3 +1,4 @@
+"use client";
 import BookingMain from "@/components/booking-it/BookingMain";
 import MetaData from "@/hooks/useMetaData";
 import Wrapper from "@/layout/DefaultWrapper";

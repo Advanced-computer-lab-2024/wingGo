@@ -68,28 +68,32 @@ const OrderDetails = ({ id }: idTypeNew) => {
             Order Number: {order.orderId}
           </h3>
 
-          <div className="row mb-4">
-            <div className="col-md-6">
-              <p className="order-status">
+          <div className="row mb-4 align-items-center">
+            <div className="col-md-6 d-flex align-items-center">
+              <p className="order-status mb-0 me-4">
                 <strong>Status: </strong>
                 <span className={`badge ${order.orderStatus === "delivered" ? "bg-success" : "bg-warning"}`}>
                   {order.orderStatus}
                 </span>
               </p>
-            </div>
-            <div className="col-md-6">
-              <p className="payment-status">
+            
+            
+              <p className="payment-status mb-0">
                 <strong>Payment Status: </strong>
                 <span className={`badge ${order.paymentStatus === "paid" ? "bg-success" : "bg-danger"}`}>
                   {order.paymentStatus}
                 </span>
               </p>
+              </div>
+              <div className="col-md-6 d-flex justify-content-end">
                        {/* Cancel Order Button */}
-                       {order.orderStatus !== "cancelled" && (
+                       {order.orderStatus !== "delivered" && order.orderStatus !== "cancelled" && (
                 <button
                   className="bd-primary-btn btn-style radius-60"
                   onClick={handleCancelOrder}
-                  disabled={order.orderStatus === "delivered"}
+                  style={{
+                    marginLeft: "-10px", // Adjust left margin to slightly move the button closer
+                  }}
                 >
                   Cancel Order
                 </button>

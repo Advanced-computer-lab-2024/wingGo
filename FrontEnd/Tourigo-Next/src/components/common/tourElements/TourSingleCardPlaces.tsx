@@ -74,15 +74,18 @@ const TourSingleCard = ({
                 </Link>
               </h5>
               <p>{tour.description}</p>
-              <span className="tour-price b3">
+              {/* <span className="tour-price b3">
                 {currency} {convertedPrice?.toLocaleString("en-US") || tour.ticketPrices.foreigner.toLocaleString("en-US")} for foreigners
-              </span>
+              </span> */}
               <div className="tour-divider"></div>
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
                 <div className="time d-flex align-items-center gap--5">
                   <i className="fa-regular fa-clock"></i>
                   <span>{tour.openingHours}</span>
+                </div>
+                <div className="tour-btn">
+                  
                 </div>
               </div>
             </div>

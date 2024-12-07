@@ -62,10 +62,13 @@ const OrdersList = () => {
                                                                 Order Number: {order.orderId}
                                                                 </Link>
                                                                 </h5>
+                                                                
                                                                 <p>Status: {order.orderStatus}</p>
-                                                                <div>
-                                                            <p>Total Price: {order.totalPrice}</p>
-                                                            </div>
+                                                               
+                                                                <p> Payment Method: {order.paymentMethod } </p>
+           
+                                                                <p>Total Price: {order.totalPrice}</p>
+                                                           
                                                             </div>
                                                         </div>
                                                     </td>

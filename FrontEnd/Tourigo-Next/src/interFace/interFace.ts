@@ -619,7 +619,8 @@ export interface Order {
   paymentStatus: 'notPaid' | 'paid'; 
   orderStatus: 'cancelled' | 'confirmed' | 'preparing' | 'delivering' | 'delivered';
   buyer: string; 
-  totalPrice: number; 
+  totalPrice: number;
+  paymentMethod:String; 
 }
 
 export interface TourGuideSales {
