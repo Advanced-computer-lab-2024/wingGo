@@ -17,6 +17,15 @@ const SavedEventsGrid = () => {
   const [savedActivities, setSavedActivities] = useState<Activity[]>([]);
   const [savedItineraries, setSavedItineraries] = useState<Itinerary[]>([]);
 
+  const removeUnsavedItinerary = (itineraryId: string) => {
+    setSavedItineraries((prev) => prev.filter((itinerary) => itinerary._id !== itineraryId));
+  };
+  
+  const removeUnsavedActivity = (activityId: string) => {
+    setSavedActivities((prev) => prev.filter((activity) => activity._id !== activityId));
+  };
+  
+
   useEffect(() => {
     const fetchSavedEvents = async () => {
       try {
@@ -76,6 +85,7 @@ const SavedEventsGrid = () => {
                     className="col-xxl-4 col-xl-6 col-lg-6 col-md-6"
                     tourWrapperClass="tour-wrapper style-one"
                     isparentClass={true}
+                    onUnsaved={removeUnsavedItinerary} // Add this line
                   />
                 ))}
           {savedActivities.map((activity) => (
@@ -85,8 +95,16 @@ const SavedEventsGrid = () => {
               className="col-xxl-4 col-xl-6 col-lg-6 col-md-6"
               tourWrapperClass="tour-wrapper style-one"
               isparentClass={true}
+              onUnsaved={removeUnsavedActivity}
             />
           ))}
+
+          {(savedItineraries.length === 0 && savedActivities.length === 0) && (
+              <div className="no-saved-events-message" style={{ textAlign: "center", marginTop: "20px", fontSize: "18px", color: "gray", paddingLeft: "20px" }}>
+                No saved events yet...
+              </div>
+          )}
+
 
 
               </div>
