@@ -717,5 +717,17 @@ export interface TouristReportOfAdvertiser {
   };
 }
 
+export interface PromoCode {
+  _id: string; 
+  code: string; 
+  discount: number; 
+  startDate: string; 
+  endDate: string; 
+  isActive: boolean; 
+  description?: string; 
+  touristId: string; 
+
+}
+
 
 
