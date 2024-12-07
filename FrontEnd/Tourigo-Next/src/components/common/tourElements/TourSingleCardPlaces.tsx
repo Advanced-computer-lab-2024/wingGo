@@ -49,15 +49,14 @@ const TourSingleCard = ({
                   <Image
                     src={tour.pictures[0] || "/images/default-image.jpg"}
                     loader={imageLoader}
+                    width={370}
+                    height={270}
                     style={{ width: "100%", height: "auto" }}
                     alt={tour.name}
                   />
                 </Link>
               </div>
               <div className="tour-meta d-flex align-items-center justify-content-between">
-                <button className="tour-favorite tour-like">
-                  <i className="icon-heart"></i>
-                </button>
                 <div className="tour-location">
                   <span>
                     <Link href={`/place-details/${tour._id}`}>
@@ -84,21 +83,6 @@ const TourSingleCard = ({
                 <div className="time d-flex align-items-center gap--5">
                   <i className="fa-regular fa-clock"></i>
                   <span>{tour.openingHours}</span>
-                </div>
-                <div className="tour-btn">
-                  <button
-                    onClick={() => setModalData(tour)}
-                    className="bd-text-btn style-two"
-                    type="button"
-                    data-bs-toggle="modal"
-                    data-bs-target="#popUpBookingForm"
-                  >
-                    Book Now
-                    <span className="icon__box">
-                      <i className="fa-regular fa-arrow-right-long icon__first"></i>
-                      <i className="fa-regular fa-arrow-right-long icon__second"></i>
-                    </span>
-                  </button>
                 </div>
               </div>
             </div>

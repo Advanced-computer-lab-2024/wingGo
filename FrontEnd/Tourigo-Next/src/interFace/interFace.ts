@@ -675,4 +675,40 @@ export interface SellerSales {
   };
 }
 
+export interface TouristReportOfGuide {
+  success: boolean;
+  data: {
+    itineraries: {
+      details: {
+        name: string; // Name of the itinerary
+        totalTourists: number; // Total number of tourists for this itinerary
+        details: {
+          touristId: string; // ID of the tourist
+          bookingDate: string; // Booking date in ISO format
+          numberOfPeople: number; // Number of people in the booking
+        }[]; // Array of tourist booking details
+      }[];
+      totalTourists: number; // Total number of tourists across all itineraries
+    };
+  };
+}
+export interface TouristReportOfAdvertiser {
+  success: boolean;
+  data: {
+    activities: {
+      details: {
+        name: string; // Name of the activity
+        soldDate: string; // Date of the activity sale
+        totalTourists: number; // Total number of tourists for this activity
+        details: {
+          numberOfPeople: number; // Number of people in a specific booking
+          soldDate: string; // Date of the sale for this specific booking
+        }[]; // Array of detailed bookings
+      }[];
+      totalTourists: number; // Total number of tourists across all activities
+    };
+  };
+}
+
+
 
