@@ -4436,6 +4436,25 @@ const checkIfSaved = async (req, res) => {
     }
 };
 
+const checkIfActivitySaved = async (req, res) => {
+    try {
+      const { touristId, activityId } = req.params;
+  
+      // Fetch the tourist and check if the activity is in their savedActivities
+      const tourist = await Tourist.findById(touristId);
+      if (!tourist) {
+        return res.status(404).json({ message: "Tourist not found" });
+      }
+  
+      const isSaved = tourist.savedActivities.includes(activityId);
+      res.status(200).json({ isSaved });
+    } catch (error) {
+      console.error("Error checking if activity is saved:", error);
+      res.status(500).json({ message: "An error occurred", error });
+    }
+  };
+  
+
 module.exports = {
     tourist_hello,
     orderDetails,
@@ -4535,5 +4554,6 @@ module.exports = {
     getDeliveryAddresses,
     getPlacesTags,
     getSavedItineraries,
-    checkIfSaved
+    checkIfSaved,
+    checkIfActivitySaved
 };

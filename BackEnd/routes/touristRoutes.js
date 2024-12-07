@@ -168,5 +168,8 @@ router.get('/savedItineraries/:touristId', touristController.getSavedItineraries
 
 router.get('/isItinerarySaved/:touristId/:itineraryId', touristController.checkIfSaved);
 
+router.get('/isActivitySaved/:touristId/:activityId', touristController.checkIfActivitySaved);
+
+
 
 module.exports = router;

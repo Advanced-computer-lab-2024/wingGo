@@ -230,3 +230,16 @@ export const saveOrUnsaveActivityApi = async (activityId: string, save: boolean)
       throw error;
     }
   };
+
+  export const checkIfActivitySaved = async (touristId: string, activityId: string) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/tourist/isActivitySaved/${touristId}/${activityId}`
+      );
+      return response.data.isSaved;
+    } catch (error) {
+      console.error("Error checking if activity is saved:", error);
+      throw error;
+    }
+  };
+  
