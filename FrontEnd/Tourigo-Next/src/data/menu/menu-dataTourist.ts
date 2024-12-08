@@ -12,13 +12,18 @@ const menu_data: MenuType[] = [
   {
     id: 2,
     hasDropdown: true,
-    active: true,
-    megaMenu: true,
     children: true,
+    megaMenu: true,
+    active: true,
     title: "Products",
     pluseIncon: true,
-    link: "/Products",
-   
+    lastDropdown: true,
+    link: "#",
+    submenus: [
+      { title: "Cart", link: "/cartItems" },
+      { title: "Wishlist", link: "/wishlist-tourist" },
+      { title: "Shop", link: "/Products" },
+    ],
   },
   {
     id: 3,

@@ -110,9 +110,8 @@ const TermsConditions: React.FC<Props> = ({ profileData, id, setRefreshTerms}) =
                                     {!(profileData?.termsAccepted) ? (
                                         <button
                                         onClick={acceptTerms}
-                                        className="bd-primary-btn btn-style has-arrow radius-60 "
+                                        className="bd-primary-btn btn-style radius-60 mt-20"
                                     >
-                                
                                         <span className="bd-primary-btn-text">Accept Terms & Conditions</span>
                                         <span className="bd-primary-btn-circle"></span>
                                         
