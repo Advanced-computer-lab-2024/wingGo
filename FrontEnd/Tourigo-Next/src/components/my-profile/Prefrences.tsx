@@ -82,7 +82,7 @@ const Prefrences: React.FC<Props> = ({profileData, id, setPrefrenceRefresh}) => 
     try {
       const updatedPreference = !notifyOnInterest;
       setNotifyOnInterest(updatedPreference); // Optimistic update
-      await toggleNotificationPreferenceApi(id, updatedPreference);
+      await toggleNotificationPreferenceApi(updatedPreference);
       toast.success(`Notifications ${updatedPreference ? 'enabled' : 'disabled'} successfully!`);
     } catch (error) {
       setNotifyOnInterest((prev) => !prev); // Revert state if API fails

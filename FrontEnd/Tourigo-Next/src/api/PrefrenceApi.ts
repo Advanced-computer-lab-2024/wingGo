@@ -1,4 +1,17 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+import { toast } from "sonner";
+
+
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+//   iat: number; // Add this if included in the token payload
+}
+
 
 const API_URL = 'http://localhost:8000';
 const touristId = "67240ed8c40a7f3005a1d01d";
@@ -56,28 +69,81 @@ export const getAllPreferenceTags = async (): Promise<Array<any>> => {
   }
 };
 
+// export const toggleNotificationPreferenceApi = async (
+//   touristId: string,
+//   notifyOnInterest: boolean
+// ) => {
+//   try {
+//     const response = await axios.put(
+//       `http://localhost:8000/tourist/toggleNotificationPreference/${touristId}`,
+//       { notifyOnInterest }
+//     );
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error toggling notification preference:', error);
+//     throw error;
+//   }
+// };
+
 export const toggleNotificationPreferenceApi = async (
-  touristId: string,
   notifyOnInterest: boolean
 ) => {
   try {
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
+    }
+
+    // Decode the token to extract the tourist ID
+    let touristId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      touristId = decodedToken.id; // Extract the tourist ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Perform the API call with the extracted tourist ID
     const response = await axios.put(
       `http://localhost:8000/tourist/toggleNotificationPreference/${touristId}`,
       { notifyOnInterest }
     );
     return response.data;
   } catch (error) {
-    console.error('Error toggling notification preference:', error);
+    console.error("Error toggling notification preference:", error);
     throw error;
   }
 };
 
 export const getTouristNotificationsApi = async () => {
   try {
-    const response = await axios.get(`http://localhost:8000/tourist/notifications/${touristId}`);
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
+    }
+
+    // Decode the token to extract the tourist ID
+    let touristId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      touristId = decodedToken.id; // Extract the tourist ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Perform the API call with the extracted tourist ID
+    const response = await axios.get(
+      `http://localhost:8000/tourist/notifications/${touristId}`
+    );
     return response.data.notifications;
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    console.error("Error fetching notifications:", error);
     throw error;
   }
 };
