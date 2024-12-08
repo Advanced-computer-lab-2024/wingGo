@@ -6,9 +6,7 @@ const WishlistMain = () => {
   return (
     <>
       <Breadcrumb titleOne="Wishlist" titleTwo="Wishlist" />
-      <WishlistArea 
-      
-      />
+      <WishlistArea />
     </>
   );
 };

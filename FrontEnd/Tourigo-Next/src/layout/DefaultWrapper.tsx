@@ -94,23 +94,7 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
             }
           })()}
           {children}
-          {(() => {
-            switch (pathName) {
-              case "/":
-                return <FooterArea />;
-              case "/home":
-                return <FooterOne />;
-              case "/home-two":
-                return <FooterTwo />;
-              case "/home-three":
-                return <FooterAreaThree />;
-              case "/home-five":
-                return <FooterAreaFive />;
-
-              default:
-                return <FooterAreaFour />;
-            }
-          })()}
+ 
           <BacktoTop />
         </>
       )}

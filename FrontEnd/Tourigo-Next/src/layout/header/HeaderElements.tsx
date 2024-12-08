@@ -40,25 +40,7 @@ const HeaderElements = () => {
                   <div className="header-action d-flex align-items-center">
                     <div className="header-btn-wrap d-flex align-items-center h-gap-55">
                       <div className="d-none d-sm-inline-flex h-gap-55">
-                        <div className="header-currency-item header-currency">
-                          <span
-                            className="header-currency-toggle"
-                            id="header-currency-toggle"
-                          >
-                            USD
-                          </span>
-                          <ul>
-                            <li>
-                              <Link href="#">KWD</Link>
-                            </li>
-                            <li>
-                              <Link href="#">GBP</Link>
-                            </li>
-                            <li>
-                              <Link href="#">EUR</Link>
-                            </li>
-                          </ul>
-                        </div>
+                     
                       </div>
                       <div className="d-flex h-gap-55">
                         <div className="d-xxs-none">
