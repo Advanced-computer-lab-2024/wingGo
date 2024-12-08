@@ -1,38 +1,63 @@
-//@refresh
 "use client";
 import React, { useEffect, useState } from "react";
 if (typeof window !== "undefined") {
   require("bootstrap/dist/js/bootstrap");
 }
 import { usePathname } from "next/navigation";
-import HeaderOne from "./header/HeaderOne";
 import { animationCreate } from "@/utils/utils";
-import HeaderArea from "./header/HeaderArea";
+import HeaderOne from "./header/HeaderOne";
+import HeaderTwo from "./header/HeaderTwo";
+import HeaderThree from "./header/HeaderThree";
+import HeaderFour from "./header/HeaderFour";
+import HeaderFive from "./header/HeaderFive";
+import HeaderSeven from "./header/HeaderSeven";
+import Headereight from "./header/Headereight";
 import FooterArea from "./footer/FooterArea";
 import FooterOne from "./footer/FooterOne";
-import HeaderTwo from "./header/HeaderTwo";
-import Headereight from "./header/Headereight";
 import FooterTwo from "./footer/FooterTwo";
-import HeaderThree from "./header/HeaderThree";
 import FooterAreaThree from "./footer/FooterAreaThree";
-import HeaderFour from "./header/HeaderFour";
 import FooterAreaFour from "./footer/FooterAreaFour";
-import HeaderFive from "./header/HeaderFive";
 import FooterAreaFive from "./footer/FooterAreaFive";
-import TourListingHeader from "./header/TourListingHeader";
-import ShopHeader from "./header/ShopHeader";
-import HeaderSix from "./header/HeaderSix";
-import HeaderSeven from "./header/HeaderSeven";
 import BacktoTop from "@/elements/backToTop/BacktoTop";
 import SidebarMain from "./header/components/Sidebar/SidebarMain";
 import HeaderDashboard from "./HeaderDashboard";
 import Preloader from "@/components/common/Preloader";
+import Cookies from "js-cookie";
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  username: string;
+  id: string;
+  role: string;
+  mustChangePassword: boolean;
+}
+
 interface WrapperProps {
   children: React.ReactNode;
 }
+
 const Wrapper: React.FC<WrapperProps> = ({ children }) => {
   const pathName = usePathname();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [role, setRole] = useState<string | null>(null);
+
+  // Decode the token and set the role
+  useEffect(() => {
+    const token = Cookies.get("token"); // Retrieve the token from cookies
+    if (token) {
+      try {
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        console.log('Decoded Token:', decodedToken);
+        setRole(decodedToken.role); // Extract the role
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        setRole(null); // Fallback if token is invalid
+      }
+    } else {
+      setRole(null); // No token found
+    }
+  }, []);
+
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
       setIsLoading(false);
@@ -46,6 +71,27 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
       animationCreate();
     }, 2000);
   }, []);
+
+  // Function to determine the header based on role
+  const renderHeader = () => {
+    switch (role) {
+      case "Tourist":
+        return <HeaderTwo />;
+      case "Admin":
+        return <HeaderSeven />;
+      case "TourGuide":
+        return <HeaderThree />;
+      case "Advertiser":
+        return <HeaderFour />;
+      case "Seller":
+        return <HeaderFive />;
+      case "TourismGovernor":
+        return <Headereight />;
+      default:
+        return <HeaderOne />; // Default to HeaderOne if no role or token (Basically a guest)
+    }
+  };
+
   return (
     <>
       {isLoading ? (
@@ -55,46 +101,25 @@ const Wrapper: React.FC<WrapperProps> = ({ children }) => {
       ) : (
         <>
           <SidebarMain />
+          {renderHeader()} {/* Render header based on role */}
+          {children}
           {(() => {
             switch (pathName) {
               case "/":
-                return <HeaderArea />;
+                return <FooterArea />;
               case "/home":
-                return <HeaderOne />;
+                return <FooterOne />;
               case "/home-two":
-                return <HeaderTwo />;
+                return <FooterTwo />;
               case "/home-three":
-                return <HeaderThree />;
-              case "/home-four":
-                return <HeaderFour />;
+                return <FooterAreaThree />;
               case "/home-five":
-                return <HeaderFive />;
-                case "/home-eight":
-                return <Headereight />;
-              case "/shop":
-                return <ShopHeader />;
-              case "/shop-v2":
-                return <ShopHeader />;
-              case "/shop-details":
-                return <ShopHeader />;
-              case "/sign-up":
-                return <HeaderOne />;
-              case "/sign-in":
-                return <HeaderOne />;
-              case "/forgot":
-                return <HeaderSix />;
-              case "/otp":
-                return <HeaderSix />;
-              case "/dashboard":
-                return <HeaderDashboard />;
-              case "/home-six":
-                  return <HeaderSeven />;
+                return <FooterAreaFive />;
+
               default:
-                return <TourListingHeader />;
+                return <FooterAreaFour />;
             }
           })()}
-          {children}
- 
           <BacktoTop />
         </>
       )}
