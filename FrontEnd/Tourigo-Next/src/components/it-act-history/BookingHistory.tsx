@@ -16,6 +16,7 @@ import CancelConfirmationModal from "./CancelConfirmationModal"; // Import the n
 import { useCurrency } from "@/contextApi/CurrencyContext"; 
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
+import { toast } from "sonner";
 
 interface DecodedToken {
   username: string;
@@ -129,12 +130,15 @@ const BookingHistory = () => {
             setBookedItineraries((prev) =>
                 prev.filter((item) => item.itinerary._id !== bookingToCancel.itinerary._id)
             );
-            alert('Booking canceled successfully');
+            toast.success("Booking canceled successfully");
+            // alert('Booking canceled successfully');
         } catch (error: any) {
             if (error.response?.data?.message === 'Cannot cancel the itinerary within 48 hours of the booking date.') {
-                alert("Cannot cancel the itinerary within 48 hours of the booking date.");
+                // alert("Cannot cancel the itinerary within 48 hours of the booking date.");
+                toast.error("Cannot cancel the itinerary within 48 hours of the booking date"); 
             } else {
-                alert('Failed to cancel the booking');
+                toast.error("Failed to cancel the booking. Please try again later"); 
+                // alert('Failed to cancel the booking');
             }
         } finally {
             setShowCancelModal(false);
@@ -258,15 +262,18 @@ const BookingHistory = () => {
     
         try {
             await cancelActivityApi(booking._id);
-            alert('Booking canceled successfully');
+            // alert('Booking canceled successfully');
+            toast.success("Booking canceled successfully");
             setFilteredActivities((prev) =>
                 prev.filter((item) => item._id !== booking._id)
             );
         } catch (error: any) {
             if (error.response?.data?.message === 'Cannot cancel the activity within 48 hours of the booking date.') {
-                alert("Cannot cancel the activity within 48 hours of the booking date.");
+                // alert("Cannot cancel the activity within 48 hours of the booking date.");
+                toast.error("Cannot cancel the activity within 48 hours of the booking date."); 
             } else {
-                alert('Failed to cancel the booking');
+                toast.error("Failed to cancel the booking. Please try again later."); 
+                // alert('Failed to cancel the booking');
             }
         }
     };
