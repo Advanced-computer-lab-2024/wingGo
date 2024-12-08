@@ -7,6 +7,7 @@ import { fetchAllItineraries } from "@/api/itineraryApi"; // Adjust API call to 
 import { Itinerary } from "@/interFace/interFace";
 import Link from "next/link";
 import { idTypeNew } from "@/interFace/interFace";
+import { fetchItImage } from "@/api/itineraryApi";
 
 const BookingSidebar = ({ id }: idTypeNew) => {
   const [dateRange, setDateRange] = useState([null, null]);
@@ -15,6 +16,9 @@ const BookingSidebar = ({ id }: idTypeNew) => {
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const DEFAULT_IMAGE = "/assets/images/Itinerary.png";
+  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
+  
 
   const bookingProducts = useSelector(
     (state: RootState) => state.booking.bookingProducts
@@ -36,6 +40,23 @@ const BookingSidebar = ({ id }: idTypeNew) => {
     };
     fetchData();
   }, [id]);
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        if (data?._id && data?.photo) { // Check if the item has an image
+          const url = await fetchItImage(data._id);
+          if (url) {
+            console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
+            setImageUrl(url);
+            console.log(imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load image:", error);
+      }
+    };
+    loadImage();
+  }, [data?._id, data?.photo,imageUrl]);
 
   return (
     <>
@@ -46,11 +67,12 @@ const BookingSidebar = ({ id }: idTypeNew) => {
               <div className="booking-sidebar-widget-wrapper mb-30">
                 <div className="booking-sidebar-widget-thumb mb-15">
                   <Image
-                      src="/images/default-image.jpg"
+                      src={imageUrl}
                       loader={imageLoader}
                       alt="Itinerary Image"
                       width={500} // Adjust width as needed
                       height={300} // Adjust height as needed
+                      unoptimized
                     />
 
                 </div>

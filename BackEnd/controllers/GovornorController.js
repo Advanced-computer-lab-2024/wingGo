@@ -9,13 +9,16 @@ const bcrypt = require('bcrypt');
 // Create a new place
 const createPlace = async (req, res) => {
     try {
+        console.log('entered backend method');
         const { tagss, ...placeData } = req.body; // Extract tagss separately
         const governorId = req.query.governorId; // Assuming governorId is passed in the query
 
         // Validate the governor ID
         const governor = await Governor.findById(governorId);
         if (!governor) {
+            console.log('1');
             return res.status(404).json({ message: 'Governor not found' });
+          
         }
 
         // Process uploaded pictures (if any)
