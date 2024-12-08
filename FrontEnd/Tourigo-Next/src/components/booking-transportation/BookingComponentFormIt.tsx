@@ -24,7 +24,7 @@ interface FormData {
 const BookingComponentForm = ({ id }: idTypeNew) => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
   const [data, setData] = useState<Transport | null>(null);
-  const touristId = "67240ed8c40a7f3005a1d01d"; // Hardcoded tourist ID for testing
+  // const touristId = "67240ed8c40a7f3005a1d01d"; // Hardcoded tourist ID for testing
   const [paymentMethod, setPaymentMethod] = useState<"wallet" | "stripe" | "creditCard">("wallet");
   // const [promocode, setPromocode] = useState(""); // State for promo code
   const [validPromo, setValidPromo] = useState(true); 
@@ -94,7 +94,7 @@ useEffect(() => {
     const toastId = toast.loading("Processing your booking...");
   
     try {
-      await bookTransport(touristId, id, paymentMethod, promocode); // Use the new API function
+      await bookTransport( id, paymentMethod, promocode); // Use the new API function
       toast.success("Transport Booking Successful!", { id: toastId, duration: 1000 });
 
       setTimeout(() => {

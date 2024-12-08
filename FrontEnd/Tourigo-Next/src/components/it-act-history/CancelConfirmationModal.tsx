@@ -51,6 +51,7 @@ const styles = {
 };
 
 const CancelConfirmationModal: React.FC<CancelConfirmationModalProps> = ({ onConfirm, onCancel }) => {
+  console.log("CancelConfirmationModal rendered");
   return (
     <div style={styles.overlay}>
       <div style={styles.content}>
