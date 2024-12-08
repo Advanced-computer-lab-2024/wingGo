@@ -15,17 +15,9 @@ const HomeMain = () => {
   return (
     <>
       <BannerOne />
-      <ActivityArea />
-      <AboutCompany />
-      <TourArea />
-      <OfferArea />
-      <TripArea />
       <CounterArea />
       <WhyChooseArea />
-      <TestimonialElementOne />
       <TravelArea />
-      <BlogArea />
-      <CtaElementOne />
     </>
   );
 };

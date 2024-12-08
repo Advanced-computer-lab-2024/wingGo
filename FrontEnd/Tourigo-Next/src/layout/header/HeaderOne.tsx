@@ -44,27 +44,7 @@ const HeaderFour = () => {
                 </div>
                 <div className="header-right">
                   <div className="header-action d-flex align-items-center">
-                    <div className="header-btn-wrap">
-                      <div className="d-none d-xs-inline-flex gap-15 align-items-center">
-                  
-                        <div className="d-flex h-gap-55">
-                      <div className="">
-                        <Link
-                          className="bd-btn btn-style text-btn"
-                          href="/sign-up"
-                        >
-                          Sign up
-                        </Link>
-                        <Link
-                          className="bd-btn btn-style text-btn"
-                          href="/sign-in"
-                        >
-                          Sign in
-                        </Link>
-                      </div>
-                    </div>                      
-                      </div>
-                    </div>
+            
                     {/* <div className="header-hamburger">
                       <div className="sidebar-toggle">
                         <Link
