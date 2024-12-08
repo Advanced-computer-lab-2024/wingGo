@@ -1,7 +1,21 @@
 // itineraryApi.ts
 
 import axios from 'axios';
+import { AdvertiserSales , TouristReportOfAdvertiser} from '@/interFace/interFace'; 
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+  iat: number; // Add this if included in the token payload
+}
+
 import { Itinerary, BookedItinerary } from '../interFace/interFace';
+
+
 
 const touristId = '67240ed8c40a7f3005a1d01d';
 const tourGuideId = '67244655313a2a345110c1e6';  // Hardcoded tour guide ID
@@ -199,43 +213,69 @@ export const fetchTouristUsername = async (touristId: string): Promise<string> =
     }
 };
 
-
-// Next will be hardcoded in
 export const bookItineraryApi = async (
-    touristId: string,
     itineraryId: string,
     bookingDate: Date,
     paymentMethod: string,
     numberOfPeople: number,
     promoCode?: string
-): Promise<void> => {
+  ): Promise<void> => {
+    const token = Cookies.get("token"); // Retrieve the token from cookies
+  
+    let touristId = ""; // Initialize touristId
     try {
-        const response = await axios.post(
-            `http://localhost:8000/tourist/bookItinerary/${touristId}/${itineraryId}`,
-            null, // No body payload, parameters are sent via query
-            {
-                params: {
-                    bookingDate: bookingDate.toISOString(),
-                    paymentMethod,
-                    numberOfPeople,
-                    promoCode: promoCode || "", // Optional promo code
-                },
-            }
-        );
-        return response.data; // Return the response data if needed
+      if (token) {
+        const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+        console.log("Decoded Token:", decodedToken);
+        touristId = decodedToken.id; // Extract the tourist ID
+      } else {
+        throw new Error("No token found. Please log in.");
+      }
+  
+      // Perform the booking API call
+      const response = await axios.post(
+        `http://localhost:8000/tourist/bookItinerary/${touristId}/${itineraryId}`,
+        null, // No body payload, parameters are sent via query
+        {
+          params: {
+            bookingDate: bookingDate.toISOString(),
+            paymentMethod,
+            numberOfPeople,
+            promoCode: promoCode || "", // Optional promo code
+          },
+        }
+      );
+  
+      console.log("Booking response:", response.data);
+      return response.data; // Return the response data if needed
     } catch (error) {
-        console.error("Error booking itinerary:", error);
-        throw error;
+      console.error("Error booking itinerary:", error);
+      throw error;
     }
-};
+  };
 
-// Function to book an itinerary for a specific tourist
-// export const bookItineraryApi = async (touristId: string, itineraryId: string, bookingDate: Date, paymentMethod: string): Promise<void> => {
+
+// Next will be hardcoded in
+// export const bookItineraryApi = async (
+//     touristId: string,
+//     itineraryId: string,
+//     bookingDate: Date,
+//     paymentMethod: string,
+//     numberOfPeople: number,
+//     promoCode?: string
+// ): Promise<void> => {
 //     try {
 //         const response = await axios.post(
 //             `http://localhost:8000/tourist/bookItinerary/${touristId}/${itineraryId}`,
-//             null,
-//             { params: { bookingDate: bookingDate.toISOString() } } // Send booking date as a query parameter
+//             null, // No body payload, parameters are sent via query
+//             {
+//                 params: {
+//                     bookingDate: bookingDate.toISOString(),
+//                     paymentMethod,
+//                     numberOfPeople,
+//                     promoCode: promoCode || "", // Optional promo code
+//                 },
+//             }
 //         );
 //         return response.data; // Return the response data if needed
 //     } catch (error) {

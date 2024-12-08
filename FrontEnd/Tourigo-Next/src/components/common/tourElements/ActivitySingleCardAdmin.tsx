@@ -77,7 +77,7 @@ const TourSingleCard = ({
                     loader={imageLoader}
                     width={370}
                     height={370}
-                    style={{ width: "100%", height: "auto" }}
+                    style={{ width: "50%", height: "auto" }}
                     alt="Activity Image"
                   />
                 </Link>
