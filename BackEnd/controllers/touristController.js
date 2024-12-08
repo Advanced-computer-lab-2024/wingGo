@@ -3653,6 +3653,65 @@ const payForOrder = async (req, res) => {
 };
 
 
+//decrease quantity of wwishlist product
+// Decrease quantity of a wishlist product
+const decQuantityByOne = async (req, res) => {
+    const { touristId, productId } = req.params;
+
+    try {
+        // Find the wishlist item by touristId and productId
+        const wishlistItem = await Wishlist.findOne({ touristId, productId });
+
+        if (!wishlistItem) {
+            return res.status(404).json({ message: 'Wishlist item not found' });
+        }
+
+        // Check if quantity is greater than 1 before decrementing
+        if (wishlistItem.quantity > 1) {
+            wishlistItem.quantity -= 1;
+            await wishlistItem.save();
+            res.status(200).json({
+                message: 'Quantity decreased by one successfully',
+                wishlistItem,
+            });
+        } else {
+            // Optionally, prevent quantity from going below 1
+            return res.status(400).json({
+                message: 'Quantity cannot be less than 1',
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+//increase quantity of wishlist product
+// Increase quantity of a wishlist product
+const incQuantityByOne = async (req, res) => {
+    const { touristId, productId } = req.params;
+
+    try {
+        // Find the wishlist item by touristId and productId
+        const wishlistItem = await Wishlist.findOne({ touristId, productId });
+
+        if (!wishlistItem) {
+            return res.status(404).json({ message: 'Wishlist item not found' });
+        }
+
+        // Increment the quantity by 1
+        wishlistItem.quantity += 1;
+        await wishlistItem.save();
+
+        res.status(200).json({
+            message: 'Quantity increased by one successfully',
+            wishlistItem,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 //add item to wishlist
 const addWishlist = async (req, res) => {
     const { touristId ,productId} = req.params;
