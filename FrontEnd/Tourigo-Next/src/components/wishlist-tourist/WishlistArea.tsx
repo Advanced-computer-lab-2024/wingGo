@@ -21,6 +21,7 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 
 
+
 const WishlistArea = () => {
   const route = useRouter();
   const [totalQuantity, setTotalQuantity] = useState(0);
@@ -131,18 +132,18 @@ const WishlistArea = () => {
                       </thead>
                       <tbody>
                         {wishlistProducts?.map((item, index) => {
-                          const totalAmount = item?.productId.price * item?.productId.quantity;
+                          const totalAmount = item?.productId.price;
                           return (
                             <tr key={index}>
                               <td className="bd-cart-img image-hover-effect">
-                                <Link href="/shop-details">
+                                <Link href={`/Product-details/${item.productId._id}/Tourist`}>
                                   {" "}
                                   <Image src={item?.picture} alt="image" />
                                 </Link>
                               </td>
 
                               <td className="bd-cart-title">
-                                <Link href="/shop-details">{item?.productId.name}</Link>
+                              <Link href={`/Product-details/${item.productId._id}/Tourist`}>{item?.productId.name}</Link>
                               </td>
 
                               <td className="bd-cart-price">
