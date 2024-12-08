@@ -30,13 +30,13 @@ const TourSingleCard = ({
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
   useEffect(() => {
     const convertPrice = async () => {
-      if (tour.ticketPrices.foreigner) {
-        const priceInSelectedCurrency = await convertAmount(tour.ticketPrices.foreigner);
+      if (tour.ticketPrices?.foreigner) {
+        const priceInSelectedCurrency = await convertAmount(tour.ticketPrices?.foreigner);
         setConvertedPrice(priceInSelectedCurrency);
       }
     };
     convertPrice();
-  }, [tour.ticketPrices.foreigner, currency, convertAmount]);
+  }, [tour.ticketPrices?.foreigner, currency, convertAmount]);
 
   return (
     <>
