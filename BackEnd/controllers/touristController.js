@@ -3517,6 +3517,14 @@ const payForOrder = async (req, res) => {
             const paymentDate = new Date(); // Current date and time
             product.sellingDates.push(paymentDate); // Add payment date to the array
 
+            const purchasedProduct = {
+                productId: product._id,
+                purchaseDate: paymentDate,
+                rating: null, // You can set a default value for rating or remove this field if not needed
+            };
+
+            buyer.purchasedProducts.push(purchasedProduct);
+
             // Check if the product is out of stock
             if (product.quantity === 0) {
                 if (product.seller) {
@@ -3563,6 +3571,9 @@ const payForOrder = async (req, res) => {
             // Save updated product
             await product.save();
         }
+
+        await buyer.save(); // Save the updated buyer with purchasedProducts
+
 
         // Deduct wallet balance if applicable
         if (paymentMethod === 'wallet') {
@@ -4476,6 +4487,45 @@ const checkIfActivitySaved = async (req, res) => {
       res.status(500).json({ message: "An error occurred", error });
     }
   };
+
+  const getTransportPrice = async (req, res) => {
+    const { transportId, promoCode } = req.params;
+
+    try {
+        // Find the transport by ID
+        const transport = await Transport.findById(transportId);
+        if (!transport) {
+            return res.status(404).json({ message: 'Transport not found' });
+        }
+
+        let totalPrice = transport.price;
+        let promoCodeDetails = null;
+
+        // Check if a promo code is provided
+        if (promoCode) {
+            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date()
+            ) {
+                return res.status(400).json({ message: 'Invalid or expired promo code' });
+            }
+
+            // Apply discount
+            const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+            totalPrice -= discountAmount;
+        }
+
+        res.status(200).json({
+            totalPrice,
+            promoCodeApplied: !!promoCodeDetails,
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error calculating price', error: error.message });
+    }
+};
+
   
 
 module.exports = {
@@ -4578,5 +4628,6 @@ module.exports = {
     getPlacesTags,
     getSavedItineraries,
     checkIfSaved,
-    checkIfActivitySaved
+    checkIfActivitySaved,
+    getTransportPrice
 };
