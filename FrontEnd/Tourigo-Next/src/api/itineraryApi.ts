@@ -192,14 +192,40 @@ export const commentOnTourGuideApi = async (touristId: string, tourGuideId: stri
 
 
 // Cancel Itinerary function -> touristId will be hardcoded in the folder of it-act-history fi BookingHistory.tsx
-export const cancelItineraryApi = async (touristId: string, itineraryId: string) => {
-    try {
-        const response = await axios.delete(`http://localhost:8000/tourist/cancelItinerary/${touristId}/${itineraryId}`);
-        return response.data;
-    } catch (error) {
-        console.error("Error canceling itinerary:", error);
-        throw error;
+// export const cancelItineraryApi = async (touristId: string, itineraryId: string) => {
+//     try {
+//         const response = await axios.delete(`http://localhost:8000/tourist/cancelItinerary/${touristId}/${itineraryId}`);
+//         return response.data;
+//     } catch (error) {
+//         console.error("Error canceling itinerary:", error);
+//         throw error;
+//     }
+// };
+export const cancelItineraryApi = async (itineraryId: string) => {
+  try {
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
     }
+
+    let touristId = ""; // Initialize tourist ID
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+      touristId = decodedToken.id; // Extract the tourist ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Make the API call with the extracted touristId
+    const response = await axios.delete(`http://localhost:8000/tourist/cancelItinerary/${touristId}/${itineraryId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error canceling itinerary:", error);
+    throw error;
+  }
 };
 
 // Function to fetch a tourist's username by their ID

@@ -1275,6 +1275,8 @@ const bookActivity = async (req, res) => {
     const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
     const { numberOfPeople, paymentMethod, promoCode  } = req.body;
 
+    console.log("Tourist booking now is: ",touristId);
+
     try {
         // Retrieve tourist details and check if the activityId is already booked
         const reqTourist = await Tourist.findById(touristId);
@@ -1433,6 +1435,8 @@ const bookActivity = async (req, res) => {
                 error: emailError.message,
             });
         }
+
+        console.log("Tourist activities ",reqTourist.bookedActivities);
 
         // Success response
         return res.status(200).json({
@@ -3478,11 +3482,11 @@ const payForOrder = async (req, res) => {
 
             const purchasedProduct = {
                 productId: product._id,
-                purchaseDate: paymentDate,
                 rating: null, // You can set a default value for rating or remove this field if not needed
             };
 
             buyer.purchasedProducts.push(purchasedProduct);
+            console.log(buyer.purchasedProducts);
 
             // Check if the product is out of stock
             if (product.quantity === 0) {

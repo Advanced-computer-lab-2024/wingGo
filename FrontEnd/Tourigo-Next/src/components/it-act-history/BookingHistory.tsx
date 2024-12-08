@@ -14,6 +14,16 @@ import { cancelItineraryApi } from '@/api/itineraryApi';
 import { cancelActivityApi, fetchFilteredActivities } from '@/api/activityApi';
 import CancelConfirmationModal from "./CancelConfirmationModal"; // Import the new modal component
 import { useCurrency } from "@/contextApi/CurrencyContext"; 
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+//   iat: number; // Add this if included in the token payload
+}
 
 interface FilterOptions {
     date?: string;
@@ -27,7 +37,7 @@ const BookingHistory = () => {
     // const [bookedActivities, setBookedActivities] = useState<BookedActivity[]>([]);
     const [selectedBooking_act, setSelectedBooking_act] = useState<Activity | null>(null);
     const [activeTab, setActiveTab] = useState('itinerary'); // New state for tab selection
-    const touristId = "67240ed8c40a7f3005a1d01d";
+    // const touristId = "67240ed8c40a7f3005a1d01d";
     const currentDate = new Date();
     const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
     const [convertedItineraryPrices, setConvertedItineraryPrices] = useState<{ [key: string]: number }>({});
@@ -38,6 +48,23 @@ const BookingHistory = () => {
     const [filteredActivities, setFilteredActivities] = useState<Activity[]>([]);
     const [filters, setFilters] = useState<FilterOptions>({});
     const [loading, setLoading] = useState(false);
+    const [touristId, setTouristId] = useState<string>("");
+
+  useEffect(() => {
+    // Extract `touristId` from the token
+    const token = Cookies.get("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        setTouristId(decodedToken.id);
+        console.log("Tourist ID:", decodedToken.id);
+      } catch (error) {
+        console.error("Failed to decode token:", error);
+      }
+    } else {
+      console.error("No token found.");
+    }
+  }, []);
 
     
 
@@ -98,7 +125,7 @@ const BookingHistory = () => {
         if (!bookingToCancel) return;
 
         try {
-            await cancelItineraryApi(touristId, bookingToCancel.itinerary._id);
+            await cancelItineraryApi(bookingToCancel.itinerary._id);
             setBookedItineraries((prev) =>
                 prev.filter((item) => item.itinerary._id !== bookingToCancel.itinerary._id)
             );
@@ -122,7 +149,7 @@ const BookingHistory = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await getBookedItinerariesData(touristId);
+                const data = await getBookedItinerariesData();
                 setBookedItineraries(data);
             } catch (error) {
                 console.error("Failed to load booked activities:", error);
@@ -230,7 +257,7 @@ const BookingHistory = () => {
         if (!userConfirmed) return;
     
         try {
-            await cancelActivityApi(touristId, booking._id);
+            await cancelActivityApi(booking._id);
             alert('Booking canceled successfully');
             setFilteredActivities((prev) =>
                 prev.filter((item) => item._id !== booking._id)
