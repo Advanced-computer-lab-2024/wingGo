@@ -12,7 +12,7 @@ const DashBreadCrumb = ({ titleOne, titleTwo }: {titleOne: string, titleTwo: str
                                 <div className="bd-breadcrumb-content">
                                     <h1 className="bd-breadcrumb-title">{titleOne}</h1>
                                     <div className="bd-breadcrumb-list justify-content-start">
-                                        <span><Link href="/"><i className="icon-home"></i>Tourigo</Link></span>
+                                        <span><Link href="/"><i className="icon-home"></i>WingGo</Link></span>
                                         <span>{titleTwo}</span>
                                     </div>
                                 </div>
