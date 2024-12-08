@@ -8,6 +8,7 @@ import TourDetailTabArea from "./TourDetailTabArea";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 
 interface TourDetailsProps {
   id: string;
@@ -18,6 +19,7 @@ const TourDetails: React.FC<TourDetailsProps> = ({ id }) => {
   const { currency, convertAmount } = useCurrency();
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
   const [isBooked, setIsBooked] = useState<boolean>(false);
+  const router = useRouter(); // Initialize router
 
   useEffect(() => {
     const fetchTransportDetails = async () => {
@@ -38,16 +40,8 @@ const TourDetails: React.FC<TourDetailsProps> = ({ id }) => {
     fetchTransportDetails();
   }, [id, convertAmount]);
 
-  const handleBookNowClick = async () => {
-    try {
-      if (transport) {
-        await bookTransport(transport._id);
-        setIsBooked(true);
-        toast.success("Transport booked successfully!");
-      }
-    } catch (error) {
-      toast.error("Error booking transport.");
-    }
+  const handleBookNowClick = () => {
+    router.push(`/booking-transportation/${id}`);
   };
 
   if (!transport) {
@@ -84,9 +78,9 @@ const TourDetails: React.FC<TourDetailsProps> = ({ id }) => {
                     </div>
                   </div>
                   <button
-                    onClick={handleBookNowClick}
+                    onClick={isBooked ? undefined : handleBookNowClick}
                     disabled={isBooked}
-                    className="bd-primary-btn btn-style radius-60 mb-10"
+                    className="bd-primary-btn btn-style radius-60 mb-20"
                     style={{
                       cursor: isBooked ? "not-allowed" : "pointer",
                     }}
