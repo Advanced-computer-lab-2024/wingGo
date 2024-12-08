@@ -2100,6 +2100,7 @@ const getAccessToken = async () => {
     }
   };
 
+  
 
 const searchFlights = async (origin, destination, departureDate, accessToken) => {
 
@@ -2164,7 +2165,7 @@ const searchFlights = async (origin, destination, departureDate, accessToken) =>
 
 
 const bookFlight = async (req, res) => {
-    const { flightOffers, paymentMethod, promoCode } = req.body;
+    const { flightOffers, paymentMethod, promoCode, adults } = req.body;
     const { touristId } = req.params;
 
     
@@ -2185,7 +2186,7 @@ const bookFlight = async (req, res) => {
         //change dob format to YYYY-MM-DD
         dob = dob.toISOString().split('T')[0];
         const email = tourist.email;
-        const wallet = tourist.wallet;
+        let wallet = tourist.wallet;
         
 
     
@@ -2197,7 +2198,7 @@ const bookFlight = async (req, res) => {
       console.log("validatedFlightOffer:", validatedFlightOffer);
       
       // Initialize and adjust total price based on promo code
-      let totalPrice = parseFloat(validatedFlightOffer.price.total); // Initialize total price
+      let totalPrice = parseFloat(validatedFlightOffer.price.total) * adults; // Initialize total price
       let promoCodeDetails = null;
 
       if (promoCode) { // Validate and apply promo code
@@ -2230,37 +2231,9 @@ const bookFlight = async (req, res) => {
        
         // Step 2: Use the access token to create a booking with Amadeus
          const amadeusResponse = validatedFlightOffer
-         //await axios.post(
-        //   'https://test.api.amadeus.com/v1/booking/flight-orders',
-        //   {
-        //     data: 
-        //     {
-        //         type,
-        //         flightOffers: [validatedFlightOffer],
-        //         travelers: [
-        //             {
-        //                 id: "1",
-        //                 dateOfBirth: dob,
-        //                 name: {
-        //                 firstName: name,
-        //                 lastName: name
-        //                 },
-        //                 contact: {
-        //                     emailAddress: email,
-        //                 }
-        //             }
-        //         ]
-        //     }
-        //   },
-        //   {
-        //     headers: {
-        //       Authorization: `Bearer ${accessToken}`,
-        //       'Content-Type': 'application/json',
-        //     },
-        //   }
-        // );
         
-        await Tourist.findByIdAndUpdate(touristId, { wallet: wallet - validatedFlightOffer.price.total });
+        
+       
         // Step 3: Extract a summary of the booking details from Amadeus' response
         //const flight = amadeusResponse.data.data; // Assuming the response has data array
         //const flightOffer = flight.flightOffers[0];
@@ -3446,11 +3419,13 @@ const payForOrder = async (req, res) => {
             const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
             totalPrice -= discountAmount;
 
-            // Update the order's total price with the discounted price
-            order.totalPrice = totalPrice;
-            order.paymentMethod = paymentMethod;
-            await order.save();
+            
         }
+
+        // Update the order's total price with the discounted price
+        order.totalPrice = totalPrice;
+        order.paymentMethod = paymentMethod;
+        await order.save();
 
         // Check wallet balance if payment method is wallet
         if (paymentMethod === 'wallet' && buyer.wallet < totalPrice) {

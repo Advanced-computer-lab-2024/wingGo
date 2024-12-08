@@ -8,7 +8,7 @@ import Breadcrumb from '../common/breadcrumb/BreadCrumb';
 const TourGridRightMain = () => {
     return (
         <>
-            <Breadcrumb titleOne='Upcoming Itineraries' titleTwo='Explore upcoming itineraries' />
+            <Breadcrumb titleOne='Itineraries' titleTwo='Your Itineraries' />
             
             <TourGridRight />
         </>

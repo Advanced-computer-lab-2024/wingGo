@@ -19,21 +19,8 @@ const activitySchema = new mongoose.Schema({
     required: false
   },
   location: {
-    type: {
-      type: String,
-      enum: ['Point'],
-      // required: true
-    },
-    address: {
-      type: String,
-      // required: true
-    },
-    lat: {
-      type: Number
-    },
-    lng: {
-      type: Number
-    }
+    type: String,
+    required: true
   },
   price: {
     type: Number,

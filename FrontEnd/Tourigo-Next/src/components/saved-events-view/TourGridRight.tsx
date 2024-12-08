@@ -25,11 +25,12 @@ const SavedEventsGrid = () => {
     setSavedActivities((prev) => prev.filter((activity) => activity._id !== activityId));
   };
   
+  const touristId = "67240ed8c40a7f3005a1d01d"
 
   useEffect(() => {
     const fetchSavedEvents = async () => {
       try {
-        const { savedActivities, savedItineraries } = await viewAllSavedEventsApi( "67240ed8c40a7f3005a1d01d");
+        const { savedActivities, savedItineraries } = await viewAllSavedEventsApi( touristId);
         setSavedActivities(savedActivities);
         setSavedItineraries(savedItineraries);
       } catch (error) {

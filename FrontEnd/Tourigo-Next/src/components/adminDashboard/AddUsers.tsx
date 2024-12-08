@@ -194,7 +194,7 @@ const AddUsers = () => {
             type="submit"
             className="bd-primary-btn  btn-style radius-60 mb-10"
           >
-            <span className="bd-primary-btn-text">Sign Up</span>
+            <span className="bd-primary-btn-text">add user</span>
             <span className="bd-primary-btn-circle"></span>
           </button>
         </div>

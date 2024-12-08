@@ -162,22 +162,29 @@ const TourSingleCard = ({
     <>
       {isparentClass ? (
         <div className={className}>
-          <div className={tourWrapperClass}>
+          <div className={tourWrapperClass} style={{ width: "350px" }}>
             <div className="p-relative">
-              <div className="tour-thumb image-overly">
-                <Link href={`/it-details/${tour._id}`}>
-                  <Image
-                    src={imageUrl}
-                    loader={imageLoader}
-                    width={270}
-                    height={270}
-                    style={{ width: "300px", height: "250px" }}
-                    alt="Itinerary Image"
-                    unoptimized 
-                    
-                  />
-                </Link>
-              </div>
+            <div
+  className="tour-thumb image-overly"
+  style={{
+    width: "100%",
+    height: "300px",
+    overflow: "hidden",
+    position: "relative",
+  }}
+>
+  <Link href={`/it-details/${tour._id}`}>
+    <Image
+      src={imageUrl}
+      loader={imageLoader}
+      layout="fill"
+      objectFit="cover"
+      alt="Itinerary Image"
+      unoptimized
+    />
+  </Link>
+</div>
+
               <div className="tour-meta d-flex align-items-center justify-content-between">
                 <div className="tour-location">
                   <span>
