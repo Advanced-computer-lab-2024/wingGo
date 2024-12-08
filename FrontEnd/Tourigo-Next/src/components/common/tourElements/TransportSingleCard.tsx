@@ -52,8 +52,8 @@ const TransportSingleCard = ({
                   <Image
                     src="/images/default-image.jpg" // Placeholder image
                     loader={imageLoader}
-                    width={370}
-                    height={250}
+                    width={270}
+                    height={270}
                     style={{ width: "100%", height: "auto" }}
                     alt="Transport Image"
                   />
