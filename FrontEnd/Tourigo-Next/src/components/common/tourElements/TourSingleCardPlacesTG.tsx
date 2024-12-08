@@ -37,6 +37,8 @@ const TourSingleCard = ({
                   <Image
                     src={tour.pictures[0] || "/images/default-image.jpg"}
                     loader={imageLoader}
+                    width={270}
+                    height={270}
                     style={{ width: "100%", height: "auto" }}
                     alt={tour.name}
                   />
@@ -63,9 +65,9 @@ const TourSingleCard = ({
                 </Link>
               </h5>
               <p>{tour.description}</p>
-              <span className="tour-price b3">
+              {/* <span className="tour-price b3">
                 ${tour.ticketPrices.foreigner.toLocaleString("en-US")} for foreigners
-              </span>
+              </span> */}
               <div className="tour-divider"></div>
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
