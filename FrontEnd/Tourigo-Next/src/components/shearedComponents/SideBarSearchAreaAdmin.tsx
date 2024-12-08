@@ -7,6 +7,7 @@ import sideBarBg from "../../../public/assets/images/bg/sidebar-img.png";
 import SidebarBookingForm from "@/forms/SidebarBookingForm";
 import SidebarBlogList from "./SidebarBlogList";
 import SidebarSearchInputBox from "./SidebarSearchInputBox";
+import SidebarBanner from "./SidebarBanner";
 
 interface propsType {
   placeHolderTextData: string;
@@ -25,7 +26,7 @@ const SidebarSearchArea = ({ placeHolderTextData }: propsType) => {
           </div>
 
           <div className="sidebar-widget-divider"></div>
-          <SidebarBlogList />
+          <SidebarBanner />
         </div>
       </aside>
     </>

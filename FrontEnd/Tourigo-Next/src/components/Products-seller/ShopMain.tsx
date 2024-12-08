@@ -156,7 +156,6 @@ const ShopMain = () => {
                       />
                     ))}
                   </div>
-                  <PaginationWrapperTwo />
                 </div>
               </>
             ) : (

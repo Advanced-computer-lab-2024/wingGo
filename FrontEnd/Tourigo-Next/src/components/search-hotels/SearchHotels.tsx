@@ -57,7 +57,6 @@ const SearchHotels = () => {
                 />
                 
               {/*pagination area*/}
-              <PaginationWrapperTwo />
             </div>
           </div>
         </div>

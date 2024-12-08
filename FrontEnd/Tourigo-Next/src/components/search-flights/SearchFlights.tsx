@@ -40,7 +40,6 @@ const SearchFlights = () => {
                 />
                 
               {/*pagination area*/}
-              <PaginationWrapperTwo />
             </div>
           </div>
         </div>
