@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
 import Modal from "react-modal"; // Import Modal from react-modal
 import { toast } from "sonner";
+import { FaRegClock } from "react-icons/fa";
 
 interface ItourPropsType {
   tour: Activity; // Use Itinerary type
@@ -77,7 +78,7 @@ const TourSingleCard = ({
                     loader={imageLoader}
                     width={370}
                     height={370}
-                    style={{ width: "100%", height: "auto" }}
+                    style={{ width: "300px", height: "250px" }}
                     alt="Activity Image"
                   />
                 </Link>
@@ -90,7 +91,7 @@ const TourSingleCard = ({
                   <span>
                     <Link href={`/activity-details/${tour._id}`}>
                       <i className="fa-regular fa-location-dot"></i>{" "}
-                      {tour.location.address || "Location not available"}
+                      { tour.location?.address || "Location not available"}
                     </Link>
                   </span>
                 </div>
@@ -122,7 +123,7 @@ const TourSingleCard = ({
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
                 <div className="time d-flex align-items-center gap--5">
-                  <i className="icon-heart"></i>
+                <FaRegClock />
                   <span>{tour.time}</span>
                 </div>
                 <div className="tour-btn">

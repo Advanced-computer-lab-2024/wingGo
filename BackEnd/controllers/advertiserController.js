@@ -135,33 +135,59 @@ const getAdvertiserProfile = async (req, res) => {
     }
 };
 const createActivity = async (req, res) => {
-    const { name, date, time, location, price, category, tags, specialDiscounts, isBookingOpen, advertiser } = req.body;
-    console.log("Advertiser ID received:", advertiser);
+    const { 
+        name, 
+        date, 
+        time, 
+        location, 
+        price, 
+        category, 
+        tags, 
+        specialDiscounts, 
+        isBookingOpen, 
+        advertiser 
+    } = req.body;
 
+    console.log("Advertiser ID received:", advertiser);
+    
     try {
         const mongoose = require('mongoose');
 
-        // Correctly instantiate ObjectId with `new`
+        // Ensure `advertiser` is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(advertiser)) {
+            console.log("1");
+            return res.status(400).json({ error: "Invalid advertiser ID format." });
+           
+        }
+
         const advertiserObjectId = new mongoose.Types.ObjectId(advertiser);
 
-        // Fetch the advertiser from the database
+        // Fetch advertiser record
         const advertiserRecord = await Advertiser.findById(advertiserObjectId);
         if (!advertiserRecord) {
+            console.log("2");
             return res.status(404).json({ error: 'Advertiser not found.' });
         }
 
-        // Check if terms have been accepted
+        // Check terms acceptance
         if (!advertiserRecord.termsAccepted) {
+            console.log("3");
             return res.status(403).json({ error: 'Terms and conditions must be accepted to create an activity.' });
         }
 
+        
+
+        
+
+        // Handle optional photo
         let photoUrl = null;
         if (req.file) {
             photoUrl = req.file.location;
         }
-        console.log(photoUrl);
 
-        // Proceed to create a new activity
+        console.log("Photo URL:", photoUrl);
+
+        // Create and save activity
         const newActivity = new Activity({
             name,
             date,
@@ -169,20 +195,25 @@ const createActivity = async (req, res) => {
             location,
             price,
             category,
-            tags,
+            tags: tags || [], // Default to an empty array
             specialDiscounts,
-            isBookingOpen,
-            advertiser: advertiserObjectId, // Ensure ObjectId is passed
-            photo: photoUrl
+            isBookingOpen: isBookingOpen === "true", // Convert string to boolean
+            advertiser: advertiserObjectId,
+            photo: photoUrl,
         });
+        console.log(newActivity);
 
         await newActivity.save();
         res.status(201).json({ message: 'Activity created successfully!', activity: newActivity });
+        console.log("Activity added");
+
     } catch (error) {
         console.error("Error creating activity:", error);
+        console.log("Activity not added");
         res.status(400).json({ error: error.message });
     }
 };
+
 
 
 

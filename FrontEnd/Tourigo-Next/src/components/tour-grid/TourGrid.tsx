@@ -20,7 +20,7 @@ const TourGrid = () => {
               />
             ))}
           </div>
-          <PaginationWrapper />
+          
         </div>
       </section>
       <BookingFormModal />

@@ -1,5 +1,6 @@
 //BookingComponentFormIt.tsx
 "use client";
+import { useRouter } from "next/navigation"; // Import useRouter
 import ErrorMessage from "@/elements/error-message/ErrorMessage";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -10,6 +11,7 @@ import SelectPaymentType from "./SelectPaymentType";
 import { idTypeNew } from "@/interFace/interFace";
 import { Itinerary } from "@/interFace/interFace";
 import { fetchAllItineraries, bookItineraryApi, getPriceApi } from "@/api/itineraryApi"; 
+
 
 interface FormData {
   email: string;
@@ -28,6 +30,7 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
   const [numberOfPeople, setNumberOfPeople] = useState(1); // Default to 1 person
   // const [promocode, setPromocode] = useState(""); // State for promo code
   const [validPromo, setValidPromo] = useState(true); 
+  const router = useRouter(); // Initialize useRouter for navigation
 
   
   // const [price, setPrice] = useState(0);
@@ -103,7 +106,6 @@ const onSubmit = async (event: React.FormEvent) => {
 
   try {
       await bookItineraryApi(
-          touristId,
           id,
           selectedBookingDate,
           paymentMethod,
@@ -111,6 +113,9 @@ const onSubmit = async (event: React.FormEvent) => {
           promocode
       );
       toast.success("Booking Successful!", { id: toastId, duration: 1000 });
+      setTimeout(() => {
+        router.push("/it-view-orig"); // Redirect to transports page
+      }, 1000); // 1-second delay
   } catch (error) {
       toast.error("Error during booking process.", { id: toastId });
       console.error("Error during API call:", error);
