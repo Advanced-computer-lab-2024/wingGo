@@ -14,6 +14,9 @@ import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
 import Modal from "react-modal"; // Import Modal from react-modal
 import { toast } from 'sonner';
+import { fetchItImage } from "@/api/itineraryApi";
+
+
 
 interface ItourPropsType {
   tour: Itinerary; // Use Itinerary type
@@ -49,6 +52,9 @@ const TourSingleCard = ({
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [bookingState, setBookingState] = useState(tour.bookingOpen);
   const [modalAction, setModalAction] = useState(""); 
+
+  const DEFAULT_IMAGE = "/assets/images/Itinerary.png";
+  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
   
   const handleDeleteItinerary = async () => {
     const confirmDelete = window.confirm("Are you sure you want to delete this itinerary?");
@@ -80,6 +86,25 @@ const TourSingleCard = ({
 
     checkBookingStatus();
   }, [tour._id]);
+
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        if (tour._id && tour.photo) { // Check if the item has an image
+          const url = await fetchItImage(tour._id);
+          if (url) {
+            console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
+            setImageUrl(url);
+            console.log(imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load image:", error);
+      }
+    };
+    loadImage();
+  }, [tour._id, tour.photo,imageUrl]);
+
   useEffect(() => {
     const convertTourPrice = async () => {
       if (tour.price) {
@@ -142,12 +167,14 @@ const TourSingleCard = ({
               <div className="tour-thumb image-overly">
                 <Link href={`/it-details/${tour._id}`}>
                   <Image
-                    src="/images/default-image.jpg"
+                    src={imageUrl}
                     loader={imageLoader}
-                    width={370}
-                    height={370}
-                    style={{ width: "100%", height: "auto" }}
+                    width={270}
+                    height={270}
+                    style={{ width: "300px", height: "250px" }}
                     alt="Itinerary Image"
+                    unoptimized 
+                    
                   />
                 </Link>
               </div>

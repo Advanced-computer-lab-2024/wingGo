@@ -16,7 +16,6 @@ const DestinationGridLeft = () => {
               {/*trip area*/}
               <TripAreaTwo />
               {/*pagination area*/}
-              <PaginationWrapperTwo />
             </div>
           </div>
         </div>

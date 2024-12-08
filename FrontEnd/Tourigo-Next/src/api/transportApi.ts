@@ -13,6 +13,8 @@ export const fetchTransports = async (): Promise<Transport[]> => {
     }
 };
 
+
+//old dont use
 export const bookTransportApi = async ( transportId: string) => {
     try {
         const response = await axios.put(`http://localhost:8000/tourist/bookTransport/${touristId}/${transportId}`);
@@ -22,3 +24,55 @@ export const bookTransportApi = async ( transportId: string) => {
         throw error;
     }
 };
+
+// export const getTransportPrice = async (transportId: string, promoCode: string | null): Promise<{ totalPrice: number, promoCodeApplied: boolean }> => {
+//     try {
+//         const url = promoCode 
+//             ? `http://localhost:8000/tourist/transportPrice/${transportId}/${promoCode}`
+//             : `http://localhost:8000/tourist/transportPrice/${transportId}`;
+//         const response = await axios.get(url);
+//         return response.data;
+//     } catch (error) {
+//         console.error("Error fetching transport price:", error);
+//         throw error;
+//     }
+// };
+
+export const getPriceApi = async (transportId: string, promoCode: string) => {
+    const params = {
+        
+        promoCode,
+    };
+
+    try {
+        const response = await axios.get(
+            `http://localhost:8000/tourist/transportPrice/${transportId}`,
+            { params }
+        );
+        return response.data; // Includes `totalPrice` and `isValidPromoCode`
+    } catch (error) {
+        console.error('Error fetching price:', error);
+        throw error;
+    }
+};
+
+export const bookTransport = async (
+    touristId: string,
+    transportId: string,
+    paymentMethod: string,
+    promoCode?: string
+  ): Promise<any> => {
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/tourist/bookTransport/${touristId}/${transportId}`,
+        {
+          paymentMethod,
+          promoCode,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error during transport booking:", error);
+      throw error;
+    }
+  };

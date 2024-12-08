@@ -168,5 +168,10 @@ router.get('/savedItineraries/:touristId', touristController.getSavedItineraries
 
 router.get('/isItinerarySaved/:touristId/:itineraryId', touristController.checkIfSaved);
 
+router.get('/isActivitySaved/:touristId/:activityId', touristController.checkIfActivitySaved);
+
+router.get('/transportPrice/:transportId', touristController.getTransportPrice);
+
+
 
 module.exports = router;

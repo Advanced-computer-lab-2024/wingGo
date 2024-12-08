@@ -415,7 +415,6 @@ const BlogListWrapper = () => {
               </div>
             </div>
           </article>
-          <PaginationWrapperTwo />
           <ModalVideo
             channel="youtube"
             isOpen={isOpen}

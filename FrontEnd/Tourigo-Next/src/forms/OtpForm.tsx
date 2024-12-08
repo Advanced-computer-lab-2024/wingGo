@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { verifyOtp } from "@/api/forgotPasswordApi";
+import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
@@ -13,6 +14,8 @@ interface FormData {
 
 const OtpForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const {
     register,
     handleSubmit,
@@ -20,11 +23,24 @@ const OtpForm = () => {
     formState: { errors },
   } = useForm<FormData>();
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
     const toastId = toast.loading("");
-    toast.success("Message Send Successfully", { id: toastId, duration: 1000 });
-    reset();
-    router.push("/home-two");
+
+    try {
+      // Call API to verify OTP
+      const otp = `${data.inputOne}${data.inputTwo}${data.inputThree}${data.inputFour}`;
+      console.log("OTP:", otp);
+      const email = searchParams.get("email") as string;
+      if (!email) throw new Error("Email is missing from the query parameters");
+      const response = await verifyOtp(email, otp);
+      toast.success("OTP Verified Successfully", { id: toastId, duration: 1000 });
+      reset();
+      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+
+    } catch (error) {
+      toast.error("Error", { id: toastId, duration: 1000 });
+    }
+    
   };
   return (
     <>

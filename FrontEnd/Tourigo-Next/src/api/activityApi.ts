@@ -2,6 +2,16 @@
 
 import axios from 'axios';
 import { Activity ,BookedActivity} from '../interFace/interFace';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+//   iat: number; // Add this if included in the token payload
+}
 const advertiserId ="66fb37dda63c04def29f944e"; 
 const touristId = '67240ed8c40a7f3005a1d01d';
 
@@ -70,28 +80,35 @@ export const fetchAdminActivities = async (): Promise<Activity[]> => {
 };
 
 export const bookActivityApi = async (
-    touristId: string,
     activityId: string,
     paymentMethod: string,
     numberOfPeople: number,
-    promoCode?: string // Optional promo code
-  ) => {
-    try {
-      // Prepare the payload
-      const payload = {
-        numberOfPeople,
-        paymentMethod,
-        promoCode, // Optional; include only if provided
-      };
+    promoCode?: string
+  ): Promise<void> => {
+    const token = Cookies.get("token"); // Retrieve the token from cookies
   
-      // Send a POST request with the payload
+    let touristId = ""; // Initialize touristId
+    try {
+      if (token) {
+        const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+        console.log("Decoded Token:", decodedToken);
+        touristId = decodedToken.id; // Extract the tourist ID
+      } else {
+        throw new Error("No token found. Please log in.");
+      }
+  
+      // Perform the booking API call
       const response = await axios.post(
         `http://localhost:8000/tourist/bookActivity/${touristId}/${activityId}`,
-        payload // Request body
+        {
+          numberOfPeople,
+          paymentMethod,
+          promoCode: promoCode || "", // Optional promo code
+        }
       );
   
-      // Return the response data
-      return response.data;
+      console.log("Booking response:", response.data);
+      return response.data; // Return the response data if needed
     } catch (error) {
       console.error("Error booking activity:", error);
       throw error;
@@ -107,15 +124,41 @@ export const fetchBookedActivities = async (touristId: string): Promise<BookedAc
         throw error;
     }
 };
-export const cancelActivityApi = async (touristId: string, activityId: string) => {
+// export const cancelActivityApi = async (touristId: string, activityId: string) => {
+//     try {
+//         const response = await axios.delete(`http://localhost:8000/tourist/cancelActivity/${touristId}/${activityId}`);
+//         return response.data;
+//     } catch (error) {
+//         console.error("Error canceling activity:", error);
+//         throw error;
+//     }
+// };
+export const cancelActivityApi = async (activityId: string) => {
     try {
-        const response = await axios.delete(`http://localhost:8000/tourist/cancelActivity/${touristId}/${activityId}`);
-        return response.data;
+      // Retrieve the token from cookies
+      const token = Cookies.get("token");
+      if (!token) {
+        throw new Error("No token found. Please log in.");
+      }
+  
+      let touristId = ""; // Initialize tourist ID
+      try {
+        const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+        touristId = decodedToken.id; // Extract the tourist ID
+        console.log("Decoded Token:", decodedToken);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        throw new Error("Failed to decode token.");
+      }
+  
+      // Make the API call with the extracted touristId
+      const response = await axios.delete(`http://localhost:8000/tourist/cancelActivity/${touristId}/${activityId}`);
+      return response.data;
     } catch (error) {
-        console.error("Error canceling activity:", error);
-        throw error;
+      console.error("Error canceling activity:", error);
+      throw error;
     }
-};
+  };
 
 export const rateActivityApi = async (touristId : string, activityId : string, rating : Number) => {
     try {
@@ -150,41 +193,49 @@ export const isActivityBooked = async (activityId: string): Promise<boolean> => 
 };
 
 
+// export const fetchFilteredActivities = async (filters: { filterType: string }): Promise<any[]> => {
+//     try {
+//         const response = await axios.get(`http://localhost:8000/tourist/filteractivitiesdate/${touristId}`, {
+//             params: filters, // Pass filters including filterType
+//         });
+//         return response.data;
+//     } catch (error) {
+//         console.error("Error fetching filtered activities:", error);
+//         throw error;
+//     }
+// };
+
 export const fetchFilteredActivities = async (filters: { filterType: string }): Promise<any[]> => {
-    try {
-        const response = await axios.get(`http://localhost:8000/tourist/filteractivitiesdate/${touristId}`, {
-            params: filters, // Pass filters including filterType
-        });
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching filtered activities:", error);
-        throw error;
+  try {
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
     }
+
+    let touristId = ""; // Initialize tourist ID
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+      touristId = decodedToken.id; // Extract the tourist ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Make the API call with the extracted touristId
+    const response = await axios.get(`http://localhost:8000/tourist/filteractivitiesdate/${touristId}`, {
+      params: filters, // Pass filters including filterType
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching filtered activities:", error);
+    throw error;
+  }
 };
 
 
-// export const getPriceApi = async (
-//     activityId: string,
-//     numberOfPeople: number,
-//     promoCode?: string // Optional promo code
-//   ): Promise<number> => {
-//     try {
-//       const response = await axios.get(
-//         `http://localhost:8000/tourist/activityPrice/${activityId}`,
-//         {
-//           params: {
-//             numberOfPeople,
-//             promoCode, // Optional promo code
-//           },
-//         }
-//       );
-  
-//       return response.data; // Return total price from response
-//     } catch (error) {
-//       console.error("Error fetching activity price:", error);
-//       throw error;
-//     }
-//   };
+
 
 export const getPriceApi = async (activityId: string, numberOfPeople: number, promoCode: string) => {
     const params = {
@@ -230,3 +281,16 @@ export const saveOrUnsaveActivityApi = async (activityId: string, save: boolean)
       throw error;
     }
   };
+
+  export const checkIfActivitySaved = async (touristId: string, activityId: string) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/tourist/isActivitySaved/${touristId}/${activityId}`
+      );
+      return response.data.isSaved;
+    } catch (error) {
+      console.error("Error checking if activity is saved:", error);
+      throw error;
+    }
+  };
+  

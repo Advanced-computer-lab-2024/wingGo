@@ -157,7 +157,7 @@ const TourDetailsArea = () => {
                 </div>
               </div>
               <div className="product-edit-btn text-start">
-                <button type="submit" className="bd-btn btn-style radius-4">
+                <button type="submit" className="bd-primary-btn btn-style radius-60" style={{marginLeft: "20px"}}>
                   Add Product
                 </button>
               </div>

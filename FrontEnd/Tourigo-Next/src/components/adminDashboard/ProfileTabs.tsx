@@ -10,6 +10,7 @@ import Prefrences from "./Prefrences";
 import AddUsers from "./AddUsers";
 import ActivityCategories from "./ActivityCategories";
 import { TbCategory } from "react-icons/tb";
+import UserStatistics from "./UserStatistics";
 
 
 interface ProfileDetailsProps {
@@ -56,6 +57,9 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
         return <Prefrences />;
       case 'ActivityCategories':
         return <ActivityCategories />;
+      case 'UserStatistics':
+        return <UserStatistics />;
+
       
       default:
         return null;
@@ -185,11 +189,22 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                         </span>
                         Activity Categories
                       </button>
-
-
-
-                      
-                      
+                      <button
+                      className="nav-link"
+                      id="nav-community-2-tab"
+                      data-bs-toggle="tab"
+                     data-bs-target="#nav-community-2"
+                      type="button"
+                      role="tab"
+                      aria-controls="nav-community-2"
+                        aria-selected="false"
+                       onClick={() => setActiveTab('UserStatistics')}
+                        >
+                          <span>
+                          <i className="fa-solid fa-chart-bar"></i>
+                        </span>
+                        Users Statistics
+                            </button>
                     </div>
                   </nav>
                 </div>

@@ -8,11 +8,12 @@ import { Activity } from "@/interFace/interFace";
 import Image from "next/image";
 import Link from "next/link";
 import React ,{useState, useEffect} from "react";
-import { toggleFlagActivity, isActivityBooked, toggleBookingState,saveOrUnsaveActivityApi  } from '@/api/activityApi';
+import { toggleFlagActivity, isActivityBooked, toggleBookingState,saveOrUnsaveActivityApi, checkIfActivitySaved  } from '@/api/activityApi';
 import { useRouter } from "next/navigation";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
 import Modal from "react-modal";
 import { toast } from 'sonner';
+import { FaRegClock } from "react-icons/fa";
 
 
 interface ItourPropsType {
@@ -22,6 +23,7 @@ interface ItourPropsType {
   isparentClass: boolean;
   isAdmin?: boolean;
   isAdvertiser?: boolean;
+  onUnsaved?: (id: string) => void; // Add this new prop
 }
 
 const TourSingleCard = ({
@@ -30,7 +32,8 @@ const TourSingleCard = ({
   tourWrapperClass,
   isparentClass,
   isAdmin = false,
-  isAdvertiser = false
+  isAdvertiser = false,
+  onUnsaved,
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const router = useRouter();
@@ -45,7 +48,7 @@ const TourSingleCard = ({
   const [modalAction, setModalAction] = useState(""); // To track the action (Open/Close Booking)
   const [isSaved, setIsSaved] = useState(false);
 
-
+  const touristId = "67240ed8c40a7f3005a1d01d";
 
    // Fetch booking status when component mounts
    useEffect(() => {
@@ -70,35 +73,50 @@ const TourSingleCard = ({
   }, [currency, tour.price, convertAmount]); 
 
 
-  useEffect(() => {
-    const fetchSavedStatus = async () => {
-      try {
-        if (!tour._id ) {
-          console.error("Missing IDs: Cannot fetch activity id.");
-          return;
-        }
-        if(!tour.touristIDs){
+//   useEffect(() => {
+//     const fetchSavedStatus = async () => {
+//       try {
+//         if (!tour._id ) {
+//           console.error("Missing IDs: Cannot fetch activity id.");
+//           return;
+//         }
+//         if(!tour.touristIDs){
 
-          console.error("Missing IDs: Cannot fetch tourist id.");
-return;
-        }
+//           console.error("Missing IDs: Cannot fetch tourist id.");
+// return;
+//         }
   
-        // Fetch saved status (true/false) from the backend
-        const isSavedStatus = await saveOrUnsaveActivityApi(
-          //tour.touristIDs[0], // Pass the tourist ID
-          tour._id, 
-          false // Fetch current status; no save/unsave action
-        );
+//         // Fetch saved status (true/false) from the backend
+//         const isSavedStatus = await saveOrUnsaveActivityApi(
+//           //tour.touristIDs[0], // Pass the tourist ID
+//           tour._id, 
+//           false // Fetch current status; no save/unsave action
+//         );
   
-        // Update the local state to reflect the saved status
-        setIsSaved(isSavedStatus);
+//         // Update the local state to reflect the saved status
+//         setIsSaved(isSavedStatus);
+//       } catch (error) {
+//         console.error("Error fetching saved status:", error);
+//       }
+//     };
+  
+//     fetchSavedStatus();
+//   }, [tour._id, touristId]);
+
+  useEffect(() => {
+    const fetchSavedActivityStatus = async () => {
+      try {
+        const isSavedStatus = await checkIfActivitySaved(touristId, tour._id); // Call the new API
+        setIsSaved(isSavedStatus); // Update the state
       } catch (error) {
-        console.error("Error fetching saved status:", error);
+        console.error("Error fetching saved activity status:", error);
+        setIsSaved(false); // Default to not saved on error
       }
     };
   
-    fetchSavedStatus();
-  }, [tour._id, tour.touristIDs]);
+    fetchSavedActivityStatus(); // Call the function to fetch the status
+  }, [tour._id, touristId]); // Ensure it runs when either changes
+  
 
   const handleFlagActivity = async () => {
     
@@ -140,11 +158,10 @@ return;
     
    
     try {
-      if (!tour.touristIDs|| !tour._id?.length) {
+      if (!tour._id?.length) {
         console.error("Missing IDs: Cannot perform save/unsave action.");
         return;
       }
-      const touristId = tour.touristIDs[0]; // Use the string directly
       if (!touristId) {
         console.error("Tourist ID is missing.");
         return;
@@ -159,9 +176,13 @@ return;
       
       if (saveResult) {
         setIsSaved(action); // Update state to reflect the action
-        
+        toast.success(`Activity ${isSaved ? 'unsaved' : 'saved'} successfully!`);
+        if (onUnsaved) {
+          onUnsaved(tour._id); // Call the parent callback
+        }        
       } else {
         console.error("Failed to toggle save/unsave:", saveResult);
+        toast.error("Failed to toggle save/unsave. Please try again later");
       }
     } catch (error) {
       console.error("Error saving/unsaving activity:", error);
@@ -180,9 +201,9 @@ return;
                   <Image
                     src="/assets/images/Activity.jpeg" // Placeholder image
                     loader={imageLoader}
-                    width={370}
-                    height={370}
-                    style={{ width: "100%", height: "auto" }}
+                    width={270}
+                    height={270}
+                    style={{ width: "300px", height: "250px" }}
                     alt="Activity Image"
                   />
                 </Link>
@@ -262,7 +283,7 @@ return;
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
                 <div className="time d-flex align-items-center gap--5" >
-                {(!isAdvertiser) && <i className="icon-heart"></i>}
+                {(!isAdvertiser) && <FaRegClock />}
                   {(!isAdvertiser) && <span>{tour.time}</span>}
                 </div>
                 <div className="tour-btn">

@@ -6,7 +6,7 @@ const allowedTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces', 'Cas
 const placeSchema = new Schema({
     governorId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Govornor',
+        ref: 'TourismGovernor',
        // required: true
     }
     ,
@@ -20,7 +20,7 @@ const placeSchema = new Schema({
     },
     pictures: {
         type: [String],
-        required: true
+        // required: true
     },
     location: {
         type: String,

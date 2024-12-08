@@ -40,7 +40,6 @@ const StyleGuideMain = () => {
                 <div className="elements__divider">
                   <hr />
                 </div>
-                <Pagination />
                 <div className="elements__divider">
                   <hr />
                 </div>

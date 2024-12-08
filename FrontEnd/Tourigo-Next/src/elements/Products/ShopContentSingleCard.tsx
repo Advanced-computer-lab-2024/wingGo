@@ -17,6 +17,17 @@ import { ArchiveUnarchiveProduct, ArchiveUnarchiveProductAdmin, fetchProductImag
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import the currency con
 
 import { addToCart } from "@/api/cartApi";
+import {addItemtoWishlist} from '@/api/wishlistApi';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  id: string;  // Corresponds to the `sellerId` in the token
+  username: string;
+  role: string;
+  mustChangePassword: boolean;
+}
+
 
 
 interface propsType {
@@ -28,18 +39,28 @@ interface propsType {
 const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
   const { setModalData } = useGlobalContext();
   const [isHovered, setIsHovered] = useState(false);
+  const [sellerId, setSellerId] = useState<string | null>(null);
   const dispatch = useAppDispatch();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const hardcodedSellerId = "67158afc7b1ec4bfb0240575"; // Hardcoded sellerId for now till the login
+  // const hardcodedSellerId = "67158afc7b1ec4bfb0240575"; // Hardcoded sellerId for now till the login
   const { currency } = useCurrency(); // Access the current currency from context
-
+  
   useEffect(() => {
+    const token = Cookies.get("token");
+    if (token) {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      setSellerId(decodedToken.id); // Extract and set sellerId
+      console.log("Seller ID from token: ", decodedToken.id);
+      console.log("user role: ",userRole)
+    } else {
+      console.error("No token found. Please log in.");
+    }
+  
     const loadImage = async () => {
       try {
-        if (item._id && item.picture) { // Check if the item has an image
+        if (item._id && item.picture) {
           const url = await fetchProductImage(item._id);
           if (url) {
-            console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
             setImageUrl(url);
           }
         }
@@ -49,6 +70,7 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
     };
     loadImage();
   }, [item._id, item.picture]);
+  
 
   const handleAddToCart = async () => {
   
@@ -61,31 +83,44 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
     }
   };
 
-  const handleAddToWishlist = (product: Product) => {
-    dispatch(wishlist_product(product));
+  const handleAddToWishlist = async () => {
+    try{
+      addItemtoWishlist(item._id);
+      alert("Product added to wishlist successfully!");
+    } catch(error:any){
+      alert(error.message || "Failed to add product to wishlist. Please try again");
+    }
   };
 
   const handleEyeClick = async () => {
-    const sellerId = userRole === "Seller" ? hardcodedSellerId : "Admin";
+    const token = Cookies.get("token");
+  
+    let sellerId = "";
+    if (token) {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      sellerId = decodedToken.id; // Extract the seller ID from the token
+    } else {
+      console.error("No token found. Please log in.");
+      return;
+    }
+  
     const toastId = toast.loading("Processing your Request...");
-
+  
     try {
       if (item._id) {
         let response;
-        if (userRole === "Seller") {
-          console.log("seller id of item: ",item.seller);
-          console.log("seller id hardcoded: ",hardcodedSellerId);
-          console.log("condition: ",item.seller == hardcodedSellerId);
+  
+        if (userRole === "Seller" && sellerId) {
+          console.log("Seller ID from token: ", sellerId);
           response = await ArchiveUnarchiveProduct(item._id, sellerId, !item.archive);
         } else if (userRole === "Admin") {
           response = await ArchiveUnarchiveProductAdmin(item._id, !item.archive);
         }
-
-        console.log("item archive state: ", response.archive);
   
-        // Toggle the archive status locally
+        console.log("Item archive state: ", response.archive);
+  
         if (response) {
-          item.archive = response.archive; // Update the product's archive status
+          item.archive = response.archive;
           if (item.archive) {
             toast.success("Item archived successfully!", { id: toastId });
           } else {
@@ -100,6 +135,7 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
       toast.error("Failed to archive/unarchive item.");
     }
   };
+  
   
 
   // Calculate the average rating
@@ -116,8 +152,8 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
                   <Image 
                     src={imageUrl} 
                     alt="Product image" 
-                    width={300} 
-                    height={300} 
+                    width={270} 
+                    height={270} 
                     unoptimized 
                     style={{ objectFit: "cover" }} // Apply objectFit directly for Next.js Image
                   />
@@ -136,16 +172,11 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
                     <i className="far fa-cart-plus"></i>
                   </button>
                 </li>
-                <li>
-                  <button onClick={() => handleAddToWishlist(item)}>
-                    <i className="fa fa-heart"></i>
-                  </button>
-                </li>
               </ul>
             </div>
           </div>
           <div className="product-content">
-            {(userRole === "Admin" || (userRole === "Seller" && item.seller==hardcodedSellerId )) && (
+          {(userRole === "Admin" || (userRole === "Seller" && item.seller === sellerId)) && (
               <div
                 onClick={handleEyeClick}
                 onMouseEnter={() => setIsHovered(true)}

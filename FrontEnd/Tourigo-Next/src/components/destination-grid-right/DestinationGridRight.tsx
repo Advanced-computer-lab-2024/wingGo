@@ -13,7 +13,6 @@ const DestinationGridRight = () => {
               {/*trip area*/}
               <TripAreaTwo />
               {/*pagination area*/}
-              <PaginationWrapperTwo />
             </div>
             <div className="col-xxl-4 col-xl-4 col-lg-5">
               <SidebarSearchArea placeHolderTextData="Destination" />

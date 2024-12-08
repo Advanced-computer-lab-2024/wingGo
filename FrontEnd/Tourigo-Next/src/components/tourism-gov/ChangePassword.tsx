@@ -90,7 +90,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ( {id }) => {
         <div className="sign-btn mb-20">
           <button
             type="submit"
-            className="bd-primary-btn btn-style is-bg radius-60"
+            className="bd-primary-btn btn-style radius-60"
           >
             <span className="bd-primary-btn-text">Change Password</span>
             <span className="bd-primary-btn-circle"></span>

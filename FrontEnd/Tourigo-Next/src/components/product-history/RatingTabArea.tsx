@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import GetRatting from "@/hooks/GetRatting";
 import { rateProduct, reviewProduct } from '@/api/productApi';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  id: string;  // Corresponds to the `sellerId` in the token
+  username: string;
+  role: string;
+  mustChangePassword: boolean;
+}
 
 interface RatingTabAreaProps {
   touristId: string;

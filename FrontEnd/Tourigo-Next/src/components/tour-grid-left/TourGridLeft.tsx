@@ -33,7 +33,7 @@ const TourGridLeft = () => {
               </div>
             </div>
           </div>
-          <PaginationWrapper />
+          
         </div>
       </section>
       <BookingFormModal />
