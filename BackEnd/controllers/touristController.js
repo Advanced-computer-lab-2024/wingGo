@@ -3446,11 +3446,13 @@ const payForOrder = async (req, res) => {
             const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
             totalPrice -= discountAmount;
 
-            // Update the order's total price with the discounted price
-            order.totalPrice = totalPrice;
-            order.paymentMethod = paymentMethod;
-            await order.save();
+            
         }
+
+        // Update the order's total price with the discounted price
+        order.totalPrice = totalPrice;
+        order.paymentMethod = paymentMethod;
+        await order.save();
 
         // Check wallet balance if payment method is wallet
         if (paymentMethod === 'wallet' && buyer.wallet < totalPrice) {
