@@ -136,12 +136,16 @@ const getAdvertiserProfile = async (req, res) => {
 };
 const createActivity = async (req, res) => {
     const { name, date, time, location, price, category, tags, specialDiscounts, isBookingOpen, advertiser } = req.body;
+    console.log("Advertiser ID received:", advertiser);
 
     try {
+        const mongoose = require('mongoose');
 
-        console.log(req.file);
+        // Correctly instantiate ObjectId with `new`
+        const advertiserObjectId = new mongoose.Types.ObjectId(advertiser);
+
         // Fetch the advertiser from the database
-        const advertiserRecord = await Advertiser.findById(advertiser);
+        const advertiserRecord = await Advertiser.findById(advertiserObjectId);
         if (!advertiserRecord) {
             return res.status(404).json({ error: 'Advertiser not found.' });
         }
@@ -157,7 +161,6 @@ const createActivity = async (req, res) => {
         }
         console.log(photoUrl);
 
-
         // Proceed to create a new activity
         const newActivity = new Activity({
             name,
@@ -169,16 +172,18 @@ const createActivity = async (req, res) => {
             tags,
             specialDiscounts,
             isBookingOpen,
-            advertiser,
+            advertiser: advertiserObjectId, // Ensure ObjectId is passed
             photo: photoUrl
         });
 
         await newActivity.save();
         res.status(201).json({ message: 'Activity created successfully!', activity: newActivity });
     } catch (error) {
+        console.error("Error creating activity:", error);
         res.status(400).json({ error: error.message });
     }
 };
+
 
 
 const updateActivity = async (req, res) => {
