@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import breadcrumbBg from "../../../../public/assets/images/bg/breadcrumb-bg.png";
+import breadcrumbBg from "../../../../public/assets/images/bg/visit1.jpg";
 type TProps = {
   titleOne: string | undefined;
   titleTwo?: string | undefined;
