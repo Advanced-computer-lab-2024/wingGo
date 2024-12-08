@@ -16,17 +16,16 @@ const HomeFiveMain = () => {
   return (
     <>
       <BannerAreaFive />
-      <ActivityAreaFive />
-      <AboutAreaFive />
+
+
       <PopularActivityFive />
-      <CtaAreaFive />
-      <DestinationAreaFive />
+    
+
       <TravelAreaFive />
-      <TripAreaFive />
+
       <CounterAreaFive />
       <TestimonialAreaFive />
-      <BlogAreaFive />
-      <InstagramArea />
+  
     </>
   );
 };

@@ -1,7 +1,7 @@
 import { title } from 'process';
-import bannerFiveImgOne from '../../../public/assets/images/banner/banner-5/banner-5-img-1.png';
-import bannerFiveImgTwo from '../../../public/assets/images/banner/banner-5/banner-5-img-2.png';
-import bannerFiveImgThree from '../../../public/assets/images/banner/banner-5/banner-5-img-3.png';
+import bannerFiveImgOne from '../../../public/assets/images/banner/banner-5/visit1.jpg';
+import bannerFiveImgTwo from '../../../public/assets/images/banner/banner-5/visit2.jpg';
+import bannerFiveImgThree from '../../../public/assets/images/banner/banner-5/visit3.jpg';
 import { IBannerData } from '@/interFace/interFace';
 
 export const bannerFiveData: IBannerData[] = [
