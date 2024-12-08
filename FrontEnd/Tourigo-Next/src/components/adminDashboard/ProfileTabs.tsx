@@ -203,7 +203,7 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                           <span>
                           <i className="fa-solid fa-chart-bar"></i>
                         </span>
-                        User Statistics
+                        Users Statistics
                             </button>
                     </div>
                   </nav>

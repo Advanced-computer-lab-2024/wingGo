@@ -2,8 +2,17 @@
 
 import axios from "axios";
 import { Complaint } from "../interFace/interFace";
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';  
+//const touristId = '67240ed8c40a7f3005a1d01d';
 
-const touristId = '67240ed8c40a7f3005a1d01d';
+
+interface DecodedToken {
+  username: string;
+  id: string;
+  role: string;
+  mustChangePassword:boolean;
+}
 
 export const fetchComplaints = async (): Promise<any> => {
     try {
@@ -17,8 +26,15 @@ export const fetchComplaints = async (): Promise<any> => {
 
 // New API function for fetching complaints by tourist ID async (touristId: string): Promise<Complaint[]> => {
 export const fetchTouristComplaints = async (): Promise<Complaint[]> => {
-    const touristId = '67240ed8c40a7f3005a1d01d';
+   // const touristId = '67240ed8c40a7f3005a1d01d';
+   const token = Cookies.get('token'); // Get the token from cookies
+  if (!token) {
+    throw new Error('User is not authenticated');
+  }
     try {
+      const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+      const touristId = decodedToken.id; // Extract userId from the token
+
         const response = await axios.get(`http://localhost:8000/tourist/viewmycomplaints/${touristId}`);
         return response.data.complaints;
     } catch (error) {
@@ -50,9 +66,16 @@ export const replyToComplaint = async (complaintId: string, reply: string) => {
 };
 
 // Function to file a new complaint
-export const fileComplaint = async (touristId: string, complaintData: Omit<Complaint, "_id" | "tourist" | "state" | "reply">) => {
-    try {
-        const touristId = '67240ed8c40a7f3005a1d01d';
+export const fileComplaint = async ( complaintData: Omit<Complaint, "_id" | "tourist" | "state" | "reply">) => {
+  const token = Cookies.get('token'); // Get the token from cookies
+  if (!token) {
+    throw new Error('User is not authenticated');
+  }
+  try {
+    const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+    const touristId = decodedToken.id; // Extract userId from the token
+
+       // const touristId = '67240ed8c40a7f3005a1d01d';
       // Post request to the backend to add a complaint
       const response = await axios.post(`http://localhost:8000/tourist/complaints/${touristId}`, complaintData);
       return response.data;
