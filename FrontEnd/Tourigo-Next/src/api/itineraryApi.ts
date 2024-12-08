@@ -470,3 +470,63 @@ export const viewAllSavedEventsApi = async (touristId: string): Promise<any> => 
         throw error;
     }
 };
+
+export const getAvailableTags = async (): Promise<string[]> => {
+  try {
+      const response = await axios.get(`http://localhost:8000/govornor/viewPreferences`);
+      console.log("Tags available:", response.data);
+      return response.data;
+  } catch (error) {
+      console.error("Error fetching tags:", error);
+      throw error;
+  }
+};
+export const deleteItineraryApi = async (
+  itineraryId: string,
+  tourGuideId: string
+): Promise<void> => {
+  try {
+    const response = await axios.delete(
+      `http://localhost:8000/tourguide/deleteItinerary/${itineraryId}`,
+      {
+        params: { tourGuideId },
+      }
+    );
+    console.log(`Itinerary with ID: ${itineraryId} deleted successfully.`);
+    return response.data;
+  } catch (error) {
+    // Use `as` keyword to assert the error type as AxiosError
+    if (axios.isAxiosError(error)) {
+      console.error("Error deleting itinerary:", error.response?.data || error.message);
+      throw error.response?.data || error.message;
+    } else {
+      console.error("Unexpected error:", error);
+      throw error; // Re-throw if it's not an AxiosError
+    }
+  }
+};
+export const updateItineraryApi = async (
+itineraryId: string,
+updates: Record<string, any>,
+tourGuideId: string // Added tourGuideId parameter
+): Promise<void> => {
+try {
+  const response = await axios.put(
+    `http://localhost:8000/tourguide/Updateitinerary/${itineraryId}?tourGuideId=${tourGuideId}`, // Include tourGuideId as a query parameter
+    updates,
+    {
+      headers: {
+        "Content-Type": "application/json", // Ensure the correct content type
+        // Include Authorization header if needed
+        // Authorization: `Bearer ${yourToken}`,
+      },
+    }
+  );
+
+  console.log(`Itinerary with ID: ${itineraryId} updated successfully.`);
+  return response.data;
+} catch (error) {
+  console.error("Error updating itinerary:", error);
+  throw error;
+}
+};
