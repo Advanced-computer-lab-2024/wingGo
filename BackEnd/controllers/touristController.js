@@ -2677,7 +2677,7 @@ const bookHotel = async (req, res) => {
              // Extract fields from hotelOffers for booking
              //const offerId = hotelOffers.offers[0].id;  // Retrieve the offer ID
              
-             let totalPrice = hotelOffers.rawPrice;  // Total price for the offer
+             let totalPrice = hotelOffers.rawPrice * adults;  // Total price for the offer
              console.log("Total Price: ", totalPrice);
              const currency = "usd";  // Currency of the offer
 
@@ -2735,6 +2735,9 @@ const bookHotel = async (req, res) => {
             adults: adults,
         }
       ,
+      price: {
+        base: totalPrice
+      },
       hotel: {
         hotelId: data.hotelId,
         name: data.name,
@@ -2753,6 +2756,38 @@ const bookHotel = async (req, res) => {
             res.status(500).json({ message: 'Error booking hotel', error: error.response?.data || error.message });
         }
 };
+
+
+const getPromoCodeDiscountPerc = async (req, res) => {
+
+        const { touristId } = req.params;
+        const { code } = req.query;
+
+        try {
+
+            const tourist = await Tourist.findById(touristId);
+            
+
+            const promoCodeDetails = await PromoCode.findOne({ code: code });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date() ||
+                !tourist.promoCodes.includes(promoCodeDetails._id)
+            ) {
+                return res.status(400).json({ message: 'Invalid, expired, or unauthorized promo code' });
+            }
+
+            const discountAmount = (promoCodeDetails.discount / 100);
+
+            res.status(200).json({ message: 'Promo Code Discount Percentage', promoCodeDetails });
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching promo code discount percentage', error });
+        }
+};
+
+            
+
 
 const bookTransport = async (req, res) => {
         const { touristId, transportId } = req.params;
@@ -4566,7 +4601,64 @@ const getTransportPrice = async (req, res) => {
     }
 };
 
-  
+
+const getPaidPrice = async (req, res) => {
+    const { touristId, itineraryId } = req.params; // Tourist and Itinerary IDs from params.
+
+    try {
+        // Fetch the itinerary
+        const itinerary = await Itinerary.findById(itineraryId);
+
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found.' });
+        }
+
+        // Find the tourist entry in the itinerary's `touristIDs`
+        const touristEntry = itinerary.touristIDs.find(entry => entry.touristId.toString() === touristId);
+
+        if (!touristEntry) {
+            return res.status(404).json({ message: 'Booking not found for this tourist.' });
+        }
+
+        // Return the paid price
+        return res.status(200).json({ paidPrice: touristEntry.paidPrice });
+    } catch (error) {
+        console.error('Error fetching paid price:', error);
+        return res.status(500).json({ message: 'Error fetching paid price.', error });
+    }
+};
+
+const getPaidPriceForActivity = async (req, res) => {
+    const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
+
+    try {
+        // Step 1: Fetch the activity with the given activityId
+        const activity = await Activity.findById(activityId);
+
+        // Check if the activity exists
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found.' });
+        }
+
+        // Step 2: Find the tourist entry in the activity's touristIDs array
+        const touristEntry = activity.touristIDs.find(
+            entry => entry.touristId.toString() === touristId
+        );
+
+        if (!touristEntry) {
+            return res.status(404).json({ message: 'Booking not found for this tourist.' });
+        }
+
+        // Step 3: Retrieve the paid price
+        const paidPrice = touristEntry.paidPrice;
+
+        return res.status(200).json({ paidPrice });
+    } catch (error) {
+        console.error('Error fetching paid price for activity:', error); // Log the error for debugging
+        return res.status(500).json({ message: 'Error fetching paid price for activity.', error });
+    }
+};
+
 
 module.exports = {
     tourist_hello,
@@ -4669,5 +4761,8 @@ module.exports = {
     getSavedItineraries,
     checkIfSaved,
     checkIfActivitySaved,
-    getTransportPrice
+    getTransportPrice,
+    getPromoCodeDiscountPerc,
+    getPaidPrice,
+    getPaidPriceForActivity
 };

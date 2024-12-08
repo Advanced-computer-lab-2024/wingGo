@@ -293,4 +293,28 @@ export const saveOrUnsaveActivityApi = async (activityId: string, save: boolean)
       throw error;
     }
   };
+
+  export const getPaidPriceApiAct = async (activityId: string) => {
+    
+    const token = Cookies.get('token'); // Retrieve the token from cookies.
+    let touristId = ""; // Initialize touristId
+try {
+  if (token) {
+    const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+    console.log("Decoded Token:", decodedToken);
+    touristId = decodedToken.id; // Extract the tourist ID
+  } else {
+    throw new Error("No token found. Please log in.");
+  }
+
+    const response = await axios.get(
+        `http://localhost:8000/tourist/getPaidPriceAct/${touristId}/${activityId}`
+    );
+    console.log(response.data.paidPrice);
+    return response.data.paidPrice; // Return paid price from response.
+} catch (error) {
+    console.error('Error fetching paid price:', error);
+    throw error;
+}
+};
   

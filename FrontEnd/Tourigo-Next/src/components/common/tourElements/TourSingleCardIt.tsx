@@ -14,6 +14,17 @@ import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
 import { toast } from 'sonner';import { fetchItImage } from "@/api/itineraryApi";
 import { FaRegClock } from "react-icons/fa";
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+//   iat: number; // Add this if included in the token payload
+}
 
 
 
@@ -51,10 +62,25 @@ const TourSingleCard = ({
   const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
   const [isBooked, setIsBooked] = useState(false);
   const [isSaved, setIsSaved] = useState(false); // Initialize as null
+  const [touristId, setTouristId] = useState<string>("");
 
 
-  const touristId = "67240ed8c40a7f3005a1d01d";
- 
+  useEffect(() => {
+    // Extract `touristId` from the token
+    const token = Cookies.get("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        setTouristId(decodedToken.id);
+        console.log("Tourist ID:", decodedToken.id);
+      } catch (error) {
+        console.error("Failed to decode token:", error);
+      }
+    } else {
+      console.error("No token found.");
+    }
+  }, []);
+
 
   useEffect(() => {
     const fetchSavedStatus = async () => {
