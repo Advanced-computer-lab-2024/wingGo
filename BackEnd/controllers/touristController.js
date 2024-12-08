@@ -2100,6 +2100,7 @@ const getAccessToken = async () => {
     }
   };
 
+  
 
 const searchFlights = async (origin, destination, departureDate, accessToken) => {
 
@@ -2164,7 +2165,7 @@ const searchFlights = async (origin, destination, departureDate, accessToken) =>
 
 
 const bookFlight = async (req, res) => {
-    const { flightOffers, paymentMethod, promoCode } = req.body;
+    const { flightOffers, paymentMethod, promoCode, adults } = req.body;
     const { touristId } = req.params;
 
     
@@ -2185,7 +2186,7 @@ const bookFlight = async (req, res) => {
         //change dob format to YYYY-MM-DD
         dob = dob.toISOString().split('T')[0];
         const email = tourist.email;
-        const wallet = tourist.wallet;
+        let wallet = tourist.wallet;
         
 
     
@@ -2197,7 +2198,7 @@ const bookFlight = async (req, res) => {
       console.log("validatedFlightOffer:", validatedFlightOffer);
       
       // Initialize and adjust total price based on promo code
-      let totalPrice = parseFloat(validatedFlightOffer.price.total); // Initialize total price
+      let totalPrice = parseFloat(validatedFlightOffer.price.total) * adults; // Initialize total price
       let promoCodeDetails = null;
 
       if (promoCode) { // Validate and apply promo code
@@ -2230,37 +2231,9 @@ const bookFlight = async (req, res) => {
        
         // Step 2: Use the access token to create a booking with Amadeus
          const amadeusResponse = validatedFlightOffer
-         //await axios.post(
-        //   'https://test.api.amadeus.com/v1/booking/flight-orders',
-        //   {
-        //     data: 
-        //     {
-        //         type,
-        //         flightOffers: [validatedFlightOffer],
-        //         travelers: [
-        //             {
-        //                 id: "1",
-        //                 dateOfBirth: dob,
-        //                 name: {
-        //                 firstName: name,
-        //                 lastName: name
-        //                 },
-        //                 contact: {
-        //                     emailAddress: email,
-        //                 }
-        //             }
-        //         ]
-        //     }
-        //   },
-        //   {
-        //     headers: {
-        //       Authorization: `Bearer ${accessToken}`,
-        //       'Content-Type': 'application/json',
-        //     },
-        //   }
-        // );
         
-        await Tourist.findByIdAndUpdate(touristId, { wallet: wallet - validatedFlightOffer.price.total });
+        
+       
         // Step 3: Extract a summary of the booking details from Amadeus' response
         //const flight = amadeusResponse.data.data; // Assuming the response has data array
         //const flightOffer = flight.flightOffers[0];
@@ -2677,7 +2650,7 @@ const bookHotel = async (req, res) => {
              // Extract fields from hotelOffers for booking
              //const offerId = hotelOffers.offers[0].id;  // Retrieve the offer ID
              
-             let totalPrice = hotelOffers.rawPrice;  // Total price for the offer
+             let totalPrice = hotelOffers.rawPrice * adults;  // Total price for the offer
              console.log("Total Price: ", totalPrice);
              const currency = "usd";  // Currency of the offer
 
@@ -2735,6 +2708,9 @@ const bookHotel = async (req, res) => {
             adults: adults,
         }
       ,
+      price: {
+        base: totalPrice
+      },
       hotel: {
         hotelId: data.hotelId,
         name: data.name,
@@ -2753,6 +2729,38 @@ const bookHotel = async (req, res) => {
             res.status(500).json({ message: 'Error booking hotel', error: error.response?.data || error.message });
         }
 };
+
+
+const getPromoCodeDiscountPerc = async (req, res) => {
+
+        const { touristId } = req.params;
+        const { code } = req.query;
+
+        try {
+
+            const tourist = await Tourist.findById(touristId);
+            
+
+            const promoCodeDetails = await PromoCode.findOne({ code: code });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date() ||
+                !tourist.promoCodes.includes(promoCodeDetails._id)
+            ) {
+                return res.status(400).json({ message: 'Invalid, expired, or unauthorized promo code' });
+            }
+
+            const discountAmount = (promoCodeDetails.discount / 100);
+
+            res.status(200).json({ message: 'Promo Code Discount Percentage', promoCodeDetails });
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching promo code discount percentage', error });
+        }
+};
+
+            
+
 
 const bookTransport = async (req, res) => {
         const { touristId, transportId } = req.params;
@@ -3411,11 +3419,13 @@ const payForOrder = async (req, res) => {
             const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
             totalPrice -= discountAmount;
 
-            // Update the order's total price with the discounted price
-            order.totalPrice = totalPrice;
-            order.paymentMethod = paymentMethod;
-            await order.save();
+            
         }
+
+        // Update the order's total price with the discounted price
+        order.totalPrice = totalPrice;
+        order.paymentMethod = paymentMethod;
+        await order.save();
 
         // Check wallet balance if payment method is wallet
         if (paymentMethod === 'wallet' && buyer.wallet < totalPrice) {
@@ -4566,7 +4576,64 @@ const getTransportPrice = async (req, res) => {
     }
 };
 
-  
+
+const getPaidPrice = async (req, res) => {
+    const { touristId, itineraryId } = req.params; // Tourist and Itinerary IDs from params.
+
+    try {
+        // Fetch the itinerary
+        const itinerary = await Itinerary.findById(itineraryId);
+
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found.' });
+        }
+
+        // Find the tourist entry in the itinerary's `touristIDs`
+        const touristEntry = itinerary.touristIDs.find(entry => entry.touristId.toString() === touristId);
+
+        if (!touristEntry) {
+            return res.status(404).json({ message: 'Booking not found for this tourist.' });
+        }
+
+        // Return the paid price
+        return res.status(200).json({ paidPrice: touristEntry.paidPrice });
+    } catch (error) {
+        console.error('Error fetching paid price:', error);
+        return res.status(500).json({ message: 'Error fetching paid price.', error });
+    }
+};
+
+const getPaidPriceForActivity = async (req, res) => {
+    const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
+
+    try {
+        // Step 1: Fetch the activity with the given activityId
+        const activity = await Activity.findById(activityId);
+
+        // Check if the activity exists
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found.' });
+        }
+
+        // Step 2: Find the tourist entry in the activity's touristIDs array
+        const touristEntry = activity.touristIDs.find(
+            entry => entry.touristId.toString() === touristId
+        );
+
+        if (!touristEntry) {
+            return res.status(404).json({ message: 'Booking not found for this tourist.' });
+        }
+
+        // Step 3: Retrieve the paid price
+        const paidPrice = touristEntry.paidPrice;
+
+        return res.status(200).json({ paidPrice });
+    } catch (error) {
+        console.error('Error fetching paid price for activity:', error); // Log the error for debugging
+        return res.status(500).json({ message: 'Error fetching paid price for activity.', error });
+    }
+};
+
 
 module.exports = {
     tourist_hello,
@@ -4669,5 +4736,8 @@ module.exports = {
     getSavedItineraries,
     checkIfSaved,
     checkIfActivitySaved,
-    getTransportPrice
+    getTransportPrice,
+    getPromoCodeDiscountPerc,
+    getPaidPrice,
+    getPaidPriceForActivity
 };

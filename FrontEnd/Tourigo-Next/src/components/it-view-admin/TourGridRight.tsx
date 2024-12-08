@@ -5,7 +5,7 @@ import TourSingleCard from "../common/tourElements/TourSingleCardItAdmin";
 import { Itinerary } from "@/interFace/interFace";
 import { getAdminItinerariesData  } from "@/data/it-data";  // Remove filtered API call as we're only using initial data
 import ItinerariesContentHeader from "@/elements/itineraries/it-header";
-import ItinerariesSidebarMain from "../itinerariesSidebar/ItinerariesSidebarMain";
+import ItinerariesSidebarMain from "../itinerariesSidebar/ItinerariesSidebarMainAdmin";
 
 interface FilterOptions {
   budgetMin?: number;

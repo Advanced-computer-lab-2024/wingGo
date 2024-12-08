@@ -46,28 +46,7 @@ const HeaderFour = () => {
                   <div className="header-action d-flex align-items-center">
                     <div className="header-btn-wrap">
                       <div className="d-none d-xs-inline-flex gap-15 align-items-center">
-                        <div className="header-currency-item style-two header-currency">
-                          <span
-                            className="header-currency-toggle"
-                            style={{
-                              marginRight: "10px",
-                            }}
-                            id="header-currency-toggle"
-                          >
-                            USD
-                          </span>
-                          <ul>
-                            <li>
-                              <Link href="#">KWD</Link>
-                            </li>
-                            <li>
-                              <Link href="#">GBP</Link>
-                            </li>
-                            <li>
-                              <Link href="#">EUR</Link>
-                            </li>
-                          </ul>
-                        </div>                      
+                                        
                       </div>
                     </div>
                     {/* <div className="header-hamburger">

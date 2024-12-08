@@ -31,8 +31,8 @@ const touristSchema = new Schema({
     },
     jobOrStudent: {
         type: String,
-        required: true,
-        enum: ['job', 'student'] // Ensures the field is either job or student
+        required: false,
+        enum: ['job', 'student', 'Job', 'Student'] // Ensures the field is either job or student
     },
     wallet: {
         type: Number,

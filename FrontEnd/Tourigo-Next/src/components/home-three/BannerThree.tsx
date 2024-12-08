@@ -19,24 +19,7 @@ const BannerThree = () => {
         className="banner-area banner-height-2 p-relative z-index-11 fix image-bg fix"
         style={{ backgroundImage: `url(${bgImg.src})` }}
       >
-        <div className="banner-three-shape">
-          <div className="banner-three-shape-one">
-            <Image
-              src={bannerThree}
-              loader={imageLoader}
-              style={{ width: "auto", height: "auto" }}
-              alt="image"
-            />
-          </div>
-          <div className="banner-three-shape-two">
-            <Image
-              src={shapeAirline}
-              loader={imageLoader}
-              style={{ width: "auto", height: "auto" }}
-              alt="image"
-            />
-          </div>
-        </div>
+       
         <div className="swiper banner__active overflow-visible p-relative">
           <div className="swiper-wrapper">
             <div className="swiper-slide banner_more_item">
@@ -65,75 +48,10 @@ const BannerThree = () => {
                         Ut et massa mi. Aliquam in hendrerit urna. Pellentesque
                         sit amet sapien fringilla, mattis ligula consec.
                       </p>
-                      <div className="banner-btn">
-                        <Link
-                          href="/contact"
-                          className="bd-primary-btn btn-style has-arrow is-bg radius-60"
-                        >
-                          <span className="bd-primary-btn-arrow arrow-right">
-                            <i className="fa-regular fa-arrow-right"></i>
-                          </span>
-                          <span className="bd-primary-btn-text">Know More</span>
-                          <span className="bd-primary-btn-circle"></span>
-                          <span className="bd-primary-btn-arrow arrow-left">
-                            <i className="fa-regular fa-arrow-right"></i>
-                          </span>
-                        </Link>
-                      </div>
+                   
                     </div>
                   </div>
-                  <div className="col-xxl-5 col-xl-5 col-lg-6 col-md-12">
-                    <div className="banner-thumb-three p-relative">
-                      <div className="banner-thumb-three-wrapper p-relative">
-                        <div className="banner-thumb-three">
-                          <Image
-                            src={bannerModel}
-                            loader={imageLoader}
-                            style={{ width: "auto", height: "auto" }}
-                            alt="image"
-                          />
-                        </div>
-                        <div className="banner-social">
-                          <div className="theme-social">
-                            <Link href="https://www.facebook.com/">
-                              <i className="icon-facebook"></i>
-                            </Link>
-                            <Link href="https://www.twitter.com/">
-                              <i className="icon-twitter-x"></i>
-                            </Link>
-                            <Link href="https://www.linkedin.com/">
-                              <i className="icon-linkedin"></i>
-                            </Link>
-                            <Link href="https://www.youtube.com/">
-                              <i className="icon-youtube"></i>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="video-wrapper">
-                        <div className="position-relative">
-                          <div className="video-thumb">
-                            <Image
-                              src={bgVideo}
-                              loader={imageLoader}
-                              style={{ width: "auto", height: "auto" }}
-                              alt="image"
-                            />
-                          </div>
-                          <div className="pos-center">
-                            <button
-                              onClick={() => {
-                                openVideoModal();
-                              }}
-                              className="bd-play-btn small white-bg popup-video animation-three"
-                            >
-                              <i className="icon-play"></i>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+            
                 </div>
               </div>
             </div>
@@ -151,12 +69,7 @@ const BannerThree = () => {
           </div>
         </div>
       </section>
-      <ModalVideo
-        channel="youtube"
-        isOpen={isOpen}
-        videoId="eUpwDAnkgSM"
-        onClose={() => setIsOpen(false)}
-      />
+     
     </>
   );
 };

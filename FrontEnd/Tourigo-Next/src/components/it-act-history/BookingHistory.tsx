@@ -10,13 +10,14 @@ import {Activity} from '@/interFace/interFace';
 import Link from 'next/link';
 import RateCommentModal from './RateCommentModal';
 import RateCommentModalActivity from './RateCommentModalActivity';
-import { cancelItineraryApi } from '@/api/itineraryApi';
-import { cancelActivityApi, fetchFilteredActivities } from '@/api/activityApi';
+import { cancelItineraryApi, getPaidPriceApi  } from '@/api/itineraryApi';
+import { cancelActivityApi, fetchFilteredActivities, getPaidPriceApiAct } from '@/api/activityApi';
 import CancelConfirmationModal from "./CancelConfirmationModal"; // Import the new modal component
 import { useCurrency } from "@/contextApi/CurrencyContext"; 
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from "sonner";
+
 
 interface DecodedToken {
   username: string;
@@ -50,6 +51,9 @@ const BookingHistory = () => {
     const [filters, setFilters] = useState<FilterOptions>({});
     const [loading, setLoading] = useState(false);
     const [touristId, setTouristId] = useState<string>("");
+    const [paidPrices, setPaidPrices] = useState<{ [key: string]: number }>({});
+    const [paidPricesAct, setPaidPricesAct] = useState<{ [key: string]: number }>({});
+    
 
   useEffect(() => {
     // Extract `touristId` from the token
@@ -77,6 +81,49 @@ const BookingHistory = () => {
         setBookingToCancel(booking);
         setShowCancelModal(true);
     };
+
+    const [showCancelModalAct, setShowCancelModalAct] = useState(false);
+    const [bookingToCancelAct, setBookingToCancelAct] = useState<Activity | null>(null);
+
+    const handleCancelBookingClick_act = async (booking: Activity) => {
+        console.log("Booking to cancel:", booking);
+        console.log("Booking to cancel:", booking);
+setBookingToCancelAct(booking);
+setShowCancelModalAct(true);
+
+    };
+    useEffect(() => {
+        console.log("Modal state changed:", showCancelModalAct);
+    }, [showCancelModalAct]);
+    
+
+    const confirmCancellationAct = async () => {
+        if (!bookingToCancelAct) return;
+    
+        try {
+            await cancelActivityApi(bookingToCancelAct._id);
+            toast.success("Activity booking canceled successfully");
+            setFilteredActivities((prev) =>
+                prev.filter((item) => item._id !== bookingToCancelAct._id)
+            );
+        } catch (error: any) {
+            if (error.response?.data?.message === "Cannot cancel the activity within 48 hours of the booking date.") {
+                toast.error("Cannot cancel the activity within 48 hours of the booking date.");
+            } else {
+                toast.error("Failed to cancel the activity booking. Please try again later.");
+            }
+        } finally {
+            setShowCancelModalAct(false);
+            setBookingToCancelAct(null);
+        }
+    };
+    
+    const closeCancelModalAct = () => {
+        setShowCancelModalAct(false);
+        setBookingToCancelAct(null);
+    };
+    
+
 
     const loadFilteredActivities = async () => {
         try {
@@ -255,34 +302,67 @@ const BookingHistory = () => {
         return diffInMilliseconds >= 48 * 60 * 60 * 1000;
     };
     
-
-    const handleCancelBookingClick_act = async (booking: Activity) => {
-        const userConfirmed = window.confirm("Are you sure you want to cancel this booking?");
-        if (!userConfirmed) return;
     
-        try {
-            await cancelActivityApi(booking._id);
-            // alert('Booking canceled successfully');
-            toast.success("Booking canceled successfully");
-            setFilteredActivities((prev) =>
-                prev.filter((item) => item._id !== booking._id)
-            );
-        } catch (error: any) {
-            if (error.response?.data?.message === 'Cannot cancel the activity within 48 hours of the booking date.') {
-                // alert("Cannot cancel the activity within 48 hours of the booking date.");
-                toast.error("Cannot cancel the activity within 48 hours of the booking date."); 
-            } else {
-                toast.error("Failed to cancel the booking. Please try again later."); 
-                // alert('Failed to cancel the booking');
-            }
-        }
-    };
 
     const handleTabSwitch = (tab: 'itinerary' | 'activity') => {
         setActiveTab(tab);
         setFilterType('all'); // Reset filter to 'all' whenever the tab changes
         // setFilterType_it('all'); // Reset filter to 'all' whenever the tab changes
     };
+    
+   
+      
+    const fetchPaidPrice = async (itineraryId: string) => {
+        try {
+            const paidPrice = await getPaidPriceApi(itineraryId);
+            console.log("price inn, ",paidPrice);
+            return paidPrice;
+        } catch (error) {
+            console.error('Error fetching paid price:', error);
+            return null;
+        }
+    };
+
+    useEffect(() => {
+        const fetchAllPaidPrices = async () => {
+            const prices: { [key: string]: number } = {};
+            for (const booking of bookedItineraries) {
+                try {
+                    const paidPrice = await fetchPaidPrice(booking.itinerary._id);
+                    prices[booking.itinerary._id] = paidPrice || 0;
+                } catch (error) {
+                    console.error(`Error fetching price for itinerary ${booking.itinerary._id}:`, error);
+                    prices[booking.itinerary._id] = 0;
+                }
+            }
+            setPaidPrices(prices);
+        };
+    
+        if (bookedItineraries.length > 0) {
+            fetchAllPaidPrices();
+        }
+    }, [bookedItineraries]);
+
+    useEffect(() => {
+        const fetchAllPaidPricesAct = async () => {
+            const prices: { [key: string]: number } = {};
+            for (const activity of filteredActivities) {
+                try {
+                    const paidPrice = await getPaidPriceApiAct(activity._id);
+                    prices[activity._id] = paidPrice || 0;
+                } catch (error) {
+                    console.error(`Error fetching price for activity ${activity._id}:`, error);
+                    prices[activity._id] = 0; // Set default to 0 on error
+                }
+            }
+            setPaidPricesAct(prices);
+        };
+    
+        if (filteredActivities.length > 0) {
+            fetchAllPaidPricesAct();
+        }
+    }, [filteredActivities]);
+    
     
 
 
@@ -377,12 +457,12 @@ const BookingHistory = () => {
                                                             <td>
                                                                 <div className="dashboard-thumb-wrapper p-relative">
                                                                     <div className="dashboard-thu   mb image-hover-effect-two position-relative">
-                                                                        <Image
+                                                                        {/* <Image
                                                                             src=""
                                                                             loader={imageLoader}
                                                                             style={{ width: '100%', height: "auto" }}
                                                                             alt="itinerary image" 
-                                                                        />
+                                                                        /> */}
                                                                     </div>
                                                                 </div>
                                                             </td>
@@ -408,15 +488,19 @@ const BookingHistory = () => {
                                                                 onCancel={closeCancelModal}
                                                             />
                                                         )}
+
+
+
                                                             </td>
                                                             <td>
                                                                 <div className="recent-activity-price-box">
-                                                                <h5 className="mb-10">
-                                                                        {currency} {convertedItineraryPrices[booking.itinerary._id]?.toFixed(2) || booking.itinerary.price.toLocaleString("en-US")}
+                                                                    <h5 className="mb-10">
+                                                                        {currency} {paidPrices[booking.itinerary._id]?.toFixed(2) || 'Loading...'}
                                                                     </h5>
-                                                                    <p>Total/Person</p>
+                                                                    <p>Total Paid</p>
                                                                 </div>
                                                             </td>
+
                                                             <td>
                                                                 <div>
                                                                     {new Date(booking.bookingDate) < currentDate ? (
@@ -474,19 +558,29 @@ const BookingHistory = () => {
                                             </Link>
                                         </h5>
                                         <div className="recent-activity-location">
-                                            Address: {booking.location.address}
+                                            Address: {booking.location}
                                         </div>
                                     </div>
                                 </div>
+                                {showCancelModalAct && (
+    <>
+        {console.log("Rendering CancelConfirmationModal for Activity")}
+        <CancelConfirmationModal
+            onConfirm={confirmCancellationAct}
+            onCancel={closeCancelModalAct}
+        />
+    </>
+)}
                             </td>
                             <td>
-                                                                <div className="recent-activity-price-box">
-                                                                <h5 className="mb-10">
-                                                                      {currency} {convertedActivityPrices[booking._id]?.toFixed(2) || booking.price.toFixed(2)}
-                                                                    </h5>
-                                                                    <p>Total/Person</p>
-                                                                </div>
-                                                            </td>
+                                        <div className="recent-activity-price-box">
+                                            <h5 className="mb-10">
+                                                {currency} {paidPricesAct[booking._id]?.toFixed(2) || 'Loading...'}
+                                            </h5>
+                                            <p>Total Paid</p>
+                                        </div>
+                                    </td>
+
                                                             <td>
                                                                 <div>
                                                                     {new Date(booking.date) < currentDate ? (
@@ -499,16 +593,17 @@ const BookingHistory = () => {
                                                                         </button>
                                                                     ) : (
                                                                         <button
-                                                                            onClick={() => handleCancelBookingClick_act(booking)}
-                                                                            className="bd-primary-btn btn-style radius-60"
-                                                                            style={{
-                                                                                cursor: isCancellable_act(booking.date) ? "pointer" : "not-allowed",
-                                                                            }}
-                                                                            disabled={!isCancellable_act(booking.date)}
-                                                                            title={!isCancellable_act(booking.date) ? "Cannot cancel within 48 hours of booking date." : ""}
-                                                                        >
-                                                                            Cancel Booking
-                                                                        </button>
+    onClick={() => handleCancelBookingClick_act(booking)}
+    className="bd-primary-btn btn-style radius-60"
+    style={{
+        cursor: isCancellable_act(booking.date) ? "pointer" : "not-allowed",
+    }}
+    disabled={!isCancellable_act(booking.date)}
+    title={!isCancellable_act(booking.date) ? "Cannot cancel within 48 hours of booking date." : ""}
+>
+    Cancel Booking
+</button>
+
                                                                     )}
                                                                 </div>
                                                             </td>

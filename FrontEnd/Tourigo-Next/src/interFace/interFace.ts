@@ -386,12 +386,7 @@ export interface Activity {
   img: StaticImageData;
   date: string;
   time: string;
-  location: {
-    type: 'Point';
-    address: string;
-    lat?: number;
-    lng?: number;
-  };
+  location: string;
   price: number;
   category: string;
   tags?: string[];
@@ -410,6 +405,7 @@ export interface Activity {
   touristIDs?: string[]; // Array of tourist ObjectIds
   averageRating:number;
   photo: string;
+  description:string;
 }
 
 export interface BookedActivity {

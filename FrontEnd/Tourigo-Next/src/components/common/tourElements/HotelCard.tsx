@@ -13,6 +13,7 @@ interface HotelCardProps {
     rawPrice: number; // Hotel raw price
     id: string; // Hotel ID
     location: string; // Hotel location
+    distance: string; // Hotel distance
   };
   className: string; // Additional CSS class
   hotelWrapperClass: string; // Wrapper class for styling
@@ -55,7 +56,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
                   <span>
                     <Link href={`/hotel-details/${hotel.id}`}>
                       <i className="fa-regular fa-location-dot"></i>{" "}
-                      {hotel.location || "Location not available"}
+                      {hotel.distance || "Location not available"}
                     </Link>
                   </span>
                 </div>

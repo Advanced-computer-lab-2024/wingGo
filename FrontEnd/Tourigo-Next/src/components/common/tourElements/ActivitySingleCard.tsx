@@ -213,7 +213,7 @@ const TourSingleCard = ({
                   <span>
                     <Link href={`/activity-details/${tour._id}`}>
                       <i className="fa-regular fa-location-dot"></i>{" "}
-                      {tour.location.address || "Location not available"}
+                      {tour.location || "Location not available"}
                     </Link>
                   </span>
                 </div>
