@@ -5,9 +5,9 @@ import bannerMap from "../../../public/assets/images/shapes/banner-map-2.png";
 import planeShape from "../../../public/assets/images/shapes/plane-5.png";
 import bannerLine from "../../../public/assets/images/shapes/banner-line-4.svg";
 import yellowShape from "../../../public/assets/images/shapes/yellow-shape.png";
-import bannerImgOne from "../../../public/assets/images/banner/banner-4/banner-four-img-1.png";
-import bannerImgTwo from "../../../public/assets/images/banner/banner-4/banner-four-img-2.png";
-import bannerImgThree from "../../../public/assets/images/banner/banner-4/banner-four-img-3.png";
+import bannerImgOne from "../../../public/assets/images/banner/banner-4/img1.png";
+import bannerImgTwo from "../../../public/assets/images/banner/banner-4/img2.jpg";
+import bannerImgThree from "../../../public/assets/images/banner/banner-4/img3.jpg";
 import homeFourBanner from "../../../public/assets/images/shapes/home-4-banner-shape.png";
 import { imageLoader } from "@/hooks/image-loader";
 import Link from "next/link";
@@ -58,22 +58,7 @@ const BannerFour = () => {
             />
           </div>
         </div>
-        <div className="banner-social banner-four-social">
-          <div className="theme-social  wow bdFadeInLeft" data-wow-delay=".3s">
-            <Link href="https://www.facebook.com/">
-              <i className="icon-facebook"></i>
-            </Link>
-            <Link href="https://www.twitter.com/">
-              <i className="icon-twitter-x"></i>
-            </Link>
-            <Link href="https://www.linkedin.com/">
-              <i className="icon-linkedin"></i>
-            </Link>
-            <Link href="https://www.youtube.com/">
-              <i className="icon-youtube"></i>
-            </Link>
-          </div>
-        </div>
+
         <div className="banner-wrapper banner-four banner-four-bg p-relative">
           <div
             className="banner-content p-relative wow bdFadeInLeft"
@@ -83,7 +68,7 @@ const BannerFour = () => {
               className="section-subtitle mb-25 wow bdFadeInLeft color-warning"
               data-wow-delay=".3s"
             >
-              Welcome Tourigo
+              Welcome WingGo
             </span>
             <h1
               className="banner-title white-text mb-30 wow bdFadeInLeft"
@@ -104,21 +89,7 @@ const BannerFour = () => {
               Share the core values and principles that drive your company.
               Emphasize a commitment to costume.
             </p>
-            <div className="banner-btn">
-              <Link
-                href="/contact"
-                className="bd-primary-btn btn-style has-arrow is-bg btn-tertiary is-white radius-60"
-              >
-                <span className="bd-primary-btn-arrow arrow-right">
-                  <i className="fa-regular fa-arrow-right"></i>
-                </span>
-                <span className="bd-primary-btn-text">Chose Package</span>
-                <span className="bd-primary-btn-circle"></span>
-                <span className="bd-primary-btn-arrow arrow-left">
-                  <i className="fa-regular fa-arrow-right"></i>
-                </span>
-              </Link>
-            </div>
+        
           </div>
           <div className="banner-slider">
             {/*Swiper*/}
@@ -168,11 +139,7 @@ const BannerFour = () => {
               alt="shape"
             />
           </div>
-          <div className="scroll-down-wrapper">
-            <Link href="/offer" className="scroll-down-btn">
-              <span></span>
-            </Link>
-          </div>
+     
         </div>
       </section>
     </>

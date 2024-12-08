@@ -7,6 +7,9 @@ import TourAreaFour from "./TourAreaFour";
 import AboutCompany from "./AboutCompany";
 import DayTourArea from "./DayTourArea";
 import TestimonialAreaFour from "./TestimonialAreaFour";
+import TravelAreaThree from "./TravelAreaThree";
+import CounterAreaThree from "./CounterAreaThree";
+import TestimonialAreaThree from "./TestimonialAreaThree";
 import WhyChooseFour from "./WhyChooseFour";
 import BlogAreaFour from "./BlogAreaFour";
 import InstagramArea from "../shearedComponents/InstagramArea";
@@ -16,17 +19,13 @@ const HomeFourMain = () => {
   return (
     <>
       <BannerFour />
-      <LocationAreaFour />
-      <OfferAreaFour />
-      <DestinationAreaFour />
-      <TourAreaFour />
-      <AboutCompany />
-      <DayTourArea />
-      <TestimonialAreaFour />
-      <CtaAreaStyleOne />
-      <WhyChooseFour />
-      <BlogAreaFour />
-      <InstagramArea ptClass="section-space-top" />
+      <CounterAreaThree />
+ 
+ <TravelAreaThree />
+ <TestimonialAreaThree />
+
+     
+     
     </>
   );
 };
