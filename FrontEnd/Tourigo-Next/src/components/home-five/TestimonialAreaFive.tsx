@@ -20,26 +20,9 @@ const TestimonialAreaFive = () => {
                 <h2 className="section-title mb-15">
                   Voices of Travelers Testimonials and Reviews
                 </h2>
-                <p className="">
-                  Lorem ipsum dolor sit amet consectetur. Facilisis in neque
-                  curabitur tristique placerat sit turpis.
-                </p>
+            
               </div>
-              <div className="travel-btn">
-                <Link
-                  href="#"
-                  className="bd-primary-btn btn-style has-arrow is-bg radius-60"
-                >
-                  <span className="bd-primary-btn-arrow arrow-right">
-                    <i className="fa-regular fa-arrow-right"></i>
-                  </span>
-                  <span className="bd-primary-btn-text">Know More</span>
-                  <span className="bd-primary-btn-circle"></span>
-                  <span className="bd-primary-btn-arrow arrow-left">
-                    <i className="fa-regular fa-arrow-right"></i>
-                  </span>
-                </Link>
-              </div>
+         
             </div>
             <div className="col-xxl-7 col-xl-7 col-lg-7">
               <div className="testimonial-five">
@@ -85,14 +68,7 @@ const TestimonialAreaFive = () => {
                                   </div>
                                 </div>
                                 <div className="testimonial-avatar-wrap">
-                                  <div className="avatar-thumb">
-                                    <Image
-                                      src={item.avatarImg}
-                                      loader={imageLoader}
-                                      style={{ width: "100%", height: "auto" }}
-                                      alt=""
-                                    />
-                                  </div>
+                                
                                   <div className="avatar-meta">
                                     <h6 className="avatar-meta-title">
                                       {item.avatarTitle}
