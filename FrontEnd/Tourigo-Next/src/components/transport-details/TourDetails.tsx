@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Transport } from "@/interFace/interFace";
-import { getTransportsData, bookTransport } from "@/data/transport-data";
+import { getTransportsData, } from "@/data/transport-data";
 import { useCurrency } from "@/contextApi/CurrencyContext";
 import TourDetailTabArea from "./TourDetailTabArea";
 import { toast, ToastContainer } from "react-toastify";
