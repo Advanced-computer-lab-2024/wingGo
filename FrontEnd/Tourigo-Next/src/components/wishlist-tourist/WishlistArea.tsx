@@ -34,6 +34,7 @@ const WishlistArea = () => {
       try {
         const products = await fetchWishlist();
         setWishlistProducts(products);
+        console.log('ay 7aga');
       } catch (err) {
         setError("Failed to load wishlist products.");
       } finally {
@@ -56,7 +57,8 @@ const WishlistArea = () => {
 
 
   const handleAddToCart = (productId: string) => {
-    try{    addToCart(productId);
+    try{    
+      addToCart(productId);
       alert("Product has been added to cart and removed from wishlist successfully");
       handleDelteProduct(productId);
     }catch (error: any) {
