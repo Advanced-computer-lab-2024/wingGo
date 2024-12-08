@@ -1,10 +1,26 @@
 import axios from 'axios';
 import { Cart} from '../interFace/interFace';
-const touristId='673167d3aa67023ecc799397'
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
+//const touristId='673167d3aa67023ecc799397'
 
-
+interface DecodedToken {
+  id: string;  // Extract user ID from the token
+  role: string;
+  username: string;
+  mustChangePassword: boolean;
+}
 export const fetchCartItems = async (): Promise<Cart[]> => {
-  try {
+  const token = Cookies.get('token');
+  let touristId = "";
+    try {
+      if (token) {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    console.log("Decoded Token:", decodedToken);
+    touristId = decodedToken.id;  // Extract governorId from the token
+      } else {
+    throw new Error("No token found. Please log in.");
+        }
       const response = await axios.get(`http://localhost:8000/tourist/cartItems/${touristId}`);
       return response.data; // Assuming the response contains an 'items' array
   } catch (error) {
@@ -27,7 +43,16 @@ export const updateCartItemAmount = async (cartItemId: string, amount: number) =
   }
 };
 export const removeFromCart = async (productId: string) => {
-  try {
+  const token = Cookies.get('token');
+  let touristId = "";
+    try {
+      if (token) {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    console.log("Decoded Token:", decodedToken);
+    touristId = decodedToken.id;  // Extract governorId from the token
+      } else {
+    throw new Error("No token found. Please log in.");
+        }
     const response = await axios.delete(
       `http://localhost:8000/tourist/cart/${touristId}/${productId}` // Replace with your actual backend URL
     );
@@ -40,7 +65,17 @@ export const removeFromCart = async (productId: string) => {
 };
 
 export const addToCart = async (productId: any): Promise<any> => {
-  try {
+  const token = Cookies.get('token');
+  let touristId = "";
+    try {
+      if (token) {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    console.log("Decoded Token:", decodedToken);
+    touristId = decodedToken.id;  // Extract governorId from the token
+      } else {
+    throw new Error("No token found. Please log in.");
+        }
+  
     const response = await axios.post(
       `http://localhost:8000/tourist/cart/${touristId}/${productId}` // Update with your actual backend URL
     );
@@ -98,7 +133,17 @@ export const getOrderDetails = async (orderId:string|null): Promise<{ products: 
 export const fetchCartTotalPrice = async (
   promoCode?: string | null
 ): Promise<{ totalPrice: number; discount: number }> => {
-  try {
+ 
+  const token = Cookies.get('token');
+  let touristId = "";
+    try {
+      if (token) {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    console.log("Decoded Token:", decodedToken);
+    touristId = decodedToken.id;  // Extract governorId from the token
+      } else {
+    throw new Error("No token found. Please log in.");
+        }
     // Construct the API URL with query parameters
     const url = `http://localhost:8000/tourist/cartItemsPrice/${touristId}`;
     const response = await axios.get(url, {
@@ -159,7 +204,17 @@ export const addDeliveryAddresses = async (
   addedAddresses: string[];
   deliveryAddresses: string[];
 }> => {
-  try {
+ 
+  const token = Cookies.get('token');
+  let touristId = "";
+    try {
+      if (token) {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    console.log("Decoded Token:", decodedToken);
+    touristId = decodedToken.id;  // Extract governorId from the token
+      } else {
+    throw new Error("No token found. Please log in.");
+        }
     // API endpoint
     const url = `http://localhost:8000/tourist/addDeliveryAddress/${touristId}`;
 
@@ -177,7 +232,17 @@ export const addDeliveryAddresses = async (
 };
 
 export const fetchDeliveryAddresses = async (): Promise<string[]> => {
-  try {
+  
+  const token = Cookies.get('token');
+  let touristId = "";
+    try {
+      if (token) {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    console.log("Decoded Token:", decodedToken);
+    touristId = decodedToken.id;  // Extract governorId from the token
+      } else {
+    throw new Error("No token found. Please log in.");
+        }
     // API endpoint
     const url = `http://localhost:8000/tourist/deliveryAddresses/${touristId}`;
 
