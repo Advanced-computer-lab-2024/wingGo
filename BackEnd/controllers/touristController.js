@@ -3733,21 +3733,44 @@ const removeWishlistItem = async (req, res) => {
 };
 
 
+// const getPromoCodesForTourist = async (req, res) => {
+//     const { touristId } = req.params;
+  
+//     try {
+//       const tourist = await Tourist.findById(touristId).populate('promoCodes');
+//       if (!tourist) {
+//         return res.status(404).json({ message: 'Tourist not found' });
+//       }
+  
+//       res.status(200).json({ promoCodes: tourist.promoCodes });
+//     } catch (error) {
+//       console.error('Error fetching promo codes:', error);
+//       res.status(500).json({ message: 'Error fetching promo codes', error });
+//     }
+//   };
+
 const getPromoCodesForTourist = async (req, res) => {
     const { touristId } = req.params;
-  
+
     try {
-      const tourist = await Tourist.findById(touristId).populate('promoCodes');
-      if (!tourist) {
-        return res.status(404).json({ message: 'Tourist not found' });
-      }
-  
-      res.status(200).json({ promoCodes: tourist.promoCodes });
+        const tourist = await Tourist.findById(touristId).populate({
+            path: 'promoCodes',
+            match: { 
+                isActive: true, 
+                endDate: { $gte: new Date() } // Ensure endDate is in the future
+            }
+        });
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        res.status(200).json({ promoCodes: tourist.promoCodes });
     } catch (error) {
-      console.error('Error fetching promo codes:', error);
-      res.status(500).json({ message: 'Error fetching promo codes', error });
+        console.error('Error fetching promo codes:', error);
+        res.status(500).json({ message: 'Error fetching promo codes', error });
     }
-  };
+};
+
   
 
 const addWishlistItemToCart = async (req, res) => {

@@ -163,7 +163,7 @@ const RecentActivity = () => {
         }
 
         .custom-table th {
-          background-color: black;
+          background-color: #032040;
           color: white;
           font-size: 16px;
           font-weight: bold;
@@ -179,7 +179,7 @@ const RecentActivity = () => {
         }
 
         .custom-table .totals-row {
-          background-color: #000000 !important; /* Black background */
+          background-color: #032040 !important; /* Black background */
           color: white !important; /* White text */
           font-weight: bold;
         }

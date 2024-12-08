@@ -201,7 +201,7 @@ const RecentActivity = () => {
         }
 
         .custom-table th {
-          background-color: black;
+          background-color: #032040;
           color: white;
           font-size: 16px;
           font-weight: bold;
@@ -225,7 +225,7 @@ const RecentActivity = () => {
         }
 
         .custom-table .grand-total {
-          background-color: #000000 !important;
+          background-color: #032040 !important;
           color: white !important;
           font-weight: bold;
         }
