@@ -6,7 +6,7 @@ interface AddCuponMainProps {
 }
 
 const AddCuponMain: React.FC<AddCuponMainProps> = ({ setPromocode }) => {
-  const [isChecked, setIsChecked] = useState(false);
+  const [isChecked, setIsChecked] = useState(true);
   const couponRef = useRef<HTMLInputElement>(null); // Ref for coupon input field
 
   const handleCheckboxChange = () => {
@@ -27,7 +27,7 @@ const AddCuponMain: React.FC<AddCuponMainProps> = ({ setPromocode }) => {
 
   return (
     <div className="checkout-verify-item">
-      <p className="checkout-verify-reveal">
+      {/* <p className="checkout-verify-reveal">
         Have a coupon?
         <button
           type="button"
@@ -36,7 +36,7 @@ const AddCuponMain: React.FC<AddCuponMainProps> = ({ setPromocode }) => {
         >
           Click here to enter your code
         </button>
-      </p>
+      </p> */}
       {isChecked && (
         <div
           id="checkoutCouponForm"
@@ -61,7 +61,7 @@ const AddCuponMain: React.FC<AddCuponMainProps> = ({ setPromocode }) => {
               // setNumberOfPeople((prev) => Math.max(1, prev - 1));
             }}
               type="submit"
-              className="bd-primary-btn btn-style is-bg radius-60"
+              className="bd-primary-btn btn-style is-bg radius-30"
             >
               <span className="bd-primary-btn-text">Apply Coupon</span>
               <span className="bd-primary-btn-circle"></span>

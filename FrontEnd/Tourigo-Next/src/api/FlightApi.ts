@@ -18,8 +18,8 @@ export const searchFlights = async (params: FlightSearchParams): Promise<any> =>
           departureDate: params.departureDate,
         },
       });
-      console.log('Flight dataaaa:', response.data.data.flightOffers);
-      return response.data.data.flightOffers;
+      console.log('Flight dataaaa:', response.data);
+      return response.data;
     } catch (error) {
       console.error('Error fetching flight data:', error);
       throw error;

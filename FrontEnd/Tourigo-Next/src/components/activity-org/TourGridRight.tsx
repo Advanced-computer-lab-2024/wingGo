@@ -127,7 +127,7 @@ const TourGridRight = () => {
         />
       </div>
     </div>
-    <PaginationWrapper />
+    
   </div>
 </section>
 

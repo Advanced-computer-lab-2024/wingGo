@@ -152,8 +152,8 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
                   <Image 
                     src={imageUrl} 
                     alt="Product image" 
-                    width={300} 
-                    height={300} 
+                    width={270} 
+                    height={270} 
                     unoptimized 
                     style={{ objectFit: "cover" }} // Apply objectFit directly for Next.js Image
                   />

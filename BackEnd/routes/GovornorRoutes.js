@@ -1,10 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const PlaceController = require('../controllers/GovornorController');
+const  upload  = require('../uploadMiddleware');
 
 
 
-router.post('/createPlace', PlaceController.createPlace);
+
+// router.post('/createPlace', PlaceController.createPlace);
+router.post('/createPlace', upload.array('pictures', 10), PlaceController.createPlace);
+
 
 router.get('/getAllPlaces', PlaceController.getAllPlaces);
 
