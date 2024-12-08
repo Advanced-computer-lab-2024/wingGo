@@ -36,6 +36,7 @@ const createPlace = async (req, res) => {
         });
 
         await place.save();
+        console.log(place);
         res.status(201).json({ message: 'Place created successfully', place });
     } catch (err) {
         res.status(400).json({ error: err.message });
