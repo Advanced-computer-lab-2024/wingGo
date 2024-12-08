@@ -51,23 +51,42 @@ export const fetchAllItineraries = async (): Promise<Itinerary[]> => {
   }
 };
 
-
+/////////////////////////done///////////////////
 export const filterItineraries = async (filters: { 
-    budget?: number;
-    date?: string;
-    preferences?:string;
-    language?:string;
-    touristId?:string
-    
+  budget?: number;
+  date?: string;
+  preferences?: string;
+  language?: string;
 }): Promise<any[]> => {
-    try {
-        const response = await axios.get(`http://localhost:8000/tourist/filterItineraries`, { params: filters });
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching filtered itineraries:", error);
-        throw error;
+  try {
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
     }
+
+    // Decode the token to extract the tourist ID
+    let touristId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      touristId = decodedToken.id;
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Include the touristId in the filters
+    const params = { ...filters, touristId };
+
+    const response = await axios.get(`http://localhost:8000/tourist/filterItineraries`, { params });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching filtered itineraries:", error);
+    throw error;
+  }
 };
+
 
 
 
