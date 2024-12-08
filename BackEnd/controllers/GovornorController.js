@@ -6,69 +6,41 @@ const bcrypt = require('bcrypt');
 
 
 
-
+// Create a new place
 const createPlace = async (req, res) => {
-    const {
-        gov,
-        name,
-        description,
-        location,
-        openingHours,
-        ticketPrices,
-        tags,
-        tagss,
-      } = req.body;
-  
     try {
-      // Log incoming request data
-      console.log("Request Body:", req.body);
-      const mongoose = require("mongoose");
-      
-      // Cast Governor ID to ObjectId
-      const governorObjectId = new mongoose.Types.ObjectId(gov);
-  
-      // Check Governor Existence
-      const governorRecord = await Governor.findById(governorObjectId);
-      if (!governorRecord) {
-        return res.status(404).json({ error: "Governor not found." });
-      }
-  
-      // Validate Terms Acceptance
-      if (!governorRecord.termsAccepted) {
-        return res.status(403).json({
-          error: "Terms and conditions must be accepted to create a place.",
+        const { tagss, ...placeData } = req.body; // Extract tagss separately
+        const governorId = req.query.governorId; // Assuming governorId is passed in the query
+
+        // Validate the governor ID
+        const governor = await Governor.findById(governorId);
+        if (!governor) {
+            return res.status(404).json({ message: 'Governor not found' });
+        }
+
+        // Process uploaded pictures (if any)
+        let pictureUrls = [];
+        if (req.files && req.files.length > 0) {
+            pictureUrls = req.files.map(file => file.location); // Assuming you're using AWS S3 and `location` holds the URL
+        }
+
+        // Create a new place
+        const place = new Place({
+            ...placeData,  // Spread the rest of the place data (e.g., name, description, location)
+            pictures: pictureUrls, // Add the uploaded pictures
+            governorId,  // Set the governor ID
+            tagss: tagss || []  // Use an empty array if tagss is missing
         });
-      }
-  
-      // Handle Uploaded Files
-      const pictures = req.files?.map((file) => file.location || file.path) || [];
-  
-      // Safely Parse JSON Fields
-      const parsedTicketPrices = JSON.parse(ticketPrices || "{}");
-      const parsedTags = JSON.parse(tags || "{}");
-      const parsedTagss = JSON.parse(tagss || "[]");
-  
-      // Create and Save Place
-      const newPlace = new Place({
-        governorId: governorObjectId,
-        name,
-        description,
-        location,
-        openingHours,
-        ticketPrices: parsedTicketPrices,
-        tags: parsedTags,
-        tagss: parsedTagss,
-        pictures,
-      });
-  
-      await newPlace.save();
-      res.status(201).json({ message: "Place created successfully!", place: newPlace });
-    } catch (error) {
-      console.error("Error creating place:", error);
-      res.status(400).json({ error: error.message });
+
+        await place.save();
+        res.status(201).json({ message: 'Place created successfully', place });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
     }
-  };
-  
+};
+
+
+
 // const createPlace = async (req, res) => {
 //     try {
 //         const { /*governerId,*/ types, historicalPeriods, ...placeData } = req.body.tags || {}; // Extract tags separately

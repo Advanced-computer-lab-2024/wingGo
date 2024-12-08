@@ -1,5 +1,6 @@
 //BookingComponentFormIt.tsx
 "use client";
+import { useRouter } from "next/navigation"; // Import useRouter
 import ErrorMessage from "@/elements/error-message/ErrorMessage";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -9,7 +10,7 @@ import AddCupon from "./AddCuponMain";
 import SelectPaymentType from "./SelectPaymentType";
 import { idTypeNew } from "@/interFace/interFace";
 import { Transport } from "@/interFace/interFace";
-import { fetchTransports, getTransportPrice, bookTransport } from "@/api/transportApi";
+import { fetchTransports, getPriceApi, bookTransport } from "@/api/transportApi";
 import axios from 'axios';
 
 interface FormData {
@@ -27,6 +28,7 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
   const [paymentMethod, setPaymentMethod] = useState<"wallet" | "stripe" | "creditCard">("wallet");
   // const [promocode, setPromocode] = useState(""); // State for promo code
   const [validPromo, setValidPromo] = useState(true); 
+  const router = useRouter(); // Initialize useRouter for navigation
 
   
   // const [price, setPrice] = useState(0);
@@ -44,20 +46,21 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
     if (!data?._id) return;
 
     try {
-        const response = await getTransportPrice(data._id, promocode);
+        const response = await getPriceApi(data._id, promocode);
 
-        // Handle promo code validation and total price
-        if ( !response.promoCodeApplied) {
-            if (validPromo || promocode === "") {
-                toast.error("Invalid or expired promo code.");
+        // Handle invalid promo code
+        if (!response.isValidPromoCode) {
+            if (validPromo || promocode !== "") {
+                toast.error("Invalid or expired promo code."); // Show error toast
             }
-            setValidPromo(false);
+            setValidPromo(false); // Mark promo code as invalid
         } else {
+            // Handle valid promo code
             if (!validPromo) {
-                toast.success("Promo code applied successfully!");
+                toast.success("Promo code applied successfully!"); // Show success toast
             }
-            setPrice(response.totalPrice);
-            setValidPromo(true);
+            setPrice(response.totalPrice); // Update price
+            setValidPromo(true); // Mark promo code as valid
         }
     } catch (error) {
         console.error("Error updating price:", error);
@@ -67,9 +70,11 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
 
 
 
-  useEffect(() => {
-    updatePrice(); // Recalculate price on `promocode` change
-  }, [promocode]);
+  
+useEffect(() => {
+  updatePrice(); // Recalculate price on `promocode` or `numberOfPeople` change
+}, [promocode]);
+  
   
   // useEffect(() => {
   //   updatePrice();
@@ -91,6 +96,10 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
     try {
       await bookTransport(touristId, id, paymentMethod, promocode); // Use the new API function
       toast.success("Transport Booking Successful!", { id: toastId, duration: 1000 });
+
+      setTimeout(() => {
+        router.push("/transports"); // Redirect to transports page
+      }, 1000); // 1-second delay
     } catch (error) {
       toast.error("Error during transport booking process.", { id: toastId });
       console.error("Error during API call:", error);

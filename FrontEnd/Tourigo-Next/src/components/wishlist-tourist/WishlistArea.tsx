@@ -1,5 +1,6 @@
 "use client";
 import { fetchWishlist,removeFromWishlist } from "@/api/wishlistApi";
+import {addToCart} from "@/api/cartApi"
 import { ProductsType } from "@/interFace/interFace";
 import {Product} from "@/interFace/interFace";
 import { cart_product, cart_wishlist_product } from "@/redux/slices/cartSlice";
@@ -52,14 +53,19 @@ const WishlistArea = () => {
 
 
 
-  const handleAddToCart = (product: ProductsType) => {
-
+  const handleAddToCart = (productId: string) => {
+    try{    addToCart(productId);
+      alert("Product has been added to cart and removed from wishlist successfully");
+      handleDelteProduct(productId);
+    }catch (error: any) {
+      alert(error.message || "Failed to add product to cart. Please try again.");
+    }
     
   };
   const handleIncressWishlist = (product: ProductsType) => {
    
   };
-//frontend wise only- handle later
+//frontend wise only- handle later API wise
   const handDecressCart = (productId: string) => {
     setWishlistProducts((prevItems) =>
       prevItems.map((item) => {
@@ -82,12 +88,8 @@ const WishlistArea = () => {
   
 
   const handleDelteProduct = (productId:string) => {
-    const userconfirm= window.confirm(
-      "Confirmation for deletion from wishlist"
-    )
-    if (userconfirm){
-      setWishlistProducts((prevItems)=> prevItems.filter((item)=>item.productId._id!==productId))
-    };
+    setWishlistProducts((prevItems)=> prevItems.filter((item)=>item.productId._id!==productId))
+    
     removeFromWishlist(productId).then(()=>{
       console.log("Item removed from wishlist Successfullly")
     })
@@ -171,7 +173,7 @@ const WishlistArea = () => {
                               <td className="bd-cart-add-to-cart">
                                 <button
                                   type="submit"
-                                  onClick={() => handleAddToCart(item)}
+                                  onClick={() => handleAddToCart(item.productId._id)}
                                   className="bd-primary-btn btn-style is-bg radius-60"
                                 >
                                   <span className="bd-primary-btn-text">
