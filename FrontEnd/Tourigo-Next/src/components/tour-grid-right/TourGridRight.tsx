@@ -32,7 +32,7 @@ const TourGridRight = () => {
               <SidebarSearchArea placeHolderTextData="Tour Place" />
             </div>
           </div>
-          <PaginationWrapper />
+          
         </div>
       </section>
       <BookingFormModal />

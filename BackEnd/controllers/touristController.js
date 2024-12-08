@@ -2899,51 +2899,30 @@ const getTouristUsername = async (req, res) => {
 };    
 const getPurchasedProducts = async (req, res) => {
     const { touristId } = req.params;
-
+  
     try {
-        const tourist = await Tourist.findById(touristId).populate({
-            path: 'purchasedProducts.productId',
-            select: 'name picture price sales description quantity seller ratings reviews archive',
-            populate: {
-                path: 'seller',
-                select: 'username _id'
-            }
-        });
-
-        if (!tourist) {
-            return res.status(404).json({ message: 'Tourist not found' });
-        }
-
-        const purchasedProductData = tourist.purchasedProducts.map(purchased => {
-            const product = purchased.productId;
-            if (!product) {
-                console.warn(`Missing product for purchase:`, purchased);
-            }
-
-            return {
-                _id: product ? product._id : null,
-                name: product ? product.name : "Unknown",
-                picture: product?.picture ? `/images/${product.picture}` : "/images/placeholder.png",
-                price: product?.price || 0,
-                sales: product?.sales || 0,
-                description: product?.description || "No description available",
-                quantity: product?.quantity || 0,
-                seller: product?.seller?.username || "Admin",
-                sellerID: product?.seller?._id || "Admin",
-                ratings: product?.ratings || [],
-                reviews: product?.reviews || [],
-                archive: product?.archive || false,
-                purchaseDate: purchased.purchaseDate || null
-            };
-        });
-
-        res.status(200).json(purchasedProductData);
+      const tourist = await Tourist.findById(touristId).populate('purchasedProducts.productId');
+      if (!tourist) {
+        return res.status(404).json({ message: 'Tourist not found' });
+      }
+  
+      const purchasedProductData = tourist.purchasedProducts.map(purchased => ({
+        _id: purchased.productId ? purchased.productId._id : null,
+        name: purchased.productId ? purchased.productId.name : null,
+        picture: purchased.productId ? purchased.productId.picture || 'default.png' : null,
+        price: purchased.productId ? purchased.productId.price : null,
+        description: purchased.productId ? purchased.productId.description : null,
+        ratings: purchased.productId ? purchased.productId.ratings : [],
+      }));
+  
+      console.log("Purchased Products Data:", purchasedProductData); // Log the response
+      res.status(200).json(purchasedProductData);
     } catch (error) {
-        console.error("Error fetching purchased products:", error);
-        res.status(500).json({ message: "Server error", error: error.message });
+      console.error("Error fetching purchased products:", error);
+      res.status(500).json({ message: 'Error fetching purchased products', error });
     }
-};
-
+  };
+  
 
 const getUnbookedItineraries = async (req, res) => {
         const { touristId } = req.params;

@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { rateProduct, reviewProduct } from "@/api/productApi";
 import { Product } from "@/interFace/interFace";
+import { IPurchasedProduct } from "@/interFace/interFace";
 
 interface RateCommentModalProps {
+  product: IPurchasedProduct; // Update to use IPurchasedProduct if applicable
   productId: string;
   touristId: string;
-  product: Product;
   onClose: () => void;
 }
 

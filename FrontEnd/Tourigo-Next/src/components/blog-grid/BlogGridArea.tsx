@@ -23,7 +23,7 @@ const BlogGridArea = () => {
                   />
                 ))}
           </div>
-          <PaginationWrapper />
+          
         </div>
       </div>
     </>
