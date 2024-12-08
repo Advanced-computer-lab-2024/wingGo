@@ -22,6 +22,7 @@ interface ItourPropsType {
   isparentClass: boolean;
   isAdmin?: boolean;
   isAdvertiser?: boolean;
+  onUnsaved?: (id: string) => void; // Add this new prop
 }
 
 const TourSingleCard = ({
@@ -30,7 +31,8 @@ const TourSingleCard = ({
   tourWrapperClass,
   isparentClass,
   isAdmin = false,
-  isAdvertiser = false
+  isAdvertiser = false,
+  onUnsaved,
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const router = useRouter();
@@ -174,7 +176,9 @@ const TourSingleCard = ({
       if (saveResult) {
         setIsSaved(action); // Update state to reflect the action
         toast.success(`Activity ${isSaved ? 'unsaved' : 'saved'} successfully!`);
-        
+        if (onUnsaved) {
+          onUnsaved(tour._id); // Call the parent callback
+        }        
       } else {
         console.error("Failed to toggle save/unsave:", saveResult);
         toast.error("Failed to toggle save/unsave. Please try again later");

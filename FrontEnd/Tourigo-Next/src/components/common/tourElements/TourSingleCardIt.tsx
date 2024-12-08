@@ -22,6 +22,7 @@ interface ItourPropsType {
   isparentClass: boolean;
   isAdmin?: boolean; // Optional prop to check if the view is admin
   isTourGuide?: boolean; // Optional prop to check if the view is tour guide
+  onUnsaved?: (id: string) => void;
 }
 
 const TourSingleCard = ({
@@ -31,6 +32,9 @@ const TourSingleCard = ({
   isparentClass,
   isAdmin = false,
   isTourGuide = false,
+  onUnsaved,
+  
+  
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const rating = tour.averageRating ; // Use Itinerary's averageRating, default to 1
@@ -141,8 +145,12 @@ const handleSave = async () => {
       setIsSaved(true); // Set as saved
     } else {
       setIsSaved(false); // Set as unsaved
+      if (onUnsaved) {
+        onUnsaved(tour._id); // Call the parent callback
+      }
     }
     toast.success(`Itinerary ${isSaved ? 'unsaved' : 'saved'} successfully!`);
+    
   } catch (error) {
     console.error("Error toggling save/unsave itinerary:", error);
     toast.error("Failed to toggle save/unsave. Please try again later");
