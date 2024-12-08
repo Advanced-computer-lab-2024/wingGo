@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import bgImg from "../../../public/assets/images/tour/tour-img-1.png";
+import bgImg from "../../../public/assets/images/noImage.png";
 
 interface propsType {
   setlargeImg: React.Dispatch<React.SetStateAction<string>>;
@@ -43,7 +43,7 @@ const UploadSingleImg = ({ setlargeImg ,setImage}: propsType) => {
               accept=".png, .jpg, .jpeg"
               onChange={handleImageChange}
             />
-            <label htmlFor="imageUpload">Click images here</label>
+            <label htmlFor="imageUpload">Upload Image</label>
           </div>
         </div>
       </div>

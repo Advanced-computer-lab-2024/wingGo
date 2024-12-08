@@ -17,6 +17,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import useCurrency
 import { FaShareAlt, FaEnvelope } from "react-icons/fa"; // Import icons from react-icons
 import Modal from "react-modal"; // Import Modal from react-modal
+import { fetchItImage } from "@/api/itineraryApi";
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Itinerary | null>(null);
@@ -26,6 +27,9 @@ const TourDetails = ({ id }: idTypeNew) => {
   const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
   const [tourGuide, setTourGuide] = useState<TourGuide | null>(null);
+  const DEFAULT_IMAGE = "/assets/images/Itinerary.png";
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   const handleEmailChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
     setEmail(e.target.value);
@@ -79,6 +83,22 @@ const TourDetails = ({ id }: idTypeNew) => {
     fetchItinerary();
   }, [id, currency, convertAmount]);
 
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        if (data?._id && data?.photo && !isImageLoaded) { 
+          const url = await fetchItImage(data._id);
+          if (url) {
+            setImageUrl(url);
+            setIsImageLoaded(true); 
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load image:", error);
+      }
+    };
+    loadImage();
+  }, [data?._id, data?.photo, isImageLoaded]);
   const router = useRouter(); // Initialize router
 
   const handleBookNowClick = () => {
@@ -98,11 +118,12 @@ const TourDetails = ({ id }: idTypeNew) => {
                   <div className="tour-details mb-25">
                     <div className="tour-details-thumb details-slide-full mb-30">
                       <Image
-                        src="/images/default-image.jpg" // Placeholder image
+                        src={imageUrl || DEFAULT_IMAGE} // Placeholder image
                         loader={imageLoader}
-                        width={1920}
-                        height={1080}
-                        style={{ width: "100%", height: "auto" }}
+                        width={300}
+                        height={300}
+                        style={{ width: "auto", height: "auto" }}
+                        unoptimized
                         alt="Itinerary Image"
                       />
                     </div>

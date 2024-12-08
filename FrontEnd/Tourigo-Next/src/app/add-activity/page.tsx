@@ -5,7 +5,7 @@ import React from "react";
 
 const page = () => {
   return (
-    <MetaData pageTitle="Edit Tour Package">
+    <MetaData pageTitle="Add Activity">
       <Wrapper>
         <main>
           <TourListingEditMain />
