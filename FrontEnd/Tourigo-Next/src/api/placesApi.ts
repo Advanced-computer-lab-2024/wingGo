@@ -1,6 +1,15 @@
 // placesApi.ts
 import axios from 'axios';
 import { Place } from '../interFace/interFace';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode'; 
+
+interface DecodedToken {
+    username: string;
+    id: string;
+    role: string;
+    mustChangePassword:boolean;
+  }
 const API_URL = 'http://localhost:8000/tourist';
 
 // Fetch all places
@@ -14,10 +23,24 @@ export const fetchAllPlaces = async (): Promise<Place[]> => {
     }
 };
 export const createPlace = async (placeData: any): Promise<any> => {
+    const token = Cookies.get('token');
+    let governorId="";
+
     try {
+        if (token) {
+
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        console.log("Decoded Token:", decodedToken);
+        const governorId = decodedToken.id;
         console.log("placeData",placeData);
-        console.log("HELOOOOOOOOOOOOOOOOOOOOOO")
-        const response = await axios.post(`http://localhost:8000/govornor/createPlace`, placeData);
+    } else {
+        throw new Error("No token found. Please log in.");
+      }
+    
+        const response = await axios.post(`http://localhost:8000/govornor/createPlace`, {
+            ...placeData,
+            governorId,
+          });
         return response.data.place; // Return the created place data
     } catch (error) {
         console.error("Error creating place:", error);
@@ -34,8 +57,17 @@ export const deletePlace = async (placeId: string): Promise<void> => {
         throw error;
     }
 };
-export const updatePlace = async (id:string, governorId:string, updatedData:any) => {
+export const updatePlace = async (id:string, updatedData:any) => {
+    const token = Cookies.get('token');
+    let governorId = "";
     try {
+        if (token) {
+            const decodedToken = jwtDecode<DecodedToken>(token);
+            console.log("Decoded Token:", decodedToken);
+            governorId = decodedToken.id;  // Extract governorId from the token
+        } else {
+            throw new Error("No token found. Please log in.");
+        }
         const response = await axios.put(
             `http://localhost:8000/govornor/updatePlace/${id}?governorId=${governorId}`,
             updatedData
