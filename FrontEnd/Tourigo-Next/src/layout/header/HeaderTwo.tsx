@@ -31,7 +31,7 @@ const HeaderFour = () => {
                       />
                     </Link>
                   </div>
-                  <div className="mean-menu-wrapper d-none d-xl-block">
+                  <div className="mean-menu-wrapper d-none d-xl-block w-100">
                     <div className="main-menu">
                       <nav
                         className="main-menu main-menu-three"

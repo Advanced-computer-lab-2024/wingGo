@@ -8,6 +8,7 @@ import { useCurrency } from "@/contextApi/CurrencyContext";
 import {getTourGuideNotificationsApi} from "@/api/PrefrenceApi"
 import {Notification} from "@/interFace/interFace"
 import { FaBell } from "react-icons/fa";
+import Cookies from "js-cookie";
 
 const MenuTwo = () => {
   const { setCurrency, currency } = useCurrency(); // Access setCurrency from CurrencyContext
@@ -56,11 +57,11 @@ useEffect(() => {
 {item.id === 11 ? ( // Check for the Bell Icon ID
       <div
       style={{
-        position: "relative",
+        position: "absolute",
         top: "40%", // Vertically center it within the navigation bar
-        // right: "5px", // Keep it to the far-right of the screen
+        right: "150px", // Keep it to the far-right of the screen
         paddingLeft: "30px",
-        // marginLeft: "20px"
+        marginLeft: "20px"
       }}
     >
         <FaBell
@@ -239,6 +240,22 @@ useEffect(() => {
             )}
           </li>
         ))}
+        <div
+      style={{
+        position: "absolute",
+        top:"20%",
+        right: "5px", // Keep it to the far-right of the screen
+        paddingLeft: "30px",
+        marginLeft: "20px"
+      }}
+    >
+          <button className="bd-primary-btn btn-style radius-60 mb-10 px-50 mt-10"
+            onClick={() => {const cookie = Cookies.remove("token"); window.location.href = "/";}}
+            >
+              <span className="bd-primary-btn-text">Logout</span>
+              <span className="bd-primary-btn-circle"></span>
+            </button>
+            </div>
       </ul>
     </>
   );

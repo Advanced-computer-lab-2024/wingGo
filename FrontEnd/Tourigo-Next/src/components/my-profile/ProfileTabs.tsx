@@ -4,10 +4,12 @@ import ProfileDetails from './ProfileDetails';
 import LoyaltyProgram from './LoyaltyProgram';
 import HotelBookings from './HotelBookings';
 import FlightBookings from './FlightBookings';
+import TransportBookings from './TransportBookings';
 import { viewTouristProfile } from "@/api/ProfileApi";
 import { set } from "date-fns";
 import Prefrences from "./Prefrences";
 import PromoCodes from "./PromoCodes";
+import { FaCarSide } from "react-icons/fa";
 
 
 interface ProfileDetailsProps {
@@ -52,6 +54,8 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
         return <Prefrences profileData={profileData} id={id} setPrefrenceRefresh={setPreferencesRefresh}/>;
       case 'hotel':        
           return <HotelBookings id={id} />
+      case 'transport':
+        return <TransportBookings id={id} />;
       case 'flight':
             return <FlightBookings id={id}/>;
             case "promocodes": 
@@ -166,6 +170,22 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                           <i className="icon-travel-plane"></i>
                         </span>
                         Flight Bookings
+                      </button>
+                      <button
+                        className="nav-link"
+                        id="nav-community-2-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#nav-community-2"
+                        type="button"
+                        role="tab"
+                        aria-controls="nav-community-2"
+                        aria-selected="false"
+                        onClick={() => setActiveTab('transport')}
+                      >
+                        <span>
+                        <FaCarSide />
+                        </span>
+                        Transports Bookings
                       </button>
                       <button
                         className="nav-link"

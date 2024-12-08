@@ -107,6 +107,23 @@ const Menu = () => {
             )}
           </li>
         ))}
+
+<div
+      style={{
+        position: "absolute",
+        top: "20%",
+        right: "5px", // Keep it to the far-right of the screen
+        paddingLeft: "30px",
+        marginLeft: "20px"
+      }}
+    >
+          <button className="bd-primary-btn btn-style radius-60 mb-10 px-50 "
+            onClick={() => { window.location.href = "/sign-in";}}
+            >
+              <span className="bd-primary-btn-text">Login</span>
+              <span className="bd-primary-btn-circle"></span>
+            </button>
+            </div>
       </ul>
     </>
   );

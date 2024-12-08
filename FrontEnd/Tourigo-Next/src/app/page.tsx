@@ -1,5 +1,6 @@
 //@refresh
 
+import HomeFourMain from "@/components/home-four/HomeFourMain";
 import IndexMain from "@/components/index/IndexMain";
 import MetaData from "@/hooks/useMetaData";
 import Wrapper from "@/layout/DefaultWrapper";
@@ -10,7 +11,7 @@ const Home = () => {
       <MetaData pageTitle="Wellcome To Tourigo">
         <Wrapper>
           <main>
-            <IndexMain />
+            <HomeFourMain />
           </main>
         </Wrapper>
       </MetaData>

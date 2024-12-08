@@ -75,21 +75,7 @@ const TravelAreaThree = () => {
                     Emphasize a commitment to customer satisfaction
                   </p>
                 </div>
-                <div className="travel-btn">
-                  <Link
-                    href="/contact"
-                    className="bd-primary-btn btn-style has-arrow is-bg radius-60"
-                  >
-                    <span className="bd-primary-btn-arrow arrow-right">
-                      <i className="fa-regular fa-arrow-right"></i>
-                    </span>
-                    <span className="bd-primary-btn-text">Know More</span>
-                    <span className="bd-primary-btn-circle"></span>
-                    <span className="bd-primary-btn-arrow arrow-left">
-                      <i className="fa-regular fa-arrow-right"></i>
-                    </span>
-                  </Link>
-                </div>
+                
               </div>
             </div>
             <div className="col-xl-6 col-lg-6">
@@ -105,10 +91,10 @@ const TravelAreaThree = () => {
                             </span>
                           </div>
                           <h5 className="travel-title underline-two">
-                            <Link href={`/destinations-details/${item?.id}`}>
+                            
                               {item.travelTitle}
                               Tours
-                            </Link>
+                          
                           </h5>
                         </div>
                       </div>

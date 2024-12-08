@@ -6,6 +6,7 @@ import { imageLoader } from "@/hooks/image-loader";
 import { FaBell } from "react-icons/fa"; // Import the bell icon
 import { getAdvertiserNotificationsApi } from "@/api/PrefrenceApi";
 import { Notification } from "@/interFace/interFace";
+import Cookies from "js-cookie";
 
 const MenuFour = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -43,8 +44,9 @@ const MenuFour = () => {
             {item.id === 11 ? ( // Check for the Bell Icon ID
               <div
                 style={{
-                  position: "relative",
+                  position: "absolute",
                   top: "40%", // Vertically center it within the navigation bar
+                  right: "150px",
                   paddingLeft: "30px",
                 }}
               >
@@ -221,6 +223,22 @@ const MenuFour = () => {
             )}
           </li>
         ))}
+        <div
+      style={{
+        position: "absolute",
+        top:"20%",
+        right: "5px", // Keep it to the far-right of the screen
+        paddingLeft: "30px",
+        marginLeft: "20px"
+      }}
+    >
+          <button className="bd-primary-btn btn-style radius-60 mb-10 px-50 mt-2"
+            onClick={() => {const cookie = Cookies.remove("token"); window.location.href = "/";}}
+            >
+              <span className="bd-primary-btn-text">Logout</span>
+              <span className="bd-primary-btn-circle"></span>
+            </button>
+            </div>
       </ul>
     </>
   );
