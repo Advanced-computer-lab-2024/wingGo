@@ -81,6 +81,18 @@ const menu_data: MenuType[] = [
     children: false,
     megaMenu: true,
     active: true,
+    title: "Report Sales",
+    pluseIncon: true,
+    pageLayout: true,
+    link: "/sales-view-admin",
+    
+  },
+  {
+    id: 9,
+    hasDropdown: true,
+    children: false,
+    megaMenu: true,
+    active: true,
     title: "My profile",
     pluseIncon: true,
     pageLayout: true,

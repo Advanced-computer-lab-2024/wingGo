@@ -21,6 +21,7 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 
 
+
 const WishlistArea = () => {
   const route = useRouter();
   const [totalQuantity, setTotalQuantity] = useState(0);
@@ -28,20 +29,21 @@ const WishlistArea = () => {
   const [productImageUrl, setProductImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
 
   useEffect(() => {
     const loadWishlist = async () => {
       try {
         const products = await fetchWishlist();
         setWishlistProducts(products);
-        console.log('ay 7aga');
       } catch (err) {
         setError("Failed to load wishlist products.");
       } finally {
         setLoading(false);
       }
     };
-
+    
     loadWishlist();
   }, []);
   
@@ -121,28 +123,31 @@ const WishlistArea = () => {
                     <table className="table">
                       <thead>
                         <tr>
-                          <th colSpan={2} className="bd-cart-header-product">
+                          {/* <th colSpan={2} className="bd-cart-header-product">
                             Product
-                          </th>
-                          <th className="bd-cart-header-price">Price</th>
+                          </th> */}
+                          {/* <th className="bd-cart-header-product">Product</th>
+                          <th className="bd-cart-header-price">Price</th> */}
+                          <th>Product</th>
+                          <th>Price</th>
                           <th>Add to Cart</th>
                           <th>Remove</th>
                         </tr>
                       </thead>
                       <tbody>
                         {wishlistProducts?.map((item, index) => {
-                          const totalAmount = item?.productId.price * item?.productId.quantity;
+                          const totalAmount = item?.productId.price;
                           return (
                             <tr key={index}>
-                              <td className="bd-cart-img image-hover-effect">
-                                <Link href="/shop-details">
+                              {/* <td className="bd-cart-img image-hover-effect">
+                                <Link href={`/Product-details/${item.productId._id}/Tourist`}>
                                   {" "}
                                   <Image src={item?.picture} alt="image" />
                                 </Link>
-                              </td>
+                              </td> */}
 
                               <td className="bd-cart-title">
-                                <Link href="/shop-details">{item?.productId.name}</Link>
+                              <Link href={`/Product-details/${item.productId._id}/Tourist`}>{item?.productId.name}</Link>
                               </td>
 
                               <td className="bd-cart-price">

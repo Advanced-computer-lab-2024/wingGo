@@ -293,22 +293,28 @@ export const saveOrUnsaveActivityApi = async (activityId: string, save: boolean)
       throw error;
     }
   };
-  export const deleteActivityApi = async (activityId: string, advertiserId: string): Promise<void> => {
-    try {
-      const response = await axios.delete(`http://localhost:8000/advertiser/activities/${activityId}`, {
-        params: { advertiserId }, // Pass the advertiserId as a query parameter
-      });
-      console.log("Activity deleted successfully:", response.data);
-    } catch (error: any) {
-      // Handle errors more robustly
-      if (axios.isAxiosError(error) && error.response) {
-        // Log server-side error if available
-        console.error("Server error deleting activity:", error.response.data);
-        throw new Error(error.response.data.message || "Failed to delete activity.");
-      } else {
-        // Log client-side or other errors
-        console.error("Client-side error deleting activity:", error.message);
-        throw new Error("An unexpected error occurred while deleting the activity.");
-      }
-    }
-  };
+
+  export const getPaidPriceApiAct = async (activityId: string) => {
+    
+    const token = Cookies.get('token'); // Retrieve the token from cookies.
+    let touristId = ""; // Initialize touristId
+try {
+  if (token) {
+    const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+    console.log("Decoded Token:", decodedToken);
+    touristId = decodedToken.id; // Extract the tourist ID
+  } else {
+    throw new Error("No token found. Please log in.");
+  }
+
+    const response = await axios.get(
+        `http://localhost:8000/tourist/getPaidPriceAct/${touristId}/${activityId}`
+    );
+    console.log(response.data.paidPrice);
+    return response.data.paidPrice; // Return paid price from response.
+} catch (error) {
+    console.error('Error fetching paid price:', error);
+    throw error;
+}
+};
+  

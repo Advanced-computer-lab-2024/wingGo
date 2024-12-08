@@ -4,6 +4,7 @@ import ProfileDetails from './ProfileDetails';
 import { viewTouristProfile } from "@/api/ProfileApi";
 import { set } from "date-fns";
 import { getAdvertiserLogo, viewAdvertiserProfile } from "@/api/AdvertiserProfileApi";
+import { getTourGuidePhoto, viewTourGuideProfile } from "@/api/TourGuideProfileApi";
 import TermsConditions from "./TermsAndConditions";
 
 
@@ -12,9 +13,8 @@ interface ProfileDetailsProps {
   id: string;
 }
 
-const AdvertiserProfile: React.FC<ProfileDetailsProps> = ({ id }) => {
+const TourGuideProfile: React.FC<ProfileDetailsProps> = ({ id }) => {
 
-  console.log("here id is: id", id);
   
 
   const [activeTab, setActiveTab] = useState('profile');
@@ -27,7 +27,7 @@ const AdvertiserProfile: React.FC<ProfileDetailsProps> = ({ id }) => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const data = await viewAdvertiserProfile(id);
+        const data = await viewTourGuideProfile(id);
         
         setProfileData(data);
       } catch (error) {
@@ -35,9 +35,9 @@ const AdvertiserProfile: React.FC<ProfileDetailsProps> = ({ id }) => {
       }
     };
 
-    const fetchAdvertiserLogo = async () => {
+    const fetchProfilePhoto = async () => {
         try {
-            const data = await getAdvertiserLogo(id);
+            const data = await getTourGuidePhoto(id);
             console.log('Logo data:', data);
             setLogo(data);
         } catch (error) {
@@ -46,7 +46,7 @@ const AdvertiserProfile: React.FC<ProfileDetailsProps> = ({ id }) => {
      };
 
     fetchProfileData();
-    fetchAdvertiserLogo();
+    fetchProfilePhoto();
     setRefresh(false);
     setRefreshLogo(false);
     setRefreshTerms(false);
@@ -58,8 +58,7 @@ const AdvertiserProfile: React.FC<ProfileDetailsProps> = ({ id }) => {
       case 'profile':
         return <ProfileDetails profileData={profileData} id={id} logo={logo} setRefreshLogo={setRefreshLogo}/>;
       case 'terms' :
-        return <TermsConditions profileData={profileData} id={id} setRefreshTerms={setRefreshTerms}/>;
-        
+        return <TermsConditions profileData={profileData} id={id} setRefreshTerms={setRefreshTerms} />;
       default:
         return null;
     }
@@ -100,6 +99,7 @@ const AdvertiserProfile: React.FC<ProfileDetailsProps> = ({ id }) => {
                         aria-selected="false"
                         onClick={() => setActiveTab('profile')}
                       >
+
                         <span>
                         <i className="icon-profile"></i>
                         </span>
@@ -117,11 +117,14 @@ const AdvertiserProfile: React.FC<ProfileDetailsProps> = ({ id }) => {
                         aria-selected="false"
                         onClick={() => setActiveTab('terms')}
                       >
+
                         <span>
                         <i className="icon-profile"></i>
                         </span>
                         Terms & Conditions
                       </button>
+
+
                       
                       
                       
@@ -141,4 +144,4 @@ const AdvertiserProfile: React.FC<ProfileDetailsProps> = ({ id }) => {
   );
 };
 
-export default AdvertiserProfile;
+export default TourGuideProfile;

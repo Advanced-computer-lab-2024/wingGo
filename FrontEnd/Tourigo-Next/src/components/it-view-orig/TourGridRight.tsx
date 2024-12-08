@@ -13,7 +13,7 @@ interface FilterOptions {
   date?: string;
   preferences?: string;
   language?: string;
-  touristId?: string
+ 
 
 }
 
@@ -31,7 +31,7 @@ const TourGridRight = () => {
         preferences: filters.preferences,
         date: filters.date,
         language: filters.language,
-        touristId:'67240ed8c40a7f3005a1d01d'
+        
       };
 
       const data = await filterItineraries(apiFilters);
