@@ -7,7 +7,8 @@ const WishlistMain = () => {
     <>
       <Breadcrumb titleOne="Wishlist" titleTwo="Wishlist" />
       <WishlistArea 
-      userRole="Tourist" />
+      
+      />
     </>
   );
 };
