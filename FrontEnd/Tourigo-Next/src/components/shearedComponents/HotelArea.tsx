@@ -7,6 +7,7 @@ import { imageLoader } from "@/hooks/image-loader";
 import { bookflight, searchFlights } from "@/api/FlightApi";
 import { set } from "react-hook-form";
 import { bookHotel, searchHotels } from "@/api/HotelApi";
+import HotelCard from "../common/tourElements/HotelCard";
 
 
 
@@ -14,12 +15,18 @@ interface HotelAreaProps {
     cityCode: string;
     searchTriggered: boolean;
     setSearchTriggered: (value: boolean) => void;
+    checkinDate: Date | null;
+    checkoutDate: Date | null;
+    adults: number;
   }
 
 const HotelArea: React.FC<HotelAreaProps> = ({
     cityCode,
     searchTriggered,
-    setSearchTriggered
+    setSearchTriggered,
+    checkinDate,
+    checkoutDate,
+    adults
 }) => {
   
   const [tripData, setTripData] = useState<any[]>([]);
@@ -27,12 +34,20 @@ const HotelArea: React.FC<HotelAreaProps> = ({
   useEffect(() => {
     const fetchTripData = async () => {
       try {
-        const response = await searchHotels({
-            cityCode: cityCode,
-        });
-        const data = await response;
-        setTripData(data);
-        console.log('Trip data:', data);
+        if (checkinDate && checkoutDate) {
+          //YYYY-MM-DD
+          const formattedCheckinDate = checkinDate.toISOString().split('T')[0];
+          const formattedCheckoutDate = checkoutDate.toISOString().split('T')[0];
+          const response = await searchHotels({
+              cityCode: cityCode,
+              checkin: formattedCheckinDate,
+              checkout: formattedCheckoutDate,
+          });
+          const data = await response;
+          setTripData(data);
+          console.log('Trip data:', data);
+        }
+        
       } catch (error) {
         console.error('Error fetching trip data:', error);
       }
@@ -67,6 +82,7 @@ const HotelArea: React.FC<HotelAreaProps> = ({
     console.log(item);
   };
 
+  
 
   return (
     <>
@@ -75,48 +91,16 @@ const HotelArea: React.FC<HotelAreaProps> = ({
           <h2>Total Hotels Found: {tripData.length}</h2> {/* Display the length of the array */}
         </div>
         {tripData &&
-          tripData.map((item) => (
-            <div key={item.id} className="col-xl-6 col-lg-6 col-md-6">
-              <div className="trip-wrapper trip-style-one p-relative">
-                <div className="trip-thumb image-overly">
-                  <Link href="#">
-                    <Image
-                      src={tourImgFive}
-                      loader={imageLoader}
-                      style={{ width: "100%", height: "auto" }}
-                      alt="image"
-                    />
-                  </Link>
-                </div>
-                <div className="trip-tag">
-                  <div className="trip-number">
-                    <span>
-                    <Link href={`/destinations-details/${item?.id}`}>
-                      {item.offers[0].guests.adults} Adults
-                      </Link>
-                    </span>
-                  </div>
-                  <div className="trip-location">
-                    <span>
-                      <Link href={`/destinations-details/${item?.id}`}>
-                        {item.hotel.name}
-                      </Link>
-                    </span>
-                  </div>
-                  
-                  <div className="col-lg-2 text-center" onClick={() => handleBookHotel(item)} style={{ position: 'absolute', bottom: '0px', right: '10px', width: '150px' }}>
-                    <Link href="#" className="bd-switch-btn has-left w-100">
-                      <div className="bd-switch-default">
-                        <span>{item.offers[0].price.total + " $"}</span>
-                      </div>
-                      <div className="bd-switch-hover">
-                        <span>Book Now</span>
-                      </div>
-                    </Link>
-                   
-                  </div>
-                </div>
-              </div>
+          tripData.map((hotel) => (
+            <div key={hotel.hotelId} className="col-xl-6 col-lg-6 col-md-6">
+              <HotelCard
+            hotel={hotel}
+            onBook={handleBookHotel}
+            className="hotel-card"
+            hotelWrapperClass="hotel-wrapper"
+            isparentClass={true}
+            adults={adults}
+          />
             </div>
           ))}
         

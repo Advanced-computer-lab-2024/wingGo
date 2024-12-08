@@ -76,6 +76,25 @@ const AddUsers = () => {
         
       <form className="sign-up-form-wrapper" onSubmit={handleSubmit(onSubmit)}>
         <div className="row gy-24 align-items-center justify-content-between">
+        <div className="col-12">
+            <div className="from-input-box">
+              <div className="form-input-title">
+                <label htmlFor="role">
+                  Role<span>*</span>
+                </label>
+              </div>
+              <div className="form-input">
+                <NiceSelect
+                  options={roleOptions}
+                  defaultCurrent={0}
+                  placeholder="Admin"
+                  className="full-width"
+                  onChange={handleRoleChange}
+                  name="role"
+                />
+              </div>
+            </div>
+          </div>
           <div className="col-12">
             <div className="from-input-box">
               <div className="form-input-title">
@@ -167,25 +186,7 @@ const AddUsers = () => {
             </div>
           </div>
 
-          <div className="col-12">
-            <div className="from-input-box">
-              <div className="form-input-title">
-                <label htmlFor="role">
-                  Role<span>*</span>
-                </label>
-              </div>
-              <div className="form-input">
-                <NiceSelect
-                  options={roleOptions}
-                  defaultCurrent={0}
-                  placeholder="Admin"
-                  className="full-width"
-                  onChange={handleRoleChange}
-                  name="role"
-                />
-              </div>
-            </div>
-          </div>
+          
 
         </div>
         <div className="sign-btn mt-20">

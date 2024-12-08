@@ -15,6 +15,9 @@ import HotelArea from "../shearedComponents/HotelArea";
 const SearchHotels = () => {
     const [cityCode, setCityCode] = useState('');
     const [searchTriggered, setSearchTriggered] = useState(false);
+    const [checkinDate, setCheckinDate] = useState<Date | null>(null);
+    const [checkoutDate, setCheckoutDate] = useState<Date | null>(null);
+    const [adults, setAdults] = useState(1);
 
     const [hotelData, setHotelData] = useState<any[]>([]);
 
@@ -33,6 +36,12 @@ const SearchHotels = () => {
               <HotelSearchArea
                 cityCode={cityCode}
                 setCityCode={setCityCode}
+                checkinDate={checkinDate}
+                setCheckinDate={setCheckinDate}
+                checkoutDate={checkoutDate}
+                setCheckoutDate={setCheckoutDate}
+                adults={adults}
+                setAdults={setAdults}
                 setSearchTriggered={setSearchTriggered}/>
                 
             </div>
@@ -40,8 +49,11 @@ const SearchHotels = () => {
               {/*trip area*/}
               <HotelArea 
                 cityCode={cityCode}
+                checkinDate={checkinDate}
+                checkoutDate={checkoutDate}
                 searchTriggered={searchTriggered}
                 setSearchTriggered={setSearchTriggered}
+                adults={adults}
                 />
                 
               {/*pagination area*/}
