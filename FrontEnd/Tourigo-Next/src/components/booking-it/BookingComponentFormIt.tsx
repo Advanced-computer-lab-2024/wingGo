@@ -12,6 +12,7 @@ import { idTypeNew } from "@/interFace/interFace";
 import { Itinerary } from "@/interFace/interFace";
 import { fetchAllItineraries, bookItineraryApi, getPriceApi } from "@/api/itineraryApi"; 
 
+
 interface FormData {
   email: string;
   specialRequirements: string;
@@ -105,7 +106,6 @@ const onSubmit = async (event: React.FormEvent) => {
 
   try {
       await bookItineraryApi(
-          touristId,
           id,
           selectedBookingDate,
           paymentMethod,

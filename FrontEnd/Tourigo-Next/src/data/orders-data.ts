@@ -12,9 +12,9 @@ export const getOrdersDataTourist = async (): Promise<Order[]> => {
   }
 };
 
-export const getOrdersData=async():Promise<Order[]>=>{
+export const getOrdersData=async(orderId: string):Promise<Order[]>=>{
     try{
-        const orders=await fetchOrderDetails();
+        const orders=await fetchOrderDetails(orderId);
         return orders;
     }catch(error){
         console.error("Error loading orders:",error);
@@ -34,7 +34,7 @@ export const getOrdersData=async():Promise<Order[]>=>{
 //   };
 export const cancelOrderData = async (touristId: string, orderId: string): Promise<{ message: string; order: any } | null> => {
     try {
-      const response = await fetchCancelOrder(touristId, orderId);
+      const response = await fetchCancelOrder( orderId);
       return response;
     } catch (error) {
       console.error('Error canceling order:', error);

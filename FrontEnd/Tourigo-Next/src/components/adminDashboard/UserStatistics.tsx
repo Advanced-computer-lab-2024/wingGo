@@ -58,7 +58,7 @@ const UserStatistics = () => {
   return (
     <section className="user-statistics-area section-space">
       <div className="container">
-        <h2 className="team-single-title mb-20">User Statistics</h2>
+        <h2 className="team-single-title mb-20">Users Statistics</h2>
 
         
         <p>

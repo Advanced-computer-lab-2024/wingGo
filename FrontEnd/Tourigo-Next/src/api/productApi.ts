@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {  Product } from '../interFace/interFace';
+import {  Product , IPurchasedProduct} from '../interFace/interFace';
 
 export const fetchAllProducts = async (): Promise<Product[]> => {
     try {
@@ -97,15 +97,21 @@ export const ArchiveUnarchiveProduct = async (id: string, sellerId: string, valu
     }
 };
 
-export const fetchPurchasedProducts = async (touristId: string) => {
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+export const fetchPurchasedProducts = async (
+  touristId: string
+): Promise<IPurchasedProduct[]> => {
   try {
-      const response = await axios.get(`http://localhost:8000/tourist/purchasedProducts/${touristId}`);
-      return response.data; 
+    const response = await axios.get<IPurchasedProduct[]>(
+      `${API_BASE_URL}/tourist/purchasedProducts/${touristId}`
+    );
+    return response.data;
   } catch (error: any) {
-      console.error('Error fetching purchased products:', error);
-      throw new Error(error.response?.data?.message || 'Error fetching purchased products');
+    console.error('Error fetching purchased products:', error);
+    throw new Error(error.response?.data?.message || 'Error fetching purchased products');
   }
 };
+
 
 // Function to edit a product
 export const editProduct = async (productId: string, updates: Partial<Product>, pictureFile?: File) => {

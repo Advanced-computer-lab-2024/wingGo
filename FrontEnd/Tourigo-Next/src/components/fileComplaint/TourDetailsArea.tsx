@@ -21,10 +21,10 @@ const ComplaintForm = () => {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
       // For testing, hardcode the touristId instead of getting it from localStorage
-      const touristId = '67240ed8c40a7f3005a1d01d';  // Mock tourist ID for testing
+      //const touristId = '67240ed8c40a7f3005a1d01d';  // Mock tourist ID for testing
   
       // Submit complaint to the backend
-      await fileComplaint(touristId, { ...data, date: new Date(data.date) });
+      await fileComplaint({ ...data, date: new Date(data.date) });
       toast.success("Complaint filed successfully!");
       reset();
     } catch (error) {

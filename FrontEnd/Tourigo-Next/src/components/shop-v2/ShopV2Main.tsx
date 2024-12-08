@@ -26,7 +26,7 @@ const ShopV2Main = () => {
                   />
                 ))}
               </div>
-              <PaginationWrapper />
+              
             </div>
           </div>
         </div>

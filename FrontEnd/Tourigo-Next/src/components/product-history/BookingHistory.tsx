@@ -1,183 +1,196 @@
 "use client";
+
 import { imageLoader } from '@/hooks/image-loader';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
-import { getPurchasedProducts } from '@/data/prod-data'; // Change to product data fetching function
-import { Product } from '@/interFace/interFace';
-import Link from 'next/link';
+import { getPurchasedProducts } from '@/data/prod-data';
+import { IPurchasedProduct } from '@/interFace/interFace';
 import RateCommentModal from './RateCommentModal';
 import { fetchProductImage } from '@/api/productApi';
-import { useCurrency } from '@/contextApi/CurrencyContext'; // Import useCurrency
+import { useCurrency } from '@/contextApi/CurrencyContext';
+import Cookies from 'js-cookie';
+import {jwtDecode} from 'jwt-decode';
 
+interface DecodedToken {
+  id: string;
+  username: string;
+  role: string;
+  mustChangePassword: boolean;
+}
 
 const BookingHistory = () => {
-    const [bookedProducts, setBookedProducts] = useState<Product[]>([]);
-    const [imageUrls, setImageUrls] = useState<{ [key: string]: string | null }>({});
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [activeTab, setActiveTab] = useState('Product'); // Update tab to reflect product history
-    const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
-    const [convertedPrices, setConvertedPrices] = useState<{ [key: string]: number }>({});
-    const touristId = "672a3a4001589d5085322e88";
-    const currentDate = new Date();
+  const [bookedProducts, setBookedProducts] = useState<IPurchasedProduct[]>([]);
+  const [imageUrls, setImageUrls] = useState<{ [key: string]: string | null }>({});
+  const [selectedProduct, setSelectedProduct] = useState<IPurchasedProduct | null>(null);
+  const [convertedPrices, setConvertedPrices] = useState<{ [key: string]: number }>({});
+  const { currency, convertAmount } = useCurrency();
+  const currentDate = new Date();
 
+  // Decode JWT to get tourist ID
+  const getTouristId = (): string | null => {
+    const token = Cookies.get('token');
+    if (token) {
+      try {
+        const decoded: DecodedToken = jwtDecode(token);
+        return decoded.id || null;
+      } catch (error) {
+        console.error("Invalid token:", error);
+        return null;
+      }
+    }
+    return null;
+  };
 
+  // Fetch purchased products
+  useEffect(() => {
+    const fetchData = async () => {
+      const touristId = getTouristId();
+      if (!touristId) {
+        console.error("Tourist ID not found");
+        return;
+      }
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const data = await getPurchasedProducts(touristId);
-                console.log("Fetched booked products:", data); // Check the structure
-                setBookedProducts(data); // Access purchasedProducts array
-            } catch (error) {
-                console.error("Failed to load booked products:", error);
-            }
-        };
-        fetchData();
-    }, []);
+      try {
+        const data = await getPurchasedProducts(touristId);
+        console.log("Fetched booked products:", data);
+        setBookedProducts(data);
+      } catch (error) {
+        console.error("Failed to load booked products:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
-    useEffect(() => {
-        const loadImages = async () => {
-            const urls: { [key: string]: string | null } = {};
-            for (const product of bookedProducts) {
-                if (product._id && product.picture) { // Check if the product has an image
-                    try {
-                        const url = await fetchProductImage(product._id);
-                        urls[product._id] = url || null; // Store URL or null if no URL is found
-                    } catch (error) {
-                        console.error("Failed to load image for product:", product._id, error);
-                        urls[product._id] = null;
-                    }
-                }
-            }
-            setImageUrls(urls);
-        };
-        if (bookedProducts.length > 0) {
-            loadImages();
+  // Load product images
+  useEffect(() => {
+    const loadImages = async () => {
+      const urls: { [key: string]: string | null } = {};
+      for (const product of bookedProducts) {
+        if (product._id && product.picture) {
+          try {
+            const url = await fetchProductImage(product._id);
+            urls[product._id] = url || null;
+          } catch (error) {
+            console.error("Failed to load image for product:", product._id, error);
+            urls[product._id] = null;
+          }
         }
-    }, [bookedProducts]);
-
-    useEffect(() => {
-        const convertPrices = async () => {
-            const newConvertedPrices: { [key: string]: number } = {};
-            for (const product of bookedProducts) {
-                if (product.price && product._id) {
-                    const convertedPrice = await convertAmount(product.price);
-                    newConvertedPrices[product._id!] = convertedPrice; // Use non-null assertion
-                }
-            }
-            setConvertedPrices(newConvertedPrices);
-        };
-        convertPrices();
-    }, [currency, bookedProducts, convertAmount]);
-
-    const handleRateCommentClick = (product: Product) => {
-        setSelectedProduct(product);
+      }
+      setImageUrls(urls);
     };
 
-    const closeModal = () => {
-        setSelectedProduct(null);
-    };
+    if (bookedProducts.length > 0) {
+      loadImages();
+    }
+  }, [bookedProducts]);
 
-    return (
-        <>
-            <section className="bd-recent-activity section-space-small-bottom">
-                <div className="container" style={{ paddingTop: "40px" }}>
-                    <div className="row">
-                        <div className="col-xxl-12">
-                            <div className="recent-activity-wrapper">
-                                <div className="section-title-wrapper section-title-space">
-                                    <h2 className="section-title">Product Purchased History</h2>
-                                </div>
-    
-                                <div className="recent-activity-content">
-                                    <div className="table-responsive">
-                                        <table className="table mb-0">
-                                            <tbody>
-                                                {bookedProducts.map((product) => (
-                                                    <tr key={product._id} className="table-custom">
-                                                        <td>
-                                                            <div className="dashboard-thumb-wrapper p-relative">
-                                                                <div className="dashboard-thumb image-hover-effect-two position-relative">
-                                                                    {product._id && imageUrls[product._id] ? (
-                                                                        <Image
-                                                                            src={imageUrls[product._id]!}
-                                                                            loader={imageLoader}
-                                                                            alt="Product image"
-                                                                            width={80}
-                                                                            height={80}
-                                                                            unoptimized
-                                                                            style={{ objectFit: "cover", borderRadius: "4px" }}
-                                                                        />
-                                                                    ) : (
-                                                                        <p>No Image for this product</p>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div className="recent-activity-title-box d-flex align-items-center gap-10">
-                                                                <div>
-                                                                    <h5 className="product-title fw-5 underline">
-                                                                      
-                                                                            {product.name || 'No name available'}
-                                                                       
-                                                                    </h5>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div className="recent-activity-price-box">
-                                                                <h5 className="mb-10">
-                                                                {currency} {convertedPrices[product._id!]?.toFixed(2) || 'N/A'}
-                                                                </h5>
-                                                                <p>Total</p>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div>
-                                                                {/* Display the purchase date */}
-                                                                <p style={{ marginBottom: '8px', fontSize: '14px', color: '#555' }}>
-                                                                    Purchased on: {new Date(product.purchaseDate).toLocaleDateString("en-US")}
-                                                                </p>
-                                                                <button
-                                                                    onClick={() => handleRateCommentClick(product)}
-                                                                    className="bd-primary-btn btn-style radius-60 mb-10"
-                                                                    // style={{
-                                                                    //     backgroundColor: "blue",
-                                                                    //     color: "white",
-                                                                    //     padding: "8px 16px",
-                                                                    //     fontSize: "14px",
-                                                                    //     borderRadius: "4px",
-                                                                    //     cursor: "pointer",
-                                                                    //     marginBottom: "8px"
-                                                                    // }}
-                                                                >
-                                                                    Rate & Comment
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+  // Convert product prices
+  useEffect(() => {
+    const convertPrices = async () => {
+      const newConvertedPrices: { [key: string]: number } = {};
+      for (const product of bookedProducts) {
+        if (product.price && product._id) {
+          const convertedPrice = await convertAmount(product.price);
+          newConvertedPrices[product._id!] = convertedPrice;
+        }
+      }
+      setConvertedPrices(newConvertedPrices);
+    };
+    convertPrices();
+  }, [currency, bookedProducts, convertAmount]);
+
+  const handleRateCommentClick = (product: IPurchasedProduct) => {
+    setSelectedProduct(product);
+  };
+
+  const closeModal = () => {
+    setSelectedProduct(null);
+  };
+
+  return (
+    <>
+      <section className="bd-recent-activity section-space-small-bottom">
+        <div className="container" style={{ paddingTop: "40px" }}>
+          <div className="row">
+            <div className="col-xxl-12">
+              <div className="recent-activity-wrapper">
+                <div className="section-title-wrapper section-title-space">
+                  <h2 className="section-title">Product Purchased History</h2>
                 </div>
-            </section>
-    
-            {selectedProduct && (
-                <RateCommentModal
-                    productId={selectedProduct._id || ''}
-                    touristId={touristId}
-                    product={selectedProduct}
-                    onClose={closeModal}
-                />
-            )}
-        </>
-    );
+
+                <div className="recent-activity-content">
+                  <div className="table-responsive">
+                    <table className="table mb-0">
+                      <tbody>
+                        {bookedProducts.map((product) => (
+                          <tr key={product._id} className="table-custom">
+                            <td>
+                              <div className="dashboard-thumb-wrapper p-relative">
+                                <div className="dashboard-thumb image-hover-effect-two position-relative">
+                                  {product._id && imageUrls[product._id] ? (
+                                    <Image
+                                      src={imageUrls[product._id]!}
+                                      loader={imageLoader}
+                                      alt="Product image"
+                                      width={80}
+                                      height={80}
+                                      unoptimized
+                                      style={{ objectFit: "cover", borderRadius: "4px" }}
+                                    />
+                                  ) : (
+                                    <p>No Image for this product</p>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="recent-activity-title-box d-flex align-items-center gap-10">
+                                <h5 className="product-title fw-5 underline">
+                                  {product.name || 'No name available'}
+                                </h5>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="recent-activity-price-box">
+                                <h5 className="mb-10">
+                                  {currency} {convertedPrices[product._id!]?.toFixed(2) || 'N/A'}
+                                </h5>
+                                <p>Total</p>
+                              </div>
+                            </td>
+                            <td>
+                              <div>
+                               
+                                <button
+                                  onClick={() => handleRateCommentClick(product)}
+                                  className="bd-primary-btn btn-style radius-60 mb-10"
+                                >
+                                  Rate & Comment
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {selectedProduct && (
+        <RateCommentModal
+          productId={selectedProduct._id || ''}
+          touristId={getTouristId() || ''}
+          product={selectedProduct}
+          onClose={closeModal}
+        />
+      )}
+    </>
+  );
 };
 
 export default BookingHistory;

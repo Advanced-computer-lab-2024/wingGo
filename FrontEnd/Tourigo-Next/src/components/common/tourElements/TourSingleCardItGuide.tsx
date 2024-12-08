@@ -151,9 +151,9 @@ const TourSingleCard = ({
                   <Image
                     src={imageUrl}
                     loader={imageLoader}
-                    width={370}
-                    height={370}
-                    style={{ width: "100%", height: "auto" }}
+                    width={270}
+                    height={270}
+                    style={{ width: "300px", height: "250px" }}
                     alt="Itinerary Image"
                     unoptimized 
                     

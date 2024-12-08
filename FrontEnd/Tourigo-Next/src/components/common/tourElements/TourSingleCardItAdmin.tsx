@@ -15,6 +15,7 @@ import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency c
 import Modal from "react-modal"; // Import Modal from react-modal
 import { toast } from "sonner";
 import { fetchItImage } from "@/api/itineraryApi";
+import { FaRegClock } from "react-icons/fa";
 
 interface ItourPropsType {
   tour: Itinerary; // Use Itinerary type
@@ -132,9 +133,9 @@ const TourSingleCard = ({
                 <Image
                     src={imageUrl}
                     loader={imageLoader}
-                    width={370}
-                    height={370}
-                    style={{ width: "100%", height: "auto" }}
+                    width={270}
+                    height={270}
+                    style={{ width: "300px", height: "250px" }}
                     alt="Itinerary Image"
                     unoptimized 
                     
@@ -142,9 +143,7 @@ const TourSingleCard = ({
                 </Link>
               </div>
               <div className="tour-meta d-flex align-items-center justify-content-between">
-                <button className="tour-favorite tour-like">
-                  <i className="icon-heart"></i>
-                </button>
+                
                 <div className="tour-location">
                   <span>
                     <Link href={`/it-details/${tour._id}`}>
@@ -199,7 +198,7 @@ const TourSingleCard = ({
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
                 <div className="time d-flex align-items-center gap--5">
-                  <i className="icon-heart"></i>
+                <FaRegClock />
                   <span>{tour.duration}</span>
                 </div>
                 <div className="tour-btn">

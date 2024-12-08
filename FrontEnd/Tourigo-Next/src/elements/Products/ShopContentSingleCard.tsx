@@ -152,8 +152,8 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
                   <Image 
                     src={imageUrl} 
                     alt="Product image" 
-                    width={300} 
-                    height={300} 
+                    width={270} 
+                    height={270} 
                     unoptimized 
                     style={{ objectFit: "cover" }} // Apply objectFit directly for Next.js Image
                   />
@@ -170,11 +170,6 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
                 <li>
                   <button onClick={() => handleAddToCart()}>
                     <i className="far fa-cart-plus"></i>
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => handleAddToWishlist()}>
-                    <i className="fa fa-heart"></i>
                   </button>
                 </li>
               </ul>

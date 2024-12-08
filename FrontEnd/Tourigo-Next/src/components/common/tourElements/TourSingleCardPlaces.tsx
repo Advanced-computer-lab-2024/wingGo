@@ -30,13 +30,13 @@ const TourSingleCard = ({
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
   useEffect(() => {
     const convertPrice = async () => {
-      if (tour.ticketPrices.foreigner) {
-        const priceInSelectedCurrency = await convertAmount(tour.ticketPrices.foreigner);
+      if (tour.ticketPrices?.foreigner) {
+        const priceInSelectedCurrency = await convertAmount(tour.ticketPrices?.foreigner);
         setConvertedPrice(priceInSelectedCurrency);
       }
     };
     convertPrice();
-  }, [tour.ticketPrices.foreigner, currency, convertAmount]);
+  }, [tour.ticketPrices?.foreigner, currency, convertAmount]);
 
   return (
     <>
@@ -49,7 +49,7 @@ const TourSingleCard = ({
                   <Image
                     src={tour.pictures[0] || "/images/default-image.jpg"}
                     loader={imageLoader}
-                    width={370}
+                    width={270}
                     height={270}
                     style={{ width: "100%", height: "auto" }}
                     alt={tour.name}

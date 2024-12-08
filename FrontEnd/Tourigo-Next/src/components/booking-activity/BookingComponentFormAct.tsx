@@ -23,7 +23,7 @@ interface FormData {
 const BookingComponentForm = ({ id }: idTypeNew) => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
   const [data, setData] = useState<Activity | null>(null);
-  const touristId = "67240ed8c40a7f3005a1d01d"; // Hardcoded tourist ID for testing
+  // const touristId = "67240ed8c40a7f3005a1d01d"; // Hardcoded tourist ID for testing
   const [paymentMethod, setPaymentMethod] = useState<"wallet" | "stripe" | "creditCard">("wallet");
   const [numberOfPeople, setNumberOfPeople] = useState(1); // Default to 1 person
   // const [promocode, setPromocode] = useState(""); // State for promo code
@@ -116,7 +116,7 @@ const onSubmit = async (event: React.FormEvent) => {
 
   try {
       await bookActivityApi(
-          touristId,
+          // touristId,
           id,
           paymentMethod,
           numberOfPeople,

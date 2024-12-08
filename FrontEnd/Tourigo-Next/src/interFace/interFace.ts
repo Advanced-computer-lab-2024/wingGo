@@ -737,5 +737,28 @@ export interface PromoCode {
 
 }
 
+export interface IPurchasedProduct {
+  _id: string;
+  name: string;
+  price: number;
+  picture: string;
+  description: string;
+  ratings?: number[];
+  reviews?: string[];
+  archive?: boolean;
+  averageRating?: number;
+  image?: string;         // Add missing image field
+  quantity?: number;      // Optional quantity field
+  sales?: number;         // Optional sales field
+  purchaseDate?: string;  // Add missing purchaseDate field
+}
+
+
+export interface IProductRating {
+  touristId: string;   // ID of the tourist who rated
+  rating: number;      // Rating given by the tourist
+}
+
+
 
 

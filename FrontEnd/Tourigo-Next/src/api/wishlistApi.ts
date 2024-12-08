@@ -1,11 +1,30 @@
 import axios from 'axios';
 import {  Wishlist } from '../interFace/interFace';
-const touristId = '673167d3aa67023ecc799397';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode'; 
+//const touristId = '673167d3aa67023ecc799397';
+
+interface DecodedToken {
+  username: string;
+  id: string;
+  role: string;
+  mustChangePassword:boolean;
+}
 
 //router.get('/viewWishlist/:touristId', touristController.viewWishlist);
 
 export const fetchWishlist= async (): Promise<Wishlist[]> => {
+  const token = Cookies.get('token'); 
+  console.log('ay 7aga');
+   // Get the token from cookies
+  if (!token) {
+    throw new Error('User is not authenticated');
+  }
     try {
+      const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+      const touristId = decodedToken.id; 
+      console.log('id confirmed',touristId);
+
         const response = await axios.get(`http://localhost:8000/tourist/viewWishlist/${touristId}`);
         console.log('Products fetched successfully:', response.data);
         return response.data.wishlistItems;
@@ -35,7 +54,14 @@ export const getProductById = async (productId: string): Promise<any> => {
 
   //router.post('/wishlist/:touristId/:productId', touristController.addWishlist);
 export const addItemtoWishlist = async(productId:any): Promise<any>=>{
+  const token = Cookies.get('token'); // Get the token from cookies
+  if (!token) {
+    throw new Error('User is not authenticated');
+  }
   try{
+    const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+    const touristId = decodedToken.id; 
+
     const url = `http://localhost:8000/tourist/wishlist/${touristId}/${productId}`;
 
     const response=await axios.post(url);
@@ -51,7 +77,14 @@ export const addItemtoWishlist = async(productId:any): Promise<any>=>{
 
 //router.delete('/deleteWishlist/:touristId/:productId', touristController.removeWishlistItem);
 export const removeFromWishlist = async (productId: string) => {
-  try {
+   const token = Cookies.get('token'); // Get the token from cookies
+  if (!token) {
+    throw new Error('User is not authenticated');
+  }
+  try{
+
+    const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+    const touristId = decodedToken.id;
     const response = await axios.delete(
       `http://localhost:8000/tourist/deleteWishlist/${touristId}/${productId}` 
     );
