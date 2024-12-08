@@ -80,7 +80,7 @@ const TourDetails = ({ id }: idTypeNew) => {
       };
   
       // Call the update API to update the place on the backend
-      const updatedPlace = await updatePlace(id, "671590cc00553989f62a041f", updatedData);
+      const updatedPlace = await updatePlace(id, updatedData);
   
       // Update the data, ensuring the result is of type `Place | null`
       setData((prevData) => {

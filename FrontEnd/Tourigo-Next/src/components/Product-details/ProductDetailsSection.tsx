@@ -232,10 +232,6 @@ const [sellerId, setSellerId] = useState<string | null>(null);
               )}
               {userRole === "Tourist" && (
                 <div className="product-details-count-wrap d-flex flex-wrap gap-10 align-items-center">
-                  <button className="bd-primary-btn btn-style radius-60" onClick={handlePurchase}>
-                    <span className="bd-primary-btn-text">Purchase</span>
-                    <span className="bd-primary-btn-circle"></span>
-                  </button>
                   <button className="bd-primary-btn btn-style radius-60" onClick={()=>handleAddToCart()}>
                     <span className="bd-primary-btn-text">Add To Cart</span>
                     <span className="bd-primary-btn-circle"></span>
