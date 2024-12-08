@@ -27,10 +27,27 @@ const menu_data: MenuType[] = [
     pluseIncon: true,
     link: "/add-it",
   },
+  {
+    id: 3,
+    hasDropdown: true,
+    children: true,
+    megaMenu: true,
+    active: true,
+    title: "Report Sales",
+    pluseIncon: true,
+    link: "/sales-view-tourguide",
+  },
+  {
+    id: 4,
+    hasDropdown: true,
+    children: true,
+    megaMenu: true,
+    active: true,
+    title: "Tourist Report",
+    pluseIncon: true,
+    link: "/tourist-report-view-tourguide",
+  },
   
-  
- 
- 
   {
     id: 3,
     hasDropdown: true,

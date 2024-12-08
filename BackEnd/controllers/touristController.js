@@ -2346,6 +2346,7 @@ const shareActivityViaEmail = async (req, res) => {
     }
 };
 
+
 const shareItineraryViaEmail = async (req, res) => {
     const { email } = req.body;
     const { id } = req.params;
@@ -2947,40 +2948,52 @@ const getTouristUsername = async (req, res) => {
         }
 };    
 const getPurchasedProducts = async (req, res) => {
-        const { touristId } = req.params;
-    
-        try {
-            const tourist = await Tourist.findById(touristId).populate('purchasedProducts.productId');
-            
-            if (!tourist) {
-                return res.status(404).json({ message: 'Tourist not found' });
+    const { touristId } = req.params;
+
+    try {
+        const tourist = await Tourist.findById(touristId).populate({
+            path: 'purchasedProducts.productId',
+            select: 'name picture price sales description quantity seller ratings reviews archive',
+            populate: {
+                path: 'seller',
+                select: 'username _id'
             }
-    
-            // Format the purchased products to match the desired output structure
-            const purchasedProductData = tourist.purchasedProducts.map(purchased => ({
-                _id: purchased.productId ? purchased.productId._id : null,
-                name: purchased.productId ? purchased.productId.name : null,
-                picture: purchased.productId
-                    ? `../images/${purchased.productId.picture || 'null'}` // Use a placeholder if picture is null
-                    : null,
-                price: purchased.productId ? purchased.productId.price : null,
-                sales: purchased.productId ? purchased.productId.sales : 0,
-                description: purchased.productId ? purchased.productId.description : null,
-                quantity: purchased.productId ? purchased.productId.quantity : 0,
-                seller: purchased.productId && purchased.productId.seller ? purchased.productId.seller.username : 'Admin', // Handle null seller field
-                sellerID: purchased.productId && purchased.productId.seller ? purchased.productId.seller._id : 'Admin',
-                ratings: purchased.productId ? purchased.productId.ratings : [],
-                reviews: purchased.productId ? purchased.productId.reviews : [],
-                archive: purchased.productId ? purchased.productId.archive : false,
-                purchaseDate: purchased.purchaseDate || null // Include purchase date from purchasedProducts array
-            }));
-    
-            res.status(200).json(purchasedProductData);
-        } catch (error) {
-            console.error("Error fetching purchased products:", error);
-            res.status(500).json({ message: 'Error fetching purchased products', error });
+        });
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
         }
+
+        const purchasedProductData = tourist.purchasedProducts.map(purchased => {
+            const product = purchased.productId;
+            if (!product) {
+                console.warn(`Missing product for purchase:`, purchased);
+            }
+
+            return {
+                _id: product ? product._id : null,
+                name: product ? product.name : "Unknown",
+                picture: product?.picture ? `/images/${product.picture}` : "/images/placeholder.png",
+                price: product?.price || 0,
+                sales: product?.sales || 0,
+                description: product?.description || "No description available",
+                quantity: product?.quantity || 0,
+                seller: product?.seller?.username || "Admin",
+                sellerID: product?.seller?._id || "Admin",
+                ratings: product?.ratings || [],
+                reviews: product?.reviews || [],
+                archive: product?.archive || false,
+                purchaseDate: purchased.purchaseDate || null
+            };
+        });
+
+        res.status(200).json(purchasedProductData);
+    } catch (error) {
+        console.error("Error fetching purchased products:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
 };
+
 
 const getUnbookedItineraries = async (req, res) => {
         const { touristId } = req.params;
@@ -3517,6 +3530,14 @@ const payForOrder = async (req, res) => {
             const paymentDate = new Date(); // Current date and time
             product.sellingDates.push(paymentDate); // Add payment date to the array
 
+            const purchasedProduct = {
+                productId: product._id,
+                purchaseDate: paymentDate,
+                rating: null, // You can set a default value for rating or remove this field if not needed
+            };
+
+            buyer.purchasedProducts.push(purchasedProduct);
+
             // Check if the product is out of stock
             if (product.quantity === 0) {
                 if (product.seller) {
@@ -3563,6 +3584,9 @@ const payForOrder = async (req, res) => {
             // Save updated product
             await product.save();
         }
+
+        await buyer.save(); // Save the updated buyer with purchasedProducts
+
 
         // Deduct wallet balance if applicable
         if (paymentMethod === 'wallet') {
@@ -3625,6 +3649,65 @@ const payForOrder = async (req, res) => {
     } catch (error) {
         console.error('Error retrieving cart items:', error); // Log the error for debugging
         return res.status(500).json({ message: 'Error retrieving cart items.', error });
+    }
+};
+
+
+//decrease quantity of wwishlist product
+// Decrease quantity of a wishlist product
+const decQuantityByOne = async (req, res) => {
+    const { touristId, productId } = req.params;
+
+    try {
+        // Find the wishlist item by touristId and productId
+        const wishlistItem = await Wishlist.findOne({ touristId, productId });
+
+        if (!wishlistItem) {
+            return res.status(404).json({ message: 'Wishlist item not found' });
+        }
+
+        // Check if quantity is greater than 1 before decrementing
+        if (wishlistItem.quantity > 1) {
+            wishlistItem.quantity -= 1;
+            await wishlistItem.save();
+            res.status(200).json({
+                message: 'Quantity decreased by one successfully',
+                wishlistItem,
+            });
+        } else {
+            // Optionally, prevent quantity from going below 1
+            return res.status(400).json({
+                message: 'Quantity cannot be less than 1',
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+//increase quantity of wishlist product
+// Increase quantity of a wishlist product
+const incQuantityByOne = async (req, res) => {
+    const { touristId, productId } = req.params;
+
+    try {
+        // Find the wishlist item by touristId and productId
+        const wishlistItem = await Wishlist.findOne({ touristId, productId });
+
+        if (!wishlistItem) {
+            return res.status(404).json({ message: 'Wishlist item not found' });
+        }
+
+        // Increment the quantity by 1
+        wishlistItem.quantity += 1;
+        await wishlistItem.save();
+
+        res.status(200).json({
+            message: 'Quantity increased by one successfully',
+            wishlistItem,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -3720,21 +3803,44 @@ const removeWishlistItem = async (req, res) => {
 };
 
 
+// const getPromoCodesForTourist = async (req, res) => {
+//     const { touristId } = req.params;
+  
+//     try {
+//       const tourist = await Tourist.findById(touristId).populate('promoCodes');
+//       if (!tourist) {
+//         return res.status(404).json({ message: 'Tourist not found' });
+//       }
+  
+//       res.status(200).json({ promoCodes: tourist.promoCodes });
+//     } catch (error) {
+//       console.error('Error fetching promo codes:', error);
+//       res.status(500).json({ message: 'Error fetching promo codes', error });
+//     }
+//   };
+
 const getPromoCodesForTourist = async (req, res) => {
     const { touristId } = req.params;
-  
+
     try {
-      const tourist = await Tourist.findById(touristId).populate('promoCodes');
-      if (!tourist) {
-        return res.status(404).json({ message: 'Tourist not found' });
-      }
-  
-      res.status(200).json({ promoCodes: tourist.promoCodes });
+        const tourist = await Tourist.findById(touristId).populate({
+            path: 'promoCodes',
+            match: { 
+                isActive: true, 
+                endDate: { $gte: new Date() } // Ensure endDate is in the future
+            }
+        });
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        res.status(200).json({ promoCodes: tourist.promoCodes });
     } catch (error) {
-      console.error('Error fetching promo codes:', error);
-      res.status(500).json({ message: 'Error fetching promo codes', error });
+        console.error('Error fetching promo codes:', error);
+        res.status(500).json({ message: 'Error fetching promo codes', error });
     }
-  };
+};
+
   
 
 const addWishlistItemToCart = async (req, res) => {
@@ -3856,14 +3962,12 @@ const cancelOrder = async (req, res) => {
 
 
 // Method to save an activity
-const saveActivity = async (req, res) => {
+const toggleSaveActivity = async (req, res) => {
     const { touristId, activityId } = req.params;
     const { save } = req.body; // Boolean value to save or unsave
 
            // Ensure the "save" field is present and is a boolean
-           if (save === undefined || typeof save !== 'boolean') {
-            return res.status(400).json({ message: "Please provide a valid 'save' field with a boolean value" });
-        }
+           
     try {
         // Validate if the activity exists
         const activity = await Activity.findById(activityId);
@@ -3877,15 +3981,14 @@ const saveActivity = async (req, res) => {
             return res.status(404).json({ message: "Tourist not found" });
         }
 
-        if (save) {
+        
             // Save the activity
             if (!tourist.savedActivities.includes(activityId)) {
                 tourist.savedActivities.push(activityId);
                 await tourist.save();
                 return res.status(200).json({ message: "Activity saved successfully", savedActivities: tourist.savedActivities });
-            }
-            return res.status(400).json({ message: "Activity already saved" });
-        } else {
+            }           
+           else {
             // Unsave the activity
             if (tourist.savedActivities.includes(activityId)) {
                 tourist.savedActivities = tourist.savedActivities.filter(id => id.toString() !== activityId);
@@ -3902,14 +4005,12 @@ const saveActivity = async (req, res) => {
 };
 
 // Method to save an itinerary
-const saveItinerary = async (req, res) => {
+const toggleSaveItinerary = async (req, res) => {
     const { touristId, itineraryId } = req.params;
-    const { save } = req.body; // Boolean value to save or unsave
+    // const { save } = req.body; // Boolean value to save or unsave
 
         // Ensure the "save" field is present and is a boolean
-        if (save === undefined || typeof save !== 'boolean') {
-            return res.status(400).json({ message: "Please provide a valid 'save' field with a boolean value" });
-        }
+      
     
     try {
         // Validate if the itinerary exists
@@ -3923,16 +4024,15 @@ const saveItinerary = async (req, res) => {
         if (!tourist) {
             return res.status(404).json({ message: "Tourist not found" });
         }
-
-        if (save) {
+  
             // Save the itinerary
             if (!tourist.savedItineraries.includes(itineraryId)) {
                 tourist.savedItineraries.push(itineraryId);
                 await tourist.save();
                 return res.status(200).json({ message: "Itinerary saved successfully", savedItineraries: tourist.savedItineraries });
             }
-            return res.status(400).json({ message: "Itinerary already saved" });
-        } else {
+            
+         else {
             // Unsave the itinerary
             if (tourist.savedItineraries.includes(itineraryId)) {
                 tourist.savedItineraries = tourist.savedItineraries.filter(id => id.toString() !== itineraryId);
@@ -4147,47 +4247,65 @@ const getPrice = async (req, res) => {
     const { promoCode } = req.query; // Extract promo code from query
   
     try {
-        // Fetch cart items for the given tourist
-        const cartItems = await Cart.find({ touristId }).populate('productId'); // Populate product details
-        
-        if (!cartItems || cartItems.length === 0) {
-            return res.status(404).json({ message: 'No items found in the cart' });
+      // Fetch cart items for the given tourist
+      const cartItems = await Cart.find({ touristId }).populate('productId'); // Populate product details
+  
+      if (!cartItems || cartItems.length === 0) {
+        return res.status(404).json({ message: 'No items found in the cart' });
+      }
+  
+      // Calculate total price for all cart items
+      let totalPrice = 0;
+      cartItems.forEach((item) => {
+        if (!item.productId) {
+          throw new Error(`Product with ID ${item.productId} not found`);
         }
-
-        // Calculate total price for all cart items
-        let totalPrice = 0;
-        cartItems.forEach(item => {
-            if (!item.productId) {
-                throw new Error(`Product with ID ${item.productId} not found`);
-            }
-            totalPrice += item.price * item.amount; // price * quantity for each cart item
-        });
-
-        let promoCodeDetails = null;
-        let discount = 0; // Initialize discount
-
-        // Validate and apply promo code
-        if (promoCode) {
-            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
-            if (
-                !promoCodeDetails ||
-                !promoCodeDetails.isActive ||
-                promoCodeDetails.endDate < new Date()
-            ) {
-                return res.status(400).json({ message: 'Invalid or expired promo code' });
-            }
-
-            discount = promoCodeDetails.discount; // Get discount percentage
-            const discountAmount = (discount / 100) * totalPrice;
-            totalPrice -= discountAmount;
+        totalPrice += item.price * item.amount; // price * quantity for each cart item
+      });
+  
+      let discount = 0; // Initialize discount
+  
+      // Validate and apply promo code
+      if (promoCode) {
+        const promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+        if (!promoCodeDetails) {
+          return res.status(400).json({ message: 'Invalid promo code' });
         }
-
-        return res.status(200).json({ totalPrice, discount });
+  
+        // Check if the tourist has this promo code
+        const tourist = await Tourist.findById(touristId).populate('promoCodes');
+  
+        const hasPromoCode = tourist.promoCodes.some(
+          (code) => code._id.toString() === promoCodeDetails._id.toString()
+        );
+  
+        if (!hasPromoCode) {
+          return res
+            .status(400)
+            .json({ message: 'Unauthorized promo code for this tourist' });
+        }
+  
+        // Check if promo code is active and not expired
+        if (!promoCodeDetails.isActive || promoCodeDetails.endDate < new Date()) {
+          return res.status(400).json({ message: 'Promo code expired or inactive' });
+        }
+  
+        // Calculate and apply discount
+        discount = promoCodeDetails.discount; // Get discount percentage
+        const discountAmount = (discount / 100) * totalPrice;
+        totalPrice -= discountAmount;
+      }
+  
+      // Return total price and discount applied
+      return res.status(200).json({ totalPrice, discount });
     } catch (error) {
-        console.error("Error during cart total price calculation:", error);
-        return res.status(500).json({ message: 'Error calculating cart total price', error });
+      console.error('Error during cart total price calculation:', error);
+      return res
+        .status(500)
+        .json({ message: 'Error calculating cart total price', error });
     }
-};
+  };
+  
 
   const getProductById = async (req, res) => {
     try {
@@ -4342,7 +4460,184 @@ const getPlacesTags = async (req, res) => {
     }
 };
 
+const getSavedItineraries = async (req, res) => {
+    const { touristId } = req.params;
 
+    try {
+        // Find the tourist by ID and populate saved itineraries
+        const tourist = await Tourist.findById(touristId).populate('savedItineraries');
+
+        if (!tourist) {
+            return res.status(404).json({ message: "Tourist not found" });
+        }
+
+        // Return the saved itineraries
+        return res.status(200).json(tourist.savedItineraries);
+    } catch (error) {
+        console.error("Error fetching saved itineraries:", error);
+        return res.status(500).json({ message: "An error occurred", error });
+    }
+};
+
+const checkIfSaved = async (req, res) => {
+    try {
+      const { touristId, itineraryId } = req.params;
+  
+      // Fetch the tourist and check if the itinerary is in their savedItineraries
+      const tourist = await Tourist.findById(touristId);
+      if (!tourist) {
+        return res.status(404).json({ message: "Tourist not found" });
+      }
+  
+      const isSaved = tourist.savedItineraries.includes(itineraryId);
+      res.status(200).json({ isSaved });
+    } catch (error) {
+      console.error("Error checking if itinerary is saved:", error);
+      res.status(500).json({ message: "An error occurred", error });
+    }
+  };
+  
+  const saveActivity = async (req, res) => {
+    const { touristId, activityId } = req.params;
+    const { save } = req.body; // Boolean value to save or unsave
+
+           // Ensure the "save" field is present and is a boolean
+           if (save === undefined || typeof save !== 'boolean') {
+            return res.status(400).json({ message: "Please provide a valid 'save' field with a boolean value" });
+        }
+    try {
+        // Validate if the activity exists
+        const activity = await Activity.findById(activityId);
+        if (!activity) {
+            return res.status(404).json({ message: "Activity not found" });
+        }
+
+        // Add the activity to the savedActivities array if not already added
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            return res.status(404).json({ message: "Tourist not found" });
+        }
+
+        if (save) {
+            // Save the activity
+            if (!tourist.savedActivities.includes(activityId)) {
+                tourist.savedActivities.push(activityId);
+                await tourist.save();
+                return res.status(200).json({ message: "Activity saved successfully", savedActivities: tourist.savedActivities });
+            }
+            return res.status(400).json({ message: "Activity already saved" });
+        } else {
+            // Unsave the activity
+            if (tourist.savedActivities.includes(activityId)) {
+                tourist.savedActivities = tourist.savedActivities.filter(id => id.toString() !== activityId);
+                await tourist.save();
+                return res.status(200).json({ message: "Activity unsaved successfully", savedActivities: tourist.savedActivities });
+            }
+            return res.status(400).json({ message: "Activity not found in saved list" });
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "An error occurred", error });
+    }
+};
+
+const checkIfActivitySaved = async (req, res) => {
+    try {
+      const { touristId, activityId } = req.params;
+  
+      // Fetch the tourist and check if the activity is in their savedActivities
+      const tourist = await Tourist.findById(touristId);
+      if (!tourist) {
+        return res.status(404).json({ message: "Tourist not found" });
+      }
+  
+      const isSaved = tourist.savedActivities.includes(activityId);
+      res.status(200).json({ isSaved });
+    } catch (error) {
+      console.error("Error checking if activity is saved:", error);
+      res.status(500).json({ message: "An error occurred", error });
+    }
+  };
+
+//   const getTransportPrice = async (req, res) => {
+//     const { transportId, promoCode } = req.params;
+
+//     try {
+//         // Find the transport by ID
+//         const transport = await Transport.findById(transportId);
+//         if (!transport) {
+//             return res.status(404).json({ message: 'Transport not found' });
+//         }
+
+//         let totalPrice = transport.price;
+//         let promoCodeDetails = null;
+
+//         // Check if a promo code is provided
+//         if (promoCode) {
+//             promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+//             if (
+//                 !promoCodeDetails ||
+//                 !promoCodeDetails.isActive ||
+//                 promoCodeDetails.endDate < new Date()
+//             ) {
+//                 return res.status(400).json({ message: 'Invalid or expired promo code' });
+//             }
+
+//             // Apply discount
+//             const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+//             totalPrice -= discountAmount;
+//         }
+
+//         res.status(200).json({
+//             totalPrice,
+//             promoCodeApplied: !!promoCodeDetails,
+//         });
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error calculating price', error: error.message });
+//     }
+// };
+
+const getTransportPrice = async (req, res) => {
+    const { transportId } = req.params; 
+    const { promoCode } = req.query; 
+
+    try {
+        const transport = await Transport.findById(transportId);
+        if (!transport) {
+            return res.status(404).json({ message: 'transport not found or booking closed' });
+        }
+
+        let totalPrice = transport.price; // Base price calculation
+        let promoCodeDetails = null;
+        let isValidPromoCode = true;
+
+        // Validate and apply promo code
+        if (promoCode) {
+            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date()
+            ) {
+                isValidPromoCode = false;
+            } else {
+                const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+                totalPrice -= discountAmount; // Apply discount
+            }
+        }
+
+        return res.status(200).json({ totalPrice, isValidPromoCode });
+    } catch (error) {
+        console.error('Error calculating activity price:', error);
+        return res.status(500).json({
+            message: 'Error calculating activity price',
+            error: error.message || 'An unknown error occurred',
+        });
+    }
+};
+
+  
 
 module.exports = {
     tourist_hello,
@@ -4430,7 +4725,7 @@ module.exports = {
     getPromoCodesForTourist,
     addWishlistItemToCart,
     saveActivity,
-    saveItinerary,
+    toggleSaveItinerary,
     viewAllSavedEvents,
     toggleNotificationPreference,
     getFilteredActivities,
@@ -4441,5 +4736,9 @@ module.exports = {
     getProductById,
     getDiscountByCode,
     getDeliveryAddresses,
-    getPlacesTags
+    getPlacesTags,
+    getSavedItineraries,
+    checkIfSaved,
+    checkIfActivitySaved,
+    getTransportPrice
 };

@@ -3,7 +3,7 @@ import CheckoutForm from "@/forms/CheckoutFormProduct";
 import OrderDetails from "./OrderDetails";
 import CheckoutLogin from "./CheckoutLogin";
 import AddCuponMain from "./AddCuponMain";
-import { getProductById } from '@/api/productApi';
+import { payForOrder } from '@/api/cartApi';
 import SelectPaymentType from "./SelectPaymentType";
 import React, { useState, useEffect } from "react";
 interface CheckoutMainProps {
@@ -19,6 +19,15 @@ const CheckoutArea: React.FC<CheckoutMainProps> = ({ promoCode ,orderId}) => {
     expiry: "",
     cvv: "",
   });
+
+  const handlePayment = async () => {
+    try {
+      const result = await payForOrder(orderId, paymentMethod, promoCode);
+      console.log('Payment result:', result.message);
+    } catch (error) {
+      console.error('Payment failed: ',);
+    }
+  };
   return (
     <>
       <section className="checkout-area section-space">
@@ -100,10 +109,14 @@ const CheckoutArea: React.FC<CheckoutMainProps> = ({ promoCode ,orderId}) => {
 
                 </div>
                 </div>
-                <button className="nextBtn-2 bd-primary-btn btn-style is-bg radius-60" type="submit">
-                  <span className="bd-primary-btn-text">Place Order</span>
-                  <span className="bd-primary-btn-circle"></span>
-                </button>
+                <button
+                className="nextBtn-2 bd-primary-btn btn-style is-bg radius-60"
+                type="button"  // Changed from "submit" to "button" for manual form submission
+                onClick={handlePayment}  // Add your click event handler
+              >
+                <span className="bd-primary-btn-text">Place Order</span>
+                <span className="bd-primary-btn-circle"></span>
+              </button>
               </div>
             </div>
             <OrderDetails  promoCode={promoCode} orderId={orderId}   /> 

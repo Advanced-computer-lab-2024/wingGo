@@ -5,14 +5,30 @@ const LoginCredentials = require('../models/LoginCredentials');
 const bcrypt = require('bcrypt');
 
 
+
 // Create a new place
 const createPlace = async (req, res) => {
     try {
         const { tagss, ...placeData } = req.body; // Extract tagss separately
+        const governorId = req.query.governorId; // Assuming governorId is passed in the query
 
-        // Create a new place with the new tagss field
+        // Validate the governor ID
+        const governor = await Governor.findById(governorId);
+        if (!governor) {
+            return res.status(404).json({ message: 'Governor not found' });
+        }
+
+        // Process uploaded pictures (if any)
+        let pictureUrls = [];
+        if (req.files && req.files.length > 0) {
+            pictureUrls = req.files.map(file => file.location); // Assuming you're using AWS S3 and `location` holds the URL
+        }
+
+        // Create a new place
         const place = new Place({
             ...placeData,  // Spread the rest of the place data (e.g., name, description, location)
+            pictures: pictureUrls, // Add the uploaded pictures
+            governorId,  // Set the governor ID
             tagss: tagss || []  // Use an empty array if tagss is missing
         });
 
@@ -22,6 +38,7 @@ const createPlace = async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 };
+
 
 // const createPlace = async (req, res) => {
 //     try {

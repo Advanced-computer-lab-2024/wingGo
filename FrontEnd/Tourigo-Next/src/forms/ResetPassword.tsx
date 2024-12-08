@@ -1,4 +1,5 @@
 "use client";
+import { sendOtp } from "@/api/forgotPasswordApi";
 import ErrorMessage from "@/elements/error-message/ErrorMessage";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -18,11 +19,24 @@ const ResetPassword = () => {
     formState: { errors },
   } = useForm<FormData>();
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
+  
+
+
+
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
     const toastId = toast.loading("");
-    toast.success("Message Send Successfully", { id: toastId, duration: 1000 });
-    reset();
-    router.push("/home-two");
+
+    try{
+      // Call API to send email
+      await sendOtp(data.email);
+      toast.success("Message Sent Successfully", { id: toastId, duration: 1000 });
+      reset();
+      router.push(`/otp?email=${encodeURIComponent(data.email)}`);
+
+    }catch(error){
+      toast.error("Error", { id: toastId, duration: 1000 });
+    }
+
   };
   return (
     <>

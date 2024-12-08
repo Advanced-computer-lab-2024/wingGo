@@ -141,8 +141,8 @@ router.get('/promoCodes/:touristId', touristController.getPromoCodesForTourist);
 
 
 //saveActivity and saveItinerary and viewAll
-router.post('/saveActivity/:touristId/:activityId', touristController.saveActivity);
-router.post('/saveItinerary/:touristId/:itineraryId', touristController.saveItinerary);
+router.post('/toggleSaveActivity/:touristId/:activityId', touristController.saveActivity);
+router.post('/toggleSaveItinerary/:touristId/:itineraryId', touristController.toggleSaveItinerary);
 router.get('/viewAllSavedEvents/:touristId', touristController.viewAllSavedEvents);
 
 router.put('/toggleNotificationPreference/:touristId', touristController.toggleNotificationPreference);
@@ -163,5 +163,15 @@ router.get('/places/tags', touristController.getPlacesTags);
 
 
 router.get('/activityPrice/:activityId', touristController.calculateActivityPrice);
+
+router.get('/savedItineraries/:touristId', touristController.getSavedItineraries);
+
+router.get('/isItinerarySaved/:touristId/:itineraryId', touristController.checkIfSaved);
+
+router.get('/isActivitySaved/:touristId/:activityId', touristController.checkIfActivitySaved);
+
+router.get('/transportPrice/:transportId', touristController.getTransportPrice);
+
+
 
 module.exports = router;
