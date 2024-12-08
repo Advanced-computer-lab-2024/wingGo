@@ -1,8 +1,9 @@
 "use client";
-import React, { useState, FormEvent, ChangeEvent } from "react";
+import React, { useState, FormEvent, ChangeEvent, useEffect } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import UploadSingleImg from "./UploadSingleImg"; 
 import { toast } from "sonner";
-import { createItinerary } from "@/api/itineraryApi";
+import { createItinerary, getAvailableTags } from "@/api/itineraryApi";
 
 interface NewItinerary {
   tourGuideId: string;
@@ -21,6 +22,13 @@ interface NewItinerary {
 }
 
 const TourDetailsArea = () => {
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>();
   const [itinerary, setItinerary] = useState<NewItinerary>({
     tourGuideId: "67325c530b3e54ad8bfe1678", 
     title: "",
@@ -31,7 +39,7 @@ const TourDetailsArea = () => {
     duration: "",
     language: "",
     price: 0,
-    availableDates: [],
+    availableDates: [""],
     accessibility: false,
     pickupLocation: "",
     dropoffLocation: "",
@@ -39,7 +47,51 @@ const TourDetailsArea = () => {
 
   const [image, setImage] = useState<File | null>(null);
   const [largeImg, setlargeImg] = useState<string>("");
+  const [availablePrefrences, setAvailablePrefrences] = useState<Array<any>>([]);
+  const [selectedPrefrences, setSelectedPrefrences] = useState<Array<any>>([]);
+  const [isLoadingPreferences, setIsLoadingPreferences] = useState<boolean>(true);
+  useEffect(() => {
+    const fetchAllPreferenceTags = async () => {
+      try {
+        const data = await getAvailableTags();
+        console.log("Tags available:", data);
+        setAvailablePrefrences(data);
+      } catch (error) {
+        console.error("Error fetching Tags:", error);
+      } finally {
+        setIsLoadingPreferences(false);
+      }
+    };
 
+    fetchAllPreferenceTags();
+  }, []);
+
+  const handleSelectPrefClick = (id: string) => {
+    setSelectedPrefrences((prevSelected) => {
+      const updatedState = prevSelected.includes(id)
+        ? prevSelected.filter((item) => item !== id) // Remove tag
+        : [...prevSelected, id]; // Add tag
+  
+      // Update itinerary tags
+      setItinerary((prevState) => ({
+        ...prevState,
+        tags: updatedState,
+      }));
+  
+      return updatedState;
+    });
+  };
+
+  const selectHandler = () => {};
+ 
+
+  useEffect(() => {
+    // Update form data when selectedPrefrences changes
+    setItinerary((prevState) => ({
+      ...prevState,
+      tags: selectedPrefrences, // This keeps tags updated
+    }));
+  }, [selectedPrefrences]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = e.target as HTMLInputElement;
@@ -61,7 +113,25 @@ const TourDetailsArea = () => {
       setImage(e.target.files[0]);
     }
   };
-
+  const addDatePicker = () => {
+    setItinerary((prev) => ({
+      ...prev,
+      availableDates: [...prev.availableDates, ""],
+    }));
+  };
+  const removeDatePicker = (index: number) => {
+    setItinerary((prev) => ({
+      ...prev,
+      availableDates: prev.availableDates.filter((_, i) => i !== index),
+    }));
+  };
+  const handleDateChange = (index: number, value: string) => {
+    setItinerary((prev) => {
+      const updatedDates = [...prev.availableDates];
+      updatedDates[index] = value;
+      return { ...prev, availableDates: updatedDates };
+    });
+  };
   const handleAddItinerary = async (e: FormEvent) => {
     e.preventDefault();
 
@@ -77,10 +147,12 @@ const TourDetailsArea = () => {
     formData.append("duration", itinerary.duration);
     formData.append("language", itinerary.language);
     formData.append("price", String(itinerary.price));
-    formData.append("availableDates", String(itinerary.availableDates));
+   
     formData.append("pickupLocation", itinerary.pickupLocation);
     formData.append("dropoffLocation", itinerary.dropoffLocation);
-
+    itinerary.availableDates.forEach((date) => {
+      formData.append("availableDates[]", date); // Use array notation for backend compatibility
+  });
     if (image) {
       formData.append("file", image);
     }
@@ -116,21 +188,23 @@ const TourDetailsArea = () => {
                 </div>
 
                 <div className="form-input-box mb-15">
-                  <label htmlFor="tags">Tags (comma-separated)</label>
-                  <input
-                    type="text"
-                    id="tags"
-                    name="tags"
-                    value={itinerary.tags.join(", ")}
-                    onChange={(e) =>
-                      setItinerary((prev) => ({
-                        ...prev,
-                        tags: e.target.value.split(",").map((tag) => tag.trim()),
-                      }))
-                    }
-                  />
-                </div>
-
+  <h4 className="mb-20">Preference Tags</h4>
+  <div className="buttons-container-pref">
+    {isLoadingPreferences ? (
+      <p>Loading preferences...</p>
+    ) : (
+      availablePrefrences.map((item) => (
+        <button
+          key={item._id}
+          onClick={() => handleSelectPrefClick(item._id)}
+          className={`button-pref ${selectedPrefrences.includes(item._id) ? "active-pref" : ""}`}
+        >
+          {item.name}
+        </button>
+      ))
+    )}
+  </div>
+</div>
                 <div className="form-input-box">
                   <label htmlFor="price">Price<span>*</span></label>
                   <input
@@ -144,20 +218,54 @@ const TourDetailsArea = () => {
                 </div>
 
                 <div className="form-input-box">
-                  <label htmlFor="availableDates">Available Dates<span>*</span></label>
-                  <input
-                    type="date"
-                    id="availableDates"
-                    name="availableDates"
-                    onChange={(e) =>
-                      setItinerary((prev) => ({
-                        ...prev,
-                        availableDates: [...prev.availableDates, e.target.value],
-                      }))
-                    }
-                    required
-                  />
-                </div>
+  <label htmlFor="availableDates">Available Dates<span>*</span></label>
+  {itinerary.availableDates.map((date, index) => (
+    <div key={index} style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+      <input
+        type="date"
+        id={`availableDate-${index}`}
+        name="availableDates"
+        value={date}
+        onChange={(e) => handleDateChange(index, e.target.value)}
+        required
+      />
+      {index > 0 && ( // Show "-" button only for additional date pickers
+        <button
+          type="button"
+          onClick={() => removeDatePicker(index)}
+          style={{
+            marginLeft: "10px",
+            padding: "5px 10px",
+            background: "#dc3545",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            borderRadius: "3px",
+          }}
+        >
+          -
+        </button>
+      )}
+      {index === itinerary.availableDates.length - 1 && (
+        <button
+          type="button"
+          onClick={addDatePicker}
+          style={{
+            marginLeft: "10px",
+            padding: "5px 10px",
+            background: "#007bff",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            borderRadius: "3px",
+          }}
+        >
+          +
+        </button>
+      )}
+    </div>
+  ))}
+</div>
 
                 <div className="form-input-box">
                   <label htmlFor="activities">Activities<span>*</span></label>
@@ -261,3 +369,7 @@ const TourDetailsArea = () => {
   );
 };
 export default TourDetailsArea;
+function setValue(arg0: string, selectedPrefrences: any[]) {
+  throw new Error("Function not implemented.");
+}
+
