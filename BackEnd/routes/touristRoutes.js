@@ -108,6 +108,8 @@ router.get('/getActivity/:id', touristController.getActivity);
 // Search for flights by userId
 router.get('/searchFlights/:userId', touristController.searchFlightsByUserId);
 
+router.get('/searchTransports/:userId', touristController.searchTransportsByUserId);
+
 // Search for hotels by userId
 router.get('/searchHotels/:userId', touristController.searchHotelsByUserId);
 router.post('/cart/:touristId/:productId', touristController.addToCart);

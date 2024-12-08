@@ -114,7 +114,7 @@ const Prefrences: React.FC<Props> = ({profileData, id, setPrefrenceRefresh}) => 
         <h2 className="team-single-title">Preferences</h2>
 
       {/* Bell Icon for Notifications */}
-{/* <div
+<div
   style={{
     position: "absolute", // Position relative to the screen
     top: "20px", // Adjust vertical positioning
@@ -192,7 +192,7 @@ const Prefrences: React.FC<Props> = ({profileData, id, setPrefrenceRefresh}) => 
       )}
     </div>
   )}
-</div> */}
+</div>
 
 
         {/* Notification Preference Toggle */}

@@ -1,57 +1,40 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { searchHotelsByUserId } from "@/api/HotelApi";
+import { searchTransportsByUserId } from "@/api/FlightApi";
 import { format } from 'date-fns';
 
-interface HotelBooking {
-  _id: string;
-  hotel: {
-    name: string;
-    address?: string;
-  };
-  city: string;
-  checkInDate: string;
-  checkOutDate: string;
-  guests: {
-    adults: number;
+interface TransportBooking {
+    _id: string;
+    type: string;
+    duration: string;
+    price: number;
+    city: string;
+    touristID?: string;
   }
-  price: {
-    base: number;
-    currency: string;
-    total: number;
-    taxes: {
-      amount: number;
-      code: string;
-      included: boolean;
-    }[];
-  };
-  bookingStatus: string;
-  confirmationNumber?: string;
-}
 
-interface HotelBookingsProps {
+interface TransportBookingsProps {
   id: string;
 }
 
-const HotelBookings: React.FC<HotelBookingsProps> = ({ id }) => {
-  const [hotelBookings, setHotelBookings] = useState<HotelBooking[]>([]);
+const TransportBookings: React.FC<TransportBookingsProps> = ({ id }) => {
+  const [TransportBookings, setTransportBookings] = useState<TransportBooking[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchHotelBookings = async () => {
+    const fetchTransportBookings = async () => {
       try {
-        const bookings = await searchHotelsByUserId(id);
+        const bookings = await searchTransportsByUserId(id);
         console.log("Fetched bookings:", bookings); // Debugging step
-        setHotelBookings(bookings);
+        setTransportBookings(bookings);
       } catch (error) {
-        console.error("Error fetching hotel bookings:", error);
+        console.error("Error fetching Transport bookings:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHotelBookings();
+    fetchTransportBookings();
   }, [id]);
 
   const formatDate = (dateString: string) => {
@@ -66,7 +49,7 @@ const HotelBookings: React.FC<HotelBookingsProps> = ({ id }) => {
     return <h1>Loading...</h1>;
   }
 
-  if (hotelBookings.length === 0) {
+  if (TransportBookings.length === 0) {
     return <h1>No bookings found.</h1>;
   }
 
@@ -78,29 +61,23 @@ const HotelBookings: React.FC<HotelBookingsProps> = ({ id }) => {
             <div className="team-single-wrapper">
               <div className="team-contents mb-30">
                 <div className="team-heading mb-15">
-                  <h2 className="team-single-title">Hotel Bookings</h2>
+                  <h2 className="team-single-title">Transport Bookings</h2>
                 </div>
                 <div className="team-info mb-20">
                   <h4 className="mb-15">Bookings:</h4>
                   <ul className="booking-list">
-                    {hotelBookings.map((booking) => (
+                    {TransportBookings.map((booking) => (
                       <li key={booking._id} className="booking-item card mb-3" style={{ marginLeft: "10px" }}>
                         <div className="card-body">
-                          <h5 className="card-title">{booking.hotel.name}</h5>
+                          <h5 className="card-title">{booking.type}</h5>
                           <p className="card-text">
-                            <strong>Beds:</strong> {booking.guests.adults}
+                            <strong>Duration:</strong> {booking.duration}
                           </p>
                           <p className="card-text">
-                            <strong>Check-In Date:</strong> {formatDate(booking.checkInDate)}
+                            <strong>City:</strong> {booking.city}
                           </p>
                           <p className="card-text">
-                            <strong>Check-Out Date:</strong> {formatDate(booking.checkOutDate)}
-                          </p>
-                          <p className="card-text">
-                            <strong>Booking Status:</strong> {booking.bookingStatus || "N/A"}
-                          </p>
-                          <p className="card-text">
-                            <strong>Confirmation Number:</strong> {booking.confirmationNumber || "N/A"}
+                            <strong>Price:</strong> {booking.price}
                           </p>
                         </div>
                       </li>
@@ -116,4 +93,4 @@ const HotelBookings: React.FC<HotelBookingsProps> = ({ id }) => {
   );
 };
 
-export default HotelBookings;
+export default TransportBookings;
