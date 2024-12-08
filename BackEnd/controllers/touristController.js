@@ -3044,6 +3044,22 @@ const searchHotelsByUserId = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+const searchTransportsByUserId = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const transports = await Transport.find({ touristID: userId });
+
+        if (!transports.length) {
+            return res.status(404).json({ message: "No transports found for this user" });
+        }
+
+        res.status(200).json(transports);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
   
 const getActivity = async (req, res) => {
     const { id } = req.params;  // Itinerary ID from the URL params
@@ -4739,5 +4755,6 @@ module.exports = {
     getTransportPrice,
     getPromoCodeDiscountPerc,
     getPaidPrice,
-    getPaidPriceForActivity
+    getPaidPriceForActivity,
+    searchTransportsByUserId
 };
