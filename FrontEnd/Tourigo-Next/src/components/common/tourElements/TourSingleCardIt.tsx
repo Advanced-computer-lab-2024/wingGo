@@ -13,6 +13,7 @@ import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked,toggl
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
 import { toast } from 'sonner';import { fetchItImage } from "@/api/itineraryApi";
+import { FaRegClock } from "react-icons/fa";
 
 
 
@@ -311,7 +312,7 @@ const handleSave = async () => {
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
                 <div className="time d-flex align-items-center gap--5">
-                {(!isTourGuide) &&<i className="icon-heart"></i>}
+                {(!isTourGuide) && <FaRegClock />}
                 {(!isTourGuide) && <span>{tour.duration}</span>}
                 </div>
                 <div className="tour-btn">

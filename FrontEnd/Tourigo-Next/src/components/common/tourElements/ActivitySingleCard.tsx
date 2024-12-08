@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
 import Modal from "react-modal";
 import { toast } from 'sonner';
+import { FaRegClock } from "react-icons/fa";
 
 
 interface ItourPropsType {
@@ -282,7 +283,7 @@ const TourSingleCard = ({
 
               <div className="tour-meta d-flex align-items-center justify-content-between">
                 <div className="time d-flex align-items-center gap--5" >
-                {(!isAdvertiser) && <i className="icon-heart"></i>}
+                {(!isAdvertiser) && <FaRegClock />}
                   {(!isAdvertiser) && <span>{tour.time}</span>}
                 </div>
                 <div className="tour-btn">
