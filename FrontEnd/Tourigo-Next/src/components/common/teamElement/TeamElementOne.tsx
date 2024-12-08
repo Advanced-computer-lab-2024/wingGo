@@ -43,43 +43,14 @@ const TeamElementOne = ({
                 </div>
                 <div className="team-content">
                   <h6 className="team-member-name b3 underline">
-                    <Link href={`/team-details/${item?.id}`}>
-                      Ethan Mitchell
-                    </Link>
+                   
+                      Menna Essam
+                   
                   </h6>
                   <span>Tour Guide</span>
                 </div>
               </div>
-              <div className="team-social">
-                <Link
-                  className="icon-01"
-                  target="_blank"
-                  href="https://www.facebook.com/"
-                >
-                  <i className="icon-facebook"></i>
-                </Link>
-                <Link
-                  className="icon-02"
-                  target="_blank"
-                  href="https://www.instagram.com/"
-                >
-                  <i className="icon-instagram"></i>
-                </Link>
-                <Link
-                  className="icon-03"
-                  target="_blank"
-                  href="https://twitter.com/"
-                >
-                  <i className="icon-twitter-x"></i>
-                </Link>
-                <Link
-                  className="icon-04"
-                  target="_blank"
-                  href="https://www.linkedin.com/"
-                >
-                  <i className="icon-linkedin"></i>
-                </Link>
-              </div>
+             
             </div>
           </div>
         </>
@@ -99,41 +70,12 @@ const TeamElementOne = ({
               </div>
               <div className="team-content">
                 <h6 className="team-member-name b3 underline">
-                  <Link href={`/team-details/${item?.id}`}>Ethan Mitchell</Link>
+                 Ethan Mitchell
                 </h6>
                 <span>Tour Guide</span>
               </div>
             </div>
-            <div className="team-social">
-              <Link
-                className="icon-01"
-                target="_blank"
-                href="https://www.facebook.com/"
-              >
-                <i className="icon-facebook"></i>
-              </Link>
-              <Link
-                className="icon-02"
-                target="_blank"
-                href="https://www.instagram.com/"
-              >
-                <i className="icon-instagram"></i>
-              </Link>
-              <Link
-                className="icon-03"
-                target="_blank"
-                href="https://twitter.com/"
-              >
-                <i className="icon-twitter-x"></i>
-              </Link>
-              <Link
-                className="icon-04"
-                target="_blank"
-                href="https://www.linkedin.com/"
-              >
-                <i className="icon-linkedin"></i>
-              </Link>
-            </div>
+            
           </div>
         </>
       )}

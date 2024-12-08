@@ -39,46 +39,7 @@ const TravelArea = () => {
                 />
               </svg>
             </div>
-            <div className="travel-shape-two">
-              <Image
-                src={travelShapeTwo}
-                loader={imageLoader}
-                style={{ width: "100%", height: "auto" }}
-                alt="shape"
-              />
-            </div>
-            <div className="travel-shape-three">
-              <Image
-                src={travelShapeThree}
-                loader={imageLoader}
-                style={{ width: "100%", height: "auto" }}
-                alt="shape"
-              />
-            </div>
-            <div className="travel-shape-four">
-              <Image
-                src={travelShapeFour}
-                loader={imageLoader}
-                style={{ width: "100%", height: "auto" }}
-                alt="shape"
-              />
-            </div>
-            <div className="travel-shape-five">
-              <Image
-                src={travelShapeFive}
-                loader={imageLoader}
-                style={{ width: "100%", height: "auto" }}
-                alt="shape"
-              />
-            </div>
-            <div className="travel-shape-six">
-              <Image
-                src={travelShapeSix}
-                loader={imageLoader}
-                style={{ width: "100%", height: "auto" }}
-                alt="shape"
-              />
-            </div>
+      
           </div>
           <div className="row gy-24 align-items-center justify-content-between">
             <div className="col-xl-6 col-lg-6">
@@ -105,21 +66,7 @@ const TravelArea = () => {
                     Emphasize a commitment to customer satisfaction
                   </p>
                 </div>
-                <div className="travel-btn">
-                  <Link
-                    href="/contact "
-                    className="bd-primary-btn btn-style has-arrow is-bg radius-60"
-                  >
-                    <span className="bd-primary-btn-arrow arrow-right">
-                      <i className="fa-regular fa-arrow-right"></i>
-                    </span>
-                    <span className="bd-primary-btn-text">Know More</span>
-                    <span className="bd-primary-btn-circle"></span>
-                    <span className="bd-primary-btn-arrow arrow-left">
-                      <i className="fa-regular fa-arrow-right"></i>
-                    </span>
-                  </Link>
-                </div>
+              
               </div>
             </div>
             <div className="col-xl-6 col-lg-6">
@@ -135,9 +82,9 @@ const TravelArea = () => {
                             </span>
                           </div>
                           <h5 className="travel-title white-text underline-two">
-                            <Link href="/destinations-details-right ">
+                           
                               {item.travelTitle} Tours
-                            </Link>
+                            
                           </h5>
                         </div>
                       </div>

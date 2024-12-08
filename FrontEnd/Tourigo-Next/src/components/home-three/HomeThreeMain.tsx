@@ -15,16 +15,16 @@ const HomeThreeMain = () => {
   return (
     <>
       <BannerThree />
-      <LocationAreaThree />
-      <DestinationThreeArea />
-      <TourAreaThree />
+
+
+
       <CounterAreaThree />
-      <PopularActivities />
+ 
       <TravelAreaThree />
       <TestimonialAreaThree />
-      <BlogAreaThree />
-      <TeamAreaThree />
-      <NewsletterArea />
+    
+    
+     
     </>
   );
 };
