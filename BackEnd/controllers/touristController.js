@@ -2677,7 +2677,7 @@ const bookHotel = async (req, res) => {
              // Extract fields from hotelOffers for booking
              //const offerId = hotelOffers.offers[0].id;  // Retrieve the offer ID
              
-             let totalPrice = hotelOffers.rawPrice;  // Total price for the offer
+             let totalPrice = hotelOffers.rawPrice * adults;  // Total price for the offer
              console.log("Total Price: ", totalPrice);
              const currency = "usd";  // Currency of the offer
 
@@ -2735,6 +2735,9 @@ const bookHotel = async (req, res) => {
             adults: adults,
         }
       ,
+      price: {
+        base: totalPrice
+      },
       hotel: {
         hotelId: data.hotelId,
         name: data.name,
@@ -2753,6 +2756,38 @@ const bookHotel = async (req, res) => {
             res.status(500).json({ message: 'Error booking hotel', error: error.response?.data || error.message });
         }
 };
+
+
+const getPromoCodeDiscountPerc = async (req, res) => {
+
+        const { touristId } = req.params;
+        const { code } = req.query;
+
+        try {
+
+            const tourist = await Tourist.findById(touristId);
+            
+
+            const promoCodeDetails = await PromoCode.findOne({ code: code });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date() ||
+                !tourist.promoCodes.includes(promoCodeDetails._id)
+            ) {
+                return res.status(400).json({ message: 'Invalid, expired, or unauthorized promo code' });
+            }
+
+            const discountAmount = (promoCodeDetails.discount / 100);
+
+            res.status(200).json({ message: 'Promo Code Discount Percentage', promoCodeDetails });
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching promo code discount percentage', error });
+        }
+};
+
+            
+
 
 const bookTransport = async (req, res) => {
         const { touristId, transportId } = req.params;
@@ -4727,6 +4762,7 @@ module.exports = {
     checkIfSaved,
     checkIfActivitySaved,
     getTransportPrice,
+    getPromoCodeDiscountPerc,
     getPaidPrice,
     getPaidPriceForActivity
 };

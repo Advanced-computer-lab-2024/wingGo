@@ -172,6 +172,8 @@ router.get('/isActivitySaved/:touristId/:activityId', touristController.checkIfA
 
 router.get('/transportPrice/:transportId', touristController.getTransportPrice);
 
+router.get('/getPromoCode/:touristId', touristController.getPromoCodeDiscountPerc);
+
 
 router.get('/getPaidPrice/:touristId/:itineraryId', touristController.getPaidPrice);
 
