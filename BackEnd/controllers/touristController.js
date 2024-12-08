@@ -4501,20 +4501,59 @@ const checkIfActivitySaved = async (req, res) => {
     }
   };
 
-  const getTransportPrice = async (req, res) => {
-    const { transportId, promoCode } = req.params;
+//   const getTransportPrice = async (req, res) => {
+//     const { transportId, promoCode } = req.params;
+
+//     try {
+//         // Find the transport by ID
+//         const transport = await Transport.findById(transportId);
+//         if (!transport) {
+//             return res.status(404).json({ message: 'Transport not found' });
+//         }
+
+//         let totalPrice = transport.price;
+//         let promoCodeDetails = null;
+
+//         // Check if a promo code is provided
+//         if (promoCode) {
+//             promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+//             if (
+//                 !promoCodeDetails ||
+//                 !promoCodeDetails.isActive ||
+//                 promoCodeDetails.endDate < new Date()
+//             ) {
+//                 return res.status(400).json({ message: 'Invalid or expired promo code' });
+//             }
+
+//             // Apply discount
+//             const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+//             totalPrice -= discountAmount;
+//         }
+
+//         res.status(200).json({
+//             totalPrice,
+//             promoCodeApplied: !!promoCodeDetails,
+//         });
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error calculating price', error: error.message });
+//     }
+// };
+
+const getTransportPrice = async (req, res) => {
+    const { transportId } = req.params; 
+    const { promoCode } = req.query; 
 
     try {
-        // Find the transport by ID
         const transport = await Transport.findById(transportId);
         if (!transport) {
-            return res.status(404).json({ message: 'Transport not found' });
+            return res.status(404).json({ message: 'transport not found or booking closed' });
         }
 
-        let totalPrice = transport.price;
+        let totalPrice = transport.price; // Base price calculation
         let promoCodeDetails = null;
+        let isValidPromoCode = true;
 
-        // Check if a promo code is provided
+        // Validate and apply promo code
         if (promoCode) {
             promoCodeDetails = await PromoCode.findOne({ code: promoCode });
             if (
@@ -4522,20 +4561,20 @@ const checkIfActivitySaved = async (req, res) => {
                 !promoCodeDetails.isActive ||
                 promoCodeDetails.endDate < new Date()
             ) {
-                return res.status(400).json({ message: 'Invalid or expired promo code' });
+                isValidPromoCode = false;
+            } else {
+                const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+                totalPrice -= discountAmount; // Apply discount
             }
-
-            // Apply discount
-            const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
-            totalPrice -= discountAmount;
         }
 
-        res.status(200).json({
-            totalPrice,
-            promoCodeApplied: !!promoCodeDetails,
-        });
+        return res.status(200).json({ totalPrice, isValidPromoCode });
     } catch (error) {
-        res.status(500).json({ message: 'Error calculating price', error: error.message });
+        console.error('Error calculating activity price:', error);
+        return res.status(500).json({
+            message: 'Error calculating activity price',
+            error: error.message || 'An unknown error occurred',
+        });
     }
 };
 

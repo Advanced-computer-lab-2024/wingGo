@@ -3,7 +3,7 @@ import Image from "next/image";
 import { imageLoader } from "@/hooks/image-loader";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { fetchTransports, getTransportPrice } from "@/api/transportApi";
+import { fetchTransports } from "@/api/transportApi";
 import { Transport } from "@/interFace/interFace";
 import Link from "next/link";
 import { idTypeNew } from "@/interFace/interFace";
