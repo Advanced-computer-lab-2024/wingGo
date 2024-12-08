@@ -5,24 +5,70 @@ const LoginCredentials = require('../models/LoginCredentials');
 const bcrypt = require('bcrypt');
 
 
-// Create a new place
+
+
 const createPlace = async (req, res) => {
+    const {
+        gov,
+        name,
+        description,
+        location,
+        openingHours,
+        ticketPrices,
+        tags,
+        tagss,
+      } = req.body;
+  
     try {
-        const { tagss, ...placeData } = req.body; // Extract tagss separately
-
-        // Create a new place with the new tagss field
-        const place = new Place({
-            ...placeData,  // Spread the rest of the place data (e.g., name, description, location)
-            tagss: tagss || []  // Use an empty array if tagss is missing
+      // Log incoming request data
+      console.log("Request Body:", req.body);
+      const mongoose = require("mongoose");
+      
+      // Cast Governor ID to ObjectId
+      const governorObjectId = new mongoose.Types.ObjectId(gov);
+  
+      // Check Governor Existence
+      const governorRecord = await Governor.findById(governorObjectId);
+      if (!governorRecord) {
+        return res.status(404).json({ error: "Governor not found." });
+      }
+  
+      // Validate Terms Acceptance
+      if (!governorRecord.termsAccepted) {
+        return res.status(403).json({
+          error: "Terms and conditions must be accepted to create a place.",
         });
-
-        await place.save();
-        res.status(201).json({ message: 'Place created successfully', place });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
+      }
+  
+      // Handle Uploaded Files
+      const pictures = req.files?.map((file) => file.location || file.path) || [];
+  
+      // Safely Parse JSON Fields
+      const parsedTicketPrices = JSON.parse(ticketPrices || "{}");
+      const parsedTags = JSON.parse(tags || "{}");
+      const parsedTagss = JSON.parse(tagss || "[]");
+  
+      // Create and Save Place
+      const newPlace = new Place({
+        governorId: governorObjectId,
+        name,
+        description,
+        location,
+        openingHours,
+        ticketPrices: parsedTicketPrices,
+        tags: parsedTags,
+        tagss: parsedTagss,
+        pictures,
+      });
+  
+      await newPlace.save();
+      res.status(201).json({ message: "Place created successfully!", place: newPlace });
+    } catch (error) {
+      console.error("Error creating place:", error);
+      res.status(400).json({ error: error.message });
     }
-};
-
+  };
+  
 // const createPlace = async (req, res) => {
 //     try {
 //         const { /*governerId,*/ types, historicalPeriods, ...placeData } = req.body.tags || {}; // Extract tags separately

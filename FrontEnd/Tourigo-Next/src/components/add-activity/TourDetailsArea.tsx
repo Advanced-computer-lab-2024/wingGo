@@ -9,7 +9,7 @@ import ErrorMessage from "@/elements/error-message/ErrorMessage";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { createActivity } from "@/api/activityApi";
-import { File } from "@/interFace/interFace";
+
 import L from "leaflet";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import "leaflet/dist/leaflet.css";
@@ -34,6 +34,7 @@ import { MapContainer, TileLayer, Marker } from "react-leaflet";
 //   website: string;
 // }
 interface NewActivity {
+  name:string;
   date: string;
   time: string;
   location: {
@@ -46,13 +47,9 @@ interface NewActivity {
   category: string;
   tags: string[];
   specialDiscounts: string;
-  bookingOpen: boolean;
+  isBookingOpen: boolean;
   advertiser: string;
-  // ratings: {
-  //   touristId: string; // Referencing an ObjectId for the tourist
-  //   rating: number;
-  // }[];
-  averageRating:number;
+  
 }
 
 const customIcon = new L.Icon({
@@ -67,25 +64,26 @@ interface Suggestion {
   x: number;
   y: number;
 }
-const TourDetailsArea = () => {
-  
-  const [largeImg, setlargeImg] = useState<string>("");
-  const selectHandler = () => {};
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<FormData>();
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    const toastId = toast.loading("");
-    const formData = { ...data, largeImg };
-    toast.success("Message Send Successfully", { id: toastId, duration: 1000 });
-    reset();
+const TourDetailsArea = () => {
+  const advertiserId ="66fb37dda63c04def29f944e"; 
+  const [newActivity, setNewActivity] = React.useState<NewActivity>({
+    name:'',
+    date: '',
+    time: '',
+    location: { type: 'Point', address: '', lat: 0, lng: 0 },
+    price: 0,
+    category: '',
+    tags: [],
+    specialDiscounts: '',
+    isBookingOpen: true,
+    advertiser: advertiserId,  // Replace with actual advertiser ID
     
-    
-  };
+});
+  
+const [image, setImage] = useState<File | null>(null);
+const [largeImg, setlargeImg] = useState<string>("");
+  
   const [addressQuery, setAddressQuery] = useState<string>("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [mapCenter, setMapCenter] = useState({ lat: 45.652478, lng: 25.596463 });
@@ -105,68 +103,90 @@ const TourDetailsArea = () => {
     setMarkerPosition(newLatLng); // Update marker position
     setSuggestions([]); // Clear suggestions list
   };
-  const advertiserId ="67325dcb0b3e54ad8bfe1684"; 
-  const [newActivity, setNewActivity] = React.useState<NewActivity>({
-    date: '',
-    time: '',
-    location: { type: 'Point', address: '', lat: 0, lng: 0 },
-    price: 0,
-    category: '',
-    tags: [],
-    specialDiscounts: '',
-    bookingOpen: true,
-    advertiser: advertiserId,  // Replace with actual advertiser ID
-    averageRating:4
-});
   
 
-  const [activities, setActivities] = useState([]);
-  const [selectedActivity, setSelectedActivity] = useState(null);
-  const [activityId, setActivityId] = useState('');
-
   
-  const handleAddActivity = async (e:FormEvent) => {
+  const handleAddActivity = async (e: FormEvent) => {
     e.preventDefault();
+  
+    const formData = new FormData();
+  
+    // Append form data fields
+    formData.append("name", newActivity.name || ""); 
+    formData.append("date", newActivity.date); 
+    formData.append("time", newActivity.time); 
+    formData.append("price", String(newActivity.price)); 
+    formData.append("category", newActivity.category); 
+    formData.append("specialDiscounts", newActivity.specialDiscounts); 
+    formData.append("isBookingOpen", String(newActivity.isBookingOpen)); 
+    formData.append("advertiser", newActivity.advertiser); 
+    
+  
+    // Handle tags as JSON
+    if (newActivity.tags.length > 0) {
+      formData.append("tags", JSON.stringify(newActivity.tags));
+    }
+  
+    // Append the location object
+    formData.append(
+      "location",
+      JSON.stringify({
+        type: "Point",
+        address: addressQuery,
+        lat: markerPosition.lat,
+        lng: markerPosition.lng,
+      })
+    );
+  
+    // Append the image if present
+    if (image) {
+      formData.append("file", image);
+    }
+  
     try {
-      const response = await createActivity(newActivity);
-      
-      alert(response.message || "Activity added successfully");
-
+      // Make the API call
+      const response = await createActivity(formData);
+      toast.success(response.message || "Activity added successfully");
+  
+      // Reset form after success
+      setNewActivity({
+        name:"",
+        date: "",
+        time: "",
+        location: { type: "Point", address: "", lat: 0, lng: 0 },
+        price: 0,
+        category: "",
+        tags: [],
+        specialDiscounts: "",
+        isBookingOpen: true,
+        advertiser: advertiserId,
+       
+      });
+      setAddressQuery("");
+      setMarkerPosition({ lat: 45.652478, lng: 25.596463 });
     } catch (error) {
-      console.error('Error adding activity:', error);
-      alert(error);
+      console.error("Error adding activity:", error);
+      toast.error("Failed to add activity.");
     }
   };
+  
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    if (name.includes('.')) {
-        const [outerKey, innerKey] = name.split('.');
-        
-        setNewActivity(prevState => {
-            const outerObject = prevState[outerKey as keyof NewActivity];
-            
-            // Check if outerObject is an object (to allow spreading)
-            if (typeof outerObject === 'object' && outerObject !== null) {
-                return {
-                    ...prevState,
-                    [outerKey]: {
-                        ...outerObject,
-                        [innerKey]: value
-                    }
-                };
-            }
-
-            return prevState;
-        });
-    } else {
-        setNewActivity(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-    }
-};
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type, checked } = e.target as HTMLInputElement;
+  
+    setNewActivity((prev) => ({
+      ...prev,
+      [name]: name === "tags"
+        ? value.split(",").map((tag) => tag.trim()) // Handle tags as an array
+        : name === "location.address"
+        ? { ...prev.location, address: value } // Update nested location address
+        : type === "checkbox"
+        ? checked // Handle checkbox input
+        : name === "price"
+        ? Number(value) // Ensure price is a number
+        : value, // Default assignment for other fields
+    }));
+  };
 
 
   
@@ -181,7 +201,8 @@ const TourDetailsArea = () => {
                 <div className="tour-details-wrapper">
                   <div className="tour-details mb-25">
                     {/* Upload Img */}
-                    <UploadSingleImg setlargeImg={setlargeImg} />
+                    <UploadSingleImg setlargeImg={setlargeImg} setImage={setImage}/>
+
                     <div className="form-input-box mb-15">
                         <div className="form-input-title">
                           <label htmlFor="tourTitle">
@@ -190,7 +211,7 @@ const TourDetailsArea = () => {
                         </div>
                         <div className="form-input">
                           
-                           <input type="text" name="name"  onChange={handleInputChange} required />
+                           <input type="text" name="name" value={newActivity.name} onChange={handleInputChange} required />
                           
                         </div>
                       </div>
