@@ -13,35 +13,31 @@ import { selectLocationData } from "@/data/nice-select-data";
 
 
 interface NewPlace {
-  governorId: string;
   name: string;
   description: string;
-  pictures: string[];
-  location: string,
+  location: string;
   openingHours: string;
   ticketPrices: {
-    foreigner: number;
-    native: number;
-    student: number;
+    foreigner?: number;
+    native?: number;
+    student?: number;
   };
-  flagged: boolean;
-  tagss: string[];
+  tagss?: string[];
+  pictures?: string[]; // Array of files for multiple image uploads
 }
 
 interface FormData {
-  governorId: string;
   name: string;
   description: string;
-  pictures: string[];
-  location: string,
+  location: string;
   openingHours: string;
   ticketPrices: {
-    foreigner: number;
-    native: number;
-    student: number;
+    foreigner?: number;
+    native?: number;
+    student?: number;
   };
-  flagged: boolean;
-  tagss: string[];
+  tagss?: string[];
+  pictures?: string[]; // Array of files for multiple image uploads
 }
 
 const TourDetailsArea = () => {
@@ -65,7 +61,7 @@ const TourDetailsArea = () => {
 
 
   const [newPlace, setNewPlace] = useState<NewPlace>({
-    governorId: "674d045f99ed6f4415cbdd39",
+   
     name: "",
     description: "",
     pictures: [],
@@ -76,9 +72,10 @@ const TourDetailsArea = () => {
       native: 0,
       student: 0,
     },
-    flagged: false,
+   
     tagss: selectedPrefrences,
   });
+  
 
   
 
@@ -163,22 +160,22 @@ const TourDetailsArea = () => {
   
   const [pictureUrl, setPictureUrl] = useState<string>("");
 
-  const handleAddPicture = () => {
-    if (pictureUrl.trim()) {
-      setNewPlace((prevState) => ({
-        ...prevState,
-        pictures: [...prevState.pictures, pictureUrl],
-      }));
-      setPictureUrl("");
-    }
-  };
+  // const handleAddPicture = () => {
+  //   if (pictureUrl.trim()) {
+  //     setNewPlace((prevState) => ({
+  //       ...prevState,
+  //       pictures: [...prevState.pictures, pictureUrl],
+  //     }));
+  //     setPictureUrl("");
+  //   }
+  // };
 
-  const handleRemovePicture = (index: number) => {
-    setNewPlace((prevState) => ({
-      ...prevState,
-      pictures: prevState.pictures.filter((_, i) => i !== index),
-    }));
-  };
+  // const handleRemovePicture = (index: number) => {
+  //   setNewPlace((prevState) => ({
+  //     ...prevState,
+  //     pictures: prevState.pictures.filter((_, i) => i !== index),
+  //   }));
+  // };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
