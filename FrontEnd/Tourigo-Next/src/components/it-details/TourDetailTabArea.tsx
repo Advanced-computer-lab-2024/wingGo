@@ -118,164 +118,317 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
             aria-labelledby="nav-overview-tab"
             tabIndex={0}
           >
-            <p className="mb-15">
-              <strong>Language:</strong> {itineraryData.language}
-            </p>
-            <p className="mb-15">
-              <strong>Available Dates:</strong>{" "}
-              {itineraryData.availableDates.map((date, index) => (
-                <span key={index}>{formatDate(date)}{index < itineraryData.availableDates.length - 1 ? ", " : ""}</span>
-              ))}
-            </p>
-            <p className="mb-15">
-              <strong>Pickup Location:</strong> {itineraryData.pickupLocation}
-            </p>
-            <p className="mb-15">
-              <strong>Dropoff Location:</strong> {itineraryData.dropoffLocation}
-            </p>
-            <div className="tour-details-faq mb-35">
-              <h4 className="mb-20">Available Activities</h4>
-              <div className="accordion-wrapper faq-style-3">
-                <div className="accordion" id="accordionExampleThree">
-                  {itineraryData.activities.split(',').map((activity, index) => (
-                    <div className="accordion-item" key={index}>
-                      <h6 className="accordion-header" id={`heading${index}`}>
-                        <button
-                          className="accordion-button"
-                          type="button"
-                          data-bs-toggle="collapse"
-                          data-bs-target={`#collapse${index}`}
-                          aria-expanded="true"
-                          aria-controls={`collapse${index}`}
-                        >
-                          <span>Activity {index + 1}:</span> {activity.trim()}
-                        </button>
-                      </h6>
-                      <div
-                        id={`collapse${index}`}
-                        className="accordion-collapse collapse"
-                        aria-labelledby={`heading${index}`}
-                        data-bs-parent="#accordionExampleThree"
-                      >
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <style jsx>{`
-                /* Hide the default Bootstrap accordion arrow */
-                .accordion-button::after {
-                  display: none;
-                }
-              `}</style>
+                       <p className="mb-15 d-flex align-items-center">
+    <strong>Language:</strong>
+    {isEditing ? (
+      <input
+        type="text"
+        value={updatedItinerary.language}
+        onChange={(e) =>
+          setUpdatedItinerary({ ...updatedItinerary, language: e.target.value })
+        }
+        className="form-control ms-2"
+        style={{ width: "auto" }}
+      />
+    ) : (
+      <span>{itineraryData.language}</span>
+    )}
+    <button
+      onClick={() => setIsEditing(!isEditing)}
+      className="btn btn-link p-0 ms-2"
+      style={{ cursor: "pointer" }}
+    >
+      <TbEdit size={20} />
+    </button>
+  </p>
+
+  <p className="mb-15 d-flex align-items-center">
+    <strong>Available Dates:</strong>
+    {isEditing ? (
+      itineraryData.availableDates.map((date, index) => (
+        <input
+          key={index}
+          type="date"
+          value={new Date(date).toISOString().substring(0, 10)}
+          onChange={(e) => {
+            const newDates = [...itineraryData.availableDates];
+            newDates[index] = new Date(e.target.value);
+            setUpdatedItinerary({ ...updatedItinerary, availableDates: newDates });
+          }}
+          className="form-control ms-2"
+          style={{ width: "auto" }}
+        />
+      ))
+    ) : (
+      <span>
+        {itineraryData.availableDates.map((date, index) => (
+          <span key={index}>
+            {formatDate(date)}
+            {index < itineraryData.availableDates.length - 1 ? ", " : ""}
+          </span>
+        ))}
+      </span>
+    )}
+    <button
+      onClick={() => setIsEditing(!isEditing)}
+      className="btn btn-link p-0 ms-2"
+      style={{ cursor: "pointer" }}
+    >
+      <TbEdit size={20} />
+    </button>
+  </p>
+  <p className="mb-15 d-flex align-items-center">
+    <strong>Pickup Location:</strong>
+    {isEditing ? (
+      <input
+        type="text"
+        value={updatedItinerary.pickupLocation}
+        onChange={(e) =>
+          setUpdatedItinerary({
+            ...updatedItinerary,
+            pickupLocation: e.target.value,
+          })
+        }
+        className="form-control ms-2"
+        style={{ width: "auto" }}
+      />
+    ) : (
+      <span>{itineraryData.pickupLocation}</span>
+    )}
+    <button
+      onClick={() => setIsEditing(!isEditing)}
+      className="btn btn-link p-0 ms-2"
+      style={{ cursor: "pointer" }}
+    >
+      <TbEdit size={20} />
+    </button>
+  </p>
+
+  <p className="mb-15 d-flex align-items-center">
+    <strong>Dropoff Location:</strong>
+    {isEditing ? (
+      <input
+        type="text"
+        value={updatedItinerary.dropoffLocation}
+        onChange={(e) =>
+          setUpdatedItinerary({
+            ...updatedItinerary,
+            dropoffLocation: e.target.value,
+          })
+        }
+        className="form-control ms-2"
+        style={{ width: "auto" }}
+      />
+    ) : (
+      <span>{itineraryData.dropoffLocation}</span>
+    )}
+    <button
+      onClick={() => setIsEditing(!isEditing)}
+      className="btn btn-link p-0 ms-2"
+      style={{ cursor: "pointer" }}
+    >
+      <TbEdit size={20} />
+    </button>
+  </p>
+
+
+  <p className="mb-15 d-flex align-items-center">
+  <strong>Tags:</strong>
+  {isEditing ? (
+    <input
+      type="text"
+      value={updatedItinerary.tags.join(", ")}
+      onChange={(e) =>
+        setUpdatedItinerary({
+          ...updatedItinerary,
+          tags: e.target.value.split(",").map((tag) => tag.trim()),
+        })
+      }
+      className="form-control ms-2"
+      style={{ width: "auto" }}
+    />
+  ) : (
+    <span>{itineraryData.tags.join(", ")}</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+
+
+<p className="mb-15 d-flex align-items-center">
+  <strong>Price:</strong>
+  {isEditing ? (
+    <input
+      type="number"
+      value={updatedItinerary.price}
+      onChange={(e) =>
+        setUpdatedItinerary({ ...updatedItinerary, price: +e.target.value })
+      }
+      className="form-control ms-2"
+      style={{ width: "auto" }}
+    />
+  ) : (
+    <span>{itineraryData.price} USD</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+
+<p className="mb-15 d-flex align-items-center">
+  <strong>Duration:</strong>
+  {isEditing ? (
+    <input
+      type="text"
+      value={updatedItinerary.duration}
+      onChange={(e) =>
+        setUpdatedItinerary({ ...updatedItinerary, duration: e.target.value })
+      }
+      className="form-control ms-2"
+      style={{ width: "auto" }}
+    />
+  ) : (
+    <span>{itineraryData.duration}</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+
+<p className="mb-15 d-flex align-items-center">
+  <strong>Timeline:</strong>
+  {isEditing ? (
+    <textarea
+      value={updatedItinerary.timeline}
+      onChange={(e) =>
+        setUpdatedItinerary({ ...updatedItinerary, timeline: e.target.value })
+      }
+      className="form-control ms-2"
+      style={{ width: "auto" }}
+    />
+  ) : (
+    <span>{itineraryData.timeline}</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+<p className="mb-15 d-flex align-items-center">
+  <strong>Accessibility:</strong>
+  {isEditing ? (
+    <input
+      type="checkbox"
+      checked={updatedItinerary.accessibility}
+      onChange={(e) =>
+        setUpdatedItinerary({ ...updatedItinerary, accessibility: e.target.checked })
+      }
+      className="form-check-input ms-2"
+    />
+  ) : (
+    <span>{itineraryData.accessibility ? "Accessible" : "Not Accessible"}</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+ 
+
+              <div className="tour-details-faq mb-35">
+  <h4 className="mb-20 d-flex align-items-center">
+    Available Activities
+    <button
+      onClick={() => setIsEditing(!isEditing)}
+      className="btn btn-link p-0 ms-2"
+      style={{ cursor: "pointer" }}
+    >
+      <TbEdit size={20} />
+    </button>
+  </h4>
+  <div className="accordion-wrapper faq-style-3">
+    {isEditing ? (
+      <textarea
+        value={updatedItinerary.activities || itineraryData.activities}
+        onChange={(e) =>
+          setUpdatedItinerary({
+            ...updatedItinerary,
+            activities: e.target.value,
+          })
+        }
+        className="form-control"
+        style={{ width: "100%", minHeight: "100px" }}
+      />
+    ) : (
+      <div className="accordion" id="accordionExampleThree">
+        {itineraryData.activities.split(",").map((activity, index) => (
+          <div className="accordion-item" key={index}>
+            <h6 className="accordion-header" id={`heading${index}`}>
+              <button
+                className="accordion-button"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target={`#collapse${index}`}
+                aria-expanded="true"
+                aria-controls={`collapse${index}`}
+              >
+                <span>Activity {index + 1}:</span> {activity.trim()}
+              </button>
+            </h6>
+            <div
+              id={`collapse${index}`}
+              className="accordion-collapse collapse"
+              aria-labelledby={`heading${index}`}
+              data-bs-parent="#accordionExampleThree"
+            >
+              {/* Additional content for each activity can go here */}
             </div>
           </div>
-          {/* Feedback Tab */}
-          <div
-            className="tab-pane fade"
-            id="nav-feedback"
-            role="tabpanel"
-            aria-labelledby="nav-feedback-tab"
-            tabIndex={0}
-          >
-            <div className="tour-details-rating-wrapper mb-35">
-              <div className="row gy-24 align-items-center">
-                <div className="col-xl-2 col-lg-3 col-md-4 col-sm-4">
-                  <div className="rating-box">
-                    <div className="inner">
-                      <div className="rating-number">
-                        {itineraryData.averageRating.toFixed(2)}
-                      </div>
-                      <div className="rating">
-                        <GetRatting averageRating={itineraryData.averageRating} />
-                      </div>
-                      <span className="sub-title">
-                        ({itineraryData.comment.length} {itineraryData.comment.length === 1 ? "Review" : "Reviews"})
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-lg-10 col-md-8 col-sm-7">
-                  <div className="review-wrapper">
-                    {[5, 4, 3, 2, 1].map((star) => {
-                      const count = itineraryData.ratings.filter((rating) => rating === star).length;
-                      const percentage = itineraryData.ratings.length
-                        ? ((count / itineraryData.ratings.length) * 100).toFixed(1)
-                        : 0;
-                      return (
-                        <div className="single-progress-bar" key={star}>
-                          <div className="rating-text">{star}</div>
-                          <div className="progress">
-                            <div
-                              className={`progress-bar progress-bar-${star}`}
-                              role="progressbar"
-                              style={{ width: `${percentage}%` }}
-                              aria-valuenow={Number(percentage)}
-                              aria-valuemin={0}
-                              aria-valuemax={100}
-                            ></div>
-                          </div>
-                          <span className="value-text">{percentage}%</span>
-                          <span className="number">{count}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-              <style jsx>{`
-                .rating-box .fa-star.filled {
-                  color: #ffd700; /* Gold color for filled stars */
-                }
-                .progress-bar-5 {
-                  background-color: #4CAF50; /* Green */
-                }
-                .progress-bar-4 {
-                  background-color: #8BC34A; /* Light Green */
-                }
-                .progress-bar-3 {
-                  background-color: #FFC107; /* Amber */
-                }
-                .progress-bar-2 {
-                  background-color: #FF9800; /* Orange */
-                }
-                .progress-bar-1 {
-                  background-color: #F44336; /* Red */
-                }
-              `}</style>
-            </div>
-            <TourDetailsPostForm itineraryData={itineraryData} />
+        ))}
+      </div>
+    )}
+  </div>
+  {isEditing && (
+    <button
+      onClick={() => handleSaveChanges(itineraryData._id, tourGuideData._id)}
+      className="btn btn-primary mt-3"
+    >
+      Save Changes
+    </button>
+  )}
+</div>
+
+
+
           </div>
-          {/* Reviews Tab */}
-          <div
-            className="tab-pane fade"
-            id="nav-reviews"
-            role="tabpanel"
-            aria-labelledby="nav-reviews-tab"
-            tabIndex={0}
-          >
-            <div className="tour-details-meta">
-              <h4 style={{ fontSize: '3.5rem', fontWeight: 'bold', marginBottom: '15px' }}>Tour Guide Rating & Reviews</h4>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                <span style={{ display: 'flex', alignItems: 'center' }}>
-                  <i className="icon-star" style={{ color: "#FFD700", marginRight: "5px" }}></i>
-                  <span style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#333' }}>{tourGuideData.averageRating.toFixed(2)}</span>
-                  <span style={{ fontSize: '2.5rem', color: '#666' }}>({tourGuideData.ratings.length} Reviews)</span>
-                </span>
-              </div>
-              <div style={{ marginTop: '15px' }}>
-                {tourGuideData.comment.map((comment, index) => (
-                  <div key={index} style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px', border: '1px solid #e0e0e0' }}>
-                    <div style={{ padding: '15px' }}>
-                      <p style={{ fontSize: '2rem', color: '#333' }}>{comment.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {/* Gallery Tab */}
+         
+
+             
+            
+           
           </div>
         </div>
-      </div>
+     
     </>
   );
 };
