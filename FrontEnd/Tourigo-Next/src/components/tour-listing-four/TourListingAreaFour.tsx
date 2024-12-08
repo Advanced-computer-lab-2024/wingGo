@@ -20,7 +20,7 @@ const TourListingAreaFour = () => {
               />
             ))}
           </div>
-          <PaginationWrapper />
+          
         </div>
       </section>
       <BookingFormModal />

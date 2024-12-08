@@ -111,7 +111,7 @@ const TransportGridRight = () => {
             {/* <SidebarCategories onCategorySelect={(category) => applyFilters({ category })} /> */}
           </div>
         </div>
-        <PaginationWrapper />
+        
       </div>
     </section>
   );

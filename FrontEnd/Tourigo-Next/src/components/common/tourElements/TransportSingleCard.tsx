@@ -49,7 +49,7 @@ const TransportSingleCard = ({
               <div className="tour-thumb image-overly">
                 <Link href={`/transport-details/${transport._id}`}>
                   <Image
-                    src={"/assets/images/default-transport.png"}
+                    src={"/assets/images/transport.png"}
                     loader={imageLoader}
                     width={270}
                     height={270}

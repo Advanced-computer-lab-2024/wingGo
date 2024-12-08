@@ -200,7 +200,6 @@ const handleSave = async () => {
                     style={{ width: "300px", height: "250px" }}
                     alt="Itinerary Image"
                     unoptimized 
-                    
                   />
                 </Link>
               </div>
