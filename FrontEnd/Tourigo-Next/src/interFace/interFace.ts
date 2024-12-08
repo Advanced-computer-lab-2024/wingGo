@@ -409,6 +409,7 @@ export interface Activity {
   flagged?: boolean;
   touristIDs?: string[]; // Array of tourist ObjectIds
   averageRating:number;
+  photo: string;
 }
 
 export interface BookedActivity {
@@ -722,6 +723,18 @@ export interface CustomFile extends Blob {
   lastModified: number;
   webkitRelativePath?: string;
   src?: string;  // If you need a `src` property
+}
+
+export interface PromoCode {
+  _id: string; 
+  code: string; 
+  discount: number; 
+  startDate: string; 
+  endDate: string; 
+  isActive: boolean; 
+  description?: string; 
+  touristId: string; 
+
 }
 
 

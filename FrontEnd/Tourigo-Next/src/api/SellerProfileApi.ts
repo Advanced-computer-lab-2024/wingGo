@@ -3,6 +3,17 @@ import axios from 'axios';
 const ADVERTISER_API_URL = 'http://localhost:8000/seller';
 import { SellerSales } from '@/interFace/interFace';
 
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+  iat: number; // Add this if included in the token payload
+}
+
 
 export const viewSellerProfile = async (id: string): Promise<any> => {
   try {
@@ -118,8 +129,21 @@ export const acceptSellerTermsAndConditions = async (id: string): Promise<any> =
   }
 }
 
-export const getSellerSalesReport = async (sellerId: string): Promise<SellerSales> => {
+export const getSellerSalesReport = async (): Promise<SellerSales> => {
+  const cookie = Cookies.get('token'); // Retrieve the token from cookies
+
+  let sellerId = '';
   try {
+    if (cookie) {
+      const decodedToken = jwtDecode<DecodedToken>(cookie);
+      console.log('Decoded Token:', decodedToken);
+      sellerId = decodedToken.id; // Extract 'id' from the token
+    } else {
+      throw new Error("No token found. Please log in.");
+    }
+
+    console.log('Seller ID:', sellerId);
+
     const response = await axios.get<SellerSales>(`${ADVERTISER_API_URL}/sales-report/${sellerId}`);
     console.log('Seller sales report data:', response.data);
     return response.data;
@@ -131,4 +155,4 @@ export const getSellerSalesReport = async (sellerId: string): Promise<SellerSale
       throw error;
     }
   }
-}
+};

@@ -45,7 +45,6 @@ interface NewActivity {
   };
   price: number;
   category: string;
-  tags: string[];
   specialDiscounts: string;
   isBookingOpen: boolean;
   advertiser: string;
@@ -66,7 +65,7 @@ interface Suggestion {
 }
 
 const TourDetailsArea = () => {
-  const advertiserId ="66fb37dda63c04def29f944e"; 
+  const advertiserId ="67521d930982497fbe368837"; 
   const [newActivity, setNewActivity] = React.useState<NewActivity>({
     name:'',
     date: '',
@@ -74,7 +73,6 @@ const TourDetailsArea = () => {
     location: { type: 'Point', address: '', lat: 0, lng: 0 },
     price: 0,
     category: '',
-    tags: [],
     specialDiscounts: '',
     isBookingOpen: true,
     advertiser: advertiserId,  // Replace with actual advertiser ID
@@ -111,34 +109,27 @@ const [largeImg, setlargeImg] = useState<string>("");
   
     const formData = new FormData();
   
-    // Append form data fields
-    formData.append("name", newActivity.name || ""); 
-    formData.append("date", newActivity.date); 
-    formData.append("time", newActivity.time); 
-    formData.append("price", String(newActivity.price)); 
-    formData.append("category", newActivity.category); 
-    formData.append("specialDiscounts", newActivity.specialDiscounts); 
-    formData.append("isBookingOpen", String(newActivity.isBookingOpen)); 
-    formData.append("advertiser", newActivity.advertiser); 
+    // Append basic fields
+    formData.append("name", newActivity.name);
+    formData.append("date", newActivity.date);
+    formData.append("time", newActivity.time);
+    formData.append("price", String(newActivity.price));
+    formData.append("category", newActivity.category);
+    formData.append("specialDiscounts", newActivity.specialDiscounts);
+    formData.append("isBookingOpen", String(newActivity.isBookingOpen));
+    formData.append("advertiser", newActivity.advertiser);
+  
+    // Ensure correct location field
+    const locationData = {
+      type: "Point",
+      address: addressQuery || newActivity.location.address,  // Correct address source
+      lat: markerPosition.lat,
+      lng: markerPosition.lng,
+    };
     
+    formData.append("location", String(locationData));
   
-    // Handle tags as JSON
-    if (newActivity.tags.length > 0) {
-      formData.append("tags", JSON.stringify(newActivity.tags));
-    }
-  
-    // Append the location object
-    formData.append(
-      "location",
-      JSON.stringify({
-        type: "Point",
-        address: addressQuery,
-        lat: markerPosition.lat,
-        lng: markerPosition.lng,
-      })
-    );
-  
-    // Append the image if present
+    // Append image if present
     if (image) {
       formData.append("file", image);
     }
@@ -150,17 +141,15 @@ const [largeImg, setlargeImg] = useState<string>("");
   
       // Reset form after success
       setNewActivity({
-        name:"",
+        name: "",
         date: "",
         time: "",
         location: { type: "Point", address: "", lat: 0, lng: 0 },
         price: 0,
         category: "",
-        tags: [],
         specialDiscounts: "",
         isBookingOpen: true,
         advertiser: advertiserId,
-       
       });
       setAddressQuery("");
       setMarkerPosition({ lat: 45.652478, lng: 25.596463 });
@@ -169,6 +158,7 @@ const [largeImg, setlargeImg] = useState<string>("");
       toast.error("Failed to add activity.");
     }
   };
+  
   
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -315,6 +305,7 @@ const [largeImg, setlargeImg] = useState<string>("");
         <div className="form-input-box mb-20">
         <input
   type="text"
+  name="location"
   value={addressQuery}
   onChange={(e) => {
     setAddressQuery(e.target.value); // Update the input value

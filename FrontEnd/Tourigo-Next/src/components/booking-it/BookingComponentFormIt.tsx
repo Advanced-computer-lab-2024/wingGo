@@ -255,7 +255,9 @@ const onSubmit = async (event: React.FormEvent) => {
                       <option value="" disabled>
                         Select a date
                       </option>
-                      {data.availableDates.map((date) => (
+                      {data.availableDates
+                      .filter((date) => new Date(date) > new Date()) // Filter for future dates
+                      .map((date) => (
                         <option key={date.toString()} value={new Date(date).toISOString()}>
                           {new Date(date).toLocaleDateString("en-CA")}
                         </option>

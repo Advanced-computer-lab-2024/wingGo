@@ -1,5 +1,15 @@
 import axios from 'axios';
 import { TourGuideSales , TouristReportOfGuide} from '@/interFace/interFace'; // Adjust the path based on your project structure
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+  iat: number; // Add this if included in the token payload
+}
 
 
 const ADVERTISER_API_URL = 'http://localhost:8000/tourguide';
@@ -116,25 +126,54 @@ export const acceptTermsAndConditions = async (id: string): Promise<any> => {
     }
     }
 
-    export const getSalesReport = async (tourGuideId: string): Promise<TourGuideSales> => {
-      try {
-        const response = await axios.get<TourGuideSales>(`${ADVERTISER_API_URL}/sales-report/${tourGuideId}`);
-        console.log('Sales report data:', response.data);
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching sales report:', error);
-        if (axios.isAxiosError(error)) {
-          throw error.response?.data || error.message;
-        } else {
-          throw error;
-        }
-      }
-    };
 
-    // Fetch Tourist Report
-export const getTouristReportofguide = async (tourGuideId: string): Promise<TouristReportOfGuide> => {
+export const getSalesReport = async (): Promise<TourGuideSales> => {
+  const cookie = Cookies.get('token');
+
+  let tourGuideId = '';
   try {
-    const response = await axios.get<TouristReportOfGuide>(`${ADVERTISER_API_URL}/tourist-report/${tourGuideId}`);
+      if (cookie) {
+        const decodedToken = jwtDecode<DecodedToken>(cookie);
+          console.log('Decoded Token:', decodedToken);
+          tourGuideId = decodedToken.id; // Use 'id' from the token
+      } else {
+          throw new Error("No token found. Please log in.");
+      }
+      console.log('Tour Guide ID:', tourGuideId);
+      const response = await axios.get<TourGuideSales>(`${ADVERTISER_API_URL}/sales-report/${tourGuideId}`);
+
+      console.log('Sales report data:', response.data);
+      return response.data;
+
+  } catch (error) {
+      console.error('Error fetching sales report:', error);
+      if (axios.isAxiosError(error)) {
+          throw error.response?.data || error.message;
+      } else {
+          throw error;
+      }
+  }
+};
+
+// Fetch Tourist Report
+export const getTouristReportofguide = async (): Promise<TouristReportOfGuide> => {
+  const cookie = Cookies.get('token');
+
+  let tourGuideId = '';
+  try {
+    if (cookie) {
+      const decodedToken = jwtDecode<DecodedToken>(cookie);
+      console.log('Decoded Token:', decodedToken);
+      tourGuideId = decodedToken.id; // Extract 'id' from the token
+    } else {
+      throw new Error("No token found. Please log in.");
+    }
+
+    console.log('Tour Guide ID:', tourGuideId);
+
+    const response = await axios.get<TouristReportOfGuide>(
+      `${ADVERTISER_API_URL}/tourist-report/${tourGuideId}`
+    );
     console.log('Tourist report data:', response.data);
     return response.data;
   } catch (error) {
