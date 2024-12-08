@@ -385,4 +385,21 @@ export const viewAllSavedEventsApi = async (touristId: string): Promise<any> => 
     }
   };
 
-  
+  export const fetchItImage = async (itineraryId: string) => {
+    try {
+      const response = await axios.get(`http://localhost:8000/tourguide/itinerary/photo/${itineraryId}`);
+      
+      if (response.status === 200 && response.data.imageUrl) {
+        return response.data.imageUrl; // Extract the URL directly
+      }
+      
+      throw new Error('Image not found or could not retrieve the URL');
+    } catch (error) {
+      console.error('Error fetching product image:', error);
+      if (axios.isAxiosError(error) && error.response) {
+          throw new Error(error.response.data?.message || 'Error fetching product image');
+      } else {
+          throw new Error('Error fetching product image');
+      }
+    }
+  };

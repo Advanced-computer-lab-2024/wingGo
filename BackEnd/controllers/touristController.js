@@ -2146,26 +2146,12 @@ const searchFlights = async (origin, destination, departureDate, accessToken) =>
         console.log('Token retrieved successfully:', accessToken);
 
         const FlightSearchResponse = await searchFlights(origin, destination, departureDate, accessToken);
-        console.log("Flight Search Response:", FlightSearchResponse.data);
+        //console.log("Flight Search Response:", FlightSearchResponse.data);
 
-        if(FlightSearchResponse.data.length > 6){
-            FlightSearchResponse.data = FlightSearchResponse.data.slice(0,6);
-        }
 
-        const flightResponse = await axios.post('https://test.api.amadeus.com/v1/shopping/flight-offers/pricing', {
-            data: {
-              type: 'flight-offers-pricing',
-              flightOffers: FlightSearchResponse.data,
-            },
-          }, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-              'X-HTTP-Method-Override': 'GET',
-            },
-          });
+        
 
-        res.status(200).json(flightResponse.data);
+        res.status(200).json(FlightSearchResponse.data);
     } catch (error) {
         console.error('Error fetching token:', error.response?.data || error.message);
         res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
@@ -2199,11 +2185,9 @@ const bookFlight = async (req, res) => {
         
 
     
-        const accessToken = await getAccessToken();
+        
 
-        console.log("Im gonna end myself");
-         // Step 1: Validate flight offer with Amadeus Flight Offers Price API
-    
+       
   
       const validatedFlightOffer = priceValidationResponse;
       console.log("validatedFlightOffer:", validatedFlightOffer);
@@ -2241,60 +2225,59 @@ const bookFlight = async (req, res) => {
         }
        
         // Step 2: Use the access token to create a booking with Amadeus
-        const amadeusResponse = await axios.post(
-          'https://test.api.amadeus.com/v1/booking/flight-orders',
-          {
-            data: 
-            {
-                type,
-                flightOffers: [validatedFlightOffer],
-                travelers: [
-                    {
-                        id: "1",
-                        dateOfBirth: dob,
-                        name: {
-                        firstName: name,
-                        lastName: name
-                        },
-                        contact: {
-                            emailAddress: email,
-                        }
-                    }
-                ]
-            }
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+         const amadeusResponse = validatedFlightOffer
+         //await axios.post(
+        //   'https://test.api.amadeus.com/v1/booking/flight-orders',
+        //   {
+        //     data: 
+        //     {
+        //         type,
+        //         flightOffers: [validatedFlightOffer],
+        //         travelers: [
+        //             {
+        //                 id: "1",
+        //                 dateOfBirth: dob,
+        //                 name: {
+        //                 firstName: name,
+        //                 lastName: name
+        //                 },
+        //                 contact: {
+        //                     emailAddress: email,
+        //                 }
+        //             }
+        //         ]
+        //     }
+        //   },
+        //   {
+        //     headers: {
+        //       Authorization: `Bearer ${accessToken}`,
+        //       'Content-Type': 'application/json',
+        //     },
+        //   }
+        // );
         
         await Tourist.findByIdAndUpdate(touristId, { wallet: wallet - validatedFlightOffer.price.total });
         // Step 3: Extract a summary of the booking details from Amadeus' response
-        const flight = amadeusResponse.data.data; // Assuming the response has data array
-        const flightOffer = flight.flightOffers[0];
-        console.log('Flight Offer:', flightOffer);
-        const flightId = flight.id;
-        console.log('FlightID:', flightId);
+        //const flight = amadeusResponse.data.data; // Assuming the response has data array
+        //const flightOffer = flight.flightOffers[0];
+        //console.log('Flight Offer:', flightOffer);
+        //const flightId = flight.id;
+       // console.log('FlightID:', flightId);
         
 
         const summary = {
-            flightId: flightId,
+            flightId: validatedFlightOffer.id,
           userId: touristId,  // Add the user if authenticated
-          origin: flightOffer.itineraries[0].segments[0].departure.iataCode,
-          destination: flightOffer.itineraries[0].segments.slice(-1)[0].arrival.iataCode,
-          departureDate: flightOffer.itineraries[0].segments[0].departure.at,
-          arrivalDate: flightOffer.itineraries[0].segments.slice(-1)[0].arrival.at,
-          duration: flightOffer.itineraries[0].duration,
+          origin: validatedFlightOffer.itineraries[0].segments[0].departure.iataCode,
+          destination: validatedFlightOffer.itineraries[0].segments.slice(-1)[0].arrival.iataCode,
+          departureDate: validatedFlightOffer.itineraries[0].segments[0].departure.at,
+          arrivalDate: validatedFlightOffer.itineraries[0].segments.slice(-1)[0].arrival.at,
+          duration: validatedFlightOffer.itineraries[0].duration,
           price: {
-                currency: flightOffer.price.currency,
+                currency: validatedFlightOffer.price.currency,
                 total: totalPrice.toFixed(2), // Use the adjusted total price
             },
-          airline: flightOffer.validatingAirlineCodes[0],
-          flightNumber: flightOffer.itineraries[0].segments[0].number,
-          createdAt: new Date(),
+          
         };
     
         // Step 4: Save the summary to MongoDB
@@ -2519,19 +2502,20 @@ const searchHotelsByCity = async (cityCode) => {
         try {
       
   
-        const accessToken = await getAccessToken();
-        console.log("Token retrieved successfully:", accessToken);
+            
     
-        const hotelResponse = await axios.get('https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city', {
+        const options = {
+            method: 'GET',
+            url: 'https://sky-scrapper.p.rapidapi.com/api/v1/hotels/searchDestinationOrHotel',
+            params: {query: cityCode},
             headers: {
-            Authorization: `Bearer ${accessToken}`,
-            },
-            params: {
-                cityCode: cityCode,
-            },
-        });
-        
-        return hotelResponse.data;
+              'x-rapidapi-key': 'a403c51361mshf65ec4c02b27c1cp1eb07ajsneaf03822010d',
+              'x-rapidapi-host': 'sky-scrapper.p.rapidapi.com'
+            }
+          };
+          const response = await axios.request(options);
+            console.log(response.data.data[0]);
+        return response.data.data[0].entityId;
         } catch (error) {
             console.error("Error fetching token:", error.response?.data || error.message);
             return { message: 'Error fetching token', error: error.response?.data || error.message };
@@ -2569,7 +2553,7 @@ const searchHotelsByGeoLocation = async (latitude,longitude) => {
 
 const getHotelOffersByCity = async (req, res) => {
 
-        const { cityCode } = req.query;
+        const { cityCode, checkin, checkout } = req.query;
 
         if (!cityCode) {
             return res.status(400).json({ message: 'Please provide cityCode' });
@@ -2577,31 +2561,40 @@ const getHotelOffersByCity = async (req, res) => {
 
         try {
 
-            const accessToken = await getAccessToken();
-            console.log("Token retrieved successfully:", accessToken);
+            const apiKey = "a403c51361mshf65ec4c02b27c1cp1eb07ajsneaf03822010d";
+            const apiHost ="sky-scrapper.p.rapidapi.com";
+
+            
 
             const hotelSearchResponse = await searchHotelsByCity(cityCode);
             console.log("Hotel Search Response:", hotelSearchResponse);
+            console.log(typeof hotelSearchResponse);
 
-            const hotelIds = hotelSearchResponse.data.slice(0,10).map(hotel => hotel.hotelId);
-            console.log("Hotel IDs:", hotelIds);
-
-            const hotelOffersResponse = await axios.get('https://test.api.amadeus.com/v3/shopping/hotel-offers', {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+            const options = {
+                method: 'GET',
+                url: 'https://sky-scrapper.p.rapidapi.com/api/v1/hotels/searchHotels',
                 params: {
-                    hotelIds: hotelIds,
-                
+                  entityId: hotelSearchResponse,
+                    checkin: checkin,
+                    checkout: checkout,
+                    adults: '1',
+                    rooms: '1',
+                    limit: '30',
+                    sorting: '-relevance',
+                    currency: 'USD',
+                    market: 'en-US',
+                    countryCode: 'US'
                 },
-                paramsSerializer: params => {
-                  return Object.keys(params)
-                    .map(key => `${key}=${encodeURIComponent(params[key].join(','))}`)
-                    .join('&');
-                },
-            });
+                headers: {
+                  'x-rapidapi-key': 'a403c51361mshf65ec4c02b27c1cp1eb07ajsneaf03822010d',
+                  'x-rapidapi-host': 'sky-scrapper.p.rapidapi.com'
+                }
+              };
 
-            res.status(200).json(hotelOffersResponse.data);
+              const response = await axios.request(options);
+              console.log(response.data);
+
+            res.status(200).json(response.data.data.hotels);
 
         } catch (error) {
             console.error("Error fetching token:", error.response?.data || error.message);
@@ -2654,7 +2647,7 @@ const getHotelOffersByLocation = async (req, res) => {
 
 const bookHotel = async (req, res) => {
 
-        const { hotelOffers } = req.body;
+        const { hotelOffers, checkin, checkout, adults } = req.body;
         const { touristId } = req.params;
         const { promoCode, paymentMethod } = req.body;
 
@@ -2678,14 +2671,11 @@ const bookHotel = async (req, res) => {
             const accessToken = await getAccessToken();
             console.log("Token retrieved successfully:", accessToken);
              // Extract fields from hotelOffers for booking
-             const offerId = hotelOffers.offers[0].id;  // Retrieve the offer ID
-             const checkInDate = hotelOffers.offers[0].checkInDate;  // Check-in date
-             const checkOutDate = hotelOffers.offers[0].checkOutDate;  // Check-out date
-             const roomType = hotelOffers.offers[0].room.type;  // Room type
-             const rateCode = hotelOffers.offers[0].rateCode;  // Rate code
-             let totalPrice = hotelOffers.offers[0].price.total;  // Total price for the offer
+             //const offerId = hotelOffers.offers[0].id;  // Retrieve the offer ID
+             
+             let totalPrice = hotelOffers.rawPrice;  // Total price for the offer
              console.log("Total Price: ", totalPrice);
-             const currency = hotelOffers.offers[0].price.currency;  // Currency of the offer
+             const currency = "usd";  // Currency of the offer
 
 
              // ///////////////////////////// Promo Code Validation and Application Start /////////////////////////////
@@ -2709,86 +2699,42 @@ const bookHotel = async (req, res) => {
 
             
            // ///////////////////////////// Wallet Payment Handling Start /////////////////////////////
+           let newWallet = wallet;
         if (paymentMethod === 'wallet') {
             if (wallet < totalPrice) {
                 return res.status(400).json({ message: 'Insufficient funds in wallet' });
             }
 
-            const newWallet = wallet - totalPrice;
+             newWallet = wallet - totalPrice;
             await Tourist.findByIdAndUpdate(touristId, { wallet: newWallet });
         }
         // ///////////////////////////// Wallet Payment Handling End /////////////////////////////
 
 
-            const bookingResponse = await axios.post(
-                'https://test.api.amadeus.com/v2/booking/hotel-orders',
-                {
-                    
-                        data: {
-                            type: type,
-                            guests: [
-                                {
-                                    tid: 1,
-                                    firstName: name,
-                                    lastName: name,
-                                    phone: mobileNumber,
-                                    email: email
-                                  }
-                            ],
-                            roomAssociations: [
-                                {
-                                    hotelOfferId: offerId,
-                                    guestReferences: [{ guestReference: "1" }],
-                                },
-                            ],
-                            travelAgent: {
-                                contact: { email: email },
-                            },
-                            payment: {
-                                method: "CREDIT_CARD",
-                                paymentCard: {
-                                    paymentCardInfo:
-                                    {
-                                        vendorCode: "VI",
-                                        cardNumber: "4111111111111111",
-                                        expiryDate: "2028-01",
-                                        holderName: "BOB SMITH",
-                                    }
-                                },
-                                
-                            }
-                            
-                        },
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${accessToken}`,
-                            'Content-Type': 'application/json',
-                        },
-                    }
-                );
+            const bookingResponse = hotelOffers;
+            
+             
                 
                 await Tourist.findByIdAndUpdate(touristId, { wallet: newWallet });
 
 
-              const data = bookingResponse.data.data;
-              console.log('Hotel Booking Response:', JSON.stringify(data, null, 2)); // Print full response
+              const data = bookingResponse;
+              
 
     const bookingSummary = {
-      bookingId: data.id,
-      bookingStatus: data.hotelBookings[0].bookingStatus,
-      confirmationNumber: data.hotelBookings[0].hotelProviderInformation[0].confirmationNumber,
-      checkInDate: new Date(data.hotelBookings[0].hotelOffer.checkInDate),
-      checkOutDate: new Date(data.hotelBookings[0].hotelOffer.checkOutDate),
+      bookingId: data.hotelId,
+      
+      checkInDate: new Date(checkin),
+      checkOutDate: new Date(checkout),
       guests: 
         {
-            adults: 1
+            adults: adults,
         }
       ,
       hotel: {
-        hotelId: data.hotelBookings[0].hotel.hotelId,
-        name: data.hotelBookings[0].hotel.name,
-        address: data.hotelBookings[0].hotel.address,
+        hotelId: data.hotelId,
+        name: data.name,
+        address: [data.coordinates[0].toString(), data.coordinates[1].toString()],
       },
       userId: touristId,
     };
