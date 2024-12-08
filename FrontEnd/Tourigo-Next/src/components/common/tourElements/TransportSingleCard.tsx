@@ -22,9 +22,9 @@ const TransportSingleCard = ({
   isparentClass,
   isAdmin = false,
 }: TransportSingleCardProps) => {
-  const router = useRouter();
-  const { currency, convertAmount } = useCurrency();
+  const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
+  const router = useRouter(); // Initialize router
 
   useEffect(() => {
     const convertTransportPrice = async () => {
@@ -34,11 +34,10 @@ const TransportSingleCard = ({
       }
     };
     convertTransportPrice();
-  }, [currency, transport.price, convertAmount]);
+  }, [currency, transport.price, convertAmount]); // Re-run if currency or transport.price changes
 
   const handleBookNowClick = () => {
-    // Redirect to the specific page (replace "/booking-page" with the desired path)
-    router.push(`/transport-details/${transport._id}`);
+    router.push(`/booking-transportation/${transport._id}`);
   };
 
   return (
@@ -50,54 +49,69 @@ const TransportSingleCard = ({
               <div className="tour-thumb image-overly">
                 <Link href={`/transport-details/${transport._id}`}>
                   <Image
-                    src="/images/default-image.jpg" // Placeholder image
+                    src={"/assets/images/default-transport.png"}
                     loader={imageLoader}
-                    width={370}
-                    height={250}
-                    style={{ width: "100%", height: "auto" }}
+                    width={270}
+                    height={270}
+                    style={{ width: "300px", height: "250px" }}
                     alt="Transport Image"
+                    unoptimized
                   />
                 </Link>
               </div>
-              <div className="transport-meta d-flex align-items-center justify-content-between">
-                <div className="transport-location">
+              <div className="tour-meta d-flex align-items-center justify-content-between">
+                <div className="tour-location">
                   <span>
                     <Link href={`/transport-details/${transport._id}`}>
                       <i className="fa-regular fa-location-dot"></i>{" "}
-                      {transport.city || "City not available"}
+                      {transport.city || "Location not available"}
                     </Link>
                   </span>
                 </div>
               </div>
             </div>
-            <div className="transport-content">
-              <h5 className="transport-title fw-5 underline custom_mb-5">
-                <Link href={`/transport-details/${transport._id}`}>
-                  {transport.type}
-                </Link>
-              </h5>
-              <span className="transport-price b3">
+            <div className="tour-content">
+              <div className="d-flex justify-content-between align-items-center">
+                <h5 className="tour-title fw-5 underline custom_mb-5">
+                  <Link href={`/transport-details/${transport._id}`}>
+                    {transport.type}
+                  </Link>
+                </h5>
+              </div>
+              <span className="tour-price b3">
                 {currency}{" "}
                 {convertedPrice !== null
                   ? convertedPrice.toFixed(2)
                   : transport.price.toLocaleString("en-US")}
               </span>
-              <div className="transport-divider"></div>
-
-              <div className="transport-meta d-flex align-items-center justify-content-between">
-                <div className="duration d-flex align-items-center gap--5">
-                  <i className="icon-clock"></i>
+              <div className="tour-divider"></div>
+              <div className="tour-meta d-flex align-items-center justify-content-between">
+                <div className="time d-flex align-items-center gap--5">
+                  <i className="fa-regular fa-clock"></i>
                   <span>{transport.duration}</span>
+                </div>
+                <div className="tour-btn">
+                  <button
+                    onClick={handleBookNowClick}
+                    className="bd-text-btn style-two"
+                    type="button"
+                    style={{
+                      cursor: "pointer",
+                    }}
+                  >
+                    Book Now
+                    <span className="icon__box">
+                      <i className="fa-regular fa-arrow-right-long icon__first"></i>
+                      <i className="fa-regular fa-arrow-right-long icon__second"></i>
+                    </span>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       ) : (
-        // Non-parent layout, adjust as needed
-        <div className={transportWrapperClass}>
-          {/* Non-parent layout logic can go here if needed */}
-        </div>
+        <div className={transportWrapperClass}></div>
       )}
     </>
   );

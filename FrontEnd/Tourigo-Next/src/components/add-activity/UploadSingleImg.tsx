@@ -3,8 +3,9 @@ import bgImg from "../../../public/assets/images/tour/tour-img-1.png";
 
 interface propsType {
   setlargeImg: React.Dispatch<React.SetStateAction<string>>;
+  setImage: React.Dispatch<React.SetStateAction<File|null>> ;
 }
-const UploadSingleImg = ({ setlargeImg }: propsType) => {
+const UploadSingleImg = ({ setlargeImg ,setImage}: propsType) => {
   const [imagePreview, setImagePreview] = useState<string>(bgImg.src);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -15,6 +16,9 @@ const UploadSingleImg = ({ setlargeImg }: propsType) => {
         if (typeof reader.result === "string") {
           setImagePreview(reader.result);
           setlargeImg(reader.result);
+        }
+        if (e.target.files && e.target.files[0]) {
+          setImage(e.target.files[0]);
         }
       };
       reader.readAsDataURL(file);

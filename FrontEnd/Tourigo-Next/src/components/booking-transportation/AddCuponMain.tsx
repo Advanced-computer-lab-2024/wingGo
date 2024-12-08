@@ -61,7 +61,7 @@ const AddCuponMain: React.FC<AddCuponMainProps> = ({ setPromocode }) => {
               // setNumberOfPeople((prev) => Math.max(1, prev - 1));
             }}
               type="submit"
-              className="bd-primary-btn btn-style is-bg radius-60"
+              className="bd-primary-btn btn-style is-bg radius-30"
             >
               <span className="bd-primary-btn-text">Apply Coupon</span>
               <span className="bd-primary-btn-circle"></span>

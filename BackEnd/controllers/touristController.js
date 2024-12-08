@@ -2146,26 +2146,12 @@ const searchFlights = async (origin, destination, departureDate, accessToken) =>
         console.log('Token retrieved successfully:', accessToken);
 
         const FlightSearchResponse = await searchFlights(origin, destination, departureDate, accessToken);
-        console.log("Flight Search Response:", FlightSearchResponse.data);
+        //console.log("Flight Search Response:", FlightSearchResponse.data);
 
-        if(FlightSearchResponse.data.length > 6){
-            FlightSearchResponse.data = FlightSearchResponse.data.slice(0,6);
-        }
 
-        const flightResponse = await axios.post('https://test.api.amadeus.com/v1/shopping/flight-offers/pricing', {
-            data: {
-              type: 'flight-offers-pricing',
-              flightOffers: FlightSearchResponse.data,
-            },
-          }, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-              'X-HTTP-Method-Override': 'GET',
-            },
-          });
+        
 
-        res.status(200).json(flightResponse.data);
+        res.status(200).json(FlightSearchResponse.data);
     } catch (error) {
         console.error('Error fetching token:', error.response?.data || error.message);
         res.status(500).json({ message: 'Error fetching token', error: error.response?.data || error.message });
@@ -2199,11 +2185,9 @@ const bookFlight = async (req, res) => {
         
 
     
-        const accessToken = await getAccessToken();
+        
 
-        console.log("Im gonna end myself");
-         // Step 1: Validate flight offer with Amadeus Flight Offers Price API
-    
+       
   
       const validatedFlightOffer = priceValidationResponse;
       console.log("validatedFlightOffer:", validatedFlightOffer);
@@ -2241,60 +2225,59 @@ const bookFlight = async (req, res) => {
         }
        
         // Step 2: Use the access token to create a booking with Amadeus
-        const amadeusResponse = await axios.post(
-          'https://test.api.amadeus.com/v1/booking/flight-orders',
-          {
-            data: 
-            {
-                type,
-                flightOffers: [validatedFlightOffer],
-                travelers: [
-                    {
-                        id: "1",
-                        dateOfBirth: dob,
-                        name: {
-                        firstName: name,
-                        lastName: name
-                        },
-                        contact: {
-                            emailAddress: email,
-                        }
-                    }
-                ]
-            }
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+         const amadeusResponse = validatedFlightOffer
+         //await axios.post(
+        //   'https://test.api.amadeus.com/v1/booking/flight-orders',
+        //   {
+        //     data: 
+        //     {
+        //         type,
+        //         flightOffers: [validatedFlightOffer],
+        //         travelers: [
+        //             {
+        //                 id: "1",
+        //                 dateOfBirth: dob,
+        //                 name: {
+        //                 firstName: name,
+        //                 lastName: name
+        //                 },
+        //                 contact: {
+        //                     emailAddress: email,
+        //                 }
+        //             }
+        //         ]
+        //     }
+        //   },
+        //   {
+        //     headers: {
+        //       Authorization: `Bearer ${accessToken}`,
+        //       'Content-Type': 'application/json',
+        //     },
+        //   }
+        // );
         
         await Tourist.findByIdAndUpdate(touristId, { wallet: wallet - validatedFlightOffer.price.total });
         // Step 3: Extract a summary of the booking details from Amadeus' response
-        const flight = amadeusResponse.data.data; // Assuming the response has data array
-        const flightOffer = flight.flightOffers[0];
-        console.log('Flight Offer:', flightOffer);
-        const flightId = flight.id;
-        console.log('FlightID:', flightId);
+        //const flight = amadeusResponse.data.data; // Assuming the response has data array
+        //const flightOffer = flight.flightOffers[0];
+        //console.log('Flight Offer:', flightOffer);
+        //const flightId = flight.id;
+       // console.log('FlightID:', flightId);
         
 
         const summary = {
-            flightId: flightId,
+            flightId: validatedFlightOffer.id,
           userId: touristId,  // Add the user if authenticated
-          origin: flightOffer.itineraries[0].segments[0].departure.iataCode,
-          destination: flightOffer.itineraries[0].segments.slice(-1)[0].arrival.iataCode,
-          departureDate: flightOffer.itineraries[0].segments[0].departure.at,
-          arrivalDate: flightOffer.itineraries[0].segments.slice(-1)[0].arrival.at,
-          duration: flightOffer.itineraries[0].duration,
+          origin: validatedFlightOffer.itineraries[0].segments[0].departure.iataCode,
+          destination: validatedFlightOffer.itineraries[0].segments.slice(-1)[0].arrival.iataCode,
+          departureDate: validatedFlightOffer.itineraries[0].segments[0].departure.at,
+          arrivalDate: validatedFlightOffer.itineraries[0].segments.slice(-1)[0].arrival.at,
+          duration: validatedFlightOffer.itineraries[0].duration,
           price: {
-                currency: flightOffer.price.currency,
+                currency: validatedFlightOffer.price.currency,
                 total: totalPrice.toFixed(2), // Use the adjusted total price
             },
-          airline: flightOffer.validatingAirlineCodes[0],
-          flightNumber: flightOffer.itineraries[0].segments[0].number,
-          createdAt: new Date(),
+          
         };
     
         // Step 4: Save the summary to MongoDB
@@ -2345,6 +2328,7 @@ const shareActivityViaEmail = async (req, res) => {
         res.status(500).json({ message: 'Error sharing via email', error });
     }
 };
+
 
 const shareItineraryViaEmail = async (req, res) => {
     const { email } = req.body;
@@ -2518,19 +2502,20 @@ const searchHotelsByCity = async (cityCode) => {
         try {
       
   
-        const accessToken = await getAccessToken();
-        console.log("Token retrieved successfully:", accessToken);
+            
     
-        const hotelResponse = await axios.get('https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city', {
+        const options = {
+            method: 'GET',
+            url: 'https://sky-scrapper.p.rapidapi.com/api/v1/hotels/searchDestinationOrHotel',
+            params: {query: cityCode},
             headers: {
-            Authorization: `Bearer ${accessToken}`,
-            },
-            params: {
-                cityCode: cityCode,
-            },
-        });
-        
-        return hotelResponse.data;
+              'x-rapidapi-key': 'a403c51361mshf65ec4c02b27c1cp1eb07ajsneaf03822010d',
+              'x-rapidapi-host': 'sky-scrapper.p.rapidapi.com'
+            }
+          };
+          const response = await axios.request(options);
+            console.log(response.data.data[0]);
+        return response.data.data[0].entityId;
         } catch (error) {
             console.error("Error fetching token:", error.response?.data || error.message);
             return { message: 'Error fetching token', error: error.response?.data || error.message };
@@ -2568,7 +2553,7 @@ const searchHotelsByGeoLocation = async (latitude,longitude) => {
 
 const getHotelOffersByCity = async (req, res) => {
 
-        const { cityCode } = req.query;
+        const { cityCode, checkin, checkout } = req.query;
 
         if (!cityCode) {
             return res.status(400).json({ message: 'Please provide cityCode' });
@@ -2576,31 +2561,40 @@ const getHotelOffersByCity = async (req, res) => {
 
         try {
 
-            const accessToken = await getAccessToken();
-            console.log("Token retrieved successfully:", accessToken);
+            const apiKey = "a403c51361mshf65ec4c02b27c1cp1eb07ajsneaf03822010d";
+            const apiHost ="sky-scrapper.p.rapidapi.com";
+
+            
 
             const hotelSearchResponse = await searchHotelsByCity(cityCode);
             console.log("Hotel Search Response:", hotelSearchResponse);
+            console.log(typeof hotelSearchResponse);
 
-            const hotelIds = hotelSearchResponse.data.slice(0,10).map(hotel => hotel.hotelId);
-            console.log("Hotel IDs:", hotelIds);
-
-            const hotelOffersResponse = await axios.get('https://test.api.amadeus.com/v3/shopping/hotel-offers', {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+            const options = {
+                method: 'GET',
+                url: 'https://sky-scrapper.p.rapidapi.com/api/v1/hotels/searchHotels',
                 params: {
-                    hotelIds: hotelIds,
-                
+                  entityId: hotelSearchResponse,
+                    checkin: checkin,
+                    checkout: checkout,
+                    adults: '1',
+                    rooms: '1',
+                    limit: '30',
+                    sorting: '-relevance',
+                    currency: 'USD',
+                    market: 'en-US',
+                    countryCode: 'US'
                 },
-                paramsSerializer: params => {
-                  return Object.keys(params)
-                    .map(key => `${key}=${encodeURIComponent(params[key].join(','))}`)
-                    .join('&');
-                },
-            });
+                headers: {
+                  'x-rapidapi-key': 'a403c51361mshf65ec4c02b27c1cp1eb07ajsneaf03822010d',
+                  'x-rapidapi-host': 'sky-scrapper.p.rapidapi.com'
+                }
+              };
 
-            res.status(200).json(hotelOffersResponse.data);
+              const response = await axios.request(options);
+              console.log(response.data);
+
+            res.status(200).json(response.data.data.hotels);
 
         } catch (error) {
             console.error("Error fetching token:", error.response?.data || error.message);
@@ -2653,7 +2647,7 @@ const getHotelOffersByLocation = async (req, res) => {
 
 const bookHotel = async (req, res) => {
 
-        const { hotelOffers } = req.body;
+        const { hotelOffers, checkin, checkout, adults } = req.body;
         const { touristId } = req.params;
         const { promoCode, paymentMethod } = req.body;
 
@@ -2677,14 +2671,11 @@ const bookHotel = async (req, res) => {
             const accessToken = await getAccessToken();
             console.log("Token retrieved successfully:", accessToken);
              // Extract fields from hotelOffers for booking
-             const offerId = hotelOffers.offers[0].id;  // Retrieve the offer ID
-             const checkInDate = hotelOffers.offers[0].checkInDate;  // Check-in date
-             const checkOutDate = hotelOffers.offers[0].checkOutDate;  // Check-out date
-             const roomType = hotelOffers.offers[0].room.type;  // Room type
-             const rateCode = hotelOffers.offers[0].rateCode;  // Rate code
-             let totalPrice = hotelOffers.offers[0].price.total;  // Total price for the offer
+             //const offerId = hotelOffers.offers[0].id;  // Retrieve the offer ID
+             
+             let totalPrice = hotelOffers.rawPrice;  // Total price for the offer
              console.log("Total Price: ", totalPrice);
-             const currency = hotelOffers.offers[0].price.currency;  // Currency of the offer
+             const currency = "usd";  // Currency of the offer
 
 
              // ///////////////////////////// Promo Code Validation and Application Start /////////////////////////////
@@ -2708,86 +2699,42 @@ const bookHotel = async (req, res) => {
 
             
            // ///////////////////////////// Wallet Payment Handling Start /////////////////////////////
+           let newWallet = wallet;
         if (paymentMethod === 'wallet') {
             if (wallet < totalPrice) {
                 return res.status(400).json({ message: 'Insufficient funds in wallet' });
             }
 
-            const newWallet = wallet - totalPrice;
+             newWallet = wallet - totalPrice;
             await Tourist.findByIdAndUpdate(touristId, { wallet: newWallet });
         }
         // ///////////////////////////// Wallet Payment Handling End /////////////////////////////
 
 
-            const bookingResponse = await axios.post(
-                'https://test.api.amadeus.com/v2/booking/hotel-orders',
-                {
-                    
-                        data: {
-                            type: type,
-                            guests: [
-                                {
-                                    tid: 1,
-                                    firstName: name,
-                                    lastName: name,
-                                    phone: mobileNumber,
-                                    email: email
-                                  }
-                            ],
-                            roomAssociations: [
-                                {
-                                    hotelOfferId: offerId,
-                                    guestReferences: [{ guestReference: "1" }],
-                                },
-                            ],
-                            travelAgent: {
-                                contact: { email: email },
-                            },
-                            payment: {
-                                method: "CREDIT_CARD",
-                                paymentCard: {
-                                    paymentCardInfo:
-                                    {
-                                        vendorCode: "VI",
-                                        cardNumber: "4111111111111111",
-                                        expiryDate: "2028-01",
-                                        holderName: "BOB SMITH",
-                                    }
-                                },
-                                
-                            }
-                            
-                        },
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${accessToken}`,
-                            'Content-Type': 'application/json',
-                        },
-                    }
-                );
+            const bookingResponse = hotelOffers;
+            
+             
                 
                 await Tourist.findByIdAndUpdate(touristId, { wallet: newWallet });
 
 
-              const data = bookingResponse.data.data;
-              console.log('Hotel Booking Response:', JSON.stringify(data, null, 2)); // Print full response
+              const data = bookingResponse;
+              
 
     const bookingSummary = {
-      bookingId: data.id,
-      bookingStatus: data.hotelBookings[0].bookingStatus,
-      confirmationNumber: data.hotelBookings[0].hotelProviderInformation[0].confirmationNumber,
-      checkInDate: new Date(data.hotelBookings[0].hotelOffer.checkInDate),
-      checkOutDate: new Date(data.hotelBookings[0].hotelOffer.checkOutDate),
+      bookingId: data.hotelId,
+      
+      checkInDate: new Date(checkin),
+      checkOutDate: new Date(checkout),
       guests: 
         {
-            adults: 1
+            adults: adults,
         }
       ,
       hotel: {
-        hotelId: data.hotelBookings[0].hotel.hotelId,
-        name: data.hotelBookings[0].hotel.name,
-        address: data.hotelBookings[0].hotel.address,
+        hotelId: data.hotelId,
+        name: data.name,
+        address: [data.coordinates[0].toString(), data.coordinates[1].toString()],
       },
       userId: touristId,
     };
@@ -2947,40 +2894,52 @@ const getTouristUsername = async (req, res) => {
         }
 };    
 const getPurchasedProducts = async (req, res) => {
-        const { touristId } = req.params;
-    
-        try {
-            const tourist = await Tourist.findById(touristId).populate('purchasedProducts.productId');
-            
-            if (!tourist) {
-                return res.status(404).json({ message: 'Tourist not found' });
+    const { touristId } = req.params;
+
+    try {
+        const tourist = await Tourist.findById(touristId).populate({
+            path: 'purchasedProducts.productId',
+            select: 'name picture price sales description quantity seller ratings reviews archive',
+            populate: {
+                path: 'seller',
+                select: 'username _id'
             }
-    
-            // Format the purchased products to match the desired output structure
-            const purchasedProductData = tourist.purchasedProducts.map(purchased => ({
-                _id: purchased.productId ? purchased.productId._id : null,
-                name: purchased.productId ? purchased.productId.name : null,
-                picture: purchased.productId
-                    ? `../images/${purchased.productId.picture || 'null'}` // Use a placeholder if picture is null
-                    : null,
-                price: purchased.productId ? purchased.productId.price : null,
-                sales: purchased.productId ? purchased.productId.sales : 0,
-                description: purchased.productId ? purchased.productId.description : null,
-                quantity: purchased.productId ? purchased.productId.quantity : 0,
-                seller: purchased.productId && purchased.productId.seller ? purchased.productId.seller.username : 'Admin', // Handle null seller field
-                sellerID: purchased.productId && purchased.productId.seller ? purchased.productId.seller._id : 'Admin',
-                ratings: purchased.productId ? purchased.productId.ratings : [],
-                reviews: purchased.productId ? purchased.productId.reviews : [],
-                archive: purchased.productId ? purchased.productId.archive : false,
-                purchaseDate: purchased.purchaseDate || null // Include purchase date from purchasedProducts array
-            }));
-    
-            res.status(200).json(purchasedProductData);
-        } catch (error) {
-            console.error("Error fetching purchased products:", error);
-            res.status(500).json({ message: 'Error fetching purchased products', error });
+        });
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
         }
+
+        const purchasedProductData = tourist.purchasedProducts.map(purchased => {
+            const product = purchased.productId;
+            if (!product) {
+                console.warn(`Missing product for purchase:`, purchased);
+            }
+
+            return {
+                _id: product ? product._id : null,
+                name: product ? product.name : "Unknown",
+                picture: product?.picture ? `/images/${product.picture}` : "/images/placeholder.png",
+                price: product?.price || 0,
+                sales: product?.sales || 0,
+                description: product?.description || "No description available",
+                quantity: product?.quantity || 0,
+                seller: product?.seller?.username || "Admin",
+                sellerID: product?.seller?._id || "Admin",
+                ratings: product?.ratings || [],
+                reviews: product?.reviews || [],
+                archive: product?.archive || false,
+                purchaseDate: purchased.purchaseDate || null
+            };
+        });
+
+        res.status(200).json(purchasedProductData);
+    } catch (error) {
+        console.error("Error fetching purchased products:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
 };
+
 
 const getUnbookedItineraries = async (req, res) => {
         const { touristId } = req.params;
@@ -3517,6 +3476,14 @@ const payForOrder = async (req, res) => {
             const paymentDate = new Date(); // Current date and time
             product.sellingDates.push(paymentDate); // Add payment date to the array
 
+            const purchasedProduct = {
+                productId: product._id,
+                purchaseDate: paymentDate,
+                rating: null, // You can set a default value for rating or remove this field if not needed
+            };
+
+            buyer.purchasedProducts.push(purchasedProduct);
+
             // Check if the product is out of stock
             if (product.quantity === 0) {
                 if (product.seller) {
@@ -3563,6 +3530,9 @@ const payForOrder = async (req, res) => {
             // Save updated product
             await product.save();
         }
+
+        await buyer.save(); // Save the updated buyer with purchasedProducts
+
 
         // Deduct wallet balance if applicable
         if (paymentMethod === 'wallet') {
@@ -3625,6 +3595,65 @@ const payForOrder = async (req, res) => {
     } catch (error) {
         console.error('Error retrieving cart items:', error); // Log the error for debugging
         return res.status(500).json({ message: 'Error retrieving cart items.', error });
+    }
+};
+
+
+//decrease quantity of wwishlist product
+// Decrease quantity of a wishlist product
+const decQuantityByOne = async (req, res) => {
+    const { touristId, productId } = req.params;
+
+    try {
+        // Find the wishlist item by touristId and productId
+        const wishlistItem = await Wishlist.findOne({ touristId, productId });
+
+        if (!wishlistItem) {
+            return res.status(404).json({ message: 'Wishlist item not found' });
+        }
+
+        // Check if quantity is greater than 1 before decrementing
+        if (wishlistItem.quantity > 1) {
+            wishlistItem.quantity -= 1;
+            await wishlistItem.save();
+            res.status(200).json({
+                message: 'Quantity decreased by one successfully',
+                wishlistItem,
+            });
+        } else {
+            // Optionally, prevent quantity from going below 1
+            return res.status(400).json({
+                message: 'Quantity cannot be less than 1',
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+//increase quantity of wishlist product
+// Increase quantity of a wishlist product
+const incQuantityByOne = async (req, res) => {
+    const { touristId, productId } = req.params;
+
+    try {
+        // Find the wishlist item by touristId and productId
+        const wishlistItem = await Wishlist.findOne({ touristId, productId });
+
+        if (!wishlistItem) {
+            return res.status(404).json({ message: 'Wishlist item not found' });
+        }
+
+        // Increment the quantity by 1
+        wishlistItem.quantity += 1;
+        await wishlistItem.save();
+
+        res.status(200).json({
+            message: 'Quantity increased by one successfully',
+            wishlistItem,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -4476,6 +4505,84 @@ const checkIfActivitySaved = async (req, res) => {
       res.status(500).json({ message: "An error occurred", error });
     }
   };
+
+//   const getTransportPrice = async (req, res) => {
+//     const { transportId, promoCode } = req.params;
+
+//     try {
+//         // Find the transport by ID
+//         const transport = await Transport.findById(transportId);
+//         if (!transport) {
+//             return res.status(404).json({ message: 'Transport not found' });
+//         }
+
+//         let totalPrice = transport.price;
+//         let promoCodeDetails = null;
+
+//         // Check if a promo code is provided
+//         if (promoCode) {
+//             promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+//             if (
+//                 !promoCodeDetails ||
+//                 !promoCodeDetails.isActive ||
+//                 promoCodeDetails.endDate < new Date()
+//             ) {
+//                 return res.status(400).json({ message: 'Invalid or expired promo code' });
+//             }
+
+//             // Apply discount
+//             const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+//             totalPrice -= discountAmount;
+//         }
+
+//         res.status(200).json({
+//             totalPrice,
+//             promoCodeApplied: !!promoCodeDetails,
+//         });
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error calculating price', error: error.message });
+//     }
+// };
+
+const getTransportPrice = async (req, res) => {
+    const { transportId } = req.params; 
+    const { promoCode } = req.query; 
+
+    try {
+        const transport = await Transport.findById(transportId);
+        if (!transport) {
+            return res.status(404).json({ message: 'transport not found or booking closed' });
+        }
+
+        let totalPrice = transport.price; // Base price calculation
+        let promoCodeDetails = null;
+        let isValidPromoCode = true;
+
+        // Validate and apply promo code
+        if (promoCode) {
+            promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+            if (
+                !promoCodeDetails ||
+                !promoCodeDetails.isActive ||
+                promoCodeDetails.endDate < new Date()
+            ) {
+                isValidPromoCode = false;
+            } else {
+                const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+                totalPrice -= discountAmount; // Apply discount
+            }
+        }
+
+        return res.status(200).json({ totalPrice, isValidPromoCode });
+    } catch (error) {
+        console.error('Error calculating activity price:', error);
+        return res.status(500).json({
+            message: 'Error calculating activity price',
+            error: error.message || 'An unknown error occurred',
+        });
+    }
+};
+
   
 
 module.exports = {
@@ -4578,5 +4685,6 @@ module.exports = {
     getPlacesTags,
     getSavedItineraries,
     checkIfSaved,
-    checkIfActivitySaved
+    checkIfActivitySaved,
+    getTransportPrice
 };

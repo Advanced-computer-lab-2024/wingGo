@@ -49,7 +49,7 @@ const TourSingleCard = ({
                   <Image
                     src={tour.pictures[0] || "/images/default-image.jpg"}
                     loader={imageLoader}
-                    width={370}
+                    width={270}
                     height={270}
                     style={{ width: "100%", height: "auto" }}
                     alt={tour.name}

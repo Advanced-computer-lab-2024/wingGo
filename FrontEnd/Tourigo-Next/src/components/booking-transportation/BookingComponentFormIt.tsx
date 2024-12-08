@@ -1,4 +1,4 @@
-//BookingComponentFormAct.tsx
+//BookingComponentFormIt.tsx
 "use client";
 import { useRouter } from "next/navigation"; // Import useRouter
 import ErrorMessage from "@/elements/error-message/ErrorMessage";
@@ -9,8 +9,9 @@ import { toast } from "sonner";
 import AddCupon from "./AddCuponMain";
 import SelectPaymentType from "./SelectPaymentType";
 import { idTypeNew } from "@/interFace/interFace";
-import { Activity } from "@/interFace/interFace";
-import { fetchActivities, bookActivityApi, getPriceApi } from "@/api/activityApi"; 
+import { Transport } from "@/interFace/interFace";
+import { fetchTransports, getPriceApi, bookTransport } from "@/api/transportApi";
+import axios from 'axios';
 
 interface FormData {
   email: string;
@@ -22,10 +23,9 @@ interface FormData {
 
 const BookingComponentForm = ({ id }: idTypeNew) => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
-  const [data, setData] = useState<Activity | null>(null);
+  const [data, setData] = useState<Transport | null>(null);
   const touristId = "67240ed8c40a7f3005a1d01d"; // Hardcoded tourist ID for testing
   const [paymentMethod, setPaymentMethod] = useState<"wallet" | "stripe" | "creditCard">("wallet");
-  const [numberOfPeople, setNumberOfPeople] = useState(1); // Default to 1 person
   // const [promocode, setPromocode] = useState(""); // State for promo code
   const [validPromo, setValidPromo] = useState(true); 
   const router = useRouter(); // Initialize useRouter for navigation
@@ -42,25 +42,11 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
   const [promocode, setPromocode] = useState("");
   const [price, setPrice] = useState(0);
 
-  // const updatePrice = async () => {
-  //   if (!data?._id) return;
-  //   try {
-  //     const calculatedPrice = await getPriceApi(
-  //       data._id, // Activity ID
-  //       numberOfPeople, // Number of people
-  //       promocode // Optional promo code
-  //     );
-  //     setPrice(calculatedPrice);
-  //   } catch (error) {
-  //     console.error("Error updating price:", error);
-  //   }
-  // };
-
   const updatePrice = async () => {
     if (!data?._id) return;
 
     try {
-        const response = await getPriceApi(data._id, numberOfPeople, promocode);
+        const response = await getPriceApi(data._id, promocode);
 
         // Handle invalid promo code
         if (!response.isValidPromoCode) {
@@ -87,7 +73,7 @@ const BookingComponentForm = ({ id }: idTypeNew) => {
   
 useEffect(() => {
   updatePrice(); // Recalculate price on `promocode` or `numberOfPeople` change
-}, [promocode, numberOfPeople]);
+}, [promocode]);
   
   
   // useEffect(() => {
@@ -103,52 +89,38 @@ useEffect(() => {
   
   
 
-const onSubmit = async (event: React.FormEvent) => {
-  event.preventDefault();
-  const toastId = toast.loading("Processing your booking...");
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const toastId = toast.loading("Processing your booking...");
+  
+    try {
+      await bookTransport(touristId, id, paymentMethod, promocode); // Use the new API function
+      toast.success("Transport Booking Successful!", { id: toastId, duration: 1000 });
 
-  if (numberOfPeople < 1) {
-    toast.error("Please select at least one person.", { id: toastId });
-    return;
-  }
+      setTimeout(() => {
+        router.push("/transports"); // Redirect to transports page
+      }, 1000); // 1-second delay
+    } catch (error) {
+      toast.error("Error during transport booking process.", { id: toastId });
+      console.error("Error during API call:", error);
+    }
+  };
   
 
 
-  try {
-      await bookActivityApi(
-          touristId,
-          id,
-          paymentMethod,
-          numberOfPeople,
-          promocode
-      );
-      toast.success("Booking Successful!", { id: toastId, duration: 1000 });
-      setTimeout(() => {
-        router.push("/activity-org"); // Redirect to transports page
-      }, 1000); // 1-second delay
-  } catch (error) {
-      toast.error("Error during booking process.", { id: toastId });
-      console.error("Error during API call:", error);
-  }
-};
 
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const itineraries = await fetchActivities();
-        const itinerary = itineraries.find((item) => item._id === id);
-        setData(itinerary || null);
-      } catch (err) {
-        console.error("Error fetching itineraries:", err);
-      }
-    };
-    fetchData();
-  }, [id]);
-
-  const incrementPeople = () => setNumberOfPeople((prev) => prev + 1);
-  const decrementPeople = () => setNumberOfPeople((prev) => Math.max(prev - 1, 1)); // Minimum 1 person
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const transports = await fetchTransports();
+      const transport = transports.find((item) => item._id === id);
+      setData(transport || null);
+    } catch (err) {
+      console.error("Error fetching transports:", err);
+    }
+  };
+  fetchData();
+}, [id]);
 
 
   return (
@@ -158,104 +130,7 @@ const onSubmit = async (event: React.FormEvent) => {
           {/* Part 1: Booking Date Selection */}
           <div className="row setup-content" id="step-date">
             <div className="col-md-12">
-              <div className="booking-form-wrapper mb-35" >
-                <h4 className="booking-form-title mb-15">Booking Details</h4>
-                <div
-                  className="booking-details-row"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "30px", // Adds space between "Number of People" and "Booking Date"
-                  }}
-                >
-                  {/* Number of People */}
-                  <div
-                    className="number-of-people-container"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px", // Space between label and input
-                    }}
-                  >
-                    <label htmlFor="numpeople">Number Of People:</label>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      {/* Input Field */}
-                      <input
-                        type="text"
-                        id="numpeople"
-                        value={numberOfPeople}
-                        readOnly
-                        style={{
-                          width: "85px",
-                          height: "30px",
-                          textAlign: "center",
-                          border: "1px solid #ccc",
-                          borderRadius: "5px",
-                        }}
-                      />
-
-                      {/* Arrows for Increment/Decrement */}
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          marginLeft: "5px",
-                        }}
-                      >
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault(); // Prevent form submission
-                            setNumberOfPeople((prev) => prev + 1);
-                          }}
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            border: "1px solid #ccc",
-                            cursor: "pointer",
-                            background: "#f5f5f5",
-                            fontSize: "8px",
-                            borderBottom: "none",
-                          }}
-                        >
-                          ▲
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault(); // Prevent form submission
-                            setNumberOfPeople((prev) => Math.max(1, prev - 1));
-                          }}
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            border: "1px solid #ccc",
-                            cursor: "pointer",
-                            background: "#f5f5f5",
-                            fontSize: "8px",
-                          }}
-                        >
-                          ▼
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-               
-                  
-                </div>
-
-                
-              </div>
+              
              
             </div>
           </div>
@@ -268,11 +143,11 @@ const onSubmit = async (event: React.FormEvent) => {
                 <h4 className="booking-form-title mb-15">Payment Details</h4>
                 <AddCupon setPromocode={setPromocode} />
                 <div className="order-info-list">
-                <ul>
-                    <li><span>Subtotal</span><span>${data.price * numberOfPeople}</span></li>
-                    <li><span>Discount</span><span>     ${promocode && validPromo ? (((data.price * numberOfPeople) - price).toFixed(2)) : "0.00"}
+                  <ul>
+                    <li><span>Subtotal</span><span>${data.price}</span></li>
+                    <li><span>Discount</span><span>     ${promocode && validPromo ? ((data.price - price).toFixed(2)) : "0.00"}
                     </span></li>
-                    <li><span>Total</span><span> ${promocode && validPromo ? price.toFixed(2) : (data.price * numberOfPeople).toFixed(2)}</span></li>
+                    <li><span>Total</span><span> ${promocode && validPromo ? price.toFixed(2) : (data.price).toFixed(2)}</span></li>
                   </ul>
                 </div>
 
@@ -354,7 +229,8 @@ const onSubmit = async (event: React.FormEvent) => {
                     }}
                   />
                 </div>
-              )}
+              
+                   )}
 
 
                 </div>

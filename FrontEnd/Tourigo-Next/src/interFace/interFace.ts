@@ -409,6 +409,7 @@ export interface Activity {
   flagged?: boolean;
   touristIDs?: string[]; // Array of tourist ObjectIds
   averageRating:number;
+  photo: string;
 }
 
 export interface BookedActivity {
