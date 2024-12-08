@@ -24,7 +24,6 @@ const BlogGridWrapper = () => {
             />
           ))}
       </div>
-      <PaginationWrapperTwo />
     </>
   );
 };

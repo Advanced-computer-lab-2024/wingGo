@@ -87,7 +87,7 @@ const SignInForm = () => {
         <div className="sign-btn">
           <button
             type="submit"
-            className="bd-primary-btn btn-style is-bg radius-60"
+            className="bd-primary-btn btn-style radius-60"
           >
             <span className="bd-primary-btn-text">Log in</span>
             <span className="bd-primary-btn-circle"></span>

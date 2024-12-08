@@ -172,11 +172,6 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
                     <i className="far fa-cart-plus"></i>
                   </button>
                 </li>
-                <li>
-                  <button onClick={() => handleAddToWishlist()}>
-                    <i className="fa fa-heart"></i>
-                  </button>
-                </li>
               </ul>
             </div>
           </div>

@@ -468,9 +468,6 @@ const TourDetailTabArea = () => {
                               >
                                 {item.name}
                               </Link>
-                              <Link href="#">
-                                <i className="fa-solid fa-thumbs-up"></i>
-                              </Link>
                             </h5>
                             <ul className="bd-meta">
                               <li className="has-seperator">

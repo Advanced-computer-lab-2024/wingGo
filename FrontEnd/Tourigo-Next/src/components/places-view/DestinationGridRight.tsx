@@ -30,7 +30,6 @@ const DestinationGridRight = () => {
              
             </div>
             {/* Pagination component */}
-            <PaginationWrapperTwo />
           </div>
           {/* Sidebar with search functionality */}
           <div className="col-xxl-4 col-xl-4 col-lg-5">
