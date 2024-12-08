@@ -261,4 +261,13 @@ export const fetchSalesReport = async (): Promise<any> => {
 };
 
 
-
+export const fetchUserStatistics = async (): Promise<any> => {
+    try {
+      const response = await axios.get('http://localhost:8000/admin/user-statistics');
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user statistics:", error);
+      throw error;
+    }
+  };
+  
