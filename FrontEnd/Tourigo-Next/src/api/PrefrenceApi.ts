@@ -150,40 +150,120 @@ export const getTouristNotificationsApi = async () => {
 
 export const getAdminNotificationsApi = async () => {
   try {
-    const response = await axios.get(`http://localhost:8000/admin/notifications/${adminId}`);
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
+    }
+
+    // Decode the token to extract the admin ID
+    let adminId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      adminId = decodedToken.id; // Extract the admin ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Perform the API call with the extracted admin ID
+    const response = await axios.get(
+      `http://localhost:8000/admin/notifications/${adminId}`
+    );
     return response.data.notifications;
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    console.error("Error fetching notifications:", error);
     throw error;
   }
 };
 
 export const getSellerNotificationsApi = async () => {
   try {
-    const response = await axios.get(`http://localhost:8000/seller/notifications/${sellerId}`);
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
+    }
+
+    // Decode the token to extract the seller ID
+    let sellerId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      sellerId = decodedToken.id; // Extract the seller ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Perform the API call with the extracted seller ID
+    const response = await axios.get(
+      `http://localhost:8000/seller/notifications/${sellerId}`
+    );
     return response.data.notifications;
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    console.error("Error fetching notifications:", error);
     throw error;
   }
 };
 
 export const getTourGuideNotificationsApi = async () => {
   try {
-    const response = await axios.get(`http://localhost:8000/tourguide/notifications/${tourGuideId}`);
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
+    }
+
+    // Decode the token to extract the tour guide ID
+    let tourGuideId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      tourGuideId = decodedToken.id; // Extract the tour guide ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Perform the API call with the extracted tour guide ID
+    const response = await axios.get(
+      `http://localhost:8000/tourguide/notifications/${tourGuideId}`
+    );
     return response.data.notifications;
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    console.error("Error fetching notifications:", error);
     throw error;
   }
 };
 
-export const getAdvertiserNotificationsApi  = async () => {
+export const getAdvertiserNotificationsApi = async () => {
   try {
-    const response = await axios.get(`http://localhost:8000/advertiser/notifications/${advertiserId}`);
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
+    }
+
+    // Decode the token to extract the advertiser ID
+    let advertiserId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      advertiserId = decodedToken.id; // Extract the advertiser ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Perform the API call with the extracted advertiser ID
+    const response = await axios.get(
+      `http://localhost:8000/advertiser/notifications/${advertiserId}`
+    );
     return response.data.notifications;
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    console.error("Error fetching notifications:", error);
     throw error;
   }
 };
