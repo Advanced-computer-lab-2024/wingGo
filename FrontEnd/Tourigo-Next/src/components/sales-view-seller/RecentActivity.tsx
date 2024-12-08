@@ -16,11 +16,16 @@ const formatDate = (dateString: string): string => {
 const RecentActivity = () => {
   const [salesReport, setSalesReport] = useState<SellerSales | null>(null);
   const [filterMonth, setFilterMonth] = useState<string>('');
-  const sellerId = '67158afc7b1ec4bfb0240575'; // Example Seller ID, replace as needed
+  // const sellerId = '67158afc7b1ec4bfb0240575'; // Example Seller ID, replace as needed
 
   useEffect(() => {
-    loadSellerSalesReport(sellerId).then(setSalesReport);
+    loadSellerSalesReport()
+      .then(setSalesReport)
+      .catch((error) => {
+        console.error('Failed to load seller sales report:', error);
+      });
   }, []);
+  
 
   const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;
