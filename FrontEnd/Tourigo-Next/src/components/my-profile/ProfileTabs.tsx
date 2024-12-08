@@ -7,6 +7,7 @@ import FlightBookings from './FlightBookings';
 import { viewTouristProfile } from "@/api/ProfileApi";
 import { set } from "date-fns";
 import Prefrences from "./Prefrences";
+import PromoCodes from "./PromoCodes";
 
 
 interface ProfileDetailsProps {
@@ -53,6 +54,8 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
           return <HotelBookings id={id} />
       case 'flight':
             return <FlightBookings id={id}/>;
+            case "promocodes": 
+      return <PromoCodes id={id} />;
       default:
         return null;
     }
@@ -164,6 +167,22 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
                         </span>
                         Flight Bookings
                       </button>
+                      <button
+                        className="nav-link"
+                          id="nav-community-2-tab"
+                          data-bs-toggle="tab"
+                          data-bs-target="#nav-community-2"
+                          type="button"
+                          role="tab"
+                          aria-controls="nav-community-2"
+                          aria-selected="false"
+                          onClick={() => setActiveTab("promocodes")}
+                          >
+                          <span>
+                          <i className="fa fa-tag"></i>
+                          </span>
+                          Promo Codes
+                          </button>
                     </div>
                   </nav>
                 </div>

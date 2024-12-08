@@ -724,5 +724,17 @@ export interface CustomFile extends Blob {
   src?: string;  // If you need a `src` property
 }
 
+export interface PromoCode {
+  _id: string; 
+  code: string; 
+  discount: number; 
+  startDate: string; 
+  endDate: string; 
+  isActive: boolean; 
+  description?: string; 
+  touristId: string; 
+
+}
+
 
 

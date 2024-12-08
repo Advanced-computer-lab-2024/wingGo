@@ -260,7 +260,9 @@ app.delete("/verifyOtp", async (req, res) => {
             return res.status(400).json({ message: 'OTP not found' });
         }
 
-        if (userOtp.otp !== otp) {
+        
+        
+        if (userOtp.otp !== Number(otp)) {
             return res.status(400).json({ message: 'Invalid OTP' });
         }
 
