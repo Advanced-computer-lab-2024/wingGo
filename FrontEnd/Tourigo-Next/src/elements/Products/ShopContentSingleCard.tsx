@@ -17,6 +17,7 @@ import { ArchiveUnarchiveProduct, ArchiveUnarchiveProductAdmin, fetchProductImag
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import the currency con
 
 import { addToCart } from "@/api/cartApi";
+import {addItemtoWishlist} from '@/api/wishlistApi';
 
 
 interface propsType {
@@ -61,8 +62,13 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
     }
   };
 
-  const handleAddToWishlist = (product: Product) => {
-    dispatch(wishlist_product(product));
+  const handleAddToWishlist = async () => {
+    try{
+      addItemtoWishlist(item._id);
+      alert("Product added to wishlist successfully!");
+    } catch(error:any){
+      alert(error.message || "Failed to add product to wishlist. Please try again");
+    }
   };
 
   const handleEyeClick = async () => {
@@ -137,7 +143,7 @@ const ShopContentSingleCard = ({ item, classItem, userRole }: propsType) => {
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleAddToWishlist(item)}>
+                  <button onClick={() => handleAddToWishlist()}>
                     <i className="fa fa-heart"></i>
                   </button>
                 </li>
