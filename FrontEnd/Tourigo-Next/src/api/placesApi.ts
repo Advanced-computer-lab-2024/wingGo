@@ -1,6 +1,15 @@
 // placesApi.ts
 import axios from 'axios';
 import { Place } from '../interFace/interFace';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode'; 
+
+interface DecodedToken {
+    username: string;
+    id: string;
+    role: string;
+    mustChangePassword:boolean;
+  }
 const API_URL = 'http://localhost:8000/tourist';
 const governorId='674d045f99ed6f4415cbdd39'
 
@@ -45,8 +54,17 @@ export const deletePlace = async (placeId: string): Promise<void> => {
         throw error;
     }
 };
-export const updatePlace = async (id:string, governorId:string, updatedData:any) => {
+export const updatePlace = async (id:string, updatedData:any) => {
+    const token = Cookies.get('token');
+    let governorId = "";
     try {
+        if (token) {
+            const decodedToken = jwtDecode<DecodedToken>(token);
+            console.log("Decoded Token:", decodedToken);
+            governorId = decodedToken.id;  // Extract governorId from the token
+        } else {
+            throw new Error("No token found. Please log in.");
+        }
         const response = await axios.put(
             `http://localhost:8000/govornor/updatePlace/${id}?governorId=${governorId}`,
             updatedData
