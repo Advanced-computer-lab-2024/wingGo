@@ -1,4 +1,4 @@
-import { Product } from '../interFace/interFace';
+import { Product ,IPurchasedProduct} from '../interFace/interFace';
 
 import { fetchAllProducts, fetchPurchasedProducts} from '@/api/productApi';
 
@@ -15,14 +15,14 @@ export const getProductData = async (): Promise<Product[]> => {
 };
 
 
-// Function to get only purchased products for a specific tourist
-export const getPurchasedProducts = async (touristId: string) => {
+export const getPurchasedProducts = async (
+    touristId: string
+  ): Promise<IPurchasedProduct[]> => {
     try {
-        const purchasedProducts = await fetchPurchasedProducts(touristId);
-        return purchasedProducts;
+      const products = await fetchPurchasedProducts(touristId);
+      return products;
     } catch (error) {
-        console.error('Error fetching purchased products:', error);
-        throw error;
+      console.error('Error fetching purchased products:', error);
+      throw error;
     }
-};
-
+  };
