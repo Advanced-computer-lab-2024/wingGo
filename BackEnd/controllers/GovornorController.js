@@ -40,6 +40,7 @@ const createPlace = async (req, res) => {
 };
 
 
+
 // const createPlace = async (req, res) => {
 //     try {
 //         const { /*governerId,*/ types, historicalPeriods, ...placeData } = req.body.tags || {}; // Extract tags separately

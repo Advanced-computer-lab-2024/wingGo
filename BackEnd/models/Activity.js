@@ -22,11 +22,11 @@ const activitySchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ['Point'],
-      required: true
+      // required: true
     },
     address: {
       type: String,
-      required: true
+      // required: true
     },
     lat: {
       type: Number

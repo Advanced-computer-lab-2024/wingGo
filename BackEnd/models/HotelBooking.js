@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 const hotelBookingSchema = new mongoose.Schema({
   bookingId: { type: String, required: true, unique: true },
-  bookingStatus: { type: String, required: true },
   confirmationNumber: { type: String },
   checkInDate: { type: Date, required: true },
   checkOutDate: { type: Date, required: true },
@@ -16,7 +15,9 @@ const hotelBookingSchema = new mongoose.Schema({
     hotelId: { type: String },
     chainCode: { type: String },
     name: { type: String },
-    address: { type: String }, // optional if you want to add more detailed address info
+    address: [
+      {type: String}
+    ], // optional if you want to add more detailed address info
     selfLink: { type: String }, // Link to the hotel’s reference data
   },
   room: {

@@ -5,6 +5,8 @@ const API_URL = 'http://localhost:8000/tourist';
 
 interface HotelSearchParams {
     cityCode: string;
+    checkin: string | null;
+    checkout: string | null;
 }
 
 export const searchHotels = async (params: HotelSearchParams): Promise<any> => {
@@ -12,10 +14,12 @@ export const searchHotels = async (params: HotelSearchParams): Promise<any> => {
       const response = await axios.get<any>(`${API_URL}/searchHotelsByCity`, {
         params: {
           cityCode: params.cityCode,
+          checkin: params.checkin,
+          checkout: params.checkout,
         },
       });
-      console.log('Hotel dataaaa:', response.data.data);
-      return response.data.data;
+      console.log('Hotel dataaaa:', response.data);
+      return response.data;
     } catch (error) {
       console.error('Error fetching flight data:', error);
       throw error;

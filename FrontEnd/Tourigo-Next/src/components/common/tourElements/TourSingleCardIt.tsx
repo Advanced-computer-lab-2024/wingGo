@@ -12,7 +12,8 @@ import axios from "axios";
 import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked,toggleSaveItinerary, checkIfSaved } from '@/api/itineraryApi';
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
-import { toast } from 'sonner';
+import { toast } from 'sonner';import { fetchItImage } from "@/api/itineraryApi";
+
 
 
 interface ItourPropsType {
@@ -45,7 +46,8 @@ const TourSingleCard = ({
   // Local state to keep track of the flagged and deactivated status
   const [isFlagged, setIsFlagged] = useState(tour.flagged);
   const [isDeactivated, setIsDeactivated] = useState(tour.deactivated);
-
+  const DEFAULT_IMAGE = "/assets/images/Itinerary.png";
+  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
   const [isBooked, setIsBooked] = useState(false);
   const [isSaved, setIsSaved] = useState(false); // Initialize as null
 
@@ -68,7 +70,8 @@ const TourSingleCard = ({
   }, [tour._id, touristId]); // Ensure it runs when either changes
   
 
-  console.log("status: ",isSaved);
+  console.log("status: ",isSaved); 
+
   
   useEffect(() => {
     console.log("CHECKINGG22");
@@ -94,6 +97,23 @@ const TourSingleCard = ({
   }, [currency, tour.price, convertAmount]); // Re-run if currency or tour.price changes
 
 
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        if (tour._id && tour.photo) { // Check if the item has an image
+          const url = await fetchItImage(tour._id);
+          if (url) {
+            console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
+            setImageUrl(url);
+            console.log(imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load image:", error);
+      }
+    };
+    loadImage();
+  }, [tour._id, tour.photo,imageUrl]);
   
   
   const handleFlagItinerary = async () => {
@@ -172,12 +192,14 @@ const handleSave = async () => {
               <div className="tour-thumb image-overly">
                 <Link href={`/it-details/${tour._id}`}>
                   <Image
-                    src="/assets/images/Itinerary.png"
+                    src={imageUrl}
                     loader={imageLoader}
                     width={270}
                     height={270}
                     style={{ width: "300px", height: "250px" }}
                     alt="Itinerary Image"
+                    unoptimized 
+                    
                   />
                 </Link>
               </div>
