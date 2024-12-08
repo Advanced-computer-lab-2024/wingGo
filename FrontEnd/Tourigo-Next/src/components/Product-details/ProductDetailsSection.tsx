@@ -21,12 +21,24 @@ import { fetchSellerData, purchaseProduct, editProduct,fetchProductImage } from 
 import { calculateAverageRating } from "@/utils/utils"; 
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
 import { addToCart } from "@/api/cartApi";
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  id: string;  // Corresponds to the `sellerId` in the token
+  username: string;
+  role: string;
+  mustChangePassword: boolean;
+}
 
 
 
 const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string }) => {
-  const touristId = "672a3a4001589d5085322e88";
-  const hardcodedSellerId = "67158afc7b1ec4bfb0240575"; // Hardcoded sellerId for now unt
+  // const touristId = "672a3a4001589d5085322e88";
+  // const hardcodedSellerId = "67158afc7b1ec4bfb0240575"; // Hardcoded sellerId for now unt
+  const [touristId, setTouristId] = useState<string | null>(null);
+const [sellerId, setSellerId] = useState<string | null>(null);
+
   const [products, setProducts] = useState<Product[]>([]);
   const [item, setItem] = useState<Product | null>(null);
   const [sellerName, setSellerName] = useState<string | null>(null);
@@ -36,7 +48,29 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
   const [productImageUrl, setProductImageUrl] = useState<string | null>(null);
   const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null); // State for converted price
+  
+  useEffect(() => {
+    const token = Cookies.get("token");
+    if (token) {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      if (decodedToken.role === "Tourist") {
+        setTouristId(decodedToken.id); // Extract and set `touristId`
+      } else if (decodedToken.role === "Seller") {
+        setSellerId(decodedToken.id); // Extract and set `sellerId`
+      }
+      console.log("Decoded Seller ID: ", decodedToken.id);
+      console.log("Decoded Role: ", decodedToken.role);
+      
 
+    } else {
+      console.error("No token found. Please log in.");
+    }
+  }, []);
+  useEffect(() => {
+    console.log("Updated Seller ID State: ", sellerId);
+    console.log("Updated Tourist ID State: ", touristId);
+  }, [sellerId, touristId]);
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,7 +133,7 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
   const numberOfReviews = item ? item.reviews.length : 0;
 
   const handlePurchase = async () => {
-    if (item?._id) {
+    if (item?._id && touristId) {
       try {
         const response = await purchaseProduct(touristId, item._id);
         toast.success("Product purchased successfully!");
@@ -110,6 +144,7 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
       }
     }
   };
+  
   const handleAddToCart = async () => {
   
     try {
@@ -148,15 +183,16 @@ const ProductDetailsSection = ({ id, userRole }: { id: string; userRole: string 
           <div className="col-xxl-6 col-xl-6 col-lg-6">
             <div className="product-details-wrapper">
               <h2 className="product-details-title small mb-10">
-              {(userRole === "Admin" || (userRole === "Seller" && item?.sellerID === hardcodedSellerId)) && (
-                  <button
-                    onClick={() => setEditModalOpen(true)}
-                    className="edit-circle-btn"
-                    style={{ position: 'relative', top: '-5px' }}
-                  >
-                    <i className="fa fa-pen" />
-                  </button>
-                )}
+              {(userRole === "Admin" || (userRole === "Seller" && item?.sellerID === sellerId)) && (
+  <button
+    onClick={() => setEditModalOpen(true)}
+    className="edit-circle-btn"
+    style={{ position: 'relative', top: '-5px' }}
+  >
+    <i className="fa fa-pen" />
+  </button>
+)}
+
                 {item?.name}
               </h2>
               <div className="product-details-rating d-flex align-items-center mb-15">
