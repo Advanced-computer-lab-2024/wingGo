@@ -71,7 +71,7 @@ const SignUpForm = () => {
     } else {
       toast.success("User registered successfully!", { id: toastId });
       reset();
-      router.push("/");
+      router.push("/sign-in");
     }
   };
 

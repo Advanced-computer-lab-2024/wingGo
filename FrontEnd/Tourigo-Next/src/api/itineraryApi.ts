@@ -17,7 +17,7 @@ import { Itinerary, BookedItinerary } from '../interFace/interFace';
 
 
 
-const tourGuideId = '67244655313a2a345110c1e6';  // Hardcoded tour guide ID
+// const tourGuideId = '67244655313a2a345110c1e6';  // Hardcoded tour guide ID
 
 
 /////////////////////////done///////////////////
@@ -123,7 +123,7 @@ export const isItineraryBooked = async (itineraryId: string): Promise<boolean> =
 
 
 
-// Admin-specific fetch
+ /////////////////////////done/////////////////// not specific
 export const fetchAdminItineraries = async (): Promise<Itinerary[]> => {
     try {
         const response = await axios.get('http://localhost:8000/admin/getALLitineraries');  // Adjust URL if necessary
@@ -134,17 +134,37 @@ export const fetchAdminItineraries = async (): Promise<Itinerary[]> => {
     }
 };
 
-// Tour guide-specific fetch
+
+
+ /////////////////////////done///////////////////
 export const fetchTourGuideItineraries = async (): Promise<Itinerary[]> => {
-    try {
-        
-        const response = await axios.get(`http://localhost:8000/tourguide/itineraries/${tourGuideId}`);
-        return response.data;  // Return itineraries for the specific tour guide
-    } catch (error) {
-        console.error("Error fetching itineraries for tour guide:", error);
-        throw error;
+  try {
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
     }
+
+    // Decode the token to extract the tour guide ID
+    let tourGuideId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      tourGuideId = decodedToken.id; // Use the 'id' field as the tour guide ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Fetch itineraries for the specific tour guide
+    const response = await axios.get(`http://localhost:8000/tourguide/itineraries/${tourGuideId}`);
+    return response.data; // Return itineraries for the specific tour guide
+  } catch (error) {
+    console.error("Error fetching itineraries for tour guide:", error);
+    throw error;
+  }
 };
+
 
 export const fetchFilteredItineraries = async (filters: {  ////done with frontend
     budget?: number;
@@ -188,7 +208,7 @@ export const fetchBookedItineraries = async (touristId: string): Promise<BookedI
 
 
 
-// Function to flag/unflag an itinerary for admin
+ /////////////////////////done/////////////////// doesnt use admin id
 export const toggleFlagItinerary = async (id: string, flagStatus: boolean): Promise<void> => {
     try {
         await axios.put(`http://localhost:8000/admin/flagItinerary/${id}`, { flagged: flagStatus });
@@ -198,7 +218,7 @@ export const toggleFlagItinerary = async (id: string, flagStatus: boolean): Prom
     }
 };
 
-// Function to toggle activation or deactivation of an itinerary
+ /////////////////////////done/////////////////// doesnt use tourguide id
 export const toggleItineraryActivation = async (id: string, deactivate: boolean): Promise<void> => {
     try {
         await axios.put(`http://localhost:8000/tourguide/activateOrDeactivateItinerary/${id}`, { deactivate });
@@ -399,6 +419,7 @@ export const getPriceApi = async (itineraryId: string, numberOfPeople: number, p
 
 
 
+   /////////////////////////done/////////////////// doesnt take id
   export const toggleBookingState = async (itineraryId: string, bookingOpen: boolean) => {
     try {
       const response = await axios.put(
@@ -445,7 +466,7 @@ export const viewAllSavedEventsApi = async (touristId: string): Promise<any> => 
 
 
 
-
+ /////////////////////////done/////////////////// does not use id
   export const fetchItImage = async (itineraryId: string) => {
     try {
       const response = await axios.get(`http://localhost:8000/tourguide/itinerary/photo/${itineraryId}`);
@@ -489,6 +510,7 @@ export const viewAllSavedEventsApi = async (touristId: string): Promise<any> => 
         throw error;
     }
 };
+
 
 export const getAvailableTags = async (): Promise<string[]> => {
   try {
