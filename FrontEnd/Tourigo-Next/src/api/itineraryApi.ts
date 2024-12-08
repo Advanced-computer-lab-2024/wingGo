@@ -450,7 +450,7 @@ export const getPriceApi = async (itineraryId: string, numberOfPeople: number, p
 
 
 
-  // Fetch all saved events for a tourist
+ /////////////////////////done/////////////////// bs men gowa 
 export const viewAllSavedEventsApi = async (touristId: string): Promise<any> => {
     try {
       const response = await axios.get(`http://localhost:8000/tourist/viewAllSavedEvents/${touristId}`);

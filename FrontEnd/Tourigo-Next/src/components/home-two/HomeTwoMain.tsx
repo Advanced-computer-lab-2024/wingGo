@@ -16,16 +16,8 @@ const HomeTwoMain = () => {
     <>
       <BannerTwo />
       <ChooseArea />
-      <DestinationArea />
-      <TourAreaTwo />
-      <OfferAreaTwo />
-      <ActivityTwoArea />
-      <TrendsArea />
       <TestimonialAreaTwo />
-      <DownloadArea />
-      <BlogTwoArea />
-      <TeamAreaTwo />
-      <CtaElementTwo />
+      
     </>
   );
 };

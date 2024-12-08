@@ -1,7 +1,7 @@
 import { IHomeTwoSliderData } from "@/interFace/interFace";
-import bannerImgOne from '../../../public/assets/images/banner/banner-2-img-1.png';
-import bannerImgTwo from '../../../public/assets/images/banner/banner-2-img-2.png';
-import bannerImgThree from '../../../public/assets/images/banner/banner-2-img-3.png';
+import bannerImgOne from '../../../public/assets/images/banner/home2.jpg';
+import bannerImgTwo from '../../../public/assets/images/banner/home2.jpg';
+import bannerImgThree from '../../../public/assets/images/banner/home2.jpg';
 
 export const sliderData: IHomeTwoSliderData[] = [
     {

@@ -17,26 +17,7 @@ const TestimonialElementOne = () => {
       <section className="bd-testimonial-area section-space-bottom p-relative">
         <div className="container">
           <div className="row gy-24 justify-content-between">
-            <div className="col-xxl-5 col-xl-5 col-lg-5">
-              <div className="testimonial-thumb-video p-relative">
-                <Image
-                  src={testiImg}
-                  loader={imageLoader}
-                  style={{ width: "100%", height: "100%" }}
-                  alt="image"
-                />
-                <div className="post-details-video-btn pos-center">
-                  <button
-                    onClick={() => {
-                      openVideoModal();
-                    }}
-                    className="bd-play-btn popup-video animation-three"
-                  >
-                    <i className="icon-play"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
+           
             <div className="col-xxl-7 col-xl-7 col-lg-7">
               <div className="testimonial-wrapper testimonial-style-six">
                 <div className="section-title-wrapper section-title-space">
@@ -75,14 +56,7 @@ const TestimonialElementOne = () => {
                               </div>
                               <p>{item.description}</p>
                               <div className="testimonial-avatar-wrap justify-content-center">
-                                <div className="avatar-thumb">
-                                  <Image
-                                    src={item.avatarImg}
-                                    loader={imageLoader}
-                                    style={{ width: "100%", height: "auto" }}
-                                    alt=""
-                                  />
-                                </div>
+                                
                                 <div className="avatar-meta">
                                   <h6 className="avatar-meta-title">
                                     {item.avatarTitle}
@@ -91,12 +65,7 @@ const TestimonialElementOne = () => {
                                 </div>
                               </div>
                               <div className="testimonial-quot">
-                                <Image
-                                  src={testiQuoteImg}
-                                  loader={imageLoader}
-                                  style={{ width: "100%", height: "auto" }}
-                                  alt="shape"
-                                />
+                               
                               </div>
                             </div>
                           </div>
@@ -110,12 +79,7 @@ const TestimonialElementOne = () => {
           </div>
         </div>
       </section>
-      <ModalVideo
-        channel="youtube"
-        isOpen={isOpen}
-        videoId="eUpwDAnkgSM"
-        onClose={() => setIsOpen(false)}
-      />
+ 
     </>
   );
 };

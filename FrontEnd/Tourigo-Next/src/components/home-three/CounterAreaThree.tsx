@@ -20,28 +20,7 @@ const CounterAreaThree = () => {
                 </h3>
               </div>
             </div>
-            <div className="col-xl-4 col-lg-5 col-md-5">
-              <div className="counter-btn-wrapper d-flex justify-content-md-end">
-                <div className="counter-btn-content text-md-center">
-                  <p className="theme-text-two mb-20">{`Limited time offer, don't miss the opportunity`}</p>
-                  <div className="counter-btn">
-                    <Link
-                      href="/booking"
-                      className="bd-primary-btn btn-style has-arrow is-bg btn-tertiary is-white radius-60"
-                    >
-                      <span className="bd-primary-btn-arrow arrow-right">
-                        <i className="fa-regular fa-arrow-right"></i>
-                      </span>
-                      <span className="bd-primary-btn-text">Book Now</span>
-                      <span className="bd-primary-btn-circle"></span>
-                      <span className="bd-primary-btn-arrow arrow-left">
-                        <i className="fa-regular fa-arrow-right"></i>
-                      </span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
+       
           </div>
           <div className="row">
             <div className="counter-wrapper counter-style-three">
