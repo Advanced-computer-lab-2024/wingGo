@@ -44,6 +44,26 @@ const menu_data: MenuType[] = [
     pluseIncon: true,
     link: "/add-activity",
   },
+  {
+    id: 4,
+    hasDropdown: true,
+    children: true,
+    megaMenu: true,
+    active: true,
+    title: "Report Sales",
+    pluseIncon: true,
+    link: "/sales-view-advertiser",
+  },
+  {
+    id: 5,
+    hasDropdown: true,
+    children: true,
+    megaMenu: true,
+    active: true,
+    title: "Tourist Report",
+    pluseIncon: true,
+    link: "/tourist-report-view-advertiser",
+  },
   
   
  

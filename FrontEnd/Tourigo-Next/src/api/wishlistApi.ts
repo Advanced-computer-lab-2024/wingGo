@@ -33,7 +33,7 @@ export const getProductById = async (productId: string): Promise<any> => {
   };
 
   //router.post('/wishlist/:touristId/:productId', touristController.addWishlist);
-export const addItemtoWishlist = async(productId:string): Promise<any>=>{
+export const addItemtoWishlist = async(productId:any): Promise<any>=>{
   try{
     const url = `http://localhost/8000/tourist/wishlist/${touristId}/${productId}`;
 
