@@ -87,8 +87,8 @@ export const searchHotels = async (params: HotelSearchParams): Promise<any> => {
         console.log('User ID:', id);
       }
 
-     // const response = await axios.get<any>(`${API_URL}/getPromoCode/${id}?code=${promoCode}`);
-      const response = await axios.get<any>(`${API_URL}/getPromoCode/67240ed8c40a7f3005a1d01d?code=${promoCode}`);
+      const response = await axios.get<any>(`${API_URL}/getPromoCode/${id}?code=${promoCode}`);
+      //const response = await axios.get<any>(`${API_URL}/getPromoCode/67240ed8c40a7f3005a1d01d?code=${promoCode}`);
       console.log('Promo code discount data:', response.data);
       return response.data.promoCodeDetails;
     } catch (error) {

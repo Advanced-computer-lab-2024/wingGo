@@ -50,7 +50,7 @@ export const searchFlights = async (params: FlightSearchParams): Promise<any> =>
         id = decodedToken.id;
       }
 
-      const response = await axios.post<any>(`${API_URL}/bookFlight/67240ed8c40a7f3005a1d01d`, {
+      const response = await axios.post<any>(`${API_URL}/bookFlight/${id}`, {
         flightOffers: flight,
         paymentMethod: paymentMethod,
         promoCode: promoCode,

@@ -111,10 +111,7 @@ const BookingComponentForm = () => {
   //   // console.log("price: "+price);
   // }, [numberOfPeople, promocode, data]);
   
-  useEffect(() => {
-    
-    console.log("price: "+price);
-  }, [price]);
+  
   
   
   
