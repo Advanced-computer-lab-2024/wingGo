@@ -17,19 +17,40 @@ import { Itinerary, BookedItinerary } from '../interFace/interFace';
 
 
 
-const touristId = '67240ed8c40a7f3005a1d01d';
 const tourGuideId = '67244655313a2a345110c1e6';  // Hardcoded tour guide ID
-//const itineraryId='67472355bdbfc021df0e293b';
 
+
+/////////////////////////done///////////////////
 export const fetchAllItineraries = async (): Promise<Itinerary[]> => {
-    try {
-        const response = await axios.get(`http://localhost:8000/tourist/viewItineraries?touristId=${touristId}`);
-        return response.data.itineraries;
-    } catch (error) {
-        console.error("Error fetching itineraries:", error);
-        throw error;
+  try {
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
     }
+
+    // Decode the token to extract the tourist ID
+    let touristId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      touristId = decodedToken.id; // Extract the tourist ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Make the API call using the extracted tourist ID
+    const response = await axios.get(
+      `http://localhost:8000/tourist/viewItineraries?touristId=${touristId}`
+    );
+    return response.data.itineraries;
+  } catch (error) {
+    console.error("Error fetching itineraries:", error);
+    throw error;
+  }
 };
+
 
 export const filterItineraries = async (filters: { 
     budget?: number;
@@ -48,16 +69,39 @@ export const filterItineraries = async (filters: {
     }
 };
 
-// Check if an itinerary is booked for a specific tourist
-export const isItineraryBooked = async ( itineraryId: string): Promise<boolean> => {
-    try {
-        const response = await axios.get(`http://localhost:8000/tourist/booked-status/${touristId}/booked-status/${itineraryId}`);
-        return response.data.isBooked; // Returns true if booked, false otherwise
-    } catch (error) {
-        console.error("Error checking itinerary booked status:", error);
-        throw error;
+
+
+/////////////////////////done///////////////////
+export const isItineraryBooked = async (itineraryId: string): Promise<boolean> => {
+  try {
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
     }
+
+    // Decode the token to extract the tourist ID
+    let touristId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      touristId = decodedToken.id; // Extract the tourist ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Make the API call using the extracted tourist ID
+    const response = await axios.get(
+      `http://localhost:8000/tourist/booked-status/${touristId}/booked-status/${itineraryId}`
+    );
+    return response.data.isBooked; // Return whether the itinerary is booked
+  } catch (error) {
+    console.error("Error checking itinerary booked status:", error);
+    throw error;
+  }
 };
+
 
 
 // Admin-specific fetch
@@ -146,8 +190,8 @@ export const toggleItineraryActivation = async (id: string, deactivate: boolean)
 };
 
 
-//the next 4 will be hardcoded in the folder of it-act-history fi BookingHistory.tsx passed to the ratetabarea
 
+  /////////////////////////done///////////////////
 export const rateItineraryApi = async (touristId : string, itineraryId : string, rating : Number) => {
     try {
         const response = await axios.post(`http://localhost:8000/tourist/rateItinerary/${touristId}/${itineraryId}`, { rating });
@@ -158,6 +202,7 @@ export const rateItineraryApi = async (touristId : string, itineraryId : string,
     }
 };
 
+  /////////////////////////done///////////////////
 export const commentOnItineraryApi = async (touristId : string, itineraryId : string, comment : string) => {
     try {
         const response = await axios.post(`http://localhost:8000/tourist/commentItinerary/${touristId}/${itineraryId}`, { comment });
@@ -168,7 +213,8 @@ export const commentOnItineraryApi = async (touristId : string, itineraryId : st
     }
 };
 
-// API function to rate a tour guide
+
+  /////////////////////////done///////////////////
 export const rateTourGuideApi = async (touristId: string, tourGuideId: string, rating: number) => {
     try {
         const response = await axios.post(`http://localhost:8000/tourist/ratetourguide/${touristId}/${tourGuideId}`, { rating });
@@ -179,7 +225,9 @@ export const rateTourGuideApi = async (touristId: string, tourGuideId: string, r
     }
 };
 
-// API function to comment on a tour guide
+
+
+  /////////////////////////done///////////////////
 export const commentOnTourGuideApi = async (touristId: string, tourGuideId: string, comment: string) => {
     try {
         const response = await axios.post(`http://localhost:8000/tourist/commenttourguide/${touristId}/${tourGuideId}`, { comment });
@@ -191,16 +239,8 @@ export const commentOnTourGuideApi = async (touristId: string, tourGuideId: stri
 };
 
 
-// Cancel Itinerary function -> touristId will be hardcoded in the folder of it-act-history fi BookingHistory.tsx
-// export const cancelItineraryApi = async (touristId: string, itineraryId: string) => {
-//     try {
-//         const response = await axios.delete(`http://localhost:8000/tourist/cancelItinerary/${touristId}/${itineraryId}`);
-//         return response.data;
-//     } catch (error) {
-//         console.error("Error canceling itinerary:", error);
-//         throw error;
-//     }
-// };
+
+  /////////////////////////done///////////////////
 export const cancelItineraryApi = async (itineraryId: string) => {
   try {
     // Retrieve the token from cookies
@@ -239,6 +279,8 @@ export const fetchTouristUsername = async (touristId: string): Promise<string> =
     }
 };
 
+
+  /////////////////////////done///////////////////
 export const bookItineraryApi = async (
     itineraryId: string,
     bookingDate: Date,
@@ -281,34 +323,6 @@ export const bookItineraryApi = async (
   };
 
 
-// Next will be hardcoded in
-// export const bookItineraryApi = async (
-//     touristId: string,
-//     itineraryId: string,
-//     bookingDate: Date,
-//     paymentMethod: string,
-//     numberOfPeople: number,
-//     promoCode?: string
-// ): Promise<void> => {
-//     try {
-//         const response = await axios.post(
-//             `http://localhost:8000/tourist/bookItinerary/${touristId}/${itineraryId}`,
-//             null, // No body payload, parameters are sent via query
-//             {
-//                 params: {
-//                     bookingDate: bookingDate.toISOString(),
-//                     paymentMethod,
-//                     numberOfPeople,
-//                     promoCode: promoCode || "", // Optional promo code
-//                 },
-//             }
-//         );
-//         return response.data; // Return the response data if needed
-//     } catch (error) {
-//         console.error("Error booking itinerary:", error);
-//         throw error;
-//     }
-// };
 
 
 
@@ -323,6 +337,7 @@ export const createItinerary = async (itineraryData: any): Promise<any> => {
     }
 };
 
+  /////////////////////////done///////////////////
 export const fetchTourGuideRatings = async (tourGuideId: string) => {
     try {
         const response = await axios.get(`http://localhost:8000/tourguide/fetch/${tourGuideId}`);
@@ -333,6 +348,8 @@ export const fetchTourGuideRatings = async (tourGuideId: string) => {
     }
 };
 
+
+  /////////////////////////done///////////////////
 export const getPriceApi = async (itineraryId: string, numberOfPeople: number, promoCode : string) => {
     const params = {
       numberOfPeople,
@@ -348,19 +365,9 @@ export const getPriceApi = async (itineraryId: string, numberOfPeople: number, p
     }
   };
 
-//To save/unsave an itinerary
-// export const saveOrUnsaveItineraryApi = async (touristId: string,itineraryId: string, save: boolean): Promise<any> => {
-//     try {
-//       const response = await axios.post( `http://localhost:8000/tourist/saveItinerary/${touristId}/${itineraryId}`,
-//         { save } // Pass the save/unsave state in the request body
-//       );
-//       return response.data.savedItineraries; // Return the updated saved itineraries list
-//     } catch (error) {
-//       console.error("Error saving/unsaving itinerary:", error);
-//       throw error;
-//     }
-//   };
 
+
+  /////////////////////////done///////////////////
   export const toggleSaveItinerary = async (touristId: string,itineraryId: string): Promise<any> => {
     try {
       const response = await axios.post( `http://localhost:8000/tourist/toggleSaveItinerary/${touristId}/${itineraryId}`);
@@ -386,6 +393,8 @@ export const getPriceApi = async (itineraryId: string, numberOfPeople: number, p
     }
   };
   
+
+  /////////////////////////done///////////////////
   export const checkIfSaved = async (touristId: string, itineraryId: string) => {
     try {
       const response = await axios.get(
@@ -397,6 +406,10 @@ export const getPriceApi = async (itineraryId: string, numberOfPeople: number, p
       throw error;
     }
   };
+
+
+
+
   // Fetch all saved events for a tourist
 export const viewAllSavedEventsApi = async (touristId: string): Promise<any> => {
     try {
@@ -410,6 +423,9 @@ export const viewAllSavedEventsApi = async (touristId: string): Promise<any> => 
       throw error;
     }
   };
+
+
+
 
   export const fetchItImage = async (itineraryId: string) => {
     try {
@@ -429,3 +445,88 @@ export const viewAllSavedEventsApi = async (touristId: string): Promise<any> => 
       }
     }
   };
+
+  /////////////////////////done///////////////////
+  export const getPaidPriceApi = async (itineraryId: string) => {
+    
+        const token = Cookies.get('token'); // Retrieve the token from cookies.
+        let touristId = ""; // Initialize touristId
+    try {
+      if (token) {
+        const decodedToken = jwtDecode<DecodedToken>(token); // Decode the token
+        console.log("Decoded Token:", decodedToken);
+        touristId = decodedToken.id; // Extract the tourist ID
+      } else {
+        throw new Error("No token found. Please log in.");
+      }
+
+        const response = await axios.get(
+            `http://localhost:8000/tourist/getPaidPrice/${touristId}/${itineraryId}`
+        );
+        console.log(response.data.paidPrice);
+        return response.data.paidPrice; // Return paid price from response.
+    } catch (error) {
+        console.error('Error fetching paid price:', error);
+        throw error;
+    }
+};
+
+export const getAvailableTags = async (): Promise<string[]> => {
+  try {
+      const response = await axios.get(`http://localhost:8000/govornor/viewPreferences`);
+      console.log("Tags available:", response.data);
+      return response.data;
+  } catch (error) {
+      console.error("Error fetching tags:", error);
+      throw error;
+  }
+};
+export const deleteItineraryApi = async (
+  itineraryId: string,
+  tourGuideId: string
+): Promise<void> => {
+  try {
+    const response = await axios.delete(
+      `http://localhost:8000/tourguide/deleteItinerary/${itineraryId}`,
+      {
+        params: { tourGuideId },
+      }
+    );
+    console.log(`Itinerary with ID: ${itineraryId} deleted successfully.`);
+    return response.data;
+  } catch (error) {
+    // Use `as` keyword to assert the error type as AxiosError
+    if (axios.isAxiosError(error)) {
+      console.error("Error deleting itinerary:", error.response?.data || error.message);
+      throw error.response?.data || error.message;
+    } else {
+      console.error("Unexpected error:", error);
+      throw error; // Re-throw if it's not an AxiosError
+    }
+  }
+};
+export const updateItineraryApi = async (
+itineraryId: string,
+updates: Record<string, any>,
+tourGuideId: string // Added tourGuideId parameter
+): Promise<void> => {
+try {
+  const response = await axios.put(
+    `http://localhost:8000/tourguide/Updateitinerary/${itineraryId}?tourGuideId=${tourGuideId}`, // Include tourGuideId as a query parameter
+    updates,
+    {
+      headers: {
+        "Content-Type": "application/json", // Ensure the correct content type
+        // Include Authorization header if needed
+        // Authorization: `Bearer ${yourToken}`,
+      },
+    }
+  );
+
+  console.log(`Itinerary with ID: ${itineraryId} updated successfully.`);
+  return response.data;
+} catch (error) {
+  console.error("Error updating itinerary:", error);
+  throw error;
+}
+};

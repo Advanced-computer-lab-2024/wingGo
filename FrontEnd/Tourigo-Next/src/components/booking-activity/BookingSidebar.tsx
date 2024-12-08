@@ -8,6 +8,7 @@ import { Activity } from "@/interFace/interFace";
 import Link from "next/link";
 import { idTypeNew } from "@/interFace/interFace";
 
+
 const BookingSidebar = ({ id }: idTypeNew) => {
   const [dateRange, setDateRange] = useState([null, null]);
   const [startDate, endDate] = dateRange;
@@ -36,6 +37,7 @@ const BookingSidebar = ({ id }: idTypeNew) => {
     };
     fetchData();
   }, [id]);
+  
 
   return (
     <>

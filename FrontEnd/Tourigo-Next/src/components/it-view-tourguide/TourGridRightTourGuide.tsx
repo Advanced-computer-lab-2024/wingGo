@@ -29,7 +29,17 @@ const TourGridRightTourGuide = () => {
     };
     loadInitialData();
   }, []);
-
+  const removeItinerary = (id: string) => {
+    // Update the original list of itineraries
+    setItineraries((prevItineraries) =>
+      prevItineraries.filter((itinerary) => itinerary._id !== id)
+    );
+  
+    // Update the filtered list of itineraries
+    setFilteredItineraries((prevFilteredItineraries) =>
+      prevFilteredItineraries.filter((itinerary) => itinerary._id !== id)
+    );
+  };
   // Apply filters locally
   const sortData = (data: Itinerary[], option: string) => {
     let sortedData = [...data];
@@ -90,30 +100,21 @@ const TourGridRightTourGuide = () => {
     <>
       <section className="bd-tour-grid-area section-space">
         <div className="container">
-          <div className="row gy-24">
-            <div className="col-xxl-8 col-xl-8 col-lg-7">
-            <ItinerariesContentHeader
-              itineraryCount={filteredItineraries.length}
-              onSortChange={handleSortChange}
-              />
-              <div className="row gy-24">
-                {filteredItineraries.map((item) => (
-                  <TourSingleCard
-                    tour={item}
-                    key={item._id}
-                    className="col-xxl-4 col-xl-6 col-lg-6 col-md-6"
-                    tourWrapperClass="tour-wrapper style-one"
-                    isparentClass={true}
-                    isTourGuide={true} // Set isTourGuide to true for tour guide view
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="col-xxl-4 col-xl-4 col-lg-5">
-            <ItinerariesSidebarMain applyFilters={applyFilters} applySearch={applySearch}  />
-            </div>
-          </div>
+        <div className="row gy-24">
+  {filteredItineraries.map((item) => (
+    <TourSingleCard
+      tour={item}
+      key={item._id}
+      className="col-xxl-4 col-xl-6 col-lg-6 col-md-6"
+      tourWrapperClass="tour-wrapper style-one"
+      isparentClass={true}
+      isTourGuide={true}
+      removeItinerary={removeItinerary} // Pass the removeItinerary callback
+    />
+  ))}
+</div>
         </div>
+       
       </section>
     </>
   );

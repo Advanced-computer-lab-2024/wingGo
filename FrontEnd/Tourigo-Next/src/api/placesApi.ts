@@ -11,6 +11,7 @@ interface DecodedToken {
     mustChangePassword:boolean;
   }
 const API_URL = 'http://localhost:8000/tourist';
+const governorId='674d045f99ed6f4415cbdd39'
 
 // Fetch all places
 export const fetchAllPlaces = async (): Promise<Place[]> => {
@@ -22,31 +23,27 @@ export const fetchAllPlaces = async (): Promise<Place[]> => {
         throw error;
     }
 };
-export const createPlace = async (placeData: any): Promise<any> => {
-    const token = Cookies.get('token');
-    let governorId="";
-
+export const createPlace = async (
+   
+    data: any
+  ): Promise<any> => {
+   
     try {
-        if (token) {
-
-        const decodedToken = jwtDecode<DecodedToken>(token);
-        console.log("Decoded Token:", decodedToken);
-        const governorId = decodedToken.id;
-        console.log("placeData",placeData);
-    } else {
-        throw new Error("No token found. Please log in.");
-      }
-    
-        const response = await axios.post(`http://localhost:8000/govornor/createPlace`, {
-            ...placeData,
-            governorId,
-          });
-        return response.data.place; // Return the created place data
+      const response = await axios.post(
+        `http://localhost:8000/govornor/createPlace?governorId=${governorId}`, 
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data;
     } catch (error) {
-        console.error("Error creating place:", error);
-        throw error;
+      console.error("Error creating place:", error);
+      throw error;
     }
-};
+  };
 // Delete a place
 export const deletePlace = async (placeId: string): Promise<void> => {
     try {

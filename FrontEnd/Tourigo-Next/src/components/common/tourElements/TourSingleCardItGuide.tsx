@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked, toggleBookingState } from '@/api/itineraryApi';
+import { toggleFlagItinerary, toggleItineraryActivation, isItineraryBooked, toggleBookingState,deleteItineraryApi  } from '@/api/itineraryApi';
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency context
 import Modal from "react-modal"; // Import Modal from react-modal
@@ -25,6 +25,7 @@ interface ItourPropsType {
   isparentClass: boolean;
   isAdmin?: boolean; // Optional prop to check if the view is admin
   isTourGuide?: boolean; // Optional prop to check if the view is tour guide
+  removeItinerary?: (id: string) => void; 
 }
 
 const TourSingleCard = ({
@@ -34,6 +35,7 @@ const TourSingleCard = ({
   isparentClass,
   isAdmin = false,
   isTourGuide = false,
+  removeItinerary, // Destructure the prop here
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
   const rating = tour.averageRating ; // Use Itinerary's averageRating, default to 1
@@ -54,7 +56,23 @@ const TourSingleCard = ({
   const DEFAULT_IMAGE = "/assets/images/Itinerary.png";
   const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
   
-
+  const handleDeleteItinerary = async () => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this itinerary?");
+    if (!confirmDelete) return;
+  
+    const toastId = toast.loading("Deleting itinerary...");
+    try {
+      await deleteItineraryApi(tour._id, tour.tourGuideId); // Call the delete API
+      toast.success("Itinerary deleted successfully!", { id: toastId });
+  
+      if (removeItinerary) {
+        removeItinerary(tour._id); // Call the parent-provided function to update the state
+      }
+    } catch (error: any) {
+      console.error("Error deleting itinerary:", error);
+      toast.error("Failed to delete itinerary. Please try again.", { id: toastId });
+    }
+  };
 
   useEffect(() => {
     const checkBookingStatus = async () => {
@@ -235,7 +253,14 @@ const TourSingleCard = ({
                     <i className="fa-regular fa-arrow-right-long icon__second"></i>
                     </span>
                   </button>}
-                
+                  <button
+  onClick={handleDeleteItinerary}
+  className="bd-text-btn style-two"
+  type="button"
+  style={{ color: "red", marginLeft: "10px" }}
+>
+  <i className="fa fa-trash"></i> {/* Trash icon */}
+</button>
                   <Modal
                     isOpen={isModalOpen2}
                     onRequestClose={() => setIsModalOpen2(false)}

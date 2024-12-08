@@ -73,29 +73,65 @@ const ComplaintsList = () => {
                                 <h2 className="section-title">Complaints</h2>
                             </div>
                             <div className="row mb-3 d-flex align-items-center" style={{ gap: "20px", paddingBottom: "60px" }}>
-                    <div className="col-auto">
-                        <label htmlFor="statusFilter" className="me-2">Status:</label>
-                        <select
-                            id="statusFilter"
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'pending' | 'resolved')}
-                        >
-                            <option value="all">All</option>
-                            <option value="pending">Pending</option>
-                            <option value="resolved">Resolved</option>
-                        </select>
-                    </div>
-                    <div className="col-auto">
-                        <label htmlFor="sortOrder" className="me-2">Sort by Date:</label>
-                        <select
-                            id="sortOrder"
-                            value={sortOrder}
-                            onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
-                        >
-                            <option value="newest">Newest First</option>
-                            <option value="oldest">Oldest First</option>
-                        </select>
-                    </div>
+                            <div className="col-auto">
+  <label htmlFor="statusFilter" className="me-2">Status:</label>
+  <select
+    id="statusFilter"
+    value={statusFilter}
+    onChange={(e) => setStatusFilter(e.target.value as 'all' | 'pending' | 'resolved')}
+    style={{
+      width: "100%",
+      padding: "10px",
+      borderRadius: "5px",
+      border: "1px solid #ced4da",
+      fontSize: "16px",
+      color: "#495057",
+      backgroundColor: "#fff",
+      marginBottom: "15px",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+      appearance: "none",
+      WebkitAppearance: "none",
+      MozAppearance: "none",
+      backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23999999' d='M2 0L0 2h4zM2 5L0 3h4z'/></svg>")`,
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "right 10px center",
+      backgroundSize: "10px",
+    }}
+  >
+    <option value="all">All</option>
+    <option value="pending">Pending</option>
+    <option value="resolved">Resolved</option>
+  </select>
+</div>
+<div className="col-auto">
+  <label htmlFor="sortOrder" className="me-2">Sort by Date:</label>
+  <select
+    id="sortOrder"
+    value={sortOrder}
+    onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+    style={{
+      width: "100%",
+      padding: "10px",
+      borderRadius: "5px",
+      border: "1px solid #ced4da",
+      fontSize: "16px",
+      color: "#495057",
+      backgroundColor: "#fff",
+      marginBottom: "15px",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+      appearance: "none",
+      WebkitAppearance: "none",
+      MozAppearance: "none",
+      backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23999999' d='M2 0L0 2h4zM2 5L0 3h4z'/></svg>")`,
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "right 10px center",
+      backgroundSize: "10px",
+    }}
+  >
+    <option value="newest">Newest First</option>
+    <option value="oldest">Oldest First</option>
+  </select>
+</div>
                 </div>
                 {/* Notification Modal */}
                 {notification && (

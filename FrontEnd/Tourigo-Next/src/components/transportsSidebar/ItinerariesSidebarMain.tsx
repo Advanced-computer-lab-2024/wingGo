@@ -34,11 +34,11 @@ const ItinerariesSidebarMain: React.FC<ItinerariesSidebarMainProps> = ({ applyFi
                         <SidebarSearchInputBox placeHolder="City" onSearch={handleSearch} />
                     </div>
                 </div>
-                <div className="sidebar-widget-divider"></div>
+                {/* <div className="sidebar-widget-divider"></div>
                 <div className="sidebar-widget widget">
                     <h6 className="sidebar-widget-title small mb-15">Price Filter</h6>
                     <RangeFilter onChange={handlePriceChange} />
-                </div>
+                </div> */}
                 <div className="sidebar-widget-divider"></div>
                 <div className="sidebar-widget widget widget_categories">
                     <h6 className="sidebar-widget-title small mb-15">Type of Transport</h6>

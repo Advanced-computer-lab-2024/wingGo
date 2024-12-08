@@ -8,6 +8,7 @@ import { bookflight, searchFlights } from "@/api/FlightApi";
 import { set } from "react-hook-form";
 import { bookHotel, searchHotels } from "@/api/HotelApi";
 import HotelCard from "../common/tourElements/HotelCard";
+import { useRouter } from "next/navigation";
 
 
 
@@ -28,6 +29,8 @@ const HotelArea: React.FC<HotelAreaProps> = ({
     checkoutDate,
     adults
 }) => {
+
+  const router = useRouter();
   
   const [tripData, setTripData] = useState<any[]>([]);
 
@@ -59,20 +62,20 @@ const HotelArea: React.FC<HotelAreaProps> = ({
     }
   }, [searchTriggered, cityCode]);
 
-
+  
    const handleBookHotel = async (hotel: any) => {
 
         try {
           console.log('Booking hotel:', hotel);
-          const response = await bookHotel(hotel);
-          console.log('Booking response:', response);
+          localStorage.setItem("selectedHotel", JSON.stringify(hotel));
+          const query = new URLSearchParams({
+            adults: adults.toString(),
+            checkin: checkinDate?.toISOString().split('T')[0] || '',
+            checkout: checkoutDate?.toISOString().split('T')[0] || '',
+          });
+
+          router.push(`/booking-hotel?${query}`);
     
-          if(response.message === "Hotel booked successfully"){
-            alert("Hotel booked successfully");
-          }
-          else{
-            alert("Insufficient balance");
-          }
         } catch (error) {
           console.error('Error booking hotel:', error);
         }
