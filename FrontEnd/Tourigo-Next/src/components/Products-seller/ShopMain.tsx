@@ -14,6 +14,16 @@ import { useFilter } from "@/hooks/useFilterproduct";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import the useCurrency hook
 import { filterProductsSeller} from "@/api/productApi";
 import ItinerariesContentHeader from "@/elements/Products/it-header";
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  id: string;  // Corresponds to the `sellerId` in the token
+  username: string;
+  role: string;
+  mustChangePassword: boolean;
+}
+
 
 interface FilterOptions {
   budget?: number;
@@ -28,8 +38,20 @@ const ShopMain = () => {
   const [filters, setFilters] = useState<FilterOptions>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("Default");
+  const [sellerId, setSellerId] = useState<string | null>(null);
 
-  const hardcodedSellerId = "67158afc7b1ec4bfb0240575";
+
+  // const hardcodedSellerId = "67158afc7b1ec4bfb0240575";
+  useEffect(() => {
+    const token = Cookies.get("token");
+    if (token) {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      setSellerId(decodedToken.id); // Extract and set sellerId
+    } else {
+      console.error("No token found. Please log in.");
+    }
+  }, []);
+  
 
   
   // const mapData = (searchData.length ? searchData : filterData).filter(
@@ -37,36 +59,40 @@ const ShopMain = () => {
   // );
   // Fetch filtered activities from the API
   const loadFilteredProducts = async () => {
+    if (!sellerId) {
+      console.error("Seller ID is not available.");
+      return;
+    }
     try {
       const apiFilters: FilterOptions = {
         budget: filters.budget,
       };
-
-      const data = await filterProductsSeller({ ...apiFilters, sellerId:hardcodedSellerId  });
-
-      // Apply local search filtering if searchQuery is provided
-    const finalFilteredData = searchQuery
-      ? data.filter(
-          (product) =>
-            product.name.toLowerCase().includes(searchQuery.toLowerCase()) 
-            
-        )
+  
+      const data = await filterProductsSeller({ ...apiFilters, sellerId });
+  
+      const finalFilteredData = searchQuery
+        ? data.filter((product) =>
+            product.name.toLowerCase().includes(searchQuery.toLowerCase())
+          )
         : data;
-        // Apply the mapData logic to filter out archived products
+  
       const mapData = finalFilteredData;
-
-      // Apply sorting after fetching and filtering
+  
       const sortedData = sortData(mapData, sortOption);
       setFilteredProducts(sortedData);
     } catch (error) {
-      console.error("Failed to fetch filtered itineraries:", error);
+      console.error("Failed to fetch filtered products:", error);
     }
   };
+  
 
 
   useEffect(() => {
-    loadFilteredProducts();
-  }, [filters, searchQuery, sortOption]);
+    if (sellerId) {
+      loadFilteredProducts();
+    }
+  }, [sellerId, filters, searchQuery, sortOption]);
+  
 
 
   const sortData = (data: Product[], option: string): Product[] => {
