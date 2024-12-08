@@ -558,7 +558,7 @@ setShowCancelModalAct(true);
                                             </Link>
                                         </h5>
                                         <div className="recent-activity-location">
-                                            Address: {booking.location.address}
+                                            Address: {booking.location}
                                         </div>
                                     </div>
                                 </div>
