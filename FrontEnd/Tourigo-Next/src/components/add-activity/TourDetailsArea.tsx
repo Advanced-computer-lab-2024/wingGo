@@ -1,5 +1,5 @@
 "use client";
-import React, { useState,FormEvent,ChangeEvent} from "react";
+import React, { useState,FormEvent,ChangeEvent, useEffect} from "react";
 import UploadSingleImg from "./UploadSingleImg";
 import TourGallery from "./TourGallary";
 import TourContent from "./TourContent";
@@ -9,7 +9,8 @@ import ErrorMessage from "@/elements/error-message/ErrorMessage";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { createActivity } from "@/api/activityApi";
-
+import {  getAvailableTags } from "@/api/itineraryApi";
+import { getAllActCategories } from "@/api/adminApi";
 import L from "leaflet";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import "leaflet/dist/leaflet.css";
@@ -37,18 +38,15 @@ interface NewActivity {
   name:string;
   date: string;
   time: string;
-  location: {
-      type: string;
-      address: string;
-      lat: number;
-      lng: number;
-  };
+  location: string;
+  
   price: number;
   category: string;
   specialDiscounts: string;
   isBookingOpen: boolean;
   advertiser: string;
-  
+  tags: string[];
+  description: string; 
 }
 
 const customIcon = new L.Icon({
@@ -63,19 +61,24 @@ interface Suggestion {
   x: number;
   y: number;
 }
-
+interface Category {
+  _id: string;
+  name: string;
+}
 const TourDetailsArea = () => {
   const advertiserId ="67521d930982497fbe368837"; 
   const [newActivity, setNewActivity] = React.useState<NewActivity>({
     name:'',
     date: '',
     time: '',
-    location: { type: 'Point', address: '', lat: 0, lng: 0 },
+    location: "",
     price: 0,
     category: '',
     specialDiscounts: '',
     isBookingOpen: true,
-    advertiser: advertiserId,  // Replace with actual advertiser ID
+    tags: [],
+    advertiser: advertiserId,
+    description: "",  // Replace with actual advertiser ID
     
 });
   
@@ -86,19 +89,82 @@ const [largeImg, setlargeImg] = useState<string>("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [mapCenter, setMapCenter] = useState({ lat: 45.652478, lng: 25.596463 });
   const [markerPosition, setMarkerPosition] = useState(mapCenter);
+  const [availablePrefrences, setAvailablePrefrences] = useState<Array<any>>([]);
+  const [selectedPrefrences, setSelectedPrefrences] = useState<Array<any>>([]);
+  const [isLoadingPreferences, setIsLoadingPreferences] = useState<boolean>(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
   const provider = new OpenStreetMapProvider();
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllActCategories(); // API call to fetch categories
+        setCategories(response); // Update categories state
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast.error("Failed to fetch categories.");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
 
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const fetchAllPreferenceTags = async () => {
+      try {
+        const data = await getAvailableTags();
+        console.log("Tags available:", data);
+        setAvailablePrefrences(data);
+      } catch (error) {
+        console.error("Error fetching Tags:", error);
+      } finally {
+        setIsLoadingPreferences(false);
+      }
+    };
+
+    fetchAllPreferenceTags();
+  }, []);
+  const handleSelectPrefClick = (id: string) => {
+    setSelectedPrefrences((prevSelected) => {
+      const updatedState = prevSelected.includes(id)
+        ? prevSelected.filter((item) => item !== id) // Remove tag
+        : [...prevSelected, id]; // Add tag
+  
+      // Update itinerary tags
+      setNewActivity((prevState) => ({
+        ...prevState,
+        tags: updatedState,
+      }));
+  
+      return updatedState;
+    });
+  };
+  const selectHandler = () => {};
+  useEffect(() => {
+    // Update form data when selectedPrefrences changes
+    setNewActivity((prevState) => ({
+      ...prevState,
+      tags: selectedPrefrences, // This keeps tags updated
+    }));
+  }, [selectedPrefrences]);
   const searchAddress = async (query: string) => {
     const results: Suggestion[] = await provider.search({ query });
     setSuggestions(results);
   };
 
   const handleSelectAddress = (suggestion: Suggestion) => {
+    const newLatLng = { lat: suggestion.y, lng: suggestion.x };
+  
     setAddressQuery(suggestion.label); // Update the address query
-    const newLatLng = { lat: suggestion.y, lng: suggestion.x }; // Use suggestion coordinates
     setMapCenter(newLatLng); // Update map center
     setMarkerPosition(newLatLng); // Update marker position
+    setNewActivity((prev) => ({
+      ...prev,
+      location: suggestion.label, // Update location as a string
+    }));
     setSuggestions([]); // Clear suggestions list
   };
   
@@ -107,59 +173,60 @@ const [largeImg, setlargeImg] = useState<string>("");
   const handleAddActivity = async (e: FormEvent) => {
     e.preventDefault();
   
-    const formData = new FormData();
+    if (!newActivity.location) {
+      toast.error("Please provide a valid location.");
+      return;
+    }
   
-    // Append basic fields
+    const formData = new FormData();
     formData.append("name", newActivity.name);
     formData.append("date", newActivity.date);
     formData.append("time", newActivity.time);
+    formData.append("location", newActivity.location); // Append location as a string
     formData.append("price", String(newActivity.price));
     formData.append("category", newActivity.category);
+    formData.append("tags", JSON.stringify(newActivity.tags)); // Convert tags array to JSON string
     formData.append("specialDiscounts", newActivity.specialDiscounts);
     formData.append("isBookingOpen", String(newActivity.isBookingOpen));
     formData.append("advertiser", newActivity.advertiser);
+    formData.append("description", newActivity.description);
   
-    // Ensure correct location field
-    const locationData = {
-      type: "Point",
-      address: addressQuery || newActivity.location.address,  // Correct address source
-      lat: markerPosition.lat,
-      lng: markerPosition.lng,
-    };
-    
-    formData.append("location", String(locationData));
-  
-    // Append image if present
     if (image) {
       formData.append("file", image);
     }
   
     try {
-      // Make the API call
       const response = await createActivity(formData);
       toast.success(response.message || "Activity added successfully");
-  
-      // Reset form after success
       setNewActivity({
         name: "",
         date: "",
         time: "",
-        location: { type: "Point", address: "", lat: 0, lng: 0 },
+        location: "",
         price: 0,
         category: "",
         specialDiscounts: "",
         isBookingOpen: true,
+        tags: [],
         advertiser: advertiserId,
+        description: "",
       });
       setAddressQuery("");
-      setMarkerPosition({ lat: 45.652478, lng: 25.596463 });
     } catch (error) {
       console.error("Error adding activity:", error);
       toast.error("Failed to add activity.");
     }
   };
   
-  
+  const handleSelectCategoryClick = (id: string) => {
+    const selectedCategory = categories.find((category) => category._id === id);
+    if (selectedCategory) {
+      setNewActivity((prevState) => ({
+        ...prevState,
+        category: selectedCategory.name, // Set the category name as the selected value
+      }));
+    }
+  };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = e.target as HTMLInputElement;
@@ -167,14 +234,14 @@ const [largeImg, setlargeImg] = useState<string>("");
     setNewActivity((prev) => ({
       ...prev,
       [name]: name === "tags"
-        ? value.split(",").map((tag) => tag.trim()) // Handle tags as an array
-        : name === "location.address"
-        ? { ...prev.location, address: value } // Update nested location address
+        ? value.split(",").map((tag) => tag.trim())
+        : name === "address"
+        ? value // Update location as a string // Handle address updates
         : type === "checkbox"
-        ? checked // Handle checkbox input
+        ? checked
         : name === "price"
-        ? Number(value) // Ensure price is a number
-        : value, // Default assignment for other fields
+        ? Number(value)
+        : value,
     }));
   };
 
@@ -262,19 +329,47 @@ const [largeImg, setlargeImg] = useState<string>("");
                         
                         <div className="tour-details-destination-info">
                           <div className="tour-details-destination-info-title">
-                            <div className="form-input-box">
-                              <div className="form-input-title">
-                                <label htmlFor="tourType">
-                                  Activity Category<span>*</span>
-                                </label>
-                              </div>
-                              <div className="form-input">
-                              <input type="text" name="category" value={newActivity.category} onChange={handleInputChange} required />
-                                
-                              </div>
-                            </div>
+                          <div className="form-input-box mb-15">
+  <h4 className="mb-20">Activity Category</h4>
+  <div className="buttons-container-pref">
+    {isLoadingCategories ? (
+      <p>Loading categories...</p>
+    ) : (
+      categories.map((category) => (
+        <button
+          key={category._id}
+          type="button"
+          onClick={() => handleSelectCategoryClick(category._id)}
+          className={`button-pref ${
+            newActivity.category === category.name ? "active-pref" : ""
+          }`}
+        >
+          {category.name}
+        </button>
+      ))
+    )}
+  </div>
+</div>
                           </div>
                         </div>
+                        <div className="form-input-box mb-15">
+  <h4 className="mb-20">Preference Tags</h4>
+  <div className="buttons-container-pref">
+    {isLoadingPreferences ? (
+      <p>Loading preferences...</p>
+    ) : (
+      availablePrefrences.map((item) => (
+        <button
+          key={item._id}
+          onClick={() => handleSelectPrefClick(item._id)}
+          className={`button-pref ${selectedPrefrences.includes(item._id) ? "active-pref" : ""}`}
+        >
+          {item.name}
+        </button>
+      ))
+    )}
+  </div>
+</div>
                         <div className="tour-details-destination-info">
                           <div className="tour-details-destination-info-title">
                             <div className="form-input-box">
@@ -291,25 +386,37 @@ const [largeImg, setlargeImg] = useState<string>("");
                           </div>
                         </div>
                       </div>
-                      <div className="mb-35">
-                        <h4 className="mb-20">Activity Content</h4>
-                        <TourContent />
-                      </div>
-                      <div className="tour-details-gallery mb-35">
-                        <h4 className="mb-20">Activity Galley</h4>
-
-                        <TourGallery />
-                      </div>
+                     
+                      <div className="form-input-box mb-15">
+  <div className="form-input-title">
+    <label htmlFor="description">Activity Description</label>
+  </div>
+  <div className="form-input">
+    <textarea
+      name="description"
+      value={newActivity.description}
+      onChange={handleInputChange}
+      placeholder="Enter a detailed description of the activity (optional)"
+      rows={4}
+      className="form-textarea"
+    />
+  </div>
+</div>
                       <div className="tour-details-location mb-35">
         <h4 className="mb-20">Location</h4>
         <div className="form-input-box mb-20">
         <input
   type="text"
-  name="location"
-  value={addressQuery}
+  name="address"
+  value={newActivity.location}  // Bind directly to newActivity.location.address
   onChange={(e) => {
-    setAddressQuery(e.target.value); // Update the input value
-    searchAddress(e.target.value); // Fetch suggestions for typed address
+    const newAddress = e.target.value;
+    setAddressQuery(newAddress); // Update the address query
+    setNewActivity((prev) => ({
+      ...prev,
+      location: newAddress, // Correct: Update location as a string
+    }));
+    searchAddress(newAddress); // Fetch suggestions
   }}
   placeholder="Type an address"
   className="form-input"
@@ -344,14 +451,19 @@ const [largeImg, setlargeImg] = useState<string>("");
       const marker = e.target as L.Marker; // Get the marker instance
       const position = marker.getLatLng(); // Get new position after dragging
       setMarkerPosition(position); // Update marker position state
-
+  
       // Perform reverse geocoding to get the new address
       fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.lat}&lon=${position.lng}`
       )
         .then((response) => response.json())
         .then((data) => {
-          setAddressQuery(data.display_name || "Unknown location"); // Update the text box with the new address
+          const newAddress = data.display_name || "Unknown location";
+          setAddressQuery(newAddress); // Update the address box
+          setNewActivity((prev) => ({
+            ...prev,
+  location: newAddress,
+          }));
         });
     },
   }}

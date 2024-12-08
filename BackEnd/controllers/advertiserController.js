@@ -145,7 +145,8 @@ const createActivity = async (req, res) => {
         tags, 
         specialDiscounts, 
         isBookingOpen, 
-        advertiser 
+        advertiser ,
+        description 
     } = req.body;
 
     console.log("Advertiser ID received:", advertiser);
@@ -200,6 +201,7 @@ const createActivity = async (req, res) => {
             isBookingOpen: isBookingOpen === "true", // Convert string to boolean
             advertiser: advertiserObjectId,
             photo: photoUrl,
+            description: description || "",
         });
         console.log(newActivity);
 
@@ -235,15 +237,8 @@ const updateActivity = async (req, res) => {
             delete req.body.advertiser;
         }
 
-        if (req.body.location && req.body.location.address) {
-            // Parse the location address (assuming you have a function to do this)
-            const {lat,lng} = await getCoordinates(req.body.location.address);
-            req.body.location = {
-                type: 'Point',
-                lat: lat,
-                lng: lng,
-                address: req.body.location.address
-            };
+        if (req.body.location) {
+            req.body.location = req.body.location; // Treat location as a simple string
         }
 
 
