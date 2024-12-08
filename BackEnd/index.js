@@ -276,9 +276,9 @@ app.delete("/verifyOtp", async (req, res) => {
         }
 
         const user = await LoginCredentials.findOne({ email: email });
-
+        console.log(user);
         user.mustChangePassword = true;
-
+        console.log(user);
         await user.save();
 
         await Otp.findOneAndDelete({email: email});

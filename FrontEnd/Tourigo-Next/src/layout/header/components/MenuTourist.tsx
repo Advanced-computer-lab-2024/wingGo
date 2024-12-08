@@ -8,6 +8,7 @@ import { useCurrency } from "@/contextApi/CurrencyContext";
 import {getTouristNotificationsApi} from "@/api/PrefrenceApi"
 import {Notification} from "@/interFace/interFace"
 import { FaBell } from "react-icons/fa";
+import Cookies from "js-cookie";
 
 const Menu = () => {
   const { setCurrency, currency } = useCurrency(); // Access setCurrency from CurrencyContext
@@ -74,11 +75,11 @@ useEffect(() => {
 {item.id === 11 ? ( // Check for the Bell Icon ID
       <div
       style={{
-        position: "relative",
-        top: "40%", // Vertically center it within the navigation bar
-        // right: "5px", // Keep it to the far-right of the screen
-        paddingLeft: "30px",
-        // marginLeft: "20px"
+        position: "absolute",
+        top: "45%", // Vertically center it within the navigation bar
+        right: "150px", // Keep it to the far-right of the screen
+        //paddingLeft: "30px",
+        //marginLeft: "20px"
       }}
     >
         <FaBell
@@ -227,6 +228,8 @@ useEffect(() => {
               </ul>
             )}
 
+            
+
             {/* multi pages */}
             {item?.pageLayout === true && item?.submenus?.length && (
               <ul className="mega-menu mega-grid-4">
@@ -257,7 +260,25 @@ useEffect(() => {
             )}
           </li>
         ))}
+<div
+      style={{
+        position: "absolute",
+        top:"20%",
+        right: "5px", // Keep it to the far-right of the screen
+        paddingLeft: "30px",
+        marginLeft: "20px"
+      }}
+    >
+          <button className="bd-primary-btn btn-style radius-60 mb-10 px-50 mt-20"
+            onClick={() => {const cookie = Cookies.remove("token"); window.location.href = "/";}}
+            >
+              <span className="bd-primary-btn-text">Logout</span>
+              <span className="bd-primary-btn-circle"></span>
+            </button>
+            </div>
       </ul>
+
+      
       {/* <p>Current selected currency: {currency}</p> */}
     </>
   );
