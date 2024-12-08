@@ -25,6 +25,7 @@ const WishlistArea = () => {
   const route = useRouter();
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
+  const [productImageUrl, setProductImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +43,7 @@ const WishlistArea = () => {
 
     loadWishlist();
   }, []);
+  
 
   if (loading) {
     return <h3 className="text-center">Loading Wishlist...</h3>;
@@ -89,7 +91,7 @@ const WishlistArea = () => {
 
   const handleDelteProduct = (productId:string) => {
     setWishlistProducts((prevItems)=> prevItems.filter((item)=>item.productId._id!==productId))
-    
+
     removeFromWishlist(productId).then(()=>{
       console.log("Item removed from wishlist Successfullly")
     })
@@ -121,7 +123,6 @@ const WishlistArea = () => {
                             Product
                           </th>
                           <th className="bd-cart-header-price">Price</th>
-                          <th className="bd-cart-header-quantity">Quantity</th>
                           <th>Add to Cart</th>
                           <th>Remove</th>
                         </tr>
@@ -144,30 +145,6 @@ const WishlistArea = () => {
 
                               <td className="bd-cart-price">
                                 <span>${totalAmount.toFixed(2)}</span>
-                              </td>
-
-                              <td className="bd-cart-quantity">
-                                <div className="bd-product-quantity">
-                                  <span
-                                    className="bd-cart-minus"
-                                    onClick={() => handDecressCart(item.productId._id)}
-                                  >
-                                    <MinusIcon />
-                                  </span>
-                                  <input
-                                    className="bd-cart-input"
-                                    type="text"
-                                    onChange={handleChange}
-                                    value={item.productId.quantity}
-                                    readOnly
-                                  />
-                                  <span
-                                    className="bd-cart-plus"
-                                    onClick={() => handleIncressWishlist(item)}
-                                  >
-                                    <PlusIcon />
-                                  </span>
-                                </div>
                               </td>
 
                               <td className="bd-cart-add-to-cart">

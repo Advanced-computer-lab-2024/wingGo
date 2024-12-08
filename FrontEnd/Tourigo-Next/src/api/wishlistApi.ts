@@ -1,6 +1,15 @@
 import axios from 'axios';
 import {  Wishlist } from '../interFace/interFace';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode'; 
 const touristId = '673167d3aa67023ecc799397';
+
+interface DecodedToken {
+  username: string;
+  id: string;
+  role: string;
+  mustChangePassword:boolean;
+}
 
 //router.get('/viewWishlist/:touristId', touristController.viewWishlist);
 
