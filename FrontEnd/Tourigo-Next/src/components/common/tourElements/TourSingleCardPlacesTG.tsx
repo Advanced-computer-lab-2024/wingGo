@@ -5,8 +5,9 @@ import useGlobalContext from "@/hooks/use-context";
 import { Place } from "@/interFace/interFace";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React,{useState,useEffect} from "react";
 import { deletePlace } from "@/api/placesApi";
+import {fetchImage} from "@/api/placesApi"
 interface ItourPropsType {
   tour: Place;
   className: string;
@@ -27,6 +28,8 @@ const TourSingleCard = ({
   onRemove, // Destructure the prop
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
+  const DEFAULT_IMAGE = "/assets/images/places.jpg";
+  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
   const handleDeletePlace = async (placeId: string) => {
     if (confirm("Are you sure you want to delete this place?")) {
       try {
@@ -41,6 +44,23 @@ const TourSingleCard = ({
       }
     }
   };
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        if (tour?._id && tour?.photo) { // Check if the item has an image
+          const url = await fetchImage(tour._id);
+          if (url) {
+            console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
+            setImageUrl(url);
+            console.log(imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load image:", error);
+      }
+    };
+    loadImage();
+  }, [tour?._id, tour?.photo,imageUrl]);
   return (
     <>
       {isparentClass ? (
@@ -49,13 +69,14 @@ const TourSingleCard = ({
             <div className="p-relative">
               <div className="tour-thumb image-overly">
                 <Link href={`/place-details-TG/${tour._id}`}>
-                  <Image
-                    src={tour.pictures[0] || "/images/default-image.jpg"}
+                <Image
+                    src={imageUrl}
                     loader={imageLoader}
                     width={270}
                     height={270}
-                    style={{ width: "100%", height: "auto" }}
-                    alt={tour.name}
+                    style={{ width: "300px", height: "250px" }}
+                    alt="Places Image"
+                    unoptimized 
                   />
                 </Link>
               </div>

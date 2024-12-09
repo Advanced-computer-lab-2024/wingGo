@@ -73,7 +73,7 @@ const TourSingleCard = ({
                     width={270}
                     height={270}
                     style={{ width: "300px", height: "250px" }}
-                    alt="Activity Image"
+                    alt="Places Image"
                     unoptimized 
                   />
                 </Link>

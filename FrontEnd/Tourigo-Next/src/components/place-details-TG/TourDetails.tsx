@@ -17,6 +17,7 @@ import { ToastContainer, toast } from "react-toastify";
 import Modal from "react-modal"; // Import Modal from react-modal
 import { TbEdit } from "react-icons/tb";
 import { updatePlace } from "@/api/placesApi";
+import {fetchImage} from "@/api/placesApi"
 
 
 const TourDetails = ({ id }: idTypeNew) => {
@@ -24,6 +25,8 @@ const TourDetails = ({ id }: idTypeNew) => {
   const [isEmailFormOpen, setIsEmailFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [email, setEmail] = useState('');
+  const DEFAULT_IMAGE = "/assets/images/places.jpg";
+  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -80,6 +83,23 @@ const TourDetails = ({ id }: idTypeNew) => {
 
     fetchPlace();
 }, [id]);
+useEffect(() => {
+  const loadImage = async () => {
+    try {
+      if (data?._id && data?.photo) { // Check if the item has an image
+        const url = await fetchImage(data._id);
+        if (url) {
+          console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
+          setImageUrl(url);
+          console.log(imageUrl);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load image:", error);
+    }
+  };
+  loadImage();
+}, [data?._id, data?.photo,imageUrl]);
 
 const handleSave = async (event?: React.MouseEvent<HTMLButtonElement>) => {
  console.log("upd");
@@ -126,12 +146,15 @@ setIsEditing(false);
                 <div className="tour-details-wrapper">
                   <div className="tour-details mb-25">
                     <div className="tour-details-thumb details-slide-full mb-30">
-                      <Image
-                        src={data?.pictures[0]}
-                        loader={imageLoader}
-                        style={{ width: "100%", height: "auto" }}
-                        alt="Place's Image"
-                      />
+                    <Image
+                      src={imageUrl|| DEFAULT_IMAGE} // Placeholder image
+                      loader={imageLoader}
+                      width={300}
+                      height={300}
+                      style={{ width: "auto", height: "auto" }}
+                      alt="Place Image"
+                      unoptimized
+                    />
                     </div>
                     <div className="tour-details-content">
                       {/* <div className="tour-details-badge d-flex gap--5 mb-10">
