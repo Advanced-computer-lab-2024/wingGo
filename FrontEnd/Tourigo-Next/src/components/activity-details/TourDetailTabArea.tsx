@@ -2,7 +2,7 @@
 import { imageLoader } from "@/hooks/image-loader";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import tourImgNine from "../../../public/assets/images/tour/tour-img-9.png";
 import tourImgTwentyOne from "../../../public/assets/images/tour/tour-img-21.png";
 import tourImgTwentyTwo from "../../../public/assets/images/tour/tour-img-22.png";
@@ -10,9 +10,12 @@ import { clientReviewData } from "@/data/client-review-data";
 import TourDetailsPostForm from "./TourDetailsPostFrom/TourDetailsPostForm";
 import { Activity } from '@/interFace/interFace';
 import GetRatting from "@/hooks/GetRatting";
-
+import { updateActivityApi } from "@/api/activityApi";
+import { toast } from "sonner";
+import { TbEdit } from "react-icons/tb";
 interface TourDetailTabAreaProps {
   activityData: Activity;
+  advertiserId: string; 
 }
 // Function to format date into a readable string
 const formatDate = (date: string | Date) => {
@@ -22,7 +25,37 @@ const formatDate = (date: string | Date) => {
 };
 
 
-const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ activityData }) => {
+const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({
+  activityData: initialActivityData,
+  advertiserId,
+}) =>  {
+  const [isEditing, setIsEditing] = useState(false);
+  const [activityData, setActivityData] = useState(initialActivityData);
+  const [updatedActivity, setUpdatedActivity] = useState({
+    name: activityData.name || "",
+    date: activityData.date || "",
+    time: activityData.time || "",
+    location: activityData.location || "",
+    price: activityData.price || 0,
+    category: activityData.category || "",
+    tags: activityData.tags || [],
+    specialDiscounts: activityData.specialDiscounts || "",
+    description: activityData.description || "",
+  });
+  const handleSaveChanges = async () => {
+    try {
+      await updateActivityApi(activityData._id, updatedActivity, advertiserId);
+      setActivityData((prevData) => ({
+        ...prevData,
+        ...updatedActivity,
+      }));
+      toast.success("Activity updated successfully!");
+      setIsEditing(false);
+    } catch (error) {
+      toast.error("Failed to update activity. Please try again.");
+    }
+  };
+  
   return (
     <>
       <div className="tour-details-nav-tabs mb-35">
@@ -65,18 +98,47 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ activityData }) =
             tabIndex={0}
           >
             
-            <p className="mb-15">
-              <strong> Dates:</strong>{" "}
-              {formatDate(activityData.date)}
-            </p>
+            <p className="mb-15 d-flex align-items-center">
+        <strong>Date:</strong>
+        {isEditing ? (
+          <input
+            type="date"
+            value={updatedActivity.date}
+            onChange={(e) =>
+              setUpdatedActivity({ ...updatedActivity, date: e.target.value })
+            }
+            className="form-control ms-2"
+            style={{ width: "auto" }}
+          />
+        ) : (
+          <span>{new Date(activityData.date).toLocaleDateString()}</span>
+        )}
+        <button
+          onClick={() => setIsEditing(!isEditing)}
+          className="btn btn-link p-0 ms-2"
+          style={{ cursor: "pointer" }}
+        >
+          <TbEdit size={20} />
+        </button>
+      </p>
+      {isEditing && (
+        <button onClick={handleSaveChanges} className="btn btn-primary mt-3">
+          Save Changes
+        </button>
+      )}
             <p className="mb-15">
               <strong>Time:</strong> {activityData.time}
             </p>
             <p className="mb-15">
               <strong>Category:</strong> {activityData.category}
             </p>
-            
-
+            <p><strong>Description:</strong> {activityData.description || 'N/A'}</p>
+        <p><strong>Location:</strong> {activityData.location}</p>
+        <p><strong>Price:</strong> {activityData.price} USD</p>
+        <p><strong>Tags:</strong> {activityData.tags?.join(', ') || 'No tags available'}</p>
+        <p><strong>Special Discounts:</strong> {activityData.specialDiscounts || 'None'}</p>
+        
+       
             <div className="tour-details-faq mb-35">
   
   <div className="accordion-wrapper faq-style-3">

@@ -11,7 +11,9 @@ import BookingFormModal from "@/elements/modals/BookingFormModal";
 
 const TourGridRight = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
-
+  const removeActivity = (id: string) => {
+    setActivities((prevActivities) => prevActivities.filter((activity) => activity._id !== id));
+};
   useEffect(() => {
     const fetchActivities = async () => {
       const data = await getActivities_Adv();
@@ -37,6 +39,7 @@ const TourGridRight = () => {
                       tourWrapperClass="tour-wrapper style-one"
                       isparentClass={true}
                       isAdvertiser={true}
+                      onUnsaved={removeActivity}
                     />
                   ))
                 ) : (
