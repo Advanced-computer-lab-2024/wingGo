@@ -6,6 +6,8 @@ import AddCuponMain from "./AddCuponMain";
 import { payForOrder } from '@/api/cartApi';
 import SelectPaymentType from "./SelectPaymentType";
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 interface CheckoutMainProps {
   promoCode: string | null; // Accept promoCode as a prop
   orderId:string | null
@@ -20,11 +22,18 @@ const CheckoutArea: React.FC<CheckoutMainProps> = ({ promoCode ,orderId}) => {
     cvv: "",
   });
 
+  const router = useRouter();
+
   const handlePayment = async () => {
     try {
       const result = await payForOrder(orderId, paymentMethod, promoCode);
+      toast.success("Payment successful!");
+      setTimeout(() => {
+        router.push("/Products"); // Redirect to transports page
+      }, 1000); // 1-second delay
       console.log('Payment result:', result.message);
     } catch (error) {
+      toast.error("Payment can't be done. Please try again later.");
       console.error('Payment failed: ',);
     }
   };
