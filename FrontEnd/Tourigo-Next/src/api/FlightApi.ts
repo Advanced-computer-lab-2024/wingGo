@@ -65,8 +65,17 @@ export const searchFlights = async (params: FlightSearchParams): Promise<any> =>
   }
 
   export const searchFlightsByUserId = async (userId: string): Promise<any> => {
+
+    const cookie = Cookies.get('token');
+    let id = '';
+    if(cookie){
+      const decodedToken = jwtDecode<DecodedToken>(cookie);
+      id = decodedToken.id
+    }
+
+
     try {
-      const response = await axios.get<any>(`${API_URL}/searchFlights/67240ed8c40a7f3005a1d01d`);
+      const response = await axios.get<any>(`${API_URL}/searchFlights/${id}`);
       console.log('search flights data:', response.data);
       return response.data;
     } catch (error) {
@@ -76,8 +85,16 @@ export const searchFlights = async (params: FlightSearchParams): Promise<any> =>
   };
 
   export const searchTransportsByUserId = async (userId: string): Promise<any> => {
+
+    const cookie = Cookies.get('token');
+    let id = '';
+    if(cookie){
+      const decodedToken = jwtDecode<DecodedToken>(cookie);
+      id = decodedToken.id
+    }
+
     try {
-      const response = await axios.get<any>(`${API_URL}/searchTransports/673167d3aa67023ecc799397`);
+      const response = await axios.get<any>(`${API_URL}/searchTransports/${id}`);
       console.log('search Transports data:', response.data);
       return response.data;
     } catch (error) {

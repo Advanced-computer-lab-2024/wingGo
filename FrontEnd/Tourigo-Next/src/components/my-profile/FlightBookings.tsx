@@ -74,7 +74,7 @@ const FlightBookings: React.FC<FlightBookingsProps> = ({ id }) => {
                 <div className="team-info mb-20">
                   <h4 className="mb-15">Bookings:</h4>
                   <ul className="booking-list">
-                    {flightBookings.map((booking) => (
+                    {flightBookings.length>0 && flightBookings?.map((booking) => (
                       <li key={booking._id} className="booking-item card mb-3" style={{ marginLeft: "10px" }}>
                         <div className="card-body">
                           <h5 className="card-title">Flight ID: {booking.flightId}</h5>
