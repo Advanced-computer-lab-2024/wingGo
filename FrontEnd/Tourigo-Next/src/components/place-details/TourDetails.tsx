@@ -15,11 +15,15 @@ import "react-toastify/dist/ReactToastify.css"; // Import the CSS for styling
 import { FaShareAlt, FaEnvelope } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import Modal from "react-modal"; // Import Modal from react-modal
+import {fetchImage} from "@/api/placesApi"
 
 const TourDetails = ({ id }: idTypeNew) => {
   const [data, setData] = useState<Place | null>(null);
   const [isEmailFormOpen, setIsEmailFormOpen] = useState(false);
   const [email, setEmail] = useState('');
+  const DEFAULT_IMAGE = "/assets/images/Activity.jpeg";
+  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
+  
 
   const handleEmailChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
     setEmail(e.target.value);
