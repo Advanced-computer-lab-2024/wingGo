@@ -428,7 +428,7 @@ const TourDetailsArea = () => {
                               
                             </div>
                           </div>
-                          <div className="col-lg-6">
+                          {/* <div className="col-lg-6">
                             <div className="tour-details-location-map">
                               <iframe
                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d89245.36062680863!2d25.596462799999998!3d45.652478099999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40b35b862aa214f1%3A0x6cf5f2ef54391e0f!2sBra%C8%99ov%2C%20Romania!5e0!3m2!1sen!2sbd!4v1707640089632!5m2!1sen!2sbd"
@@ -437,7 +437,7 @@ const TourDetailsArea = () => {
                                 referrerPolicy="no-referrer-when-downgrade"
                               ></iframe>
                             </div>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </div>
