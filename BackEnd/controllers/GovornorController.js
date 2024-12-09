@@ -21,18 +21,21 @@ const createPlace = async (req, res) => {
           
         }
 
-        // Process uploaded pictures (if any)
-        let pictureUrls = [];
-        if (req.files && req.files.length > 0) {
-            pictureUrls = req.files.map(file => file.location); // Assuming you're using AWS S3 and `location` holds the URL
+        // Handle optional photo
+        let photoUrl = null;
+        if (req.file) {
+            photoUrl = req.file.location;
         }
+
+        console.log("Photo URL:", photoUrl);
 
         // Create a new place
         const place = new Place({
             ...placeData,  // Spread the rest of the place data (e.g., name, description, location)
-            pictures: pictureUrls, // Add the uploaded pictures
+            // pictures: pictureUrls, // Add the uploaded pictures
             governorId,  // Set the governor ID
-            tagss: tagss || []  // Use an empty array if tagss is missing
+            tagss: tagss || [] , // Use an empty array if tagss is missing
+            photo: photoUrl,
         });
 
         await place.save();

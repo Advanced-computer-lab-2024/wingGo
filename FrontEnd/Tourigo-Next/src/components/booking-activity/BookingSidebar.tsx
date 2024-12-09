@@ -7,6 +7,8 @@ import { getActivitiesData } from "@/data/act-data";
 import { Activity } from "@/interFace/interFace";
 import Link from "next/link";
 import { idTypeNew } from "@/interFace/interFace";
+import { fetchImage } from "@/api/activityApi";
+
 
 
 const BookingSidebar = ({ id }: idTypeNew) => {
@@ -16,6 +18,9 @@ const BookingSidebar = ({ id }: idTypeNew) => {
   const [activity, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const DEFAULT_IMAGE = "/assets/images/Activity.jpeg";
+  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
+
 
   const bookingProducts = useSelector(
     (state: RootState) => state.booking.bookingProducts
@@ -37,6 +42,24 @@ const BookingSidebar = ({ id }: idTypeNew) => {
     };
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        if (data?._id && data?.photo) { // Check if the item has an image
+          const url = await fetchImage(data._id);
+          if (url) {
+            console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
+            setImageUrl(url);
+            console.log(imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load image:", error);
+      }
+    };
+    loadImage();
+  }, [data?._id, data?.photo,imageUrl]);
   
 
   return (

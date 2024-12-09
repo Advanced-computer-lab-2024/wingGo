@@ -29,6 +29,7 @@ const TourDetailsArea = () => {
     reset,
     formState: { errors },
   } = useForm<FormData>();
+  
   const [itinerary, setItinerary] = useState<NewItinerary>({
     tourGuideId: "67325c530b3e54ad8bfe1678", 
     title: "",

@@ -15,6 +15,8 @@ import L from "leaflet";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 // interface FormData {
 //   tag: string;
 //   discount: string;
@@ -34,6 +36,13 @@ import { MapContainer, TileLayer, Marker } from "react-leaflet";
 //   phone: string;
 //   website: string;
 // }
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+//   iat: number; // Add this if included in the token payload
+}
 interface NewActivity {
   name:string;
   date: string;
@@ -66,7 +75,22 @@ interface Category {
   name: string;
 }
 const TourDetailsArea = () => {
-  const advertiserId ="67521d930982497fbe368837"; 
+
+  // Extract advertiser ID from the token
+  const token = Cookies.get("token");
+  let advertiserId = "";
+
+  try {
+    if (!token) {
+      throw new Error("No token found. Please log in.");
+    }
+
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    advertiserId = decodedToken.id; // Extract advertiser ID
+    console.log("Decoded Token:", decodedToken);
+  } catch (error) {
+    console.error("Error decoding token:", error);
+  }
   const [newActivity, setNewActivity] = React.useState<NewActivity>({
     name:'',
     date: '',
