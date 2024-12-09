@@ -77,6 +77,6 @@ const sendBirthdayPromoCodes = async () => {
 // Schedule this task to run daily at midnight
 // schedule.scheduleJob('0 0 * * *', sendBirthdayPromoCodes);
 // schedule.scheduleJob('*/2 * * * *', sendBirthdayPromoCodes);
-schedule.scheduleJob('22 01 * * *', sendBirthdayPromoCodes); // Runs daily at 8:29 PM
+schedule.scheduleJob('15 10 * * *', sendBirthdayPromoCodes); // Runs daily at 10:15 AM
 
 module.exports = sendBirthdayPromoCodes;

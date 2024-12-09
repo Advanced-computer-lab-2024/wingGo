@@ -152,7 +152,7 @@ const sendReminders = async () => {
 const startScheduler = () => {
   // schedule.scheduleJob('*/1 * * * *', sendReminders); // Run every minute for testing
 // schedule.scheduleJob('0 0 * * *', sendReminders); // Runs daily at midnight
-schedule.scheduleJob('03 04 * * *', sendReminders); // Runs daily at 4:03 AM
+schedule.scheduleJob('15 10 * * *', sendReminders); // Runs daily at 10:15 AM
 };
 
 module.exports = startScheduler;
