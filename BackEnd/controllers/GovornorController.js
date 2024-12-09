@@ -47,6 +47,34 @@ const createPlace = async (req, res) => {
 };
 
 
+const getPlacePhoto = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const place = await Place.findById(id);
+        if (!place) {
+            return res.status(404).json({ message: 'Place not found' });
+        }
+
+        if (!place.photo) {
+            return res.status(404).json({ message: 'Photo not found' });
+        }
+
+        if (place.photo) {
+            const key = place.photo.split('/').slice(-1)[0];
+            const preSignedUrl = await previewgeneratePreSignedUrl(key);
+
+            // Instead of redirecting, send the pre-signed URL directly
+            return res.json({ imageUrl: preSignedUrl });
+        } else {
+            return res.status(404).json({ message: 'Image not found for this activity.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
 
 // const createPlace = async (req, res) => {
 //     try {
@@ -386,6 +414,7 @@ module.exports = {
     changePassword,
     getActivePreferenceTags,
     addTagToPlace2,
+    getPlacePhoto,
     
     
 };

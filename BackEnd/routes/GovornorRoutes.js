@@ -7,7 +7,8 @@ const  upload  = require('../uploadMiddleware');
 
 
 // router.post('/createPlace', PlaceController.createPlace);
-router.post('/createPlace', upload.array('pictures', 10), PlaceController.createPlace);
+router.post('/createPlace', upload.single('photo'), PlaceController.createPlace);
+router.get('/getPlacePhoto/:id', PlaceController.getPlacePhoto);
 
 
 router.get('/getAllPlaces', PlaceController.getAllPlaces);
