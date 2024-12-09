@@ -52,7 +52,7 @@ The application is fully functional with no major bugs reported.
 - _Amadeus_: It offers services like flight reservations, hotel bookings, car rentals, and more through its Global Distribution System (GDS).
 - _Amazon S3_: Is a scalable, high-performance, and secure cloud storage solution provided by Amazon Web Services (AWS)
 - _NextJs_: React-based framework for building modern web applications. It provides features like server-side rendering (SSR), static site generation (SSG), and client-side rendering (CSR).
-- _TypeScript_: programming language developed that builds on JavaScript by adding static typing. It helps us catch errors at compile time rather than runtime.
+- _TypeScript_: programming language developed that builds on JavaScript by adding static typing. It helps with catching errors at compile time rather than runtime.
 
 
 ## Features
@@ -61,16 +61,16 @@ The application is fully functional with no major bugs reported.
 - Register (sign up) as a tourist using email, username, password, mobile number, nationality, DOB, job/student.
 - Register (sign up) as a tour guide/ advertiser/ seller on the system with username, email and password.
 
-### Authintication 
+### Authentication 
 - Login using username and password.
 - Log out.
 
 ### Password Management
 - Change password.
-- Forget password using an OTP sent by email.
+- If user forgot password they can still sign in by an OTP sent by email.
 
 ### Profile Management 
-- Set up or modify my profile as a tour guide, including personal details such as mobile number, years of experience, and any prior work (if applicable), once accepted into the system.
+- Set up or modify my profile as a tour guide, including personal details such as mobile number, years of experience, and any prior work (if applicable), once accepted into the system as a tour guide.
 - Set up or modify my profile as a company (Advertiser), including details like a website link, hotline number, and company description, once accepted as an advertiser on the system.
 - Set up or modify my profile as a Seller, including my name and description, once approved as a seller in the system.
 - As a Tour Guide, Advertiser or Seller, upload a profile picture.
@@ -86,7 +86,7 @@ The application is fully functional with no major bugs reported.
 - Create, view, update, or delete activity categories (e.g., food, stand-up comedy, concerts, parties, bazaars, exhibitions, sports events, parks, etc.).
 - Create, view, update, or delete preference tags (e.g., historic sites, beaches, family-friendly, shopping, budget-friendly).
 - View a sales report detailing revenue from various events, itineraries, and gift shop sales.
-- Flag an event or itinerary if it is found to be inappropriate.
+- Flag an event or itinerary if it is found to be inappropriate/irrelevant.
 - Monitor the total number of users and track new user sign-ups each month.
 - Review a list of all complaints along with their statuses (pending/resolved).
 - View the details of a specific complaint.
@@ -189,6 +189,7 @@ The application is fully functional with no major bugs reported.
 
 ### Tourism Governer
 - View a list of all my created activities, itineraries and museums and historical places.
+- Edit the information of a created place.
 
 
 ## Code Examples
