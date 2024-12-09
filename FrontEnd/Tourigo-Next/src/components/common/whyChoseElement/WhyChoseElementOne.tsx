@@ -32,19 +32,7 @@ const WhyChoseElementOne = () => {
             </ul>
           </div>
         </div>
-        <div
-          className="col-xxl-3 col-xl-3 col-lg-3 col-md-6 wow bdFadeInUp"
-          data-wow-delay=".4s"
-        >
-          <div className="chose-thumb text-center">
-            <Image
-              src={chooseImg}
-              loader={imageLoader}
-              style={{ width: "100%", height: "auto" }}
-              alt="image"
-            />
-          </div>
-        </div>
+      
         <div
           className="col-xxl-5 col-xl-5 col-lg-5 col-md-12 wow bdFadeInRight"
           data-wow-delay=".5s"

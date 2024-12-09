@@ -14,7 +14,7 @@ const menu_data: MenuType[] = [
     children: true,
     title: "Places",
     pluseIncon: true,
-    link: "/home",
+    link: "/place-view-TG",
    
   },
   {

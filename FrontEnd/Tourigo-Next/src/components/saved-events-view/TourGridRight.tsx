@@ -9,13 +9,25 @@ import ItinerariesContentHeader from "@/elements/itineraries/it-header";
 import ItinerariesSidebarMain from "../itinerariesSidebar/ItinerariesSidebarMain";
 import { viewAllSavedEventsApi } from "@/api/itineraryApi";
 import { it } from "node:test";
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+import { toast } from "sonner";
 
+
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+//   iat: number; // Add this if included in the token payload
+}
 
 
 
 const SavedEventsGrid = () => {
   const [savedActivities, setSavedActivities] = useState<Activity[]>([]);
   const [savedItineraries, setSavedItineraries] = useState<Itinerary[]>([]);
+  const [touristId, setTouristId] = useState<string>("");
 
   const removeUnsavedItinerary = (itineraryId: string) => {
     setSavedItineraries((prev) => prev.filter((itinerary) => itinerary._id !== itineraryId));
@@ -25,7 +37,22 @@ const SavedEventsGrid = () => {
     setSavedActivities((prev) => prev.filter((activity) => activity._id !== activityId));
   };
   
-  const touristId = "67240ed8c40a7f3005a1d01d"
+  useEffect(() => {
+    // Extract `touristId` from the token
+    const token = Cookies.get("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        setTouristId(decodedToken.id);
+        console.log("Tourist ID:", decodedToken.id);
+      } catch (error) {
+        console.error("Failed to decode token:", error);
+      }
+    } else {
+      console.error("No token found.");
+    }
+  }, []);
+
 
   useEffect(() => {
     const fetchSavedEvents = async () => {

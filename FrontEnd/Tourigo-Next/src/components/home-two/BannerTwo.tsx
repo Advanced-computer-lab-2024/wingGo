@@ -31,7 +31,7 @@ const BannerTwo = () => {
                   className="banner-search-wrapper style-two wow bdFadeIn"
                   data-wow-delay="1.2s"
                 >
-                  <SearchFilterTwo />
+                
                 </div>
               </div>
             </div>

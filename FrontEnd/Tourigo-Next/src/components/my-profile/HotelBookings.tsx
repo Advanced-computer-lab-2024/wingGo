@@ -82,26 +82,27 @@ const HotelBookings: React.FC<HotelBookingsProps> = ({ id }) => {
                 </div>
                 <div className="team-info mb-20">
                   <h4 className="mb-15">Bookings:</h4>
-                  <ul>
+                  <ul className="booking-list">
                     {hotelBookings.map((booking) => (
-                      <li key={booking._id}>
-                        <span className="team-label">Hotel Name: </span>
-                        {booking.hotel.name}
-                        <br />
-                        <span className="team-label">Beds: </span> 
-                        {booking.guests.adults}
-                        <br />
-                        <span className="team-label">Check-In Date: </span>
-                        {formatDate(booking.checkInDate)}
-                        <br />
-                        <span className="team-label">Check-Out Date: </span>
-                        {formatDate(booking.checkOutDate)}
-                        <br />
-                        <span className="team-label">Booking Status: </span>
-                        {booking.bookingStatus}
-                        <br />
-                        <span className="team-label">Confirmation Number: </span>
-                        {booking.confirmationNumber || "N/A"}
+                      <li key={booking._id} className="booking-item card mb-3" style={{ marginLeft: "10px" }}>
+                        <div className="card-body">
+                          <h5 className="card-title">{booking.hotel.name}</h5>
+                          <p className="card-text">
+                            <strong>Beds:</strong> {booking.guests.adults}
+                          </p>
+                          <p className="card-text">
+                            <strong>Check-In Date:</strong> {formatDate(booking.checkInDate)}
+                          </p>
+                          <p className="card-text">
+                            <strong>Check-Out Date:</strong> {formatDate(booking.checkOutDate)}
+                          </p>
+                          <p className="card-text">
+                            <strong>Booking Status:</strong> {booking.bookingStatus || "N/A"}
+                          </p>
+                          <p className="card-text">
+                            <strong>Confirmation Number:</strong> {booking.confirmationNumber || "N/A"}
+                          </p>
+                        </div>
                       </li>
                     ))}
                   </ul>

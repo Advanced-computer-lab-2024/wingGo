@@ -26,15 +26,15 @@ export const fetchTransports = async (): Promise<Transport[]> => {
 
 
 //old dont use bs dont delete 3shan used fi heta tanya
-export const bookTransportApi = async ( transportId: string) => {
-    try {
-        const response = await axios.put(`http://localhost:8000/tourist/bookTransport/${touristId}/${transportId}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error booking transport:', error);
-        throw error;
-    }
-};
+// export const bookTransportApi = async ( transportId: string) => {
+//     try {
+//         const response = await axios.put(`http://localhost:8000/tourist/bookTransport/${touristId}/${transportId}`);
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error booking transport:', error);
+//         throw error;
+//     }
+// };
 
 // export const getTransportPrice = async (transportId: string, promoCode: string | null): Promise<{ totalPrice: number, promoCodeApplied: boolean }> => {
 //     try {
