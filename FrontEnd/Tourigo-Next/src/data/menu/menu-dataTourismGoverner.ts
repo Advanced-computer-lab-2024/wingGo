@@ -4,6 +4,23 @@ import homeTowImg from "../../../public/assets/images/menu/menu-home-2.jpg";
 import homeThreeImg from "../../../public/assets/images/menu/menu-home-3.jpg";
 import homeFourImg from "../../../public/assets/images/menu/menu-home-4.jpg";
 import homeFiveImg from "../../../public/assets/images/menu/menu-home-5.jpg";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
+interface DecodedToken {
+  username: string;
+  id: string;
+  role: string;
+  mustChangePassword: boolean;
+}
+const cookie = Cookies.get("token");
+let id = "";
+if(cookie){
+  const decodedToken = jwtDecode<DecodedToken>(cookie);
+  console.log('Decoded Token:', decodedToken);
+  id = decodedToken.id;
+}
+
+
 
 const menu_data: MenuType[] = [
   {
@@ -40,7 +57,7 @@ const menu_data: MenuType[] = [
     title: "Change Password",
     pluseIncon: true,
     pageLayout: true,
-    link: "tourism-gov/change-password/673212f4d9fd4d61027021e1",
+    link: `tourism-gov/change-password/${id}`,
   },
   {
     id: 11, // Unique ID for the bell icon
