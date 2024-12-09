@@ -57,7 +57,7 @@ interface ItinerariesSidebarMainProps {
     <aside className="sidebar-wrapper sidebar-sticky">
       <div className="sidebar-widget-wrapper mb-30">
         <div className="sidebar-widget widget">
-          <h6 className="sidebar-widget-title small mb-15">Search Itineraries</h6>
+          <h6 className="sidebar-widget-title small mb-15">Search Activities</h6>
           <div className="sidebar-search">
           <SidebarSearchInputBox placeHolder="Search Itineraries" onSearch={handleSearch} />
           </div>
