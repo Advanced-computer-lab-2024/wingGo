@@ -133,15 +133,15 @@ export const getAvailableTags = async (): Promise<string[]> => {
     }
 };
 export const deletePlace = async (placeId: string, governorId: string): Promise<void> => {
-  try {
-      const response = await axios.delete(`http://localhost:8000/govornor/deletePlace/${placeId}?governorId=${governorId}`);
-      console.log(`Place with ID ${placeId} has been deleted successfully.`);
-      return response.data;
-  } catch (error) {
-      console.error("Error deleting place:", error);
-      throw error;
-  }
-};
+    try {
+        const response = await axios.delete(`http://localhost:8000/govornor/deletePlace/${placeId}?governorId=${governorId}`);
+        console.log(`Place with ID ${placeId} has been deleted successfully.`);
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting place:", error);
+        throw error;
+    }
+  };
 
 export const fetchImage = async (placeId: string) => {
   try {
