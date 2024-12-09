@@ -64,6 +64,7 @@ const TourSingleCard = ({
   const [isSaved, setIsSaved] = useState(false); // Initialize as null
   const [touristId, setTouristId] = useState<string>("");
 
+  const token = Cookies.get("token");
 
   useEffect(() => {
     // Extract `touristId` from the token
@@ -163,6 +164,11 @@ const TourSingleCard = ({
   };
 
   const handleBookNowClick = () => {
+    if (!token) {
+      toast.error("Please sign in to book itineraries.");
+      router.push("/sign-in");
+      return;
+    }
     router.push(`/booking-it/${tour._id}`);
   };
   
@@ -184,25 +190,51 @@ const TourSingleCard = ({
   // }, [tour._id]);
   
 
-const handleSave = async () => {
-  try {
-    const result = await toggleSaveItinerary(touristId, tour._id);
 
-    if (result.savedItineraries.includes(tour._id)) {
-      setIsSaved(true); // Set as saved
-    } else {
-      setIsSaved(false); // Set as unsaved
-      if (onUnsaved) {
-        onUnsaved(tour._id); // Call the parent callback
-      }
+  const handleSave = async () => {
+    if (!token) {
+      toast.error("Please sign in to save itineraries.");
+      router.push("/sign-in");
+      return;
     }
-    toast.success(`Itinerary ${isSaved ? 'unsaved' : 'saved'} successfully!`);
+  
+    try {
+      const result = await toggleSaveItinerary(touristId, tour._id);
+  
+      if (result.savedItineraries.includes(tour._id)) {
+        setIsSaved(true); // Set as saved
+      } else {
+        setIsSaved(false); // Set as unsaved
+        if (onUnsaved) {
+          onUnsaved(tour._id); // Call the parent callback
+        }
+      }
+      toast.success(`Itinerary ${isSaved ? 'unsaved' : 'saved'} successfully!`);
+    } catch (error) {
+      console.error("Error toggling save/unsave itinerary:", error);
+      toast.error("Failed to toggle save/unsave. Please try again later");
+    }
+  };
+  
+// const handleSave = async () => {
+//   try {
+//     const result = await toggleSaveItinerary(touristId, tour._id);
+
+//     if (result.savedItineraries.includes(tour._id)) {
+//       setIsSaved(true); // Set as saved
+//     } else {
+//       setIsSaved(false); // Set as unsaved
+//       if (onUnsaved) {
+//         onUnsaved(tour._id); // Call the parent callback
+//       }
+//     }
+//     toast.success(`Itinerary ${isSaved ? 'unsaved' : 'saved'} successfully!`);
     
-  } catch (error) {
-    console.error("Error toggling save/unsave itinerary:", error);
-    toast.error("Failed to toggle save/unsave. Please try again later");
-  }
-};
+//   } catch (error) {
+//     console.error("Error toggling save/unsave itinerary:", error);
+//     toast.error("Failed to toggle save/unsave. Please try again later");
+//   }
+// };
 
   
   
@@ -298,7 +330,7 @@ const handleSave = async () => {
               </span>
               <div className="d-flex justify-content-between align-items-center mb-2">
               <h5 className="tour-title fw-5 underline custom_mb-5"> </h5>
-              <div className="bookmark-container">
+              {token && (<div className="bookmark-container">
               {/* <span
               className={`bookmark-icon ${isSaved ? "bookmarked" : ""}`}
               onClick={handleSave}
@@ -330,7 +362,7 @@ const handleSave = async () => {
               <i className={`fa${isSaved ? "s" : "r"} fa-bookmark`}></i>
             </span>
 
-            </div>
+            </div>)}
             </div>
 
               <div className="tour-divider"></div>

@@ -60,13 +60,15 @@ export const filterItineraries = async (filters: {
 }): Promise<any[]> => {
   try {
     // Retrieve the token from cookies
-    const token = Cookies.get("token");
-    if (!token) {
-      throw new Error("No token found. Please log in.");
-    }
-
     // Decode the token to extract the tourist ID
     let touristId = "";
+    const token = Cookies.get("token");
+    if (!token) {
+      // throw new Error("No token found. Please log in.");
+      touristId="6755df2c1153f9878a8ba068";
+    }
+
+    else{
     try {
       const decodedToken = jwtDecode<DecodedToken>(token);
       touristId = decodedToken.id;
@@ -75,6 +77,7 @@ export const filterItineraries = async (filters: {
       console.error("Error decoding token:", error);
       throw new Error("Failed to decode token.");
     }
+  }
 
     // Include the touristId in the filters
     const params = { ...filters, touristId };

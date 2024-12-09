@@ -15,6 +15,18 @@ import Modal from "react-modal";
 import { toast } from 'sonner';
 import { FaRegClock } from "react-icons/fa";
 import { deleteActivityApi } from '@/api/activityApi'; 
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+//   iat: number; // Add this if included in the token payload
+}
+const token = Cookies.get("token");
 
 interface ItourPropsType {
   tour: Activity; // Use Itinerary type
@@ -147,6 +159,11 @@ const TourSingleCard = ({
 
   const handleBookNowClick = () => {
     // Redirect to the specific page (replace "/booking-page" with the desired path)
+    if (!token) {
+      toast.error("Please sign in to book itineraries.");
+      router.push("/sign-in");
+      return;
+    }
     router.push(`/booking-activity/${tour._id}`);
   };
 
@@ -171,7 +188,11 @@ const TourSingleCard = ({
   };
 
   const handleSave = async () => {
-    
+    if (!token) {
+      toast.error("Please sign in to save itineraries.");
+      router.push("/sign-in");
+      return;
+    }
    
     try {
       if (!tour._id?.length) {
@@ -277,7 +298,7 @@ const TourSingleCard = ({
 
               <div className="d-flex justify-content-between align-items-center mb-2">
               <h5 className="tour-title fw-5 underline custom_mb-5"> </h5>
-              <div className="bookmark-container">
+             {token && ( <div className="bookmark-container">
               <span
               className={`bookmark-icon ${isSaved ? "bookmarked" : ""}`}
               onClick={handleSave}
@@ -293,7 +314,7 @@ const TourSingleCard = ({
                 >
             <i className={`fa${isSaved ? "s" : "r"} fa-bookmark`}></i> {/* Solid for saved, Regular for unsaved */}
             </span>
-            </div>
+            </div>)}
             </div>
               <div className="tour-divider"></div>
 
