@@ -4,8 +4,10 @@
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
+    "leaflet-geosearch": "^4.0.0",
     "mobiscroll-react": "^4.0.0",
     "react-chartjs-2": "^5.2.0",
+    "react-leaflet": "^4.2.1",
     "react-modal": "^3.16.1"
   },
   "devDependencies": {

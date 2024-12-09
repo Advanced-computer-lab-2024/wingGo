@@ -68,18 +68,21 @@ const UserManagement = () => {
   return (
     <section className="bd-team-details-area section-space position-relative">
         <div className="container">
+          
     <section className="bd-recent-activity section-space-small-bottom">
+      
       <div className="container" style={{ paddingTop: "0px" }}>
-        <div className="row">
-          <div className="col-xxl-12">
-            <div className="recent-activity-wrapper">
-              <div className="section-title-wrapper section-title-space">
+      <div className="section-title-wrapper section-title-space">
                 <InputBox
                   placeHolder="Username"
                   value={search}
                   onChange={handleSearch}
                 />
               </div>
+        <div className="row">
+          <div className="col-xxl-12">
+            <div className="recent-activity-wrapper">
+              
               <div className="recent-activity-content">
                 <div className="table-responsive" style={{ maxHeight: "373px", overflowY: "auto", scrollbarWidth: "thin", scrollbarColor: "#006CE4 #F2F2F2" }}>
                   <table className="table mb-0">
