@@ -3,6 +3,7 @@ const PreferenceTag = require('../models/PreferenceTag');
 const Governor = require('../models/TourismGovernor');
 const LoginCredentials = require('../models/LoginCredentials');
 const bcrypt = require('bcrypt');
+const {previewgeneratePreSignedUrl}  = require('../downloadMiddleware');
 
 
 

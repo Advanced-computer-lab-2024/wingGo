@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useCurrency } from "@/contextApi/CurrencyContext";
+import {fetchImage} from "@/api/placesApi"
 
 interface ItourPropsType {
   tour: Place;
@@ -18,6 +19,7 @@ interface ItourPropsType {
 }
 
 const TourSingleCard = ({
+
   tour,
   className,
   tourWrapperClass,
@@ -28,6 +30,8 @@ const TourSingleCard = ({
   const { setModalData } = useGlobalContext();
   const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
+  const DEFAULT_IMAGE = "/assets/images/places.jpg";
+  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
   useEffect(() => {
     const convertPrice = async () => {
       if (tour.ticketPrices?.foreigner) {
@@ -37,6 +41,23 @@ const TourSingleCard = ({
     };
     convertPrice();
   }, [tour.ticketPrices?.foreigner, currency, convertAmount]);
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        if (tour?._id && tour?.photo) { // Check if the item has an image
+          const url = await fetchImage(tour._id);
+          if (url) {
+            console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
+            setImageUrl(url);
+            console.log(imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load image:", error);
+      }
+    };
+    loadImage();
+  }, [tour?._id, tour?.photo,imageUrl]);
 
   return (
     <>
@@ -46,13 +67,14 @@ const TourSingleCard = ({
             <div className="p-relative">
               <div className="tour-thumb image-overly">
                 <Link href={`/place-details/${tour._id}`}>
-                  <Image
-                    src={tour.pictures[0] || "/images/default-image.jpg"}
+                <Image
+                    src={imageUrl}
                     loader={imageLoader}
                     width={270}
                     height={270}
-                    style={{ width: "100%", height: "auto" }}
-                    alt={tour.name}
+                    style={{ width: "300px", height: "250px" }}
+                    alt="Places Image"
+                    unoptimized 
                   />
                 </Link>
               </div>

@@ -431,6 +431,7 @@ export interface BookedActivity {
   };
     flagged: boolean;
     tagss: string[];
+    photo:string
 };
 
 export interface Wishlist {
