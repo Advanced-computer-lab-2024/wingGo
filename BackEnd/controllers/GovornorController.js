@@ -225,7 +225,6 @@ const deletePlace = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-
 // Add a tag to a place (already provided in previous response)
 const addTagToPlace = async (req, res) => {
 

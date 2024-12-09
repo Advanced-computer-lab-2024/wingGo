@@ -27,10 +27,10 @@ const TourSingleCard = ({
   onRemove, // Destructure the prop
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
-  const handleDeletePlace = async (placeId: string, governorId: string) => {
+  const handleDeletePlace = async (placeId: string) => {
     if (confirm("Are you sure you want to delete this place?")) {
       try {
-        await deletePlace(placeId, governorId);
+        await deletePlace(placeId);
         alert("Place deleted successfully.");
         if (onRemove) {
           onRemove(placeId); // Call the onRemove handler
@@ -106,7 +106,7 @@ const TourSingleCard = ({
                   </button>
                   <button
   className="delete-btn"
-  onClick={() => handleDeletePlace(tour._id, tour.governorId)} // Pass both placeId and governorId
+  onClick={() => handleDeletePlace(tour._id)} // Pass both placeId and governorId
   type="button"
 >
   <i className="fa-solid fa-trash" style={{ color: "red" }}></i>
