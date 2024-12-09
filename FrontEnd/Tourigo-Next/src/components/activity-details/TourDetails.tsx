@@ -37,6 +37,8 @@ const TourDetails = ({ id }: idTypeNew) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isBooked, setIsBooked] = useState(false); // State for booking status
+  const [isAdvertiser, setIsAdvertiser] = useState(false); 
+  
 
   const router = useRouter(); // Initialize router
   const [isEmailFormOpen, setIsEmailFormOpen] = useState(false);
@@ -53,6 +55,7 @@ const TourDetails = ({ id }: idTypeNew) => {
       try {
         const decodedToken = jwtDecode<DecodedToken>(token);
         setadvertiserId(decodedToken.id);
+        setIsAdvertiser(decodedToken.role == "Advertiser");
         console.log("advertiserId: ", decodedToken.id);
       } catch (error) {
         console.error("Failed to decode token:", error);
@@ -247,7 +250,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                       </div>
                     </div>
                     {/* Include more fields as necessary */}
-                    <TourDetailTabArea activityData={data} advertiserId= {advertiserId}/>
+                    <TourDetailTabArea activityData={data} advertiserId= {advertiserId} isAdvertiser= {isAdvertiser}/>
 
                     <div className="tour-details-related-tour mb-35">
                       {/* <h4 className="mb-20">Related Tours</h4> */}
