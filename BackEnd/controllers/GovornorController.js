@@ -144,9 +144,9 @@ const updatePlace = async (req, res) => {
     const { governorId } = req.query;
     try {
         const { tagss, ...placeData } = req.body; // Extract tagss separately
-        console.log(id );
+        
         // Find the place by ID and update with the new data
-        const place = await Place.findOne({governorId, _id: req.params.id });
+        const place = await Place.findOne({ _id: req.params.id });
         if (!place) {
             return res.status(404).json({ message: 'Place not found' });
         }
@@ -216,7 +216,7 @@ const deletePlace = async (req, res) => {
 
     const {governerId} = req.query;
     try {
-        const place = await Place.findOneAndDelete({governerId, _id: req.params.id});
+        const place = await Place.findOneAndDelete({_id: req.params.id});
         if (!place) {
             return res.status(404).json({ message: 'Place not found' });
         }
@@ -398,6 +398,27 @@ const addTagToPlace2 = async (req, res) => {
     }
 };
 
+const getGovernorPlaces = async (req, res) => {
+    try {
+        const { govid } = req.params; // Extract governor ID from route parameters
+
+        if (!govid) {
+            return res.status(400).json({ message: 'Governor ID is required' });
+        }
+
+        // Fetch all places associated with the governor ID
+        const places = await Place.find({ governorId: govid });
+
+        if (places.length === 0) {
+            return res.status(404).json({ message: 'No places found for this governor' });
+        }
+
+        res.status(200).json({ message: 'Places retrieved successfully', places });
+    } catch (error) {
+        console.error('Error fetching places:', error);
+        res.status(500).json({ message: 'An error occurred while fetching places', error: error.message });
+    }
+};
 
 
 
@@ -415,6 +436,6 @@ module.exports = {
     getActivePreferenceTags,
     addTagToPlace2,
     getPlacePhoto,
-    
+    getGovernorPlaces
     
 };

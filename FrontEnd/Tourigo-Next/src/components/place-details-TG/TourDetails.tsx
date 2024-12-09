@@ -94,7 +94,7 @@ const TourDetails = ({ id }: idTypeNew) => {
       if (response) {
         toast.success("Place details updated successfully!");
         setData(response.data);
-        setIsEditing(false);
+        // setIsEditing(false);
       }
     } catch (error) {
       console.log(updatedData);

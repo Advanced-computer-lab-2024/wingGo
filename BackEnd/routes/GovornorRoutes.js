@@ -35,6 +35,8 @@ router.put('/changePassword/:id', PlaceController.changePassword); // Define rou
 // Route to get all active preference tags el etnein m3 ba3d first for dropdown list to choose from second to add the chosen tag to the place
 router.get('/viewPreferences', PlaceController.getActivePreferenceTags);
 router.put('/addTagToPlace/:id', PlaceController.addTagToPlace2);
+
+router.get('/places/:govid', PlaceController.getGovernorPlaces);
 /////////////////
 
 module.exports = router;

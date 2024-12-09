@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import TourSingleCard from "../common/tourElements/TourSingleCardPlacesTG";
 import { Place } from "@/interFace/interFace";
 import { getPlacesData } from "@/data/placeData";
+import {fetchAllPlaces} from "@/api/placesApi"
 
 // import ItinerariesContentHeader from "@/elements/itineraries/it-header";
 import SidebarSearchArea from "../shearedComponents/SidebarSearchAreaPlaces";
@@ -31,7 +32,7 @@ const TourGridRight = () => {
 // Load initial data
 useEffect(() => {
   const loadInitialData = async () => {
-    const data = await getPlacesData();
+    const data = await fetchAllPlaces();
     setPlaces(data);
     setFilteredPlaces(data); // Set the initial filtered list
   };
