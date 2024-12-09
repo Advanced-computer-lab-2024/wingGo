@@ -63,18 +63,18 @@ const menu_data: MenuType[] = [
     link: "/add-product",
     
   },
-  {
-    id: 7,
-    hasDropdown: true,
-    children: false,
-    megaMenu: true,
-    active: true,
-    title: "Archived Products",
-    pluseIncon: true,
-    pageLayout: true,
-    link: "/Products-adminArch",
+  // {
+  //   id: 7,
+  //   hasDropdown: true,
+  //   children: false,
+  //   megaMenu: true,
+  //   active: true,
+  //   title: "Archived Products",
+  //   pluseIncon: true,
+  //   pageLayout: true,
+  //   link: "/Products-adminArch",
     
-  },
+  // },
   {
     id: 8,
     hasDropdown: true,

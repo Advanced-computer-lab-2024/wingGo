@@ -24,6 +24,7 @@ interface Category {
 interface TourDetailTabAreaProps {
   activityData: Activity;
   advertiserId: string; 
+  isAdvertiser: boolean
 }
 // Function to format date into a readable string
 const formatDate = (date: string | Date) => {
@@ -36,6 +37,7 @@ const formatDate = (date: string | Date) => {
 const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({
   activityData: initialActivityData,
   advertiserId,
+  isAdvertiser
 }) =>  {
   const [isEditing, setIsEditing] = useState(false);
   const [activityData, setActivityData] = useState(initialActivityData);
@@ -163,7 +165,7 @@ useEffect(() => {
           className="btn btn-link p-0 ms-2"
           style={{ cursor: "pointer" }}
         >
-          <TbEdit size={20} />
+          {isAdvertiser &&<TbEdit size={20} />}
         </button>
       </p>
       
@@ -187,7 +189,7 @@ useEffect(() => {
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+    {isAdvertiser &&<TbEdit size={20} />}
   </button>
 </p>
             
@@ -223,7 +225,7 @@ useEffect(() => {
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+   {isAdvertiser &&<TbEdit size={20} />}
   </button>
 </p>
 <p className="mb-15 d-flex align-items-start">
@@ -250,7 +252,7 @@ useEffect(() => {
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+   {isAdvertiser &&<TbEdit size={20} />}
   </button>
 </p>
 <p className="mb-15 d-flex align-items-start">
@@ -277,7 +279,7 @@ useEffect(() => {
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+   {isAdvertiser &&<TbEdit size={20} />}
   </button>
 </p>
 <p className="mb-15 d-flex align-items-center">
@@ -305,7 +307,7 @@ useEffect(() => {
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+   {isAdvertiser &&<TbEdit size={20} />}
   </button>
 </p>
 <p className="mb-15 d-flex align-items-start">
@@ -331,7 +333,7 @@ useEffect(() => {
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+   {isAdvertiser &&<TbEdit size={20} />}
   </button>
 </p>
 <p className="mb-15 d-flex align-items-start">
@@ -357,7 +359,7 @@ useEffect(() => {
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+    {isAdvertiser &&<TbEdit size={20} />}
   </button>
 </p>
         {isEditing && (

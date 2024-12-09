@@ -3,14 +3,24 @@
 import { imageLoader } from "@/hooks/image-loader";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Itinerary, TourGuide } from '@/interFace/interFace';
 import GetRatting from "@/hooks/GetRatting";
 import TourDetailsPostForm from "./TourDetailsPostFrom/TourDetailsPostForm";
 import { TbEdit } from "react-icons/tb";
-import { useState } from "react";
 import { toast } from "sonner"; // For notifications, if not already imported
 import { updateItineraryApi } from "@/api/itineraryApi";
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+//   iat: number; // Add this if included in the token payload
+}
 
 interface TourDetailTabAreaProps {
   itineraryData: Itinerary;
@@ -39,7 +49,23 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
     timeline: itineraryData.timeline || "", // New field
     accessibility: itineraryData.accessibility || false,
   });
-
+  const [isGuide, setIsGuide] = useState(false); 
+  useEffect(() => {
+    // Extract `touristId` from the token
+    const token = Cookies.get("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        
+        setIsGuide(decodedToken.role == "TourGuide");
+        console.log("TourGuide: ", decodedToken.id);
+      } catch (error) {
+        console.error("Failed to decode token:", error);
+      }
+    } else {
+      console.error("No token found.");
+    }
+  }, []);
   const handleSaveChanges = async (itineraryId: string, tourGuideId: string) => {
     const updates = {
       language: updatedItinerary.language,
@@ -140,7 +166,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+    {isGuide &&<TbEdit size={20} />}
   </button>
 </p>
 <p className="mb-15 d-flex align-items-center">
@@ -175,7 +201,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
      className="btn btn-link p-0 ms-2"
      style={{ cursor: "pointer" }}
    >
-     <TbEdit size={20} />
+    {isGuide &&<TbEdit size={20} />}
    </button>
  </p>
  <p className="mb-15 d-flex align-items-center">
@@ -201,7 +227,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
      className="btn btn-link p-0 ms-2"
      style={{ cursor: "pointer" }}
    >
-     <TbEdit size={20} />
+    {isGuide &&<TbEdit size={20} />}
    </button>
  </p>
  <p className="mb-15 d-flex align-items-center">
@@ -227,7 +253,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+   {isGuide &&<TbEdit size={20} />}
   </button>
 </p>
 <p className="mb-15 d-flex align-items-center">
@@ -253,7 +279,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+    {isGuide &&<TbEdit size={20} />}
   </button>
 </p>
 <p className="mb-15 d-flex align-items-center">
@@ -276,7 +302,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+   {isGuide &&<TbEdit size={20} />}
   </button>
 </p>
 <p className="mb-15 d-flex align-items-center">
@@ -299,7 +325,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+    {isGuide &&<TbEdit size={20} />}
   </button>
 </p>
 <p className="mb-15 d-flex align-items-center">
@@ -321,7 +347,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+  {isGuide &&<TbEdit size={20} />}
   </button>
 </p>
 <p className="mb-15 d-flex align-items-center">
@@ -343,7 +369,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
     className="btn btn-link p-0 ms-2"
     style={{ cursor: "pointer" }}
   >
-    <TbEdit size={20} />
+   {isGuide &&<TbEdit size={20} />}
   </button>
 </p>
 
