@@ -38,7 +38,7 @@ const WishlistArea = () => {
         const products = await fetchWishlist();
         setWishlistProducts(products);
       } catch (err) {
-        setError("Failed to load wishlist products.");
+        setError("No wishlist products found.");
       } finally {
         setLoading(false);
       }

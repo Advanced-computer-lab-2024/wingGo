@@ -55,7 +55,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
     };
   
     try {
-      await updateItineraryApi(itineraryId, updates, tourGuideId);
+      await updateItineraryApi(itineraryId, updates);
       setItineraryData((prevData) => ({
         ...prevData,
         ...updates,

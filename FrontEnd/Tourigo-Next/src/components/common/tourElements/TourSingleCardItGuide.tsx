@@ -62,7 +62,7 @@ const TourSingleCard = ({
   
     const toastId = toast.loading("Deleting itinerary...");
     try {
-      await deleteItineraryApi(tour._id, tour.tourGuideId); // Call the delete API
+      await deleteItineraryApi(tour._id); // Call the delete API
       toast.success("Itinerary deleted successfully!", { id: toastId });
   
       if (removeItinerary) {

@@ -523,10 +523,19 @@ export const getAvailableTags = async (): Promise<string[]> => {
   }
 };
 export const deleteItineraryApi = async (
-  itineraryId: string,
-  tourGuideId: string
+  itineraryId: string
+  //tourGuideId: string
 ): Promise<void> => {
+  const token = Cookies.get("token");
+  let tourGuideId = "";
   try {
+    if (token) {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      console.log("Decoded Token:", decodedToken);
+      tourGuideId = decodedToken.id; // Extract the Tour Guide ID from the token
+    } else {
+      throw new Error("No token found. Please log in.");
+    }
     const response = await axios.delete(
       `http://localhost:8000/tourguide/deleteItinerary/${itineraryId}`,
       {
@@ -549,9 +558,18 @@ export const deleteItineraryApi = async (
 export const updateItineraryApi = async (
 itineraryId: string,
 updates: Record<string, any>,
-tourGuideId: string // Added tourGuideId parameter
+//tourGuideId: string // Added tourGuideId parameter
 ): Promise<void> => {
+  const token = Cookies.get("token");
+  let tourGuideId = "";
 try {
+  if (token) {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    console.log("Decoded Token:", decodedToken);
+    tourGuideId = decodedToken.id; // Extract the Tour Guide ID from the token
+  } else {
+    throw new Error("No token found. Please log in.");
+  }
   const response = await axios.put(
     `http://localhost:8000/tourguide/Updateitinerary/${itineraryId}?tourGuideId=${tourGuideId}`, // Include tourGuideId as a query parameter
     updates,

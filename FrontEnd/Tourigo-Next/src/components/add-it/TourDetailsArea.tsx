@@ -4,6 +4,8 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import UploadSingleImg from "./UploadSingleImg"; 
 import { toast } from "sonner";
 import { createItinerary, getAvailableTags } from "@/api/itineraryApi";
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 
 interface NewItinerary {
   tourGuideId: string;
@@ -30,7 +32,8 @@ const TourDetailsArea = () => {
     formState: { errors },
   } = useForm<FormData>();
   const [itinerary, setItinerary] = useState<NewItinerary>({
-    tourGuideId: "67325c530b3e54ad8bfe1678", 
+    //tourGuideId: "67325c530b3e54ad8bfe1678", 
+    tourGuideId: "",
     title: "",
     tags: [],
     activities: "",
@@ -50,6 +53,27 @@ const TourDetailsArea = () => {
   const [availablePrefrences, setAvailablePrefrences] = useState<Array<any>>([]);
   const [selectedPrefrences, setSelectedPrefrences] = useState<Array<any>>([]);
   const [isLoadingPreferences, setIsLoadingPreferences] = useState<boolean>(true);
+  
+  
+    // Decode token and set tourGuideId
+    useEffect(() => {
+      const token = Cookies.get("token");
+      if (token) {
+        try {
+          const decodedToken = jwtDecode<{ id: string }>(token);
+          setItinerary((prev) => ({
+            ...prev,
+            tourGuideId: decodedToken.id, 
+          }));
+        } catch (error) {
+          console.error("Error decoding token:", error);
+          toast.error("Invalid token. Please log in again.");
+        }
+      } else {
+        toast.error("User not authenticated. Please log in.");
+      }
+    }, []);
+  
   useEffect(() => {
     const fetchAllPreferenceTags = async () => {
       try {
@@ -160,6 +184,7 @@ const TourDetailsArea = () => {
     try {
       const response = await createItinerary(formData);
       toast.success(response.message || "Itinerary added successfully");
+      reset(); // Clear form after successful submission
     } catch (error) {
       console.error("Error adding itinerary:", error);
       toast.error("Failed to add itinerary.");
