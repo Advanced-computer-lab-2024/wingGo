@@ -12,8 +12,8 @@ interface DecodedToken {
   mustChangePassword: boolean;
 //   iat: number; // Add this if included in the token payload
 }
-const advertiserId ="66fb37dda63c04def29f944e"; 
-const touristId = '67240ed8c40a7f3005a1d01d';
+// const advertiserId ="66fb37dda63c04def29f944e"; 
+// const touristId = '67240ed8c40a7f3005a1d01d';
 
 export const fetchActivities = async (): Promise<Activity[]> => {
     try {
@@ -36,13 +36,34 @@ export const createActivity = async (activityData: any): Promise<any> => {
     }
 };
 export const fetchActivitiesAdvertiser = async (): Promise<Activity[]> => {
-    try {
-        const response = await axios.get(`http://localhost:8000/advertiser/activities?advertiserId=${advertiserId}`);
-        return response.data.activities;
-    } catch (error) {
-        console.error("Error fetching activities:", error);
-        throw error;
+  try {
+    // Extract the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
     }
+
+    // Decode the token to get the advertiser ID
+    let advertiserId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      advertiserId = decodedToken.id; // Extract the advertiser ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Make the API call using the extracted advertiser ID
+    const response = await axios.get(
+      `http://localhost:8000/advertiser/activities?advertiserId=${advertiserId}`
+    );
+
+    return response.data.activities; // Ensure this matches your API response structure
+  } catch (error) {
+    console.error("Error fetching activities:", error);
+    throw error;
+  }
 };
 
 // Function to flag/unflag an activity for admin
@@ -183,13 +204,34 @@ export const commentOnActivityApi = async (touristId : string, activityId : stri
 
 // Check if an activity is booked for a specific tourist
 export const isActivityBooked = async (activityId: string): Promise<boolean> => {
-    try {
-        const response = await axios.get(`http://localhost:8000/tourist/booked-status/${touristId}/activity-status/${activityId}`);
-        return response.data.isBooked; // Returns true if booked, false otherwise
-    } catch (error) {
-        console.error("Error checking activity booked status:", error);
-        throw error;
+  try {
+    // Extract the token from cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      throw new Error("No token found. Please log in.");
     }
+
+    // Decode the token to extract the tourist ID
+    let touristId = "";
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      touristId = decodedToken.id; // Extract the tourist ID
+      console.log("Decoded Token:", decodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      throw new Error("Failed to decode token.");
+    }
+
+    // Make the API call using the extracted tourist ID and activity ID
+    const response = await axios.get(
+      `http://localhost:8000/tourist/booked-status/${touristId}/activity-status/${activityId}`
+    );
+
+    return response.data.isBooked; // Return booking status
+  } catch (error) {
+    console.error("Error checking activity booked status:", error);
+    throw error;
+  }
 };
 
 
@@ -270,17 +312,37 @@ export const getPriceApi = async (activityId: string, numberOfPeople: number, pr
   };
   
     //To save/unsave an itinerary
-export const saveOrUnsaveActivityApi = async (activityId: string, save: boolean): Promise<any> => {
-    try {
-      const response = await axios.post( `http://localhost:8000/tourist/toggleSaveActivity/${touristId}/${activityId}`,
-        { save } // Pass the save/unsave state in the request body
-      );
-      return response.data.savedActivities; 
-    } catch (error) {
-      console.error("Error saving/unsaving activity:", error);
-      throw error;
-    }
-  };
+    export const saveOrUnsaveActivityApi = async (activityId: string, save: boolean): Promise<any> => {
+      try {
+        // Extract the token from cookies
+        const token = Cookies.get("token");
+        if (!token) {
+          throw new Error("No token found. Please log in.");
+        }
+    
+        // Decode the token to get the tourist ID
+        let touristId = "";
+        try {
+          const decodedToken = jwtDecode<DecodedToken>(token);
+          touristId = decodedToken.id; // Extract the tourist ID
+          console.log("Decoded Token:", decodedToken);
+        } catch (error) {
+          console.error("Error decoding token:", error);
+          throw new Error("Failed to decode token.");
+        }
+    
+        // Make the API call using the extracted tourist ID and activity ID
+        const response = await axios.post(
+          `http://localhost:8000/tourist/toggleSaveActivity/${touristId}/${activityId}`,
+          { save } // Pass the save/unsave state in the request body
+        );
+    
+        return response.data.savedActivities; // Return the updated saved activities
+      } catch (error) {
+        console.error("Error saving/unsaving activity:", error);
+        throw error;
+      }
+    };
 
   export const checkIfActivitySaved = async (touristId: string, activityId: string) => {
     try {
@@ -317,7 +379,25 @@ try {
     throw error;
 }
 };
-  
+
+export const fetchImage = async (activityId: string) => {
+  try {
+    const response = await axios.get(`http://localhost:8000/advertiser/activities/photo/${activityId}`);
+    
+    if (response.status === 200 && response.data.imageUrl) {
+      return response.data.imageUrl; // Extract the URL directly
+    }
+    
+    throw new Error('Image not found or could not retrieve the URL');
+  } catch (error) {
+    console.error('Error fetching product image:', error);
+    if (axios.isAxiosError(error) && error.response) {
+        throw new Error(error.response.data?.message || 'Error fetching product image');
+    } else {
+        throw new Error('Error fetching product image');
+    }
+  }
+};
 export const deleteActivityApi = async (activityId: string, advertiserId: string): Promise<void> => {
   try {
     const response = await axios.delete(`http://localhost:8000/advertiser/activities/${activityId}`, {
@@ -360,3 +440,4 @@ export const updateActivityApi = async (
     throw error;
   }
 };
+  

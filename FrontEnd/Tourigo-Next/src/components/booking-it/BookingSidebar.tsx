@@ -40,6 +40,7 @@ const BookingSidebar = ({ id }: idTypeNew) => {
     };
     fetchData();
   }, [id]);
+  
   useEffect(() => {
     const loadImage = async () => {
       try {

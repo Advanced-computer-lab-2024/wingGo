@@ -12,6 +12,8 @@ import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency c
 import Modal from "react-modal"; // Import Modal from react-modal
 import { toast } from "sonner";
 import { FaRegClock } from "react-icons/fa";
+import {fetchImage} from "@/api/activityApi"
+
 
 interface ItourPropsType {
   tour: Activity; // Use Itinerary type
@@ -36,6 +38,10 @@ const TourSingleCard = ({
   const { currency, convertAmount } = useCurrency();
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const DEFAULT_IMAGE = "/assets/images/Activity.jpeg";
+const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
+
+
 
   useEffect(() => {
     const convertTourPrice = async () => {
@@ -50,6 +56,23 @@ const TourSingleCard = ({
   const handleFlagActivity = async () => {
     setIsModalOpen(true);
   };
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        if (tour?._id && tour?.photo) { // Check if the item has an image
+          const url = await fetchImage(tour._id);
+          if (url) {
+            console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
+            setImageUrl(url);
+            console.log(imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load image:", error);
+      }
+    };
+    loadImage();
+  }, [tour?._id, tour?.photo,imageUrl]);
 
   const confirmFlagActivity = async () => {
     const toastId = toast.loading("Processing your Request...");
@@ -74,12 +97,13 @@ const TourSingleCard = ({
               <div className="tour-thumb image-overly">
                 <Link href={`/activity-details/${tour._id}`}>
                   <Image
-                    src="/images/default-image.jpg" // Placeholder image
+                    src={imageUrl}
                     loader={imageLoader}
-                    width={370}
-                    height={370}
+                    width={270}
+                    height={270}
                     style={{ width: "300px", height: "250px" }}
                     alt="Activity Image"
+                    unoptimized 
                   />
                 </Link>
               </div>
