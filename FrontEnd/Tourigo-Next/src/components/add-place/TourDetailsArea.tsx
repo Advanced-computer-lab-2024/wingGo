@@ -11,6 +11,7 @@ import { createPlace, getAvailableTags } from "@/api/placesApi";
 import { selectLocationData } from "@/data/nice-select-data";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
+import { useRouter } from "next/navigation";
 
 
 
@@ -55,6 +56,7 @@ const TourDetailsArea = () => {
   } = useForm<FormData>();
 
 
+  //get back here
 
 
   // const [image, setImage] = useState<File | null>(null);
@@ -92,10 +94,20 @@ const TourDetailsArea = () => {
       setFileName(null);
     }
   };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>, setFileName: React.Dispatch<React.SetStateAction<string | null>>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setPhoto(e.target.files[0]);
+      setFileName(e.target.files[0].name);
+      console.log("Photo:", e.target.files[0]);
+    } else {
+      setFileName(null);
+    }
+  };
   
 
   
-
+  const router = useRouter();
   useEffect(() => {
     const fetchAllPreferenceTags = async () => {
       try {
@@ -152,28 +164,24 @@ const TourDetailsArea = () => {
     const toastId = toast.loading("");
 
     console.log("Form Data:", data);
+    console.log("photo:", photo); 
     try {
-      const response = await createPlace(data);
+      const response = await createPlace(data, photo);
       console.log("Response:", response);
 
 
       toast.success(response.message || "Place added successfully", {
         duration: 1000, id: toastId
       });
+      reset();
+      router.push("/");
     } catch (error) {
       console.error("Error adding place:", error);
       toast.error("Failed to add place.", { id: toastId });
   }
 };
   
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>, setFileName: React.Dispatch<React.SetStateAction<string | null>>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setPhoto(e.target.files[0]);
-      setFileName(e.target.files[0].name);
-    } else {
-      setFileName(null);
-    }
-  };
+ 
   
   const [pictureUrl, setPictureUrl] = useState<string>("");
 
@@ -220,19 +228,7 @@ const TourDetailsArea = () => {
     }
   };
 
-  const handleAddPlace = async (e: FormEvent) => {
-    e.preventDefault();
-    console.log("New Place GET OUT:", newPlace);
-    try {
-      const response = await createPlace(newPlace);
-      toast.success(response.message || "Place added successfully", {
-        duration: 1000,
-      });
-    } catch (error) {
-      console.error("Error adding place:", error);
-      toast.error("Failed to add place.");
-    }
-  };
+  
 
   return ( 
     <>
@@ -254,7 +250,7 @@ const TourDetailsArea = () => {
                         required: "Photo is required",
                       })}
                       className="custom-file-input"
-                      onChange={(e) => handleFileChange(e, setPhotoName)}
+                      onChange={(e) => handlePhotoChange(e, setPhotoName)}
                     />
                     <label htmlFor="photo" className="custom-file-label">
                       <FontAwesomeIcon icon={faUpload} /> Upload picture
