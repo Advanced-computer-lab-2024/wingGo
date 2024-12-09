@@ -63,7 +63,7 @@ const TourDetails = ({ id }: idTypeNew) => {
   }, []);
   const DEFAULT_IMAGE = "/assets/images/Activity.jpeg";
   const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
-
+  
 
   const handleEmailChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
     setEmail(e.target.value);
@@ -102,18 +102,29 @@ const TourDetails = ({ id }: idTypeNew) => {
         setData(response.data);
         
         const activity = response.data;
-
-        if (activity) {
-          // Check if the activity is booked
-          const bookedStatus = await isActivityBooked(activity._id);
-          setIsBooked(bookedStatus);
-
-          // Convert the activity price to selected currency
-          if (activity.price) {
-            const priceInSelectedCurrency = await convertAmount(activity.price);
-            setConvertedPrice(priceInSelectedCurrency);
+        const token = Cookies.get("token");
+        if (activity && token) {
+          try {
+            const decodedToken = jwtDecode<DecodedToken>(token);
+            if (decodedToken.role === "Tourist") {
+              // Your logic for Tourist role
+              const bookedStatus = await isActivityBooked(activity._id);
+              setIsBooked(bookedStatus);
+        
+              if (activity.price) {
+                const priceInSelectedCurrency = await convertAmount(activity.price);
+                setConvertedPrice(priceInSelectedCurrency);
+              }
+            } else {
+              console.error("Unauthorized role:", decodedToken.role);
+            }
+          } catch (error) {
+            console.error("Failed to decode token or check role:", error);
           }
+        } else {
+          console.error("Activity or token is not available.");
         }
+        
       } catch (err) {
         setError("Error loading tour details.");
         console.error("Error fetching activities:", err);
