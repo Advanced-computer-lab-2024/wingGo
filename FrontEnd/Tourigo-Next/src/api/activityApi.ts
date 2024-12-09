@@ -440,4 +440,27 @@ export const updateActivityApi = async (
     throw error;
   }
 };
+
+// Fetch category names
+export const fetchCategories = async () => {
+  try {
+    const response = await axios.get("http://localhost:8000/admin/getCategoryNames");
+
+    if (response.status === 200 && Array.isArray(response.data)) {
+      return response.data; // Return the category names array
+    }
+
+    throw new Error("Categories not found or invalid response format");
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data?.message || "Error fetching categories");
+    } else {
+      throw new Error("Error fetching categories");
+    }
+  }
+};
+
+
   

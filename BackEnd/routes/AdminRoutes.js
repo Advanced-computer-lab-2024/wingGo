@@ -115,6 +115,7 @@ router.get('/searchUser', adminController.searchForUserByUsername);
 
 
 router.get('/user-statistics', adminController.getUserStatistics);
+router.get('/getCategoryNames', adminController.getCategoryNames);
 
 
 module.exports = router;

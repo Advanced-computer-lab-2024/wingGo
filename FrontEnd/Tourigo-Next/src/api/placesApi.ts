@@ -14,14 +14,42 @@ const API_URL = 'http://localhost:8000/tourist';
 const governorId='674d045f99ed6f4415cbdd39'
 
 // Fetch all places
+// export const fetchAllPlaces = async (): Promise<Place[]> => {
+//     try {
+//         const response = await axios.get(`http://localhost:8000/govornor/places/${governorId}`);
+//         return response.data.places;
+//     } catch (error) {
+//         console.error("Error fetching places:", error);
+//         throw error;
+//     }
+// };
 export const fetchAllPlaces = async (): Promise<Place[]> => {
-    try {
-        const response = await axios.get(`http://localhost:8000/tourist/viewPlaces`);
-        return response.data.places;
-    } catch (error) {
-        console.error("Error fetching places:", error);
-        throw error;
-    }
+  console.log("INNNN");
+  try {
+      // Retrieve token from cookies
+      const token = Cookies.get('token');
+
+      if (!token) {
+          throw new Error('No token found. Please log in.');
+      }
+
+      // Decode token to get governor ID
+      let governorId = '';
+      try {
+          const decodedToken = jwtDecode<DecodedToken>(token);
+          governorId = decodedToken.id;
+      } catch (error) {
+          console.error('Error decoding token:', error);
+          throw new Error('Invalid token. Please log in again.');
+      }
+
+      // Make API call with governor ID
+      const response = await axios.get(`http://localhost:8000/govornor/places/${governorId}`);
+      return response.data.places;
+  } catch (error) {
+      console.error('Error fetching places:', error);
+      throw error;
+  }
 };
 export const createPlace = async (data: any, photo:any): Promise<any> => {
   const cookie = Cookies.get("token");
@@ -154,3 +182,22 @@ export const deletePlace = async (placeId: string): Promise<void> => {
         throw error;
     }
   };
+
+export const fetchImage = async (placeId: string) => {
+  try {
+    const response = await axios.get(`http://localhost:8000/govornor/getPlacePhoto/${placeId}`);
+    
+    if (response.status === 200 && response.data.imageUrl) {
+      return response.data.imageUrl; // Extract the URL directly
+    }
+    
+    throw new Error('Image not found or could not retrieve the URL');
+  } catch (error) {
+    console.error('Error fetching product image:', error);
+    if (axios.isAxiosError(error) && error.response) {
+        throw new Error(error.response.data?.message || 'Error fetching place image');
+    } else {
+        throw new Error('Error fetching product image');
+    }
+  }
+};

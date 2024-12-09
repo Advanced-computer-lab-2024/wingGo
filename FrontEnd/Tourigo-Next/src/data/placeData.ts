@@ -5,6 +5,7 @@ import { Place } from '@/interFace/interFace';
 
 export const getPlacesData = async (): Promise<Place[]> => {
     try {
+        console.log();
         const places = await fetchAllPlaces();
         return places;
     } catch (error) {
