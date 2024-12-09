@@ -8,7 +8,7 @@ By combining advanced technology with an intuitive interface, we aim to revoluti
 ## Build Status
 
 ### Stable
-The application is fully functional with no major bugs reported.
+The application is fully functional apart from the change currency, it bugged during code integration.
 
 ## Code Style
 - This project uses envato market as a source for its front end's template .
