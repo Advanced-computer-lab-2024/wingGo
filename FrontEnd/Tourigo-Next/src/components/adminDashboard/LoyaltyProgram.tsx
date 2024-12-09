@@ -18,12 +18,12 @@ const LoyaltyProgram: React.FC<Props> = ({id, profileData, refreshData, setRefre
 
     const handleClaimReward = async () => {
         try {
-          const response = await redeemPoints(id);
-          console.log('Redeem points response:', response);
-            setWalletCredit(response.wallet);
-            setLoyalityPoints(response.loyaltyPoints);
-            setBadgeLevel(response.badge.level);
-            setRefreshData(true);
+          // const response = await redeemPoints(id);
+          // console.log('Redeem points response:', response);
+          //   setWalletCredit(response.wallet);
+          //   setLoyalityPoints(response.loyaltyPoints);
+          //   setBadgeLevel(response.badge.level);
+          //   setRefreshData(true);
           // Handle the response (e.g., update the UI or show a success message)
         } catch (error) {
           console.error('Error redeeming points:', error);

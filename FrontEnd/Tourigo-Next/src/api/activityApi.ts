@@ -398,4 +398,46 @@ export const fetchImage = async (activityId: string) => {
     }
   }
 };
+export const deleteActivityApi = async (activityId: string, advertiserId: string): Promise<void> => {
+  try {
+    const response = await axios.delete(`http://localhost:8000/advertiser/activities/${activityId}`, {
+      params: { advertiserId }, // Pass the advertiserId as a query parameter
+    });
+    console.log("Activity deleted successfully:", response.data);
+  } catch (error: any) {
+    // Handle errors more robustly
+    if (axios.isAxiosError(error) && error.response) {
+      // Log server-side error if available
+      console.error("Server error deleting activity:", error.response.data);
+      throw new Error(error.response.data.message || "Failed to delete activity.");
+    } else {
+      // Log client-side or other errors
+      console.error("Client-side error deleting activity:", error.message);
+      throw new Error("An unexpected error occurred while deleting the activity.");
+    }
+  }
+
+};
+export const updateActivityApi = async (
+  activityId: string,
+  updates: Record<string, any>,
+  advertiserId: string
+): Promise<void> => {
+  try {
+    const response = await axios.put(
+      `http://localhost:8000/advertiser/activities/${activityId}`,
+      updates,
+      {
+        params: { advertiserId }, // Include advertiserId as a query parameter
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("Activity updated successfully:", response.data);
+  } catch (error) {
+    console.error("Failed to update activity:", error);
+    throw error;
+  }
+};
   

@@ -25,7 +25,7 @@ interface DecodedToken {
   mustChangePassword: boolean;
 //   iat: number; // Add this if included in the token payload
 }
-
+import { deleteActivityApi } from '@/api/activityApi'; 
 
 interface ItourPropsType {
   tour: Activity; // Use Itinerary type
@@ -121,7 +121,23 @@ const TourSingleCard = ({
   }, [tour?._id, tour?.photo,imageUrl]);
 
 
+  const handleDeleteActivity = async () => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this activity?");
+    if (!confirmDelete) return;
 
+    const toastId = toast.loading("Deleting activity...");
+    try {
+        await deleteActivityApi(tour._id, tour.advertiser); // Use the correct property
+        toast.success("Activity deleted successfully!", { id: toastId });
+
+        if (onUnsaved) {
+            onUnsaved(tour._id); // Call the parent-provided function to update the list
+        }
+    } catch (error: any) {
+        console.error("Error deleting activity:", error);
+        toast.error("Failed to delete activity. Please try again.", { id: toastId });
+    }
+};
 //   useEffect(() => {
 //     const fetchSavedStatus = async () => {
 //       try {
@@ -367,7 +383,18 @@ const TourSingleCard = ({
                     <i className="fa-regular fa-arrow-right-long icon__second"></i>
                     </span>
                   </button>}
-                
+                  <div className="tour-btn">
+    {isAdvertiser && (
+        <button
+            onClick={handleDeleteActivity}
+            className="bd-text-btn style-two"
+            type="button"
+            style={{ color: "red", marginLeft: "10px" }}
+        >
+            <i className="fa fa-trash"></i> 
+        </button>
+    )}
+</div>
                   <Modal
                     isOpen={isModalOpen}
                     onRequestClose={() => setIsModalOpen(false)}

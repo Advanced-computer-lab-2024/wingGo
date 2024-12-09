@@ -74,47 +74,37 @@ const FlightBookings: React.FC<FlightBookingsProps> = ({ id }) => {
                 <div className="team-info mb-20">
                   <h4 className="mb-15">Bookings:</h4>
                   <ul className="booking-list">
-                    {flightBookings.map((booking) => (
-                      <li key={booking._id} className="booking-item">
-                        <div className="booking-details">
-                          <span className="team-label">Flight ID: </span>
-                          {booking.flightId}
-                        </div>
-                        <div className="booking-details">
-                          <span className="team-label">Origin: </span>
-                          {booking.origin}
-                        </div>
-                        <div className="booking-details">
-                          <span className="team-label">Destination: </span>
-                          {booking.destination}
-                        </div>
-                        <div className="booking-details">
-                          <span className="team-label">Departure Date: </span>
-                          {formatDate(booking.departureDate)}
-                        </div>
-                        <div className="booking-details">
-                          <span className="team-label">Arrival Date: </span>
-                          {formatDate(booking.arrivalDate)}
-                        </div>
-                        <div className="booking-details">
-                          <span className="team-label">Duration: </span>
-                          {booking.duration}
-                        </div>
-                        <div className="booking-details">
-                          <span className="team-label">Price: </span>
-                          {formatPrice(booking.price)}
-                        </div>
-                        <div className="booking-details">
-                          <span className="team-label">Airline: </span>
-                          {booking.airline}
-                        </div>
-                        <div className="booking-details">
-                          <span className="team-label">Flight Number: </span>
-                          {booking.flightNumber}
-                        </div>
-                        <div className="booking-details">
-                          <span className="team-label">Booking Date: </span>
-                          {formatDate(booking.createdAt)}
+                    {flightBookings.length>0 && flightBookings?.map((booking) => (
+                      <li key={booking._id} className="booking-item card mb-3" style={{ marginLeft: "10px" }}>
+                        <div className="card-body">
+                          <h5 className="card-title">Flight ID: {booking.flightId}</h5>
+                          <p className="card-text">
+                            <strong>Origin:</strong> {booking.origin}
+                          </p>
+                          <p className="card-text">
+                            <strong>Destination:</strong> {booking.destination}
+                          </p>
+                          <p className="card-text">
+                            <strong>Departure Date:</strong> {formatDate(booking.departureDate)}
+                          </p>
+                          <p className="card-text">
+                            <strong>Arrival Date:</strong> {formatDate(booking.arrivalDate)}
+                          </p>
+                          <p className="card-text">
+                            <strong>Duration:</strong> {booking.duration}
+                          </p>
+                          <p className="card-text">
+                            <strong>Price:</strong> {formatPrice(booking.price)}
+                          </p>
+                          <p className="card-text">
+                            <strong>Airline:</strong> {booking.airline}
+                          </p>
+                          <p className="card-text">
+                            <strong>Flight Number:</strong> {booking.flightNumber}
+                          </p>
+                          <p className="card-text">
+                            <strong>Booking Date:</strong> {formatDate(booking.createdAt)}
+                          </p>
                         </div>
                       </li>
                     ))}

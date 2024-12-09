@@ -1209,6 +1209,7 @@ const cancelItinerary = async (req, res) => {
 
 const redeemPoints = async (req, res) => {
     const { touristId } = req.params; // Extracting touristId from URL parameters
+    const { points } = req.body; // Extracting points from the request body
 
     try {
         // Step 1: Fetch the tourist with the given touristId
@@ -1222,26 +1223,36 @@ const redeemPoints = async (req, res) => {
         // Calculate the value to be added to the wallet
         const oldPoints = tourist.loyaltyPoints;
        
-        
+        const convertedPointsToCredit = Math.floor((points / 10000) *100); // Conversion rate: 10,000 points = 100 EGP
         
        
-        if (oldPoints < 10000) {
+        if (oldPoints < 100) {
             return res.status(400).json({ 
-                message: 'Insufficient loyalty points. You need at least 10,000 points to redeem into your wallet.' 
+                message: 'Insufficient loyalty points. You need at least 100 points to redeem into your wallet.' 
             });
         }
-        const redeemablePoints = Math.floor(oldPoints / 10000) * 10000;
-        const remainingPoints = oldPoints % 10000;
+        
+        if(points <100){
+            return res.status(400).json({ 
+                message: 'You need to redeem at least 100 points.' 
+            });
+        };
 
-        // Convert redeemable points to wallet amount
-        const amountToAdd = (redeemablePoints / 10000) * 100; // Conversion rate: 10,000 points = 100 EGP
+        if(points > oldPoints){
+            return res.status(400).json({
+                message: 'You do not have enough points to redeem.'
+            });
+        }
 
+        const remainingPoints = oldPoints - points;
+        
+        const amountToAdd = convertedPointsToCredit;
         // Step 3: Update tourist's wallet and loyalty points
        
         tourist.loyaltyPoints = remainingPoints;
         let newPoints = remainingPoints;
-        let newLevel = 1;
-        let newAmount = 0.5;
+        
+        
 
 
         // Update the tourist document
@@ -1250,8 +1261,7 @@ const redeemPoints = async (req, res) => {
             { 
                 $set: { 
                     loyaltyPoints: newPoints,          // Reset loyalty points
-                    'badge.level': newLevel,           // Reset badge level
-                    'badge.amount': newAmount          // Reset badge amount
+                                            
                 },
                 $inc: { wallet: amountToAdd }           // Increment wallet by toBeAdded amount
             }, 
@@ -3044,6 +3054,22 @@ const searchHotelsByUserId = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+const searchTransportsByUserId = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const transports = await Transport.find({ touristID: userId });
+
+        if (!transports.length) {
+            return res.status(404).json({ message: "No transports found for this user" });
+        }
+
+        res.status(200).json(transports);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
   
 const getActivity = async (req, res) => {
     const { id } = req.params;  // Itinerary ID from the URL params
@@ -4739,5 +4765,6 @@ module.exports = {
     getTransportPrice,
     getPromoCodeDiscountPerc,
     getPaidPrice,
-    getPaidPriceForActivity
+    getPaidPriceForActivity,
+    searchTransportsByUserId
 };

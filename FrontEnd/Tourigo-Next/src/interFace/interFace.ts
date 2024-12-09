@@ -406,6 +406,7 @@ export interface Activity {
   averageRating:number;
   photo: string;
   description:string;
+  [key: string]: any;
 }
 
 export interface BookedActivity {

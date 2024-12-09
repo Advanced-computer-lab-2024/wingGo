@@ -5,11 +5,11 @@ import { jwtDecode } from 'jwt-decode';
 
 interface DecodedToken {
     username: string;
-    userId: string;
+    id: string;
     role: string;
     mustChangePassword: boolean;
 }
-const adminID = '67326284e3b86017593a03a0'
+
 
 
 export const fetchPendingUsers = async (): Promise<any[]> => {
@@ -63,7 +63,17 @@ export const viewPendingUserID = async (id: string): Promise<any> => {
     }
 };
 export const fetchUsername = async (): Promise<any[]> => {
+
+
+    const cookie = Cookies.get('token');
+
+    let adminID = '';
     try {
+        if(cookie){
+            const decodedToken = jwtDecode<DecodedToken>(cookie);
+            console.log('Decoded Token:', decodedToken);
+            adminID = decodedToken.id;
+        }
         const response = await axios.get<IPendingUser[]>(`http://localhost:8000/admin/getUsername/${adminID}`);
         return response.data;
     } catch (error) {

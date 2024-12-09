@@ -18,6 +18,17 @@ import { useCurrency } from "@/contextApi/CurrencyContext"; // Import the curren
 import { FaEnvelope, FaShareAlt } from "react-icons/fa";
 import Modal from "react-modal";
 import {fetchImage} from "@/api/activityApi"
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+//   iat: number; // Add this if included in the token payload
+}
 
 
 const TourDetails = ({ id }: idTypeNew) => {
@@ -32,6 +43,24 @@ const TourDetails = ({ id }: idTypeNew) => {
   const [email, setEmail] = useState('');
   const { currency, convertAmount } = useCurrency(); // Access currency and conversion function
   const [convertedPrice, setConvertedPrice] = useState<number | null>(null); // Converted price state
+  const [advertiserId, setadvertiserId] = useState<string>("");
+  const advId= "66fb37dda63c04def29f944e";
+
+  useEffect(() => {
+    // Extract `touristId` from the token
+    const token = Cookies.get("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        setadvertiserId(decodedToken.id);
+        console.log("advertiserId: ", decodedToken.id);
+      } catch (error) {
+        console.error("Failed to decode token:", error);
+      }
+    } else {
+      console.error("No token found.");
+    }
+  }, []);
   const DEFAULT_IMAGE = "/assets/images/Activity.jpeg";
   const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
 
@@ -207,7 +236,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                       </div>
                     </div>
                     {/* Include more fields as necessary */}
-                    <TourDetailTabArea activityData={data} />
+                    <TourDetailTabArea activityData={data} advertiserId= {advId}/>
 
                     <div className="tour-details-related-tour mb-35">
                       {/* <h4 className="mb-20">Related Tours</h4> */}

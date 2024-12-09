@@ -25,6 +25,8 @@ const ProfileTabs: React.FC<ProfileDetailsProps> = ({ id }) => {
   const [profileData, setProfileData] = useState<any>(null);
   const [refresh, setRefresh] = useState(false);
 
+  console.log(id);
+
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
