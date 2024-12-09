@@ -280,7 +280,7 @@ app.delete("/verifyOtp", async (req, res) => {
         user.mustChangePassword = true;
         console.log(user);
         await user.save();
-
+        
         await Otp.findOneAndDelete({email: email});
 
         res.status(200).json({ message: 'OTP verified successfully' });
