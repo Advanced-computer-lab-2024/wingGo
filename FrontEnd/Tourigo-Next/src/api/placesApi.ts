@@ -132,10 +132,22 @@ export const getAvailableTags = async (): Promise<string[]> => {
         throw error;
     }
 };
-export const deletePlace = async (placeId: string, governorId: string): Promise<void> => {
+export const deletePlace = async (placeId: string): Promise<void> => {
+    const token = Cookies.get("token"); // Fetch token from cookies
+    if (!token) {
+        throw new Error("No token found. Please log in.");
+      }
+    
     try {
-        const response = await axios.delete(`http://localhost:8000/govornor/deletePlace/${placeId}?governorId=${governorId}`);
-        console.log(`Place with ID ${placeId} has been deleted successfully.`);
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        const governorId = decodedToken.id;
+        const response = await axios.delete(`http://localhost:8000/govornor/deletePlace/${placeId}?governorId=${governorId}`,
+            {
+                headers: {
+                  Authorization: `Bearer ${token}`  // Include token in the request header
+                }
+              }
+            );
         return response.data;
     } catch (error) {
         console.error("Error deleting place:", error);

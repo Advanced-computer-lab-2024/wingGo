@@ -216,7 +216,7 @@ const deletePlace = async (req, res) => {
 
     const {governerId} = req.query;
     try {
-        const place = await Place.findOneAndDelete({governerId, _id: req.params.id});
+        const place = await Place.findOneAndDelete({_id: req.params.id});
         if (!place) {
             return res.status(404).json({ message: 'Place not found' });
         }
@@ -225,7 +225,6 @@ const deletePlace = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-
 // Add a tag to a place (already provided in previous response)
 const addTagToPlace = async (req, res) => {
 
