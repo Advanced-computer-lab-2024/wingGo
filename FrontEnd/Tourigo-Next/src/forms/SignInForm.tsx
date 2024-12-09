@@ -65,7 +65,7 @@ const SignInForm = () => {
           )}
         </div>
         <div className="sign-meta d-flex justify-content-between mb-20">
-          <div className="sign-remember">
+          {/* <div className="sign-remember">
             <label className="footer-form-check-label signing-page cursor">
               <input type="checkbox" />
               <svg viewBox="0 0 64 64" height="2em" width="2em">
@@ -77,7 +77,7 @@ const SignInForm = () => {
               </svg>{" "}
               Remember me
             </label>
-          </div>
+          </div> */}
           <div className="sign-forgot">
             <Link href="/forgot" className="sign-link">
               Forgot Password?
