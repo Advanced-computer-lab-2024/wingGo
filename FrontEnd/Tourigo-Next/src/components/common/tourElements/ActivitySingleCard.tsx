@@ -319,32 +319,35 @@ const TourSingleCard = ({
                   </button>
                 )} */}
                 
-                {isAdvertiser && <button
-                    onClick={() => handleToggleBooking(bookingState ? "Close" : "Open")} 
-                    className="bd-text-btn style-two"
-                    type="button"
-                    style={{
-                      color:  bookingState ? "red" : "blue"
-                     }}
-                  >
-                   {bookingState ? "Close Booking" : "Open Booking"}
-                    <span className="icon__box">
-                    <i className="fa-regular fa-arrow-right-long icon__first"></i>
-                    <i className="fa-regular fa-arrow-right-long icon__second"></i>
-                    </span>
-                  </button>}
-                  <div className="tour-btn">
-    {isAdvertiser && (
-        <button
-            onClick={handleDeleteActivity}
-            className="bd-text-btn style-two"
-            type="button"
-            style={{ color: "red", marginLeft: "10px" }}
-        >
-            <i className="fa fa-trash"></i> 
-        </button>
-    )}
+                <div className="tour-btn" style={{ display: "flex", alignItems: "center", gap: "10px",  paddingTop:"20px"}}>
+  {isAdvertiser && (
+    <>
+      <button
+        onClick={() => handleToggleBooking(bookingState ? "Close" : "Open")}
+        className="bd-text-btn style-two"
+        type="button"
+        style={{
+          color: bookingState ? "red" : "blue",
+        }}
+      >
+        {bookingState ? "Close Booking" : "Open Booking"}
+        <span className="icon__box">
+          <i className="fa-regular fa-arrow-right-long icon__first"></i>
+          <i className="fa-regular fa-arrow-right-long icon__second"></i>
+        </span>
+      </button>
+      <button
+        onClick={handleDeleteActivity}
+        className="bd-text-btn style-two"
+        type="button"
+        style={{ color: "red" }}
+      >
+        <i className="fa fa-trash"></i>
+      </button>
+    </>
+  )}
 </div>
+
                   <Modal
                     isOpen={isModalOpen}
                     onRequestClose={() => setIsModalOpen(false)}
