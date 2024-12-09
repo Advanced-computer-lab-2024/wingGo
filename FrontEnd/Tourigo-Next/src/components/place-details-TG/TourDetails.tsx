@@ -80,28 +80,40 @@ const TourDetails = ({ id }: idTypeNew) => {
 
     fetchPlace();
 }, [id]);
-  const handleSave = async () => {
-    const updatedData = {
-      name,
-      description,
-      location,
-      openingHours,
-      ticketPrices,
-    };
+
+const handleSave = async (event?: React.MouseEvent<HTMLButtonElement>) => {
+ console.log("upd");
+ const updatedData = {
+  name,
+  description,
+  location,
+  openingHours,
+  ticketPrices,
+};
+try {
+  const response = await updatePlace(id, updatedData);
+  if (response) {
+
+    toast.success("Place details updated successfully!");
+    const updatedPlace = response.data;
+    setName(updatedPlace.name);
+    setDescription(updatedPlace.description);
+    setLocation(updatedPlace.location);
+    setOpeningHours(updatedPlace.openingHours);
+    setTicketPrices(updatedPlace.ticketPrices);
+
+    // Optionally update `data` if it's being used elsewhere
+    setData(updatedPlace);
     
-    try {
-      const response = await updatePlace(id, updatedData);
-      if (response) {
-        toast.success("Place details updated successfully!");
-        setData(response.data);
-        // setIsEditing(false);
-      }
-    } catch (error) {
-      console.log(updatedData);
-      console.error("Error updating place details:", error);
-      toast.error("Failed to update place details.");
-    }
-  };
+  }
+} catch (error) {
+  console.error("Error updating place details:", error);
+  // toast.error("Failed to update place details.");
+}
+setIsEditing(false);
+};
+
+
 
   if (!data) return <div>Loading...</div>;
   return (
@@ -128,7 +140,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                       </div> */}
                       <div style={{ display: 'flex', gap: '10px', marginTop: '10px', marginBottom: '20px' }}>
                       <h3 className="tour-details-title mb-15">
-                      <label className="team-label w-full">Name:</label>
+                    
                       {isEditing ? (
                         <input
                           type="text"
@@ -339,18 +351,21 @@ const TourDetails = ({ id }: idTypeNew) => {
                       
                             </span>
                             {isEditing && (
-                <button
-                  onClick={handleSave}
-                  className="bd-primary-btn btn-style has-arrow radius-60 mx-3"
-                >
-                  Save Changes
-                </button>
-              )}
+    <button
+        onClick={(event) => handleSave(event)} // Pass the event to prevent default behavior
+        className="bd-primary-btn btn-style has-arrow radius-60 mx-3"
+        style={{ marginTop: "10px" }} // Correct style object
+    >
+        Save Changes
+    </button>
+)}
+
                 </div>
                           
                           
                           </div>
                       </div>
+                   
                       
                       {/*tab area start*/}
                       <TourDetailTabArea id={id} />
