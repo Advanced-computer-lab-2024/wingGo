@@ -64,10 +64,6 @@ const menu_data: MenuType[] = [
     pluseIncon: true,
     link: "/tourist-report-view-advertiser",
   },
-  
-  
- 
- 
   {
     id: 8,
     hasDropdown: true,

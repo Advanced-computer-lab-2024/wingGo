@@ -79,6 +79,14 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id, profileData, logo, 
   };
 
   const handleDelete = async () => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete your account? This action cannot be undone."
+    );
+  
+    if (!isConfirmed) {
+      return; // Exit if the user cancels
+    }
+  
     try {
       const response = await requestAccountDeletion(id);
       console.log("Delete response:", response);
@@ -89,6 +97,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id, profileData, logo, 
       toast.error("Error deleting account. Please try again later.");
     }
   };
+  
 
   return seller ? (
     <section className="bd-team-details-area section-space position-relative">
