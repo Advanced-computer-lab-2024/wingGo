@@ -21,21 +21,25 @@ const createPlace = async (req, res) => {
           
         }
 
-        // Process uploaded pictures (if any)
-        let pictureUrls = [];
-        if (req.files && req.files.length > 0) {
-            pictureUrls = req.files.map(file => file.location); // Assuming you're using AWS S3 and `location` holds the URL
+        // Handle optional photo
+        let photoUrl = null;
+        if (req.file) {
+            photoUrl = req.file.location;
         }
+
+        console.log("Photo URL:", photoUrl);
 
         // Create a new place
         const place = new Place({
             ...placeData,  // Spread the rest of the place data (e.g., name, description, location)
-            pictures: pictureUrls, // Add the uploaded pictures
+            // pictures: pictureUrls, // Add the uploaded pictures
             governorId,  // Set the governor ID
-            tagss: tagss || []  // Use an empty array if tagss is missing
+            tagss: tagss || [] , // Use an empty array if tagss is missing
+            photo: photoUrl,
         });
 
         await place.save();
+        console.log(place);
         res.status(201).json({ message: 'Place created successfully', place });
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -112,7 +116,7 @@ const updatePlace = async (req, res) => {
     const { governorId } = req.query;
     try {
         const { tagss, ...placeData } = req.body; // Extract tagss separately
-
+        console.log(id );
         // Find the place by ID and update with the new data
         const place = await Place.findOne({governorId, _id: req.params.id });
         if (!place) {
@@ -296,7 +300,7 @@ const changePassword = async (req, res) => {
        
 
         // 3. Compare the old password with the hashed password in TourGuide
-        const isMatch = await bcrypt.compare(oldPassword, governor.password);
+        const isMatch = await bcrypt.compare(oldPassword, userCredentials.password);
         console.log('Is password match:', isMatch);
 
         if (!isMatch) {
@@ -307,13 +311,15 @@ const changePassword = async (req, res) => {
         if (newPassword !== confirmNewPassword) {
             return res.status(400).json({ message: 'New password and confirm password do not match' });
         }
-
+        console.log("AHUDHJGHJDFGHJFDSG");
         // 5. Hash the new password
         const hashedNewPassword = await bcrypt.hash(newPassword, 10); // Hash new password
         
         // 6. Update the password in LoginCredentials
         userCredentials.password = hashedNewPassword;
         await userCredentials.save();
+
+        console.log("AHUDHJGHJDFGHJFDSG");
 
         // 7. Update the password in the TourGuide collection
         governor.password = hashedNewPassword;

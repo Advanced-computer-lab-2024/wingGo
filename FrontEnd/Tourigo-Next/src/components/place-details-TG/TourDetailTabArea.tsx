@@ -15,15 +15,7 @@ interface TourDetailTabAreaProps {
 }
 
 const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ id }) => {
-  const handleDelete = async () => {
-    try {
-      await deletePlace(id);
-      alert("Place deleted successfully.");
-      // Optionally, refresh the page or redirect to another page
-    } catch (error) {
-      alert("Failed to delete the place.");
-    }
-  };
+ 
   return (
     <>
       <div className="tour-details-nav-tabs mb-35">
@@ -280,9 +272,7 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ id }) => {
                     </div>
                   </div>
                 </div>
-                <button onClick={handleDelete} className="btn btn-danger mt-3">
-                                    Delete
-                                </button>
+               
               </div>
             </div>
           </div>

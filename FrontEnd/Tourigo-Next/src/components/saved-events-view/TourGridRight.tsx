@@ -55,14 +55,22 @@ const SavedEventsGrid = () => {
 
 
   useEffect(() => {
+    let tid="";
+    const token = Cookies.get("token");
     const fetchSavedEvents = async () => {
+      console.log("touristId :",touristId);
+      if (token) {
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        console.log("Tourist ID2222:", decodedToken.id);
+        tid=decodedToken.id;
       try {
-        const { savedActivities, savedItineraries } = await viewAllSavedEventsApi( touristId);
+        const { savedActivities, savedItineraries } = await viewAllSavedEventsApi(tid);
         setSavedActivities(savedActivities);
         setSavedItineraries(savedItineraries);
       } catch (error) {
         console.error("Error fetching saved events:", error);
       }
+    }
     };
 
     fetchSavedEvents();

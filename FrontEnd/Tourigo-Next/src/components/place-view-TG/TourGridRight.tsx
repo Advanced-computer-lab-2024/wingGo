@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import TourSingleCard from "../common/tourElements/TourSingleCardPlacesTG";
 import { Place } from "@/interFace/interFace";
 import { getPlacesData } from "@/data/placeData";
+
 // import ItinerariesContentHeader from "@/elements/itineraries/it-header";
 import SidebarSearchArea from "../shearedComponents/SidebarSearchAreaPlaces";
 
@@ -20,7 +21,12 @@ const TourGridRight = () => {
   const [filteredPlaces, setFilteredPlaces] = useState<Place[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   
-
+  const handleRemovePlace = (placeId: string) => {
+    setPlaces((prevPlaces) => prevPlaces.filter((place) => place._id !== placeId));
+    setFilteredPlaces((prevFiltered) =>
+      prevFiltered.filter((place) => place._id !== placeId)
+    );
+  };
   // Load initial data
 // Load initial data
 useEffect(() => {
@@ -63,13 +69,14 @@ const handleSearch = (query: string) => {
               {/* <ItinerariesContentHeader /> */}
               <div className="row gy-24">
                 {filteredPlaces.map((item) => (
-                  <TourSingleCard
-                    tour={item}
-                    key={item._id}
-                    className="col-xxl-4 col-xl-6 col-lg-6 col-md-6"
-                    tourWrapperClass="tour-wrapper style-one"
-                    isparentClass={true}
-                  />
+                 <TourSingleCard
+                 tour={item}
+                 key={item._id}
+                 className="col-xxl-4 col-xl-6 col-lg-6 col-md-6"
+                 tourWrapperClass="tour-wrapper style-one"
+                 isparentClass={true}
+                 onRemove={handleRemovePlace} // Pass the handler
+               />
                 ))}
               </div>
             </div>

@@ -9,6 +9,8 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { createPlace, getAvailableTags } from "@/api/placesApi";
 import { selectLocationData } from "@/data/nice-select-data";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUpload } from '@fortawesome/free-solid-svg-icons';
 
 
 
@@ -23,7 +25,7 @@ interface NewPlace {
     student?: number;
   };
   tagss?: string[];
-  pictures?: string[]; // Array of files for multiple image uploads
+  photo?: File|null; // Array of files for multiple image uploads
 }
 
 interface FormData {
@@ -37,7 +39,9 @@ interface FormData {
     student?: number;
   };
   tagss?: string[];
-  pictures?: string[]; // Array of files for multiple image uploads
+  photo?: File|null;
+ 
+ 
 }
 
 const TourDetailsArea = () => {
@@ -51,7 +55,10 @@ const TourDetailsArea = () => {
   } = useForm<FormData>();
 
 
-  const [largeImg, setlargeImg] = useState<string>("");
+
+
+  // const [image, setImage] = useState<File | null>(null);
+  // const [largeImg, setlargeImg] = useState<string>("");
   const [availablePrefrences, setAvailablePrefrences] = useState<Array<any>>([]);
   const [selectedPrefrences, setSelectedPrefrences] = useState<Array<any>>([]);
   const [isLoadingPreferences, setIsLoadingPreferences] = useState<boolean>(true);
@@ -64,7 +71,7 @@ const TourDetailsArea = () => {
    
     name: "",
     description: "",
-    pictures: [],
+
     location:"",
     openingHours: "",
     ticketPrices: {
@@ -74,7 +81,17 @@ const TourDetailsArea = () => {
     },
    
     tagss: selectedPrefrences,
+    photo:photo
   });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setFileName: React.Dispatch<React.SetStateAction<string | null>>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setPhoto(e.target.files[0]);
+      setFileName(e.target.files[0].name);
+    } else {
+      setFileName(null);
+    }
+  };
   
 
   
@@ -227,7 +244,28 @@ const TourDetailsArea = () => {
                 <div className="tour-details-wrapper">
                   <div className="tour-details mb-25">
                     {/* Upload Img */}
-                    <UploadSingleImg setlargeImg={setlargeImg} />
+                    {/* <UploadSingleImg setlargeImg={setlargeImg} /> */}
+
+                    <div className="form-input">
+                    <input
+                      id="photo"
+                      type="file"
+                      {...register("photo", {
+                        required: "Photo is required",
+                      })}
+                      className="custom-file-input"
+                      onChange={(e) => handleFileChange(e, setPhotoName)}
+                    />
+                    <label htmlFor="photo" className="custom-file-label">
+                      <FontAwesomeIcon icon={faUpload} /> Upload picture
+                    </label>
+                    {photoName && (
+                      <p className="file-name">{photoName}</p>
+                    )}
+                    {errors.photo && (
+                      <ErrorMessage message={errors.photo.message as string} />
+                    )}
+                  </div>
                     <div className="form-input-box mb-15">
                       <div className="form-input-title">
                         <label htmlFor="placeTitle">

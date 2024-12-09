@@ -17,6 +17,7 @@ import axios from "axios";
 import { useCurrency } from "@/contextApi/CurrencyContext"; // Import the currency context
 import { FaEnvelope, FaShareAlt } from "react-icons/fa";
 import Modal from "react-modal";
+import {fetchImage} from "@/api/activityApi"
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 
@@ -60,6 +61,8 @@ const TourDetails = ({ id }: idTypeNew) => {
       console.error("No token found.");
     }
   }, []);
+  const DEFAULT_IMAGE = "/assets/images/Activity.jpeg";
+  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
 
 
   const handleEmailChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
@@ -120,6 +123,23 @@ const TourDetails = ({ id }: idTypeNew) => {
     };
     fetchData();
   }, [id, currency, convertAmount]); // Add currency and convertAmount to dependency array
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        if (data?._id && data?.photo) { // Check if the item has an image
+          const url = await fetchImage(data._id);
+          if (url) {
+            console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
+            setImageUrl(url);
+            console.log(imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load image:", error);
+      }
+    };
+    loadImage();
+  }, [data?._id, data?.photo,imageUrl]);
 
 
   const handleBookNowClick = () => {
@@ -142,12 +162,13 @@ const TourDetails = ({ id }: idTypeNew) => {
                 <div className="tour-details mb-25">
                   <div className="tour-details-thumb details-slide-full mb-30">
                     <Image
-                      src="/images/default-image.jpg" // Placeholder image
+                      src={imageUrl|| DEFAULT_IMAGE} // Placeholder image
                       loader={imageLoader}
-                      width={500}
-                      height={500}
-                      style={{ width: "100%", height: "auto" }}
-                      alt="Itinerary Image"
+                      width={300}
+                      height={300}
+                      style={{ width: "auto", height: "auto" }}
+                      alt="Activity Image"
+                      unoptimized
                     />
                   </div>
                   <div className="tour-details-content">

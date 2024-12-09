@@ -45,15 +45,15 @@ export const createPlace = async (
     }
   };
 // Delete a place
-export const deletePlace = async (placeId: string): Promise<void> => {
-    try {
-        await axios.delete(`http://localhost:8000/govornor/deletePlace/${placeId}`);
-        console.log(`Place with ID ${placeId} has been deleted.`);
-    } catch (error) {
-        console.error("Error deleting place:", error);
-        throw error;
-    }
-};
+// export const deletePlace = async (placeId: string): Promise<void> => {
+//     try {
+//         await axios.delete(`http://localhost:8000/govornor/deletePlace/${placeId}`);
+//         console.log(`Place with ID ${placeId} has been deleted.`);
+//     } catch (error) {
+//         console.error("Error deleting place:", error);
+//         throw error;
+//     }
+// };
 export const updatePlace = async (id:string, updatedData:any) => {
     const token = Cookies.get('token');
     let governorId = "";
@@ -66,9 +66,9 @@ export const updatePlace = async (id:string, updatedData:any) => {
             throw new Error("No token found. Please log in.");
         }
         const response = await axios.put(
-            `http://localhost:8000/govornor/updatePlace/${id}?governorId=${governorId}`,
-            updatedData
-        );
+          `http://localhost:8000/govornor/updatePlace/${id}?governorId=${governorId}`,
+    updatedData
+);
         return response.data; // Contains message and updated place data
     } catch (error) {
         console.error('Error updating place:', error);
@@ -117,4 +117,14 @@ export const getAvailableTags = async (): Promise<string[]> => {
         console.error("Error fetching tags:", error);
         throw error;
     }
+};
+export const deletePlace = async (placeId: string, governorId: string): Promise<void> => {
+  try {
+      const response = await axios.delete(`http://localhost:8000/govornor/deletePlace/${placeId}?governorId=${governorId}`);
+      console.log(`Place with ID ${placeId} has been deleted successfully.`);
+      return response.data;
+  } catch (error) {
+      console.error("Error deleting place:", error);
+      throw error;
+  }
 };

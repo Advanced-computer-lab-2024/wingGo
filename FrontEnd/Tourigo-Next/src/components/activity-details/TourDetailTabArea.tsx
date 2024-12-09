@@ -13,6 +13,14 @@ import GetRatting from "@/hooks/GetRatting";
 import { updateActivityApi } from "@/api/activityApi";
 import { toast } from "sonner";
 import { TbEdit } from "react-icons/tb";
+import { useEffect } from "react";
+import { getAllActCategories } from "@/api/adminApi"; // Import category API
+import { getAvailableTags } from "@/api/itineraryApi";
+
+interface Category {
+  _id: string;
+  name: string;
+}
 interface TourDetailTabAreaProps {
   activityData: Activity;
   advertiserId: string; 
@@ -42,6 +50,43 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({
     specialDiscounts: activityData.specialDiscounts || "",
     description: activityData.description || "",
   });
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+const [isEditingTags, setIsEditingTags] = useState(false);
+const [isLoadingTags, setIsLoadingTags] = useState(true); // Track loading state
+useEffect(() => {
+  const fetchTags = async () => {
+    try {
+      const response = await getAvailableTags(); // Fetch tags from API
+      setAvailableTags(response.map((tag: any) => tag.name)); // Assuming `response` contains a `name` field
+    } catch (error) {
+      console.error("Failed to fetch tags:", error);
+      toast.error("Failed to load tags.");
+    } finally {
+      setIsLoadingTags(false);
+    }
+  };
+
+  fetchTags();
+}, []);
+
+  const [categories, setCategories] = useState<Category[]>([]);
+const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const response = await getAllActCategories(); // API call to fetch categories
+      setCategories(response); // Update categories state
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      toast.error("Failed to fetch categories.");
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
+
+  fetchCategories();
+}, []);
   const handleSaveChanges = async () => {
     try {
       await updateActivityApi(activityData._id, updatedActivity, advertiserId);
@@ -121,23 +166,205 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({
           <TbEdit size={20} />
         </button>
       </p>
-      {isEditing && (
+      
+           <p className="mb-15 d-flex align-items-center">
+  <strong>Time:</strong>
+  {isEditing ? (
+    <input
+      type="time"
+      value={updatedActivity.time}
+      onChange={(e) =>
+        setUpdatedActivity({ ...updatedActivity, time: e.target.value })
+      }
+      className="form-control ms-2"
+      style={{ width: "auto" }}
+    />
+  ) : (
+    <span>{activityData.time}</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+            
+<p className="mb-15 d-flex align-items-center">
+  <strong>Category:</strong>
+  {isEditing ? (
+    <select
+      value={updatedActivity.category}
+      onChange={(e) =>
+        setUpdatedActivity({ ...updatedActivity, category: e.target.value })
+      }
+      className="form-control ms-2"
+      style={{ width: "auto" }}
+    >
+      <option value="" disabled>
+        Select a category
+      </option>
+      {isLoadingCategories ? (
+        <option>Loading categories...</option>
+      ) : (
+        categories.map((category) => (
+          <option key={category._id} value={category.name}>
+            {category.name}
+          </option>
+        ))
+      )}
+    </select>
+  ) : (
+    <span>{activityData.category || "No category selected"}</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+<p className="mb-15 d-flex align-items-start">
+  <strong>Description:</strong>
+  {isEditing ? (
+    <textarea
+      value={updatedActivity.description}
+      onChange={(e) =>
+        setUpdatedActivity({
+          ...updatedActivity,
+          description: e.target.value,
+        })
+      }
+      className="form-control ms-2"
+      style={{ width: "auto", resize: "vertical" }}
+      rows={4} // Adjust rows for multiline input
+      placeholder="Enter a detailed description"
+    ></textarea>
+  ) : (
+    <span>{activityData.description || "No description provided"}</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+<p className="mb-15 d-flex align-items-start">
+  <strong>Location:</strong>
+  {isEditing ? (
+    <textarea
+      value={updatedActivity.location}
+      onChange={(e) =>
+        setUpdatedActivity({
+          ...updatedActivity,
+          location: e.target.value,
+        })
+      }
+      className="form-control ms-2"
+      style={{ width: "auto", resize: "vertical" }}
+      rows={3} // Adjust rows for multiline input
+      placeholder="Enter the location address"
+    ></textarea>
+  ) : (
+    <span>{activityData.location || "No location provided"}</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+<p className="mb-15 d-flex align-items-center">
+  <strong>Price:</strong>
+  {isEditing ? (
+    <input
+      type="number"
+      value={updatedActivity.price}
+      onChange={(e) =>
+        setUpdatedActivity({
+          ...updatedActivity,
+          price: +e.target.value, // Convert to number
+        })
+      }
+      className="form-control ms-2"
+      style={{ width: "auto" }}
+      placeholder="Enter the activity price"
+      min="0" // Ensure the price is non-negative
+    />
+  ) : (
+    <span>{activityData.price ? `${activityData.price} USD` : "No price set"}</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+<p className="mb-15 d-flex align-items-start">
+  <strong>Tags:</strong>
+  {isEditing ? (
+    <textarea
+      value={updatedActivity.tags.join(", ")} // Convert tags array to a comma-separated string
+      onChange={(e) =>
+        setUpdatedActivity({
+          ...updatedActivity,
+          tags: e.target.value.split(",").map((tag) => tag.trim()), // Split input into an array of tags
+        })
+      }
+      className="form-control ms-2"
+      style={{ width: "100%", resize: "vertical" }}
+      placeholder="Enter tags separated by commas"
+    ></textarea>
+  ) : (
+    <span>{activityData.tags?.join(", ") || "No tags provided"}</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+<p className="mb-15 d-flex align-items-start">
+  <strong>Special Discounts:</strong>
+  {isEditing ? (
+    <textarea
+      value={updatedActivity.specialDiscounts} // The current special discounts
+      onChange={(e) =>
+        setUpdatedActivity({
+          ...updatedActivity,
+          specialDiscounts: e.target.value, // Update the specialDiscounts field
+        })
+      }
+      className="form-control ms-2"
+      style={{ width: "100%", resize: "vertical" }}
+      placeholder="Enter details about special discounts"
+    ></textarea>
+  ) : (
+    <span>{activityData.specialDiscounts || "No special discounts provided"}</span>
+  )}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="btn btn-link p-0 ms-2"
+    style={{ cursor: "pointer" }}
+  >
+    <TbEdit size={20} />
+  </button>
+</p>
+        {isEditing && (
         <button onClick={handleSaveChanges} className="btn btn-primary mt-3">
           Save Changes
         </button>
       )}
-            <p className="mb-15">
-              <strong>Time:</strong> {activityData.time}
-            </p>
-            <p className="mb-15">
-              <strong>Category:</strong> {activityData.category}
-            </p>
-            <p><strong>Description:</strong> {activityData.description || 'N/A'}</p>
-        <p><strong>Location:</strong> {activityData.location}</p>
-        <p><strong>Price:</strong> {activityData.price} USD</p>
-        <p><strong>Tags:</strong> {activityData.tags?.join(', ') || 'No tags available'}</p>
-        <p><strong>Special Discounts:</strong> {activityData.specialDiscounts || 'None'}</p>
-        
        
             <div className="tour-details-faq mb-35">
   

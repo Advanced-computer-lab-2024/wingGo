@@ -58,24 +58,28 @@ const TourDetails = ({ id }: idTypeNew) => {
   };
  
   useEffect(() => {
+    if (!id) {
+        console.error('Place ID is undefined');
+        return;
+    }
+    console.log('Place ID:', id); // Ensure this logs the correct ID
     const fetchPlace = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8000/govornor/getPlace/${id}`);
-        setData(response.data);
-        const place = response.data;
-        setName(place.name || "");
-        setDescription(place.description || "");
-        setLocation(place.location || "");
-        setOpeningHours(place.openingHours || "");
-        setTicketPrices(place.ticketPrices || {});
-      } catch (error) {
-        console.error("Error fetching Place data:", error);
-      }
+        try {
+            const response = await axios.get(`http://localhost:8000/govornor/getPlace/${id}`);
+            setData(response.data);
+            const place = response.data;
+            setName(place.name || "");
+            setDescription(place.description || "");
+            setLocation(place.location || "");
+            setOpeningHours(place.openingHours || "");
+            setTicketPrices(place.ticketPrices || {});
+        } catch (error) {
+            console.error("Error fetching Place data:", error);
+        }
     };
 
     fetchPlace();
-  }, [id]);
-
+}, [id]);
   const handleSave = async () => {
     const updatedData = {
       name,

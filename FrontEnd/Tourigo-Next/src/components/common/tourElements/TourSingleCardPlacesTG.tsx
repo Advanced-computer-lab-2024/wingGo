@@ -6,7 +6,7 @@ import { Place } from "@/interFace/interFace";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-
+import { deletePlace } from "@/api/placesApi";
 interface ItourPropsType {
   tour: Place;
   className: string;
@@ -14,6 +14,7 @@ interface ItourPropsType {
   isparentClass: boolean;
   isAdmin?: boolean;
   isTourGuide?: boolean;
+  onRemove?: (placeId: string) => void; // New prop
 }
 
 const TourSingleCard = ({
@@ -23,9 +24,23 @@ const TourSingleCard = ({
   isparentClass,
   isAdmin = false,
   isTourGuide = false,
+  onRemove, // Destructure the prop
 }: ItourPropsType) => {
   const { setModalData } = useGlobalContext();
-
+  const handleDeletePlace = async (placeId: string, governorId: string) => {
+    if (confirm("Are you sure you want to delete this place?")) {
+      try {
+        await deletePlace(placeId, governorId);
+        alert("Place deleted successfully.");
+        if (onRemove) {
+          onRemove(placeId); // Call the onRemove handler
+        }
+      } catch (error) {
+        console.error("Error deleting place:", error);
+        alert("Failed to delete the place. Please try again.");
+      }
+    }
+  };
   return (
     <>
       {isparentClass ? (
@@ -89,6 +104,13 @@ const TourSingleCard = ({
                       <i className="fa-regular fa-arrow-right-long icon__second"></i>
                     </span>
                   </button>
+                  <button
+  className="delete-btn"
+  onClick={() => handleDeletePlace(tour._id, tour.governorId)} // Pass both placeId and governorId
+  type="button"
+>
+  <i className="fa-solid fa-trash" style={{ color: "red" }}></i>
+</button>
                 </div>
               </div>
             </div>
