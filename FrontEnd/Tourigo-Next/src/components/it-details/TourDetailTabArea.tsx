@@ -382,7 +382,8 @@ const TourDetailTabArea: React.FC<TourDetailTabAreaProps> = ({ itineraryData: in
       className="btn btn-link p-0 ms-2"
       style={{ cursor: "pointer" }}
     >
-      <TbEdit size={20} />
+      {isGuide &&<TbEdit size={20} />}
+      
     </button>
   </h4>
   <div className="accordion-wrapper faq-style-3">
