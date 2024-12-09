@@ -90,16 +90,7 @@ const handleDelete = async () => {
     <section className="bd-team-details-area section-space position-relative">
       <div className="container">
         <div className="row justify-content-between gy-24">
-          <div className="col-xxl-3 col-xl-5 col-lg-5 col-md-5">
-            <div className="team-details-thumb sidebar-sticky">
-            <Image
-                  src={filterData?.img as StaticImageData}
-                  loader={imageLoader}
-                  style={{ width: "100%", height: "auto" }}
-                  alt="image"
-                />
-            </div>
-          </div>
+          
           <div className="col-xxl-9 col-xl-7 col-lg-7 col-md-7">
             <div className="team-single-wrapper">
               <div className="team-contents mb-30">
