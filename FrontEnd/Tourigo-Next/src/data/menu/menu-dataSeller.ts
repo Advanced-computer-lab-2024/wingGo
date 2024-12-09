@@ -35,10 +35,10 @@ const menu_data: MenuType[] = [
     children: false,
     megaMenu: true,
     active: true,
-    title: "Archived Products",
+    title: "Products",
     pluseIncon: true,
     pageLayout: true,
-    link: "/Products-sellerArch",
+    link: "/Products-seller",
     
   },
   {

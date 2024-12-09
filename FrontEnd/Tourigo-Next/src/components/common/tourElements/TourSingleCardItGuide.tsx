@@ -236,6 +236,8 @@ const TourSingleCard = ({
                       cursor: "pointer",
                       color: isDeactivated ? "grey" : "grey",
                     }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "blue")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = isDeactivated ? "grey" : "grey")}
                   >
                     {isDeactivated ?  "Activate" : "Deactivate"}
                     {/* <span className="icon__box">
