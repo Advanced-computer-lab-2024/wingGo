@@ -215,7 +215,7 @@ const TourDetails = ({ id }: idTypeNew) => {
                       </div>
                     </div>
                     {/* Include more fields as necessary */}
-                    <TourDetailTabArea activityData={data} advertiserId= {advertiserId}/>
+                    <TourDetailTabArea activityData={data} advertiserId= {advId}/>
 
                     <div className="tour-details-related-tour mb-35">
                       {/* <h4 className="mb-20">Related Tours</h4> */}

@@ -112,7 +112,7 @@ const updatePlace = async (req, res) => {
     const { governorId } = req.query;
     try {
         const { tagss, ...placeData } = req.body; // Extract tagss separately
-
+        console.log(id );
         // Find the place by ID and update with the new data
         const place = await Place.findOne({governorId, _id: req.params.id });
         if (!place) {
