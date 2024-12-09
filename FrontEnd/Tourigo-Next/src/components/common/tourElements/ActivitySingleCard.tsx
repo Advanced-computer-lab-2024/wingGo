@@ -16,6 +16,26 @@ import { toast } from 'sonner';
 import { FaRegClock } from "react-icons/fa";
 import { deleteActivityApi } from '@/api/activityApi'; 
 
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+//   iat: number; // Add this if included in the token payload
+}
+const token = Cookies.get("token");
+import {fetchImage} from "@/api/activityApi"
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+interface DecodedToken {
+  username: string;
+  id: string; // Use 'id' instead of 'userId'
+  role: string;
+  mustChangePassword: boolean;
+}
+//   iat: number; // Add this if included in the token payload
+//   iat: number; // Add this if included in the token payload
+
 interface ItourPropsType {
   tour: Activity; // Use Itinerary type
   className: string;
@@ -47,8 +67,27 @@ const TourSingleCard = ({
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility
   const [modalAction, setModalAction] = useState(""); // To track the action (Open/Close Booking)
   const [isSaved, setIsSaved] = useState(false);
+  const DEFAULT_IMAGE = "/assets/images/Activity.jpeg";
+ const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
+ const [touristId, setTouristId] = useState<string>("");
 
-  const touristId = "67240ed8c40a7f3005a1d01d";
+
+  // const touristId = "67240ed8c40a7f3005a1d01d";
+  // Extract the tourist ID from the token when the component mounts
+  useEffect(() => {
+    try {
+      const token = Cookies.get("token");
+      if (token) {
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        setTouristId(decodedToken.id); // Set tourist ID
+        console.log("Decoded Token:", decodedToken);
+      } else {
+        console.error("No token found. Please log in.");
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }, []);
 
    // Fetch booking status when component mounts
    useEffect(() => {
@@ -119,6 +158,24 @@ const TourSingleCard = ({
 //     fetchSavedStatus();
 //   }, [tour._id, touristId]);
 
+useEffect(() => {
+  const loadImage = async () => {
+    try {
+      if (tour?._id && tour?.photo) { // Check if the item has an image
+        const url = await fetchImage(tour._id);
+        if (url) {
+          console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
+          setImageUrl(url);
+          console.log(imageUrl);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load image:", error);
+    }
+  };
+  loadImage();
+}, [tour?._id, tour?.photo,imageUrl]);
+
   useEffect(() => {
     const fetchSavedActivityStatus = async () => {
       try {
@@ -147,6 +204,11 @@ const TourSingleCard = ({
 
   const handleBookNowClick = () => {
     // Redirect to the specific page (replace "/booking-page" with the desired path)
+    if (!token) {
+      toast.error("Please sign in to book itineraries.");
+      router.push("/sign-in");
+      return;
+    }
     router.push(`/booking-activity/${tour._id}`);
   };
 
@@ -171,7 +233,11 @@ const TourSingleCard = ({
   };
 
   const handleSave = async () => {
-    
+    if (!token) {
+      toast.error("Please sign in to save itineraries.");
+      router.push("/sign-in");
+      return;
+    }
    
     try {
       if (!tour._id?.length) {
@@ -214,13 +280,14 @@ const TourSingleCard = ({
             <div className="p-relative">
               <div className="tour-thumb image-overly">
                 <Link href={`/activity-details/${tour._id}`}>
-                  <Image
-                    src="/assets/images/Activity.jpeg" // Placeholder image
+                <Image
+                    src={imageUrl}
                     loader={imageLoader}
                     width={270}
                     height={270}
                     style={{ width: "300px", height: "250px" }}
                     alt="Activity Image"
+                    unoptimized 
                   />
                 </Link>
               </div>
@@ -277,7 +344,7 @@ const TourSingleCard = ({
 
               <div className="d-flex justify-content-between align-items-center mb-2">
               <h5 className="tour-title fw-5 underline custom_mb-5"> </h5>
-              <div className="bookmark-container">
+             {token && ( <div className="bookmark-container">
               <span
               className={`bookmark-icon ${isSaved ? "bookmarked" : ""}`}
               onClick={handleSave}
@@ -293,7 +360,7 @@ const TourSingleCard = ({
                 >
             <i className={`fa${isSaved ? "s" : "r"} fa-bookmark`}></i> {/* Solid for saved, Regular for unsaved */}
             </span>
-            </div>
+            </div>)}
             </div>
               <div className="tour-divider"></div>
 

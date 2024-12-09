@@ -141,6 +141,18 @@ const menu_data: MenuType[] = [
     // icon: true, // Custom property to indicate this is an icon
 },
 
+{
+  id: 12, // Unique ID for the bell icon
+  hasDropdown: true, // Enables the dropdown for notifications
+  children: false, // No submenus in this case
+  megaMenu: false,
+  active: true,
+  title: "Saved Events", // No visible title, only the icon
+  pluseIncon: false,
+  link: "/saved-events-view", // No link since it’s an icon
+  // icon: true, // Custom property to indicate this is an icon
+},
+
   
 ];
 

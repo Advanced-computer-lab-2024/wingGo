@@ -23,21 +23,35 @@ export const fetchAllPlaces = async (): Promise<Place[]> => {
         throw error;
     }
 };
-export const createPlace = async (
-   
-    data: any
-  ): Promise<any> => {
-   
+export const createPlace = async (data: any, photo:any): Promise<any> => {
+  const cookie = Cookies.get("token");
+  let governorId = "";
+ 
+  const formData = new FormData();
+  formData.append("name", data.name);
+  formData.append("description", data.description);
+  formData.append("location", data.location);
+  formData.append("openingHours", data.openingHours);
+  formData.append("ticketPrices", data.ticketPrices);
+  formData.append("tagss", data.tagss);
+  formData.append("photo", photo);
+
+  
+
+
     try {
+      if (cookie) {
+        const decodedToken = jwtDecode<DecodedToken>(cookie);
+        governorId = decodedToken.id;
+      } else {
+        throw new Error("No token found. Please log in.");
+      }
       const response = await axios.post(
-        `http://localhost:8000/govornor/createPlace?governorId=${governorId}`, 
-        data,
-        {
+        `http://localhost:8000/govornor/createPlace?governorId=${governorId}`, formData, {
           headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+              'Content-Type': 'multipart/form-data'
+          }
+      });
       return response.data;
     } catch (error) {
       console.error("Error creating place:", error);
