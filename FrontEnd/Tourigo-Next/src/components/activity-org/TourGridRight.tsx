@@ -7,6 +7,7 @@ import { Activity } from "@/interFace/interFace";
 import ActivitiesSidebarMain from "../activitiesSidebar/ItinerariesSidebarMain";
 import ActivitiesContentHeader from "@/elements/activities/act-header";
 import { filterUpcomingActivities } from "@/api/activityApi";
+import {getAllActCategories} from "@/api/adminApi"
 
 interface FilterOptions {
   budget?: number;

@@ -1573,7 +1573,21 @@ const searchForUserByUsername = async (req, res) => {
     }
 };
 
-  ;
+const getCategoryNames = async (req, res) => {
+    try {
+      // Fetch only the 'name' field from the database
+      const categories = await ActivityCategory.find({}, "name");
+  
+      // Extract names into an array of strings
+      const categoryNames = categories.map((category) => category.name);
+  
+      // Return the array of names
+      res.status(200).json(categoryNames);
+    } catch (error) {
+      // Handle errors
+      res.status(500).json({ error: error.message });
+    }
+  };
 
   
 
@@ -1634,5 +1648,6 @@ module.exports = {
     getSalesReport,
     getAllUsers,
     searchForUserByUsername,
-    getUserStatistics
+    getUserStatistics,
+    getCategoryNames
 };

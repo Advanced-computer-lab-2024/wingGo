@@ -1,6 +1,7 @@
 // SidebarCategories.tsx
 import React from 'react';
 
+
 interface SidebarCategoriesProps {
     onCategorySelect: (category: string) => void;
 }
