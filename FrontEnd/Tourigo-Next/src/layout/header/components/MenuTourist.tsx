@@ -7,14 +7,69 @@ import { imageLoader } from "@/hooks/image-loader";
 import { useCurrency } from "@/contextApi/CurrencyContext";
 import {getTouristNotificationsApi} from "@/api/PrefrenceApi"
 import {Notification} from "@/interFace/interFace"
-import { FaBell } from "react-icons/fa";
+import { FaBell, FaQuestion } from "react-icons/fa";
 import Cookies from "js-cookie";
+import Joyride, { CallBackProps, Step } from 'react-joyride';
+
 
 const Menu = () => {
   const { setCurrency, currency } = useCurrency(); // Access setCurrency from CurrencyContext
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [run, setRun] = useState(false);
+
+  const steps: Step[] = [
+    {
+      target: '#products-menu',
+      content: 'View various product categories here.',
+    },
+    {
+      target: '#places-menu',
+      content: 'Discover amazing places to visit.',
+    },
+    {
+      target: '#itineraries-menu',
+      content: 'Plan your trip using our itineraries feature.',
+    },
+    {
+      target: '#activities-menu',
+      content: 'Explore activities to enhance your trip.',
+    },
+    {
+      target: '#history-menu',
+      content: 'View your itinerary, activity, products booking history here.',
+    },
+    {
+      target: '#complaints-menu',
+      content: 'Submit complaints or queries here.',
+    },
+    {
+      target: '#booking-menu',
+      content: 'Book hotels, flights, and other services here.',
+    },
+    {
+      target: '#currency-menu',
+      content: 'Select your preferred currency here.',
+    },
+    {
+      target: '#profile-menu',
+      content: 'Manage your profile settings here',
+    },
+    {
+      target: '#logout-button',
+      content: 'Log out of your account securely here.',
+    },
+    
+    
+  ];
+
+  const handleJoyrideCallback = (data: CallBackProps) => {
+    const { status } = data;
+    if (status === 'finished' || status === 'skipped') {
+      setRun(false); // Stop the guide after it's completed
+    }
+  };
 
 const handleBellClick = () => {
   setShowDropdown((prev) => !prev);
@@ -60,10 +115,29 @@ useEffect(() => {
 
   return (
     <>
+    <Joyride
+  steps={steps}
+  run={run} // Trigger the guide
+  callback={handleJoyrideCallback}
+  showSkipButton
+  continuous
+  showProgress
+  styles={{
+    options: {
+      zIndex: 10000,
+      arrowColor: '#006ce4',
+      backgroundColor: '#fff',
+      overlayColor: 'rgba(0, 0, 0, 0.6)',
+      primaryColor: '#006ce4',
+      textColor: '#333',
+    },
+  }}
+/>
       <ul className="mb-20">
         {menu_data.map((item) => (
           <li
             key={item.id}
+            id={`${item.title.toLowerCase().replace(' ', '-')}-menu`} // Add an ID for each menu item
             className={`${
               item?.children === true
                 ? "menu-item-has-children"
@@ -271,10 +345,23 @@ useEffect(() => {
     >
           <button className="bd-primary-btn btn-style radius-60 mb-10 px-50 mt-20"
             onClick={() => {const cookie = Cookies.remove("token"); window.location.href = "/";}}
+            id="logout-button"
             >
               <span className="bd-primary-btn-text">Logout</span>
               <span className="bd-primary-btn-circle"></span>
             </button>
+            </div>
+
+            <div
+      style={{
+        position: "absolute",
+        top:"20%",
+        right: "200px", // Keep it to the far-right of the screen
+        paddingLeft: "30px",
+        marginLeft: "20px"
+      }}
+    >
+          <FaQuestion style={{fontSize: "24px", cursor: "pointer", color: "#006ce4", marginTop: "37px"}} onClick={() => setRun(true)} />
             </div>
       </ul>
 

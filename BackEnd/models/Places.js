@@ -64,6 +64,9 @@ const placeSchema = new Schema({
         type: Boolean,
         default: false,  // Initially not flagged
       },
+      photo:{
+        type: String,
+      },
 
       tagss: [{  type: String }] 
 }, { timestamps: true });

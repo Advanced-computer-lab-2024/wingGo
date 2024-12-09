@@ -66,29 +66,31 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ id, profileData , setRe
   }
 };
 
-  const handleDelete = async () => {
-    try {
-      await deleteTouristProfile(id);
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Error deleting profile:", error);
-    }
-  };
+const handleDelete = async () => {
+  const isConfirmed = window.confirm(
+    "Are you sure you want to delete your account? This action cannot be undone."
+  );
+
+  if (!isConfirmed) {
+    return; // Exit if user cancels
+  }
+
+  try {
+    await deleteTouristProfile(id);
+    toast.success("Account deleted successfully!");
+    window.location.href = "/";
+  } catch (error) {
+    console.error("Error deleting profile:", error);
+    toast.error("Error deleting account. Please try again later.");
+  }
+};
+
 
   return tourist ? (
     <section className="bd-team-details-area section-space position-relative">
       <div className="container">
         <div className="row justify-content-between gy-24">
-          <div className="col-xxl-3 col-xl-5 col-lg-5 col-md-5">
-            <div className="team-details-thumb sidebar-sticky">
-            <Image
-                  src={filterData?.img as StaticImageData}
-                  loader={imageLoader}
-                  style={{ width: "100%", height: "auto" }}
-                  alt="image"
-                />
-            </div>
-          </div>
+          
           <div className="col-xxl-9 col-xl-7 col-lg-7 col-md-7">
             <div className="team-single-wrapper">
               <div className="team-contents mb-30">

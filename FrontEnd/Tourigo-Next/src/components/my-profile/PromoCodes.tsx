@@ -35,7 +35,15 @@ const PromoCodes: React.FC<PromoCodesProps> = ({ id }) => {
   }
 
   if (promoCodes.length === 0) {
-    return <h1>No promo codes available.</h1>;
+    return ( <section className="bd-team-details-area section-space position-relative">
+      <div className="container"
+      style={{
+        maxWidth: "90%", // Adjust the width to utilize the right side
+        margin: "0 auto", // Center the container
+      }}
+      ><h1>No promo codes available.</h1>
+      </div>
+      </section>);
   }
 
   return (

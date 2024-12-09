@@ -1,15 +1,67 @@
 import menu_data from "@/data/menu/menu-dataGuest";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { imageLoader } from "@/hooks/image-loader";
+import { FaQuestion } from "react-icons/fa";
+import Joyride, { CallBackProps, Step } from 'react-joyride';
+
 const Menu = () => {
+  const [run, setRun] = useState(false);
+
+  const steps: Step[] = [
+    {
+      target: '#places-menu',
+      content: 'Click here to view various landmarks!',
+    },
+    {
+      target: '#itineraries-menu',
+      content: 'Click here to browse through itineraries picked by our best Tour Guides!',
+    },
+    {
+      target: '#activities-menu',
+      content: 'Click here to complete your trip with fun activities!',
+    },
+    {
+      target: '#login-btn',
+      content: 'Click here to begin your journey and to experience the full features of the website!',
+    },
+  ];
+    
+
+  const handleJoyrideCallback = (data: CallBackProps) => {
+    const { status } = data;
+    if (status === 'finished' || status === 'skipped') {
+      setRun(false); // Stop the guide after it's completed
+    }
+  };
+
   return (
     <>
+    <Joyride
+  steps={steps}
+  run={run} // Trigger the guide
+  callback={handleJoyrideCallback}
+  showSkipButton
+  continuous
+  showProgress
+  styles={{
+    options: {
+      zIndex: 10000,
+      arrowColor: '#006ce4',
+      backgroundColor: '#fff',
+      overlayColor: 'rgba(0, 0, 0, 0.6)',
+      primaryColor: '#006ce4',
+      textColor: '#333',
+    },
+  }}
+/>
+
       <ul>
         {menu_data.map((item) => (
           <li
             key={item.id}
+            id={`${item.title.toLowerCase().replace(' ', '-')}-menu`}
             className={`${
               item?.children === true
                 ? "menu-item-has-children"
@@ -111,7 +163,7 @@ const Menu = () => {
 <div
       style={{
         position: "absolute",
-        top: "20%",
+        top: "22%",
         right: "5px", // Keep it to the far-right of the screen
         paddingLeft: "30px",
         marginLeft: "20px"
@@ -119,10 +171,23 @@ const Menu = () => {
     >
           <button className="bd-primary-btn btn-style radius-60 mb-10 px-50 "
             onClick={() => { window.location.href = "/sign-in";}}
+            id="login-btn"
             >
               <span className="bd-primary-btn-text">Login</span>
               <span className="bd-primary-btn-circle"></span>
             </button>
+            </div>
+
+            <div
+      style={{
+        position: "absolute",
+        top:"20%",
+        right: "130px", // Keep it to the far-right of the screen
+        paddingLeft: "30px",
+        marginLeft: "20px"
+      }}
+    >
+          <FaQuestion style={{fontSize: "24px", cursor: "pointer", color: "#006ce4", marginTop: "20px"}} onClick={() => setRun(true)} />
             </div>
       </ul>
     </>

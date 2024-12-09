@@ -65,8 +65,17 @@ export const searchHotels = async (params: HotelSearchParams): Promise<any> => {
   }
 
   export const searchHotelsByUserId = async (userId: string): Promise<any> => {
+
+    const cookie = Cookies.get('token');
+
+    let id = '';
+
     try {
-      const response = await axios.get<any>(`${API_URL}/searchHotels/67240ed8c40a7f3005a1d01d`);
+      if(cookie){
+        const decodedToken = jwtDecode<DecodedToken>(cookie);
+        id = decodedToken.id
+      }
+      const response = await axios.get<any>(`${API_URL}/searchHotels/${id}`);
       console.log('search hotels data:', response.data);
       return response.data;
     } catch (error) {

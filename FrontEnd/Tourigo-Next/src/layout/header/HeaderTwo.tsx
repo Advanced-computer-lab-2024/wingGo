@@ -6,8 +6,11 @@ import { imageLoader } from "@/hooks/image-loader";
 import Menu from "./components/MenuTourist";
 import useGlobalContext from "@/hooks/use-context";
 
+
 const HeaderFour = () => {
   const { toggleSideMenu, scrollDirection } = useGlobalContext();
+  
+
   return (
     <>
       <header>
