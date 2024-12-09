@@ -14,17 +14,6 @@ import { useCurrency } from "@/contextApi/CurrencyContext"; // Import currency c
 import Modal from "react-modal";
 import { toast } from 'sonner';
 import { FaRegClock } from "react-icons/fa";
-import {fetchImage} from "@/api/activityApi"
-import Cookies from 'js-cookie';
-import { jwtDecode } from 'jwt-decode';
-
-interface DecodedToken {
-  username: string;
-  id: string; // Use 'id' instead of 'userId'
-  role: string;
-  mustChangePassword: boolean;
-//   iat: number; // Add this if included in the token payload
-}
 import { deleteActivityApi } from '@/api/activityApi'; 
 
 interface ItourPropsType {
@@ -58,27 +47,8 @@ const TourSingleCard = ({
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility
   const [modalAction, setModalAction] = useState(""); // To track the action (Open/Close Booking)
   const [isSaved, setIsSaved] = useState(false);
-  const DEFAULT_IMAGE = "/assets/images/Activity.jpeg";
-  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
-  const [touristId, setTouristId] = useState<string>("");
 
-  // const touristId = "67240ed8c40a7f3005a1d01d";
-
-  // Extract the tourist ID from the token when the component mounts
-  useEffect(() => {
-    try {
-      const token = Cookies.get("token");
-      if (token) {
-        const decodedToken = jwtDecode<DecodedToken>(token);
-        setTouristId(decodedToken.id); // Set tourist ID
-        console.log("Decoded Token:", decodedToken);
-      } else {
-        console.error("No token found. Please log in.");
-      }
-    } catch (error) {
-      console.error("Error decoding token:", error);
-    }
-  }, []);
+  const touristId = "67240ed8c40a7f3005a1d01d";
 
    // Fetch booking status when component mounts
    useEffect(() => {
@@ -101,25 +71,6 @@ const TourSingleCard = ({
     };
     convertTourPrice();
   }, [currency, tour.price, convertAmount]); 
-
-  useEffect(() => {
-    const loadImage = async () => {
-      try {
-        if (tour?._id && tour?.photo) { // Check if the item has an image
-          const url = await fetchImage(tour._id);
-          if (url) {
-            console.log("Fetched Image URL:", url); // Verify if a valid URL is returned
-            setImageUrl(url);
-            console.log(imageUrl);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to load image:", error);
-      }
-    };
-    loadImage();
-  }, [tour?._id, tour?.photo,imageUrl]);
-
 
   const handleDeleteActivity = async () => {
     const confirmDelete = window.confirm("Are you sure you want to delete this activity?");
@@ -264,13 +215,12 @@ const TourSingleCard = ({
               <div className="tour-thumb image-overly">
                 <Link href={`/activity-details/${tour._id}`}>
                   <Image
-                    src={imageUrl}
+                    src="/assets/images/Activity.jpeg" // Placeholder image
                     loader={imageLoader}
                     width={270}
                     height={270}
                     style={{ width: "300px", height: "250px" }}
                     alt="Activity Image"
-                    unoptimized 
                   />
                 </Link>
               </div>
@@ -369,35 +319,32 @@ const TourSingleCard = ({
                   </button>
                 )} */}
                 
-                <div className="tour-btn" style={{ display: "flex", alignItems: "center", gap: "10px",  paddingTop:"20px"}}>
-  {isAdvertiser && (
-    <>
-      <button
-        onClick={() => handleToggleBooking(bookingState ? "Close" : "Open")}
-        className="bd-text-btn style-two"
-        type="button"
-        style={{
-          color: bookingState ? "red" : "blue",
-        }}
-      >
-        {bookingState ? "Close Booking" : "Open Booking"}
-        <span className="icon__box">
-          <i className="fa-regular fa-arrow-right-long icon__first"></i>
-          <i className="fa-regular fa-arrow-right-long icon__second"></i>
-        </span>
-      </button>
-      <button
-        onClick={handleDeleteActivity}
-        className="bd-text-btn style-two"
-        type="button"
-        style={{ color: "red" }}
-      >
-        <i className="fa fa-trash"></i>
-      </button>
-    </>
-  )}
+                {isAdvertiser && <button
+                    onClick={() => handleToggleBooking(bookingState ? "Close" : "Open")} 
+                    className="bd-text-btn style-two"
+                    type="button"
+                    style={{
+                      color:  bookingState ? "red" : "blue"
+                     }}
+                  >
+                   {bookingState ? "Close Booking" : "Open Booking"}
+                    <span className="icon__box">
+                    <i className="fa-regular fa-arrow-right-long icon__first"></i>
+                    <i className="fa-regular fa-arrow-right-long icon__second"></i>
+                    </span>
+                  </button>}
+                  <div className="tour-btn">
+    {isAdvertiser && (
+        <button
+            onClick={handleDeleteActivity}
+            className="bd-text-btn style-two"
+            type="button"
+            style={{ color: "red", marginLeft: "10px" }}
+        >
+            <i className="fa fa-trash"></i> 
+        </button>
+    )}
 </div>
-
                   <Modal
                     isOpen={isModalOpen}
                     onRequestClose={() => setIsModalOpen(false)}
