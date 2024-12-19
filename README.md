@@ -383,6 +383,7 @@ To run this project locally, follow these steps:
 - Make sure you have Node.js and npm installed on your machine.
 - MongoDB should be installed and running locally or configured appropriately in your environment variables.
 
+
 ## API Reference
 
 ### Admin
@@ -642,17 +643,14 @@ To run this project locally, follow these steps:
 - router.get('/activityPrice/:activityId', touristController.calculateActivityPrice);
 
 ## Tests
-The system was tested using Postman to ensure the validation of the APIs. Using the routes provided above just add the required input such as (Username or Name) using (body or query) to access the required method and fetch the results needed. Testing was done on all routes and methods (get, put, post, delete).
+The system was tested using Postman to ensure the validation of the APIs. Using the routes provided above just add the required input such as (Username or Name) using (body or query) to access the required method and fetch the results needed. Testing was done on all routes and methods (get, put, post, delete). A sample collection of tested endpoints can be downloaded [here] (https://raw.githubusercontent.com/Advanced-computer-lab-2024/wingGo/refs/heads/main/Assets/WingGo%20Test%20Collection.postman_collection.json)
 
-1. Open Postman.
+1- Open postman
+2- navigate to Collections
+3- click import
+4- select the downloaded file
+5- browse throught the tests and their saved results
 
-2. Click on the "New" button and select "Request".
-
-3. Give your request a name and select a collection to save it to. Click "Save to {collection name}".
-
-4. In the builder tab, select the type of request (GET, POST, PUT, DELETE, etc.) from the dropdown menu.
-
-5. Enter your API endpoint in the "Enter request URL" field.
 
 
 ## How To Use
