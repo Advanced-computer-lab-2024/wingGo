@@ -8,7 +8,7 @@ By combining advanced technology with an intuitive interface, we aim to revoluti
 ## Build Status
 
 ### Stable
-The application is fully functional apart from the change currency, it bugged during code integration; as well as adding promo codes as an admin is currently under development. 
+The application is fully functional apart from the change currency, it bugged during code integration; as well as "adding promo codes as an admin" is currently under development. 
 
 
 ## Code Style
@@ -42,6 +42,19 @@ The application is fully functional apart from the change currency, it bugged du
 - ![Tourism Governer Editing Place Info Page](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Editing%20placeInfo%20for%20tourismGoverner.jpg)
 - ![Activities Page](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Activities%20Page.jpg)
 - ![Tourist Profile](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Tourist%20profile.jpg)
+- ![Guest Viewing Places](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/GuestViewingPlaces.png)
+- ![Add Place](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Add%20Place.png)
+- ![Cart](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Cart.png)
+- ![Checkout](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Checkout.png)
+- ![Help Me Button](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Help%20Me%20Button.png)
+- ![Loyalty Program](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Loyalty%20Program.png)
+- ![OTP](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/OTP.png)
+- ![Searching Flights](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Searching%20Flights.png)
+- ![Searching Hotels](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Searching%20Hotels.png)
+- ![Wishlist](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Wishlist.png)
+- ![Tourism Governer Saving Place](https://github.com/Advanced-computer-lab-2024/wingGo/blob/main/Assets/Tourism%20Governer%20Saving%20Place.png)
+
+
 
 ## Tech/Framework Used
 - _JavaScript_: The main programming language used.
@@ -370,6 +383,7 @@ To run this project locally, follow these steps:
 - Make sure you have Node.js and npm installed on your machine.
 - MongoDB should be installed and running locally or configured appropriately in your environment variables.
 
+
 ## API Reference
 
 ### Admin
@@ -629,17 +643,14 @@ To run this project locally, follow these steps:
 - router.get('/activityPrice/:activityId', touristController.calculateActivityPrice);
 
 ## Tests
-The system was tested using Postman to ensure the validation of the APIs. Using the routes provided above just add the required input such as (Username or Name) using (body or query) to access the required method and fetch the results needed. Testing was done on all routes and methods (get, put, post, delete).
+The system was tested using Postman to ensure the validation of the APIs. Using the routes provided above just add the required input such as (Username or Name) using (body or query) to access the required method and fetch the results needed. Testing was done on all routes and methods (get, put, post, delete). A sample collection of tested endpoints can be downloaded [here](https://raw.githubusercontent.com/Advanced-computer-lab-2024/wingGo/refs/heads/main/Assets/WingGo%20Test%20Collection.postman_collection.json)
 
-1. Open Postman.
+1. Open postman.
+2. navigate to Collections.
+3. click import.
+4. select the downloaded file.
+5. browse throught the tests and their saved results.
 
-2. Click on the "New" button and select "Request".
-
-3. Give your request a name and select a collection to save it to. Click "Save to {collection name}".
-
-4. In the builder tab, select the type of request (GET, POST, PUT, DELETE, etc.) from the dropdown menu.
-
-5. Enter your API endpoint in the "Enter request URL" field.
 
 
 ## How To Use
