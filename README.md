@@ -645,11 +645,11 @@ To run this project locally, follow these steps:
 ## Tests
 The system was tested using Postman to ensure the validation of the APIs. Using the routes provided above just add the required input such as (Username or Name) using (body or query) to access the required method and fetch the results needed. Testing was done on all routes and methods (get, put, post, delete). A sample collection of tested endpoints can be downloaded [here](https://raw.githubusercontent.com/Advanced-computer-lab-2024/wingGo/refs/heads/main/Assets/WingGo%20Test%20Collection.postman_collection.json)
 
-1- Open postman
-2- navigate to Collections
-3- click import
-4- select the downloaded file
-5- browse throught the tests and their saved results
+1- Open postman.
+2- navigate to Collections.
+3- click import.
+4- select the downloaded file.
+5- browse throught the tests and their saved results.
 
 
 
