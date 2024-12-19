@@ -1,14 +1,20 @@
 # WingGo Trip Planner
 
 ## Motivation
-Planning vacations can be overwhelming, especially when juggling preferences, budgets, and logistical details. The Virtual Trip Planner was born from a desire to make this process effortless and enjoyable. The goal is to provide a one-stop platform where users can plan their dream vacations, tailored to their unique preferences and budgets, without the stress of managing multiple platforms.
+Planning vacations can feel overwhelming, especially when trying to balance preferences, budgets, and logistics. wingGo Trip Planner was created with the mission to simplify and enhance the vacation planning experience. Our goal is to offer a comprehensive platform where users can effortlessly plan their ideal getaways, perfectly customized to their individual preferences and budgets—all without the hassle of using multiple tools.
 
-By combining advanced technology with an intuitive interface, we aim to revolutionize the way trips are planned, making travel accessible and enjoyable for everyone. Whether it's exploring historic landmarks or relaxing at a beachside resort, this app is designed to cater to every traveler's needs with ease and efficiency.
+With cutting-edge technology and a user-friendly design, wingGo redefines the trip planning process, making travel seamless and enjoyable for everyone. Whether you're dreaming of exploring historic sites or unwinding at a beachside retreat, wingGo is crafted to meet the needs of every traveler with convenience and precision.
 
 ## Build Status
 
 ### Stable
-The application is fully functional apart from the change currency, it bugged during code integration; as well as "adding promo codes as an admin" is currently under development. 
+The application is fully functional apart from the change currency, it bugged during code integration; as well as "adding promo codes as an admin" is not yet available on our website. 
+
+### Purpose of Monitoring Build Status
+1. **Keeping Users Informed:** Providing transparency about the project's build status ensures users are aware of any ongoing issues or bugs, preventing confusion about whether errors are on their end.
+
+2. **Supporting Developer Collaboration:** The build status serves as a project health indicator, helping developers quickly identify and resolve issues while encouraging prompt suggestions for improvements.
+
 
 
 ## Code Style
@@ -25,16 +31,12 @@ The application is fully functional apart from the change currency, it bugged du
 ### Naming Conventions
 
 - **Variables and Functions:** Use camelCase (e.g., `getPackage`, `deleteAdmin`).
-- **Classes:** Use PascalCase (e.g., `class MyClass`).
 
 ### File Structure
 
 - Group related files together in appropriate directories.
 - Maintain a clean and organized directory structure.
 
-### Spacing
-
-- Use consistent spacing around operators and after commas.
 
 
 ## Screenshots
@@ -123,7 +125,6 @@ The application is fully functional apart from the change currency, it bugged du
 - Filter available and upcoming itineraries by budget, date, preferences (historic sites, beaches, family-friendly, shopping), and language.
 - Filter historical sites and museums by tag.
 - Share an activity, museum, historical site, or itinerary via a link or email.
-- Select the currency in which I want to view prices.
 - Rate a tour guide after completing a tour.
 - Comment on a tour guide I have completed a tour with.
 - Rate an itinerary made by a tour guide that I followed.
@@ -160,6 +161,7 @@ The application is fully functional apart from the change currency, it bugged du
 - View current and past orders.
 - Rate a product I purchased.
 - Review a product I purchased.
+- Select the currency in which I want to view prices.
 - View order details and status.
 - Cancel an order.
 - See the refund from a cancelled order in my wallet.
@@ -169,7 +171,7 @@ The application is fully functional apart from the change currency, it bugged du
 ### Tour Guide Functions
 - Create, view, edit, or delete an itinerary, including details such as activities, locations to be visited, timeline, duration of each activity, tour language, price, available dates and times, accessibility, and pickup/drop-off locations.
 - Enable or disable an itinerary with bookings.
-- View a list of all activities, itineraries, museums, and historical sites I have created.
+- View a list of all itineraries I have created.
 - View a sales report that summarizes all my revenue.
 - Filter the sales report by activity, itinerary, date, or month.
 - View a report showing the total number of tourists who used my itinerary or attended my activity.
@@ -180,7 +182,7 @@ The application is fully functional apart from the change currency, it bugged du
 
 ### Advertiser Functions 
 - Create, view, edit, or delete an activity by specifying its date, time, location, price, category, tags, special discounts, and whether booking is open.
-- View a list of all activities, itineraries, museums, and historical sites I have created.
+- View a list of all activities I have created.
 - View a sales report that shows the total revenue generated.
 - Filter the sales report by activity, itinerary, date, or month.
 - View a report showing the total number of tourists who used my itinerary or participated in my activity.
@@ -202,8 +204,9 @@ The application is fully functional apart from the change currency, it bugged du
 - Receive a notification when a product is out of stock in the system, both in-app and via email.
 
 ### Tourism Governer
-- View a list of all my created activities, itineraries and museums and historical places.
-- Edit the information of a created place.
+- Create, Read, Update, or Delete museums and historical places along with it's details like description, pictures, location, opening hours, ticket prices.
+- View a list of all my created museums and historical places.
+- Create tags for different historical locations.
 
 
 ## Code Examples
@@ -301,6 +304,344 @@ const addComplaint = async (req, res) => {
         res.status(500).json({ message: 'Error filing complaint.', error });
     }
 }; 
+
+const bookActivity = async (req, res) => {
+    const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
+    const { numberOfPeople, paymentMethod, promoCode  } = req.body;
+
+    console.log("Tourist booking now is: ",touristId);
+
+    try {
+        // Retrieve tourist details and check if the activityId is already booked
+        const reqTourist = await Tourist.findById(touristId);
+        if (!reqTourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Check if the activityId is already in bookedActivities
+        const isAlreadyBooked = reqTourist.bookedActivities.some(
+            (booking) => booking.toString() === activityId
+        );
+        if (isAlreadyBooked) {
+            return res.status(400).json({ message: 'Activity already booked by this tourist' });
+        }
+
+        // Add the tourist to the activity's touristIDs array
+        const activityUpdate = await Activity.findByIdAndUpdate(
+            activityId,
+            // { $addToSet: { touristIDs: touristId } }, // Use $addToSet to avoid duplicates
+            { new: true }
+        );
+
+        if (!activityUpdate) {
+            return res.status(404).json({ message: 'Activity not found or update failed' });
+        }
+
+        // activityUpdate.sales += 1 * numberOfPeople; // Increment sales
+        // await activityUpdate.save();
+
+          // Fetch activity details
+        const activity = await Activity.findById(activityId);
+        if (!activity || !activity.bookingOpen) {
+        return res.status(404).json({ message: 'Activity not found or booking closed' });
+        }
+
+        let totalPrice = activity.price * numberOfPeople;
+        let promoCodeDetails = null;
+    
+        // Validate and apply promo code
+        if (promoCode) {
+          promoCodeDetails = await PromoCode.findOne({ code: promoCode });
+          if (
+            !promoCodeDetails ||
+            !promoCodeDetails.isActive ||
+            promoCodeDetails.endDate < new Date() ||
+            !reqTourist.promoCodes.includes(promoCodeDetails._id)
+          ) {
+            return res.status(400).json({ message: 'Invalid, expired, or unauthorized promo code' });
+          }
+    
+          const discountAmount = (promoCodeDetails.discount / 100) * totalPrice;
+          totalPrice -= discountAmount;
+    
+          // Mark promo code as used
+          promoCodeDetails.isActive = false;
+          await promoCodeDetails.save();
+        }
+
+        // Wallet payment handling
+        // Check payment method and wallet balance
+    if (paymentMethod === 'wallet' && reqTourist.wallet < totalPrice) {
+        return res.status(400).json({ message: 'Insufficient funds in wallet' });
+      }
+  
+      // Deduct wallet balance if applicable
+      if (paymentMethod === 'wallet') {
+        reqTourist.wallet -= totalPrice;
+        await reqTourist.save();
+      }
+
+              // Calculate new points and badge details based on the activity's price
+              const activityPrice = totalPrice;
+              const oldAmount = reqTourist.badge.amount;
+              const oldPoints = reqTourist.loyaltyPoints;
+              const newPoints = activityPrice * oldAmount + oldPoints;
+      
+              // Determine new badge level and amount based on newPoints
+              let newLevel = reqTourist.badge.level;
+              let newAmount = oldAmount;
+
+      // Update activity's touristIDs
+        activity.touristIDs.push({
+            touristId,
+            paidPrice: totalPrice,
+            numberOfPeople,
+        });
+    
+        // Update activity sales or bookings
+        if (!promoCodeDetails) {
+            activity.sales += numberOfPeople;
+        }
+        // activity.numberOfPeople -= numberOfPeople; // Deduct spots booked
+        await activity.save();
+    
+        // Update tourist's booked activities
+        // reqTourist.bookedActivities.push(activityId);
+        await reqTourist.save();
+
+        if (newPoints > 100000) {
+            newLevel = 2;
+            newAmount = 1;
+        }
+        if (newPoints > 500000) {
+            newLevel = 3;
+            newAmount = 1.5;
+        }
+
+        // Update the tourist's booked activities and other details
+        const touristUpdate = await Tourist.findByIdAndUpdate(
+            touristId,
+            {
+                $addToSet: { bookedActivities: activityId }, // Add the activity to bookedActivities
+                $set: {
+                    loyaltyPoints: newPoints, // Update loyalty points
+                    'badge.level': newLevel, // Update badge level
+                    'badge.amount': newAmount, // Update badge amount
+                },
+            },
+            { new: true }
+        );
+
+        if (!touristUpdate) {
+            return res.status(404).json({ message: 'Tourist update failed' });
+        }
+
+        // Create receipt HTML
+        const receiptHtml = `
+            <h2>Payment Receipt</h2>
+            <p><strong>Activity:</strong> ${activityUpdate.name}</p>
+            <p><strong>Date:</strong> ${activityUpdate.date.toDateString()}</p>
+            <p><strong>Amount Paid:</strong> $${activityPrice}</p>
+            <p>Thank you for booking with us!</p>
+            <p>We hope you have a great experience!</p>
+        `;
+
+        // Send payment receipt via email
+        try {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'winggo567@gmail.com',
+                    pass: 'smkg eghm yrzv yyir', // Ensure this is secure
+                },
+            });
+
+            await transporter.sendMail({
+                from: 'winggo567@gmail.com',
+                to: reqTourist.email,
+                subject: 'Payment Receipt for Your Activity Booking',
+                html: receiptHtml,
+            });
+        } catch (emailError) {
+            console.error('Error sending email:', emailError);
+            return res.status(500).json({
+                message: 'Booking successful, but failed to send receipt email.',
+                error: emailError.message,
+            });
+        }
+
+        console.log("Tourist activities ",reqTourist.bookedActivities);
+
+        // Success response
+        return res.status(200).json({
+            message: 'Booking successful, receipt emailed',
+            activity: activityUpdate,
+            tourist: touristUpdate,
+        });
+    } catch (error) {
+        // Detailed error handling
+        console.error('Error during booking process:', error);
+
+        // Check for specific error fields like `message` or fallback to generic error object
+        return res.status(500).json({
+            message: 'Error during the activity booking process.',
+            error: error.message || error.toString() || 'An unknown error occurred',
+        });
+    }
+};
+
+const cancelActivity = async (req, res) => {
+    const { touristId, activityId } = req.params; // Extracting touristId and activityId from URL parameters
+
+    try {
+        const activity = await Activity.findById(activityId);
+
+        // Check if the activity exists
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found.' });
+        }
+
+        // Find the tourist entry in the activity's touristIDs array
+        const touristEntry = activity.touristIDs.find(
+            entry => entry.touristId.toString() === touristId
+        );
+
+        if (!touristEntry) {
+            return res.status(404).json({ message: 'Booking not found for this tourist.' });
+        }
+
+        // Check if the booking date is more than 48 hours from now
+        const now = new Date();
+        const bookingDate = activity.date; // Ensure this is the correct path
+
+        if (!bookingDate) {
+            return res.status(400).json({ message: 'Booking date is not valid.' });
+        }
+
+        const diffInMilliseconds = bookingDate.getTime() - now.getTime();
+        if (diffInMilliseconds < 48 * 60 * 60 * 1000) {
+            return res.status(400).json({ message: 'Cannot cancel the activity within 48 hours of the booking date.' });
+        }
+
+        // Add the price of the activity to the tourist's wallet
+        const paidPrice = touristEntry.paidPrice; // Retrieve the paid price from the touristIDs array
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found.' });
+        }
+
+        tourist.wallet = (tourist.wallet || 0) + paidPrice;
+        await tourist.save();
+
+        // Remove the specific activity from the bookedActivities array using $pull
+        const touristUpdate = await Tourist.findByIdAndUpdate(
+            touristId,
+            { $pull: { bookedActivities: activityId } },
+            { new: true }
+        );
+
+        if (!touristUpdate) {
+            return res.status(404).json({ message: 'Failed to update tourist bookings.' });
+        }
+
+        // Remove the specific tourist entry from the activity's touristIDs array
+        const activityUpdate = await Activity.findByIdAndUpdate(
+            activityId,
+            { $pull: { touristIDs: { touristId: touristId } } }, // Ensure the query matches nested documents
+            { new: true }
+        );
+
+        console.log("Activity Update Result:", activityUpdate); // Debugging line
+
+        if (!activityUpdate) {
+            return res.status(404).json({ message: 'Activity not found or failed to update.' });
+        }
+
+        // Adjust sales if no promo code was used
+        if (!touristEntry.promoCodeId) {
+            activity.sales -= touristEntry.numberOfPeople;
+            await activity.save();
+        }
+
+        return res.status(200).json({
+            message: 'Activity cancelled successfully. The amount has been added to your wallet.',
+            walletBalance: tourist.wallet,
+            tourist: touristUpdate,
+            activity: activityUpdate
+        });
+
+    } catch (error) {
+        console.error('Error cancelling the booking process:', error); // Log the error for debugging
+        return res.status(500).json({ message: 'Error cancelling the booking process.', error });
+    }
+};
+
+const addWishlist = async (req, res) => {
+    const { touristId ,productId} = req.params;
+    
+
+    try {
+        // Find the tourist by ID
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        // Check if the product is already in the wishlist
+        const existingWishlistItem = await Wishlist.findOne({ touristId, productId });
+        if (existingWishlistItem) {
+            return res.status(400).json({ message: 'Product is already in the wishlist' });
+        }
+
+
+        // Add to wishlist
+        const wishlistItem = new Wishlist({ touristId, productId });
+        await wishlistItem.save();
+
+    // Populate product details in the wishlist item
+        const populatedWishlistItem = await Wishlist.findById(wishlistItem._id).populate('productId');
+        res.status(200).json({
+            message: 'Product added to wishlist successfully',
+            wishlistItem: populatedWishlistItem,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// View wishlist
+const viewWishlist = async (req, res) => {
+    const { touristId } = req.params;
+
+    try {
+        // Find the tourist by ID
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        // Find all the wishlist items for the tourist and populate the product details
+        const wishlistItems = await Wishlist.find({ touristId })
+            .populate('productId') // Populate the productId with product details
+            .exec();
+
+        if (wishlistItems.length === 0) {
+            return res.status(404).json({ message: 'No products in wishlist' });
+        }
+
+        res.status(200).json({ message: 'Wishlist fetched successfully', wishlistItems });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 ```
 
 ## Installation
@@ -325,7 +666,7 @@ To run this project locally, follow these steps:
    cd backend
    ```
 
-3. **Install server/client dependencies:**
+3. **Install server/client dependencies in project folder (wingGo) then in Backend, Frontend, and inside Tourigo-Next:**
 
    ```bash
    npm install
@@ -645,11 +986,12 @@ To run this project locally, follow these steps:
 ## Tests
 The system was tested using Postman to ensure the validation of the APIs. Using the routes provided above just add the required input such as (Username or Name) using (body or query) to access the required method and fetch the results needed. Testing was done on all routes and methods (get, put, post, delete). A sample collection of tested endpoints can be downloaded [here](https://raw.githubusercontent.com/Advanced-computer-lab-2024/wingGo/refs/heads/main/Assets/WingGo%20Test%20Collection.postman_collection.json)
 
-1. Open postman.
-2. navigate to Collections.
-3. click import.
-4. select the downloaded file.
-5. browse throught the tests and their saved results.
+1. Right click on the opened file then press save as.
+2. Open postman.
+3. navigate to Collections.
+4. click import.
+5. select the downloaded file.
+6. browse throught the tests and their saved results.
 
 
 
@@ -761,15 +1103,15 @@ The WingGo webpage is the result of a collaborative effort by our team, supporte
 
 **And of course our team:**
 
- - Malak Hisham
- - Seif Diea
- - Omar Nasr
- - Menna
- - Sylvia
- - Maria
- - Tasneem Khalil
+ - Malak Hesham
+ - Maria Ashraf
  - Marina Samir
- - Amr 
+ - Seif Diea
+ - Sylvia Faris
+ - Menna Essam
+ - Omar Nasr
+ - Tasneem Khalil
+ - Amr Nour
  - Ali Khalid
 
 ## License
